@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt-nodejs');
 //================================
 // User Schema
 //================================
-const UserSchema = new Schema({  
+const UserSchema = new Schema({
   email: {
     type: String,
     lowercase: true,
@@ -33,7 +33,7 @@ const UserSchema = new Schema({
 });
 
 // Pre-save of user to database, hash password if password is modified or new
-UserSchema.pre('save', function(next) {  
+UserSchema.pre('save', function(next) {
   const user = this,
         SALT_FACTOR = 5;
 
@@ -50,7 +50,7 @@ UserSchema.pre('save', function(next) {
   });
 });
 
-UserSchema.methods.comparePassword = function(candidatePassword, cb) {  
+UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
     if (err) { return cb(err); }
 
@@ -58,4 +58,18 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   });
 }
 
-module.exports = mongoose.model('User', UserSchema); 
+UserSchema.methods.comparePasswordPromise = function(candidatePassword) {
+  console.log(candidatePassword)
+  return new Promise((res,rej) => {
+    bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+      console.log(err,isMatch)
+      if (err) { return rej(err) }
+      res({'lmao' :isMatch})
+    })
+  })
+}
+
+
+
+
+module.exports = mongoose.model('User', UserSchema);

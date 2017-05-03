@@ -26,6 +26,8 @@ module.exports.login = function(req,res){
   User.findOne({ email:req.body.email }, (err,user)=>{
     if(err) return res.status(500).send('server error');
     if(!user) return res.status(403).send('Wrong email or password');
+    console.log('comparing password....')
+    user.comparePasswordPromise(password).then(data =>{console.log(data)}).catch(err=>{console.log('err')})
 
     user.comparePassword(password, function(err, isMatch) {
       if(err) return res.status(500).send('server error');
@@ -42,10 +44,7 @@ module.exports.login = function(req,res){
 }
 
 module.exports.register = function (req,res){
-  const email = req.body.email;
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const password = req.body.password;
+  const { email, firstName, lastName, password } = req.body
   // Return error if no email provided
   if (!email) {
     return res.status(422).send({ error: 'You must enter an email address.'});
@@ -63,7 +62,7 @@ module.exports.register = function (req,res){
 
 
   User.findOne({email:email},function(err,exisitingUser){
-    if(err){ 
+    if(err){
       return res.status(500).send({ error:'db something wrong' })
     }
     if(exisitingUser) {
@@ -83,7 +82,7 @@ module.exports.register = function (req,res){
       if (err){
         return res.status(500).send({ error:'db something wrong'})
       }
-      //generate tokens    
+      //generate tokens
       let userInfo = makeUser(user);
       res.json({
         token:generateToken(userInfo),
