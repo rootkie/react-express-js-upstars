@@ -1,7 +1,5 @@
-const bcrypt = require('bcrypt-nodejs')
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
 const User = require('../models/user')
 
 function generateToken (user) {
@@ -25,25 +23,22 @@ module.exports.login = function (req, res) {
   User.findOne({ email: req.body.email }, (err, user) => {
     if (err) return res.status(500).send('server error')
     if (!user) return res.status(403).send('Wrong email or password')
-    
 
-    //comparing password.
-    user.comparePasswordPromise(password).then(isMatch => { 
-      if (!isMatch) return res.status(403).send('Wrong email or password');
+    // comparing password.
+    user.comparePasswordPromise(password).then(isMatch => {
+      if (!isMatch) return res.status(403).send('Wrong email or password')
       let userInfo = makeUser(user)
       res.json({
         token: generateToken(userInfo),
         user: userInfo,
         status: 'success'
-      }) // res.json      
-    }).catch(err => { 
-      console.log('err') 
+      })
+    }).catch(err => {
+      console.log(err)
       res.status(500).send('server error')
     })
-  
   })// finding user
 }
-
 module.exports.register = function (req, res) {
   const { email, firstName, lastName, password } = req.body
   // Return error if no email provided

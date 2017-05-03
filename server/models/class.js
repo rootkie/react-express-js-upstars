@@ -1,23 +1,26 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const bcrypt = require('bcrypt-nodejs');
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const bcrypt = require('bcrypt-nodejs')
 
-//================================
+// ================================
 // User Schema
-//================================
-const ClassSchema = new Schema({  
+// ================================
+const ClassSchema = new Schema({
   className: {
     type: String,
     unique: true,
     required: true
   },
   description: {
-    type: String,
+    type: String
   },
- 
-},
-{
-  timestamps: true
-});
+  students: {
+    type: [String]
+  }
 
-module.exports = mongoose.model('Class', ClassSchema); 
+},
+  {
+    timestamps: true
+  })
+
+module.exports = mongoose.model('Class', ClassSchema)
