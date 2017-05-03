@@ -3,18 +3,34 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser')
 const path = require('path');
 const routeMiddlware = require('./routeMiddleware');
-
 const app = express();
+
+const mongoose = require('mongoose');
+const config = require('./config/constConfig');
 
 
 //===================Initialization ==============================
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
 
 // Setup logger
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'));
 // Serve static assets
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
+// Enable Cross Origin Resource Sharing
+app.use(function(req, res, next) {  
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials");
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
+// Connecting to database
+mongoose.Promise = global.Promise;
+mongoose.connect(config.database);
+
+// Body parser stuff
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
 
 routeMiddlware.setAdminRouteMiddleware(app);
 
@@ -22,16 +38,17 @@ routeMiddlware.setAdminRouteMiddleware(app);
 
 //==============Serving api======================
 //only takes in x-www-form-urlencoded in req
-var classControl = require('./controllers/ClassController');
-var userControl = require('./controllers/UserController');
+const classControl = require('./controllers/ClassController');
+const userControl = require('./controllers/UserController');
+const authControl = require('./controllers/AuthController');
 
 app.get('/api/admin/getClasses', classControl.getAll);
 app.get('/api/admin/getClass/:id',classControl.getClassById);
 
-app.post('/api/admin/addClass',classControl.insert);
+app.post('/api/admin/addClass',classControl.addClass);
 
-app.post('/api/register',userControl.register);
-app.post('/api/login',userControl.login);
+app.post('/api/register',authControl.register);
+app.post('/api/login',authControl.login);
 
 //===========for testing purposes only===============
 app.delete('/api/admin/clear-database',classControl.dropDB);

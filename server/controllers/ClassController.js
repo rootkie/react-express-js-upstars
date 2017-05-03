@@ -1,33 +1,49 @@
-var db = require('../config/dbConfig').dbClass
+const Class = require('../models/class');
 
-module.exports.insert = function(req,res){
-    let newclass = {
-        classname: req.body.classname,
-        description: req.body.description,
-    };
-    db.insert(newclass, function(err, newClass) {
-        if (err){ 
-            console.log(err);
-            res.status(500).send('Database controller errors')
-        } else {
-            console.log(newClass);
-            res.json({status:"success"});    
+//This is authenticated, user info stored in req.decoded
+
+module.exports.addClass = function(req,res){
+
+    Class.findOne({ className:req.body.className }, function(err,existingClass){
+        if (err){
+            return res.status(500).send('server error, class insert');
         }
+        if (existingClass){
+            return res.status(422).send('Classname already exists');
+        }
+
+        let class1 = new Class({
+            className:req.body.className,
+            description:req.body.description,
+        });
+
+        class1.save((err,newClass)=>{
+            if (err){
+                console.log(err.message);
+                return res.status(500).send('server error, class save');
+            }
+            return res.json({
+                status:'Class created',
+                class:newClass,
+            });
+        });
+
     });
+
 
 }
 
 module.exports.getAll = function(req,res){
-    db.find({}).exec((err,classes)=>{
+    Class.find({}).then((err,classes)=>{
         if (err) return res.send(err);
         return res.json({classes:classes,info:req.decoded});
     });
 }
 module.exports.getClassById = function (req,res){
     var classId = req.params.id;
-    db.findOne({
+    Class.findOne({
         _id:classId
-    }, { classname:1, description:1, _id:0 }, (err,class1)=>{
+    },(err,class1)=>{
         if (err){
             console.log(err);
             return res.status(500).send('Database controller errors');
@@ -37,8 +53,8 @@ module.exports.getClassById = function (req,res){
 }
 
 module.exports.dropDB = function(req,res){
-    db.remove({},{ multi:true },(err,num)=>{
-        if (err) res.status(500).send(err);
-        res.json({removed:num});
+    Class.remove({},(err,num)=>{
+        if (err) return res.status(500).send(err);
+        return res.json({removed:num});
     });
 }

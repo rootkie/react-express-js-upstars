@@ -1,4 +1,0 @@
-{"username":"tester","password":"$2a$10$bSQqSD.czxlu3pe9LoyRp.OyOo4IxZme.cvbGKBUI3dNikodlZboS","email":"test@email.com","_id":"8eKNSHgkMSy8LASw","createdAt":{"$$date":1493522558075},"updatedAt":{"$$date":1493522558075}}
-{"username":"testers","password":"$2a$10$5Wa34nIZB1dkfuZ3zDXxAOaMWZJZS2Hq7KjbwMM9EIsK7W.vpTkCi","email":"test@email.coms","_id":"CeWQfXEFLW7EKO88","createdAt":{"$$date":1493523086984},"updatedAt":{"$$date":1493523086984}}
-{"$$indexCreated":{"fieldName":"email","unique":true,"sparse":false}}
-{"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
