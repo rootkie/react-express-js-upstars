@@ -25,20 +25,22 @@ module.exports.login = function (req, res) {
   User.findOne({ email: req.body.email }, (err, user) => {
     if (err) return res.status(500).send('server error')
     if (!user) return res.status(403).send('Wrong email or password')
-    console.log('comparing password....')
-    user.comparePasswordPromise(password).then(data => { console.log(data) }).catch(err => { console.log('err') })
+    
 
-    user.comparePassword(password, function (err, isMatch) {
-      if (err) return res.status(500).send('server error')
-      if (!isMatch) return res.status(403).send('Wrong email or password')
-
+    //comparing password.
+    user.comparePasswordPromise(password).then(isMatch => { 
+      if (!isMatch) return res.status(403).send('Wrong email or password');
       let userInfo = makeUser(user)
       res.json({
         token: generateToken(userInfo),
         user: userInfo,
         status: 'success'
-      }) // res.json
-    })// compare pwd
+      }) // res.json      
+    }).catch(err => { 
+      console.log('err') 
+      res.status(500).send('server error')
+    })
+  
   })// finding user
 }
 
