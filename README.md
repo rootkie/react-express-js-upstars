@@ -13,8 +13,10 @@ Start server using: nodemon server/
 
 |Directory        |    Uses   |
 |------------|---------------------|
-|/src        |    React.js stuff   |
-|/server     |    Express.js stuff |
+|/src               |React.js stuff   |
+|/server            |Express.js stuff |
+|/server/controllers|All the application logic |
+|/server/models     |Schemas and database operations |
 
 
 ## API stuff
@@ -28,14 +30,18 @@ All routes starting with /api and /api/admin is handled by express.js.
 |------|----|----|
 |GET| /api/admin/getClasses | Get all classes from database|
 |GET| /api/admin/getClass/:id | Get class by id|
-|POST| /api/admin/addClass | Add class ({classname:'example',description:'example'})|
-|POST| /api/register | Create a user ({username:'a',password:'a',email:'a@a.com'}) cannot be null.|
+|POST| /api/admin/addClass | Add class ({classname:'example',description:'example',students:'a,b,c'}) students are separated by ","|
+|POST| /api/register | Create a user ({password:'a',email:'a@a.com',firstName:'a',lastName:'a'}) cannot be null.|
 |POST| /api/login | Login as user ({email:'a@a.com',password:'a'}) Will return a jwt token if authed. Use the token to access /api/admin|
 
 
 ## Troubleshoot
 ```
 bash: nodemon: command not found
-Try using ./node_modules/.bin/nodemon server/
+Try using:
+$ ./node_modules/.bin/nodemon server/
+Or use:
+$ export PATH=$PATH:`pwd`/node_modules/.bin/
+$ nodemon server/
 ```
 
