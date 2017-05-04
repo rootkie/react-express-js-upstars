@@ -40,11 +40,15 @@ routeMiddlware.setAdminRouteMiddleware(app)
 const classControl = require('./controllers/ClassController')
 const userControl = require('./controllers/UserController')
 const authControl = require('./controllers/AuthController')
+const studentControl = require('./controllers/StudentController')
 
 app.get('/api/admin/getClasses', classControl.getAll)
 app.get('/api/admin/getClass/:id', classControl.getClassById)
-
 app.post('/api/admin/addClass', classControl.addClass)
+
+app.get('/api/getStudents',studentControl.getAll)
+app.get('/api/getStudent/:id',studentControl.getStudentById)
+app.post('/api/addStudent',studentControl.addStudent)
 
 app.post('/api/register', authControl.register)
 app.post('/api/login', authControl.login)
