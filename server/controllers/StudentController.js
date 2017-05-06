@@ -30,7 +30,7 @@ module.exports.addStudent = function (req, res) {
     student.save((err, newStudent) => {
       if (err) {
         // Printing the error messages.
-        Object.values(err.errors).forEach(function(error){ console.log(error.message) })
+        Object.values(err.errors).forEach(function (error) { console.log(error.message) })
 
         return res.status(500).send('server error, student save')
       }

@@ -34,8 +34,8 @@ const UserSchema = new Schema({
 
 // Pre-save of user to database, hash password if password is modified or new
 UserSchema.pre('save', function (next) {
-  const user = this,
-    SALT_FACTOR = 5
+  const user = this
+  const SALT_FACTOR = 5
 
   if (!user.isModified('password')) return next()
 
@@ -59,12 +59,10 @@ UserSchema.methods.comparePassword = function (candidatePassword, cb) {
 }
 
 UserSchema.methods.comparePasswordPromise = function (candidatePassword) {
-  console.log(candidatePassword)
-  return new Promise((res, rej) => {
+  return new Promise((resolve, reject) => {
     bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-      console.log(err, isMatch)
-      if (err) { return rej(err) }
-      res(isMatch)
+      if (err) { return reject(err) }
+      resolve(isMatch)
     })
   })
 }

@@ -9,13 +9,9 @@ function generateToken (user) {
 }
 
 function makeUser (req) {
-  return {
-    _id: req._id,
-    firstName: req.profile.firstName,
-    lastName: req.profile.lastName,
-    email: req.email,
-    role: req.role
-  }
+  const { _id, email, role, profile } = req
+  const { firstName, lastName } = profile
+  return { _id, firstName, lastName, role, email }
 }
 
 module.exports.login = function (req, res) {
@@ -39,6 +35,32 @@ module.exports.login = function (req, res) {
     })
   })// finding user
 }
+
+module.exports.es8Login = async (req, res) => {
+  try {
+    const { password, email } = req.body
+    // get user
+    const user = await User.findOne({email})
+    if (!user) {
+      return res.status(403).send('Wrong email or password')
+    }
+    // compare password
+    const isMatch = await user.comparePasswordPromise(password)
+    if (!isMatch) {
+      return res.status(403).send('Wrong email or password')
+    }
+    const userInfo = makeUser(user)
+    res.json({
+      token: generateToken(userInfo),
+      user: userInfo,
+      status: 'success'
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
 module.exports.register = function (req, res) {
   const { email, firstName, lastName, password } = req.body
   // Return error if no email provided

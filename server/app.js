@@ -46,12 +46,12 @@ app.get('/api/admin/getClasses', classControl.getAll)
 app.get('/api/admin/getClass/:id', classControl.getClassById)
 app.post('/api/admin/addClass', classControl.addClass)
 
-app.get('/api/getStudents',studentControl.getAll)
-app.get('/api/getStudent/:id',studentControl.getStudentById)
-app.post('/api/addStudent',studentControl.addStudent)
+app.get('/api/getStudents', studentControl.getAll)
+app.get('/api/getStudent/:id', studentControl.getStudentById)
+app.post('/api/addStudent', studentControl.addStudent)
 
 app.post('/api/register', authControl.register)
-app.post('/api/login', authControl.login)
+app.post('/api/login', authControl.es8Login)
 
 // ===========for testing purposes only===============
 app.delete('/api/admin/clear-database', classControl.dropDB)
