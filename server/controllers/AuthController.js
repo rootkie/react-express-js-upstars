@@ -14,29 +14,7 @@ function makeUser (req) {
   return { _id, firstName, lastName, role, email }
 }
 
-module.exports.login = function (req, res) {
-  const password = req.body.password
-  User.findOne({ email: req.body.email }, (err, user) => {
-    if (err) return res.status(500).send('server error')
-    if (!user) return res.status(403).send('Wrong email or password')
-
-    // comparing password.
-    user.comparePasswordPromise(password).then(isMatch => {
-      if (!isMatch) return res.status(403).send('Wrong email or password')
-      let userInfo = makeUser(user)
-      res.json({
-        token: generateToken(userInfo),
-        user: userInfo,
-        status: 'success'
-      })
-    }).catch(err => {
-      console.log(err)
-      res.status(500).send('server error')
-    })
-  })// finding user
-}
-
-module.exports.es8Login = async (req, res) => {
+module.exports.login = async (req, res) => {
   try {
     const { password, email } = req.body
     // get user
@@ -55,6 +33,7 @@ module.exports.es8Login = async (req, res) => {
       user: userInfo,
       status: 'success'
     })
+    // End of try block, catch err
   } catch (err) {
     console.log(err)
     res.status(500).send('server error')

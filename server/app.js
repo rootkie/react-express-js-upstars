@@ -51,7 +51,7 @@ app.get('/api/getStudent/:id', studentControl.getStudentById)
 app.post('/api/addStudent', studentControl.addStudent)
 
 app.post('/api/register', authControl.register)
-app.post('/api/login', authControl.es8Login)
+app.post('/api/login', authControl.login)
 
 // ===========for testing purposes only===============
 app.delete('/api/admin/clear-database', classControl.dropDB)
