@@ -46,6 +46,9 @@ app.get('/api/admin/getClasses', classControl.getAll)
 app.get('/api/admin/getClass/:id', classControl.getClassById)
 app.post('/api/admin/addEditClass', classControl.addEditClass)
 
+// POC for refs
+app.get('/api/addStudentToClass',classControl.addStudentToClass)
+
 app.get('/api/getStudents', studentControl.getAll)
 app.get('/api/getStudent/:id', studentControl.getStudentById)
 app.post('/api/addStudent', studentControl.addStudent)

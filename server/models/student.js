@@ -1,11 +1,12 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const Class = require('./class')
 
 // ================================
 // User Schema
 // ================================
 const StudentSchema = new Schema({
-  profile:{
+  profile: {
     name: {
       type: String,
       unique: true,
@@ -18,17 +19,17 @@ const StudentSchema = new Schema({
     address: String,
     gender: {
       type: String,
-      enum: ['Male','Female'],
-      default: 'Male',
+      enum: ['Male', 'Female'],
+      default: 'Male'
     }
   },
   schoolType: {
     type: String,
-    enum: ['Primary','Secondary'],
-    default: 'Primary',
+    enum: ['Primary', 'Secondary'],
+    default: 'Primary'
   },
   schoolName: String,
-
+  classes: [{ type: Schema.ObjectId, ref: 'Class' }]
 },
   {
     timestamps: true

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-
+const Student = require('./student')
 // ================================
 // User Schema
 // ================================
@@ -13,9 +13,7 @@ const ClassSchema = new Schema({
   description: {
     type: String
   },
-  students: {
-    type: [String]
-  }
+  students: [{ type: Schema.ObjectId, ref: 'Student'}]
 
 },
   {
