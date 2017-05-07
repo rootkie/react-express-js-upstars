@@ -3,7 +3,7 @@ const Student = require('../models/student')
 // This is authenticated, user info stored in req.decoded
 
 module.exports.addStudent = function (req, res) {
-  Student.findOne({ 'profile.name': req.body.name }, function (err, existingStudent) {
+  Student.findOne({ 'profile.icNumber': req.body.icNumber }, function (err, existingStudent) {
     if (err) {
       return res.status(500).send('server error, student insert')
     }
