@@ -42,25 +42,45 @@ const userControl = require('./controllers/UserController')
 const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
 
-app.get('/api/admin/getClasses', classControl.getAll)
-app.get('/api/admin/getClass/:id', classControl.getClassById)
-app.post('/api/admin/addEditClass', classControl.addEditClass)
+if (config.debug) {
+  app.get('/api/getClasses', classControl.getAll)
+  app.get('/api/getClass/:id', classControl.getClassById)
+  app.post('/api/addEditClass', classControl.addEditClass)
 
 // POC for refs
-app.get('/api/addStudentToClass',classControl.addStudentToClass)
+  app.get('/api/addStudentToClass', classControl.addStudentToClass)
 
-app.get('/api/getStudents', studentControl.getAll)
-app.get('/api/getStudent/:id', studentControl.getStudentById)
-app.post('/api/addStudent', studentControl.addStudent)
+  app.get('/api/getStudents', studentControl.getAll)
+  app.get('/api/getStudent/:id', studentControl.getStudentById)
+  app.post('/api/addStudent', studentControl.addStudent)
 
-app.post('/api/register', authControl.register)
-app.post('/api/login', authControl.login)
-
-// ===========for testing purposes only===============
-app.delete('/api/admin/clear-database', classControl.dropDB)
+  app.post('/api/register', authControl.register)
+  app.post('/api/login', authControl.login)
 
 // ===========for testing purposes only===============
+  app.delete('/api/admin/clear-database', classControl.dropDB)
 
+// ===========for testing purposes only===============
+} else {
+  app.get('/api/admin/getClasses', classControl.getAll)
+  app.get('/api/admin/getClass/:id', classControl.getClassById)
+  app.post('/api/admin/addEditClass', classControl.addEditClass)
+
+// POC for refs
+  app.get('/api/admin/addStudentToClass', classControl.addStudentToClass)
+
+  app.get('/api/admin/getStudents', studentControl.getAll)
+  app.get('/api/admin/getStudent/:id', studentControl.getStudentById)
+  app.post('/api/admin/addStudent', studentControl.addStudent)
+
+  app.post('/api/register', authControl.register)
+  app.post('/api/login', authControl.login)
+
+// ===========for testing purposes only===============
+  app.delete('/api/admin/clear-database', classControl.dropDB)
+
+// ===========for testing purposes only===============
+}
 // ==================End of API ====================
 
 // Always return the main index.html, so react-router render the route in the client
