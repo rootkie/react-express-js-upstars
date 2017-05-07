@@ -44,9 +44,9 @@ module.exports.getClassById = async (req, res) => {
 function removeDups (arr) {
   var x,
     out = [],
-    obj = {}
-
-  for (x = 0; x < arr.length; x++) {
+    obj = {},
+    l = arr.length
+  for (x = 0; x < l; x++) {
     obj[arr[x]] = 0
   }
   for (x in obj) {
