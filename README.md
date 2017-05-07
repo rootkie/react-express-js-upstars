@@ -30,7 +30,7 @@ All routes starting with /api and /api/admin is handled by express.js.
 |------|----|----|
 |GET| /api/admin/getClasses | Get all classes from database|
 |GET| /api/admin/getClass/:id | Get class by id|
-|POST| /api/admin/addClass | Add class ({classname:'example',description:'example',students:'a,b,c'}) students are separated by ","|
+|POST| /api/admin/addEditClass | Add or Edit class ({classname:'example',description:'example',students:'a,b,c'}) students are separated by ","|
 |POST| /api/register | Create a user ({password:'a',email:'a@a.com',firstName:'a',lastName:'a'}) cannot be null.|
 |POST| /api/login | Login as user ({email:'a@a.com',password:'a'}) Will return a jwt token if authed. Use the token to access /api/admin|
 

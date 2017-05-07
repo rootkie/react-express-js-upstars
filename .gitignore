@@ -18,3 +18,7 @@ yarn-error.log*
 
 #database
 /server/databases/
+
+#IDE stuff
+react-express-upstars.sublime-project
+react-express-upstars.sublime-workspace

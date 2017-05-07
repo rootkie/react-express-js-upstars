@@ -2,32 +2,27 @@ const Class = require('../models/class')
 
 // This is authenticated, user info stored in req.decoded
 
-module.exports.addClass = function (req, res) {
-  Class.findOne({ className: req.body.className }, function (err, existingClass) {
-    if (err) {
-      return res.status(500).send('server error, class insert')
+module.exports.addEditClass = async (req, res) => {
+  try {
+    const { className, description } = req.body
+    var students = req.body.students
+    if(students) students=students.split(',')
+    const class1 = {
+      className: className,
+      description: description,
+      students:students
     }
-    if (existingClass) {
-      return res.status(422).send('Classname already exists')
-    }
-    let students = req.body.students.split(',')
-    let class1 = new Class({
-      className: req.body.className,
-      description: req.body.description,
-      students: students
-    })
+    const newClass = await Class.findOneAndUpdate({ className: className}, class1, {upsert: true, new: true})
 
-    class1.save((err, newClass) => {
-      if (err) {
-        console.log(err.message)
-        return res.status(500).send('server error, class save')
-      }
-      return res.json({
-        status: 'Class created',
-        class: newClass
-      })
+    console.log(newClass)
+    res.json({
+      status: 'success',
+      class: newClass
     })
-  })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
 }
 
 module.exports.getAll = function (req, res) {

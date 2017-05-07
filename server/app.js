@@ -44,7 +44,7 @@ const studentControl = require('./controllers/StudentController')
 
 app.get('/api/admin/getClasses', classControl.getAll)
 app.get('/api/admin/getClass/:id', classControl.getClassById)
-app.post('/api/admin/addClass', classControl.addClass)
+app.post('/api/admin/addEditClass', classControl.addEditClass)
 
 app.get('/api/getStudents', studentControl.getAll)
 app.get('/api/getStudent/:id', studentControl.getStudentById)
