@@ -2,16 +2,8 @@ const Student = require('../models/student')
 
 // This is authenticated, user info stored in req.decoded
 
-module.exports.addStudent = function (req, res) {
-  Student.findOne({ 'profile.icNumber': req.body.icNumber }, function (err, existingStudent) {
-    if (err) {
-      return res.status(500).send('server error, student insert')
-    }
-    if (existingStudent) {
-      // excute updates
-      return res.status(422).send('Studentname already exists')
-    }
-
+module.exports.addEditStudent = async (req, res) => {
+  try {
     const { name, icNumber, email, contactNumber, dateOfBirth, address, gender, schoolType, schoolName } = req.body
     let student = new Student({
       profile: {
@@ -23,23 +15,20 @@ module.exports.addStudent = function (req, res) {
         address: address,
         gender: gender
       },
+      classes: [],
       schoolType: schoolType,
       schoolName: schoolName
     })
+    const newStudent = await Student.findOneAndUpdate({ 'profile.icNumber': icNumber}, student, {upsert: true, new: true})
 
-    student.save((err, newStudent) => {
-      if (err) {
-        // Printing the error messages.
-        Object.values(err.errors).forEach(function (error) { console.log(error.message) })
-
-        return res.status(500).send('server error, student save')
-      }
-      return res.json({
-        status: 'Student created',
-        student: newStudent
-      })
+    res.json({
+      status: 'success',
+      student: newStudent
     })
-  })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
 }
 
 module.exports.getAll = function (req, res) {
