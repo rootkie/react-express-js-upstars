@@ -9,10 +9,12 @@ const StudentSchema = new Schema({
   profile: {
     name: {
       type: String,
-      unique: true,
-      required: true
     },
-    icNumber: String,
+    icNumber: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     email: String,
     contactNumber: Number,
     dateOfBirth: String,

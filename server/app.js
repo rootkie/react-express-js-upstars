@@ -48,7 +48,8 @@ if (config.debug) {
   app.post('/api/addEditClass', classControl.addEditClass)
 
 // POC for refs
-  app.get('/api/addStudentToClass', classControl.addStudentToClass)
+  app.post('/api/addStudentToClass', classControl.addStudentToClass)
+  app.post('/api/deleteStudentFromClass', classControl.deleteStudentFromClass)
 
   app.get('/api/getStudents', studentControl.getAll)
   app.get('/api/getStudent/:id', studentControl.getStudentById)

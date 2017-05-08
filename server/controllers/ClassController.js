@@ -33,7 +33,7 @@ module.exports.getAll = function (req, res) {
 module.exports.getClassById = async (req, res) => {
   var classId = req.params.id
   try {
-    class1 = await Class.findById(classId)
+    class1 = await Class.findById(classId).populate('students', ['profile.name'])
     return res.json(class1)
   } catch (err) {
     console.log(err)
@@ -55,12 +55,13 @@ function removeDups (arr) {
   return out
 }
 
-// ===========temp===========
 module.exports.addStudentToClass = async (req, res) => {
   try {
-    // const student1 = await Student.findById('590af704c4f7e423a15528df')
-    const students = await Student.find({schoolType: 'Primary'})
-    var class1 = await Class.findById('590f2bd0d561f5261220b882')
+    const classId = req.body.classId
+    const studentIc = req.body.icNumber
+    // consider adding customizable filtering
+    const students = await Student.find({'profile.icNumber': studentIc})
+    var class1 = await Class.findById(classId)
 
     for (var i = 0; i < students.length; i++) {
       class1.students.push(students[i])
@@ -69,7 +70,7 @@ module.exports.addStudentToClass = async (req, res) => {
     class1.save()
     return res.json({
       class: class1,
-      students: students
+      studentAdded: students
     })
   } catch (err) {
     console.log(err)
@@ -77,7 +78,30 @@ module.exports.addStudentToClass = async (req, res) => {
   }
 }
 
-// ============end temp======
+module.exports.deleteStudentFromClass = async (req, res) => {
+  try {
+    const classId = req.body.classId
+    const studentIc = req.body.icNumber
+    const student = await Student.findOne({'profile.icNumber': studentIc})
+    var class1 = await Class.findById(classId)
+
+    let index = class1.students.indexOf(student._id)
+    // if the student is not found in the class
+    if (index == -1) {
+      return res.status(422).send('student not found in the class')
+    }
+    // remove the student id from the array
+    class1.students.splice(index, 1)
+    class1.save()
+    return res.json({
+      status: 'removed',
+      studentRemoved: student
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
 
 module.exports.dropDB = function (req, res) {
   Class.remove({}, (err, num) => {
