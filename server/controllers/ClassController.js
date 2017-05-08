@@ -63,10 +63,17 @@ module.exports.addStudentToClass = async (req, res) => {
     const students = await Student.find({'profile.icNumber': studentIc})
     var class1 = await Class.findById(classId)
 
+    // Add each student to the class
+    // AND
+    // add the class to each student
     for (var i = 0; i < students.length; i++) {
       class1.students.push(students[i])
+      students[i].classes.push(class1)
+      students[i].classes = removeDups(students[i].classes)
+      students[i].save()
     }
     class1.students = removeDups(class1.students)
+
     class1.save()
     return res.json({
       class: class1,
@@ -92,6 +99,12 @@ module.exports.deleteStudentFromClass = async (req, res) => {
     }
     // remove the student id from the array
     class1.students.splice(index, 1)
+    // no need for checking if student has the class.
+    // no other modifier of class and student refs.
+    let classIndex = student.classes.indexOf(class1._id)
+    student.classes.splice(classIndex, 1)
+
+    student.save()
     class1.save()
     return res.json({
       status: 'removed',
