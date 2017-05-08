@@ -53,7 +53,7 @@ if (config.debug) {
 
   app.get('/api/getStudents', studentControl.getAll)
   app.get('/api/getStudent/:id', studentControl.getStudentById)
-  app.post('/api/addStudent', studentControl.addStudent)
+  app.post('/api/addEditStudent', studentControl.addEditStudent)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
@@ -72,7 +72,7 @@ if (config.debug) {
 
   app.get('/api/admin/getStudents', studentControl.getAll)
   app.get('/api/admin/getStudent/:id', studentControl.getStudentById)
-  app.post('/api/admin/addStudent', studentControl.addStudent)
+  app.post('/api/admin/addEditStudent', studentControl.addEditStudent)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
