@@ -22,6 +22,7 @@ module.exports.addEditAttendance = async (req, res) => {
         // Validation is temporarily neglected
         // Consider validating if class has the students and tutors.
     let hoursInt = parseInt(hours, 10)
+    conso
     let attendance1 = {
       date: formatDate(date),
       hours: hoursInt,
@@ -35,6 +36,21 @@ module.exports.addEditAttendance = async (req, res) => {
     res.json({
       status: 'success',
       attendance: newAttendance
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.deleteAttendance = async (req, res) => {
+  try {
+    const {date, classId} = req.body
+    const removed = await Attendance.remove({class: classId, date: formatDate(date)})
+
+    res.json({
+      status: 'success',
+      removed: removed
     })
   } catch (err) {
     console.log(err)

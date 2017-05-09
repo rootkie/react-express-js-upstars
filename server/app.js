@@ -57,7 +57,7 @@ if (config.debug) {
   app.post('/api/addEditStudent', studentControl.addEditStudent)
 
   app.post('/api/addEditAttendance',attendanceControl.addEditAttendance)
-
+  app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
