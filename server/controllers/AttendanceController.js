@@ -70,17 +70,17 @@ module.exports.deleteAttendance = async (req, res) => {
   }
 }
 
-module.exports.findAttendanceBetween = async (req,res) => {
+module.exports.getAttendanceBetween = async (req, res) => {
   try {
     const { dateStart, dateEnd, classId } = req.body
-    if (classId == null){
-      throw "ClassId cannot be null"
+    if (classId == null) {
+      throw 'ClassId cannot be null'
     }
-    const foundAttendance = await Attendance.find({ date: {"$gte": formatDate(dateStart), "$lte": formatDate(dateEnd) }, class:classId })
+    const foundAttendance = await Attendance.find({ date: {'$gte': formatDate(dateStart), '$lte': formatDate(dateEnd) }, class: classId })
 
     res.json({
-      status:"success",
-      foundAttendance:foundAttendance,
+      status: 'success',
+      foundAttendance: foundAttendance
     })
   } catch (err) {
     console.log(err)
@@ -88,19 +88,47 @@ module.exports.findAttendanceBetween = async (req,res) => {
   }
 }
 
-module.exports.findAttendanceByClass = async (req,res) => {
+module.exports.getAttendanceByClass = async (req, res) => {
   try {
     const { classId } = req.params
-
-    const foundAttendances = await Attendance.find({ class:classId })
+    console.log(classId)
+    const foundAttendances = await Attendance.find({ class: classId })
     res.json({
-      status:"success",
-      foundAttendances: foundAttendances,
+      status: 'success',
+      foundAttendances: foundAttendances
     })
-
   } catch (err) {
     console.log(err)
-    res.status(500).send('server error')    
+    res.status(500).send('server error')
   }
 }
 
+module.exports.getAttendanceByUser = async (req, res) => {
+  try {
+    const { userId } = req.params
+
+    const foundAttendances = await Attendance.find({ tutors: userId }).populate('tutors', ['profile'])
+    res.json({
+      status: 'success',
+      foundAttendances: foundAttendances
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.getAttendanceByStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params
+
+    const foundAttendances = await Attendance.find({ students: studentId }).populate('students', ['profile.name'])
+    res.json({
+      status: 'success',
+      foundAttendances: foundAttendances
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}

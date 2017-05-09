@@ -56,11 +56,14 @@ if (config.debug) {
   app.get('/api/getStudent/:id', studentControl.getStudentById)
   app.post('/api/addEditStudent', studentControl.addEditStudent)
 
+  // Attendance controls
   app.post('/api/addEditAttendance',attendanceControl.addEditAttendance)
   app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
-  app.post('/api/getAttendanceBetween', attendanceControl.findAttendanceBetween)
-  app.get('/api/getAttendanceByClass/:classId', attendanceControl.findAttendanceByClass)
-
+  app.post('/api/getAttendanceBetween', attendanceControl.getAttendanceBetween)
+  app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
+  app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
+  app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
+  
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
 
