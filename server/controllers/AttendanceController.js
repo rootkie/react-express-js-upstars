@@ -69,3 +69,21 @@ module.exports.deleteAttendance = async (req, res) => {
     res.status(500).send('server error')
   }
 }
+
+module.exports.findAttendanceBetween = async (req,res) => {
+  try {
+    const { dateStart, dateEnd, classId } = req.body
+    if (classId == null){
+      throw "ClassId cannot be null"
+    }
+    const foundAttendance = await Attendance.find({ date: {"$gte": formatDate(dateStart), "$lte": formatDate(dateEnd) }, class:classId })
+
+    res.json({
+      status:"success",
+      foundAttendance:foundAttendance,
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}

@@ -58,6 +58,7 @@ if (config.debug) {
 
   app.post('/api/addEditAttendance',attendanceControl.addEditAttendance)
   app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
+  app.post('/api/findAttendanceBetween', attendanceControl.findAttendanceBetween)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
