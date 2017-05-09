@@ -87,3 +87,20 @@ module.exports.findAttendanceBetween = async (req,res) => {
     res.status(500).send('server error')
   }
 }
+
+module.exports.findAttendanceByClass = async (req,res) => {
+  try {
+    const { classId } = req.params
+
+    const foundAttendances = await Attendance.find({ class:classId })
+    res.json({
+      status:"success",
+      foundAttendances: foundAttendances,
+    })
+
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')    
+  }
+}
+
