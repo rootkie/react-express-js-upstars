@@ -11,8 +11,8 @@ const AttendanceSchema = new Schema({
   },
   hours: Number,
   class: { type: Schema.ObjectId, ref: 'Class' },
-  tutors: [{ type: Schema.ObjectId, ref: 'User'}],
-  students: [{ type: Schema.ObjectId, ref: 'Student'}],
+  tutors: [{ type: Schema.ObjectId, ref: 'User' }],
+  students: [{ type: Schema.ObjectId, ref: 'Student' }],
 
 },
   {

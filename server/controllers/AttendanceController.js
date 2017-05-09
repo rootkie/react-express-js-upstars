@@ -30,7 +30,7 @@ module.exports.addEditAttendance = async (req, res) => {
       students: students
     }
 
-    const newAttendance = await Attendance.findOneAndUpdate({class: classId}, attendance1, {upsert: true, new: true})
+    const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: formatDate(date)}, attendance1, {upsert: true, new: true})
 
     res.json({
       status: 'success',
@@ -41,4 +41,3 @@ module.exports.addEditAttendance = async (req, res) => {
     res.status(500).send('server error')
   }
 }
-
