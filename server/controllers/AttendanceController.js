@@ -13,16 +13,28 @@ function formatDate (yymmdd) {
 
 module.exports.addEditAttendance = async (req, res) => {
   try {
-    const { date, hours, classId, tutors, students } = req.body
-        // TO BE DONE ON THE FRONT END
-        // class should be the id of the class
-        // tutors should be an array of tutor id
-        // students should be an array of student id
+// Sample raw request
+// {
+//   "date":"20170102",
+//   "hours":"2",
+//   "classId":"59098787aa54171143d3f3ae",
+//   "tutors":["5908abfad4d25a79a80a9c53","5908ac4bd4d25a79a80a9c54"],
+//   "students":["591062e9edea5d1ce9fef38d","591064c77780a11e23d72705"]
+// }
 
-        // Validation is temporarily neglected
-        // Consider validating if class has the students and tutors.
+    const { date, hours, classId, tutors, students } = req.body
+    // TO BE DONE ON THE FRONT END
+    // class should be the id of the class
+    // tutors should be an array of tutor id
+    // students should be an array of student id
+
+    // Validation is temporarily neglected
+    // Consider validating if class has the students and tutors.
+
+    if (classId == null) {
+      throw 'ClassId can not be null'
+    }
     let hoursInt = parseInt(hours, 10)
-    conso
     let attendance1 = {
       date: formatDate(date),
       hours: hoursInt,
