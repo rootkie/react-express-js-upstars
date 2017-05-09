@@ -1,11 +1,16 @@
 const Class = require('../models/class')
 const Student = require('../models/student')
-// This is authenticated, user info stored in req.decoded
 
+function makeString(obj){
+  return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
+}
+
+// This is authenticated, user info stored in req.decoded
 module.exports.addEditClass = async (req, res) => {
   try {
-    const { className, description } = req.body
+    let { className, description } = req.body
     var students = []
+    className = makeString(className)
     const class1 = {
       className: className,
       description: description,
@@ -31,7 +36,7 @@ module.exports.getAll = function (req, res) {
   })
 }
 module.exports.getClassById = async (req, res) => {
-  var classId = req.params.id
+  var classId = makeString(req.params.id)
   try {
     class1 = await Class.findById(classId).populate('students', ['profile.name'])
     return res.json(class1)
@@ -57,8 +62,8 @@ function removeDups (arr) {
 
 module.exports.addStudentToClass = async (req, res) => {
   try {
-    const classId = req.body.classId
-    const studentIc = req.body.icNumber
+    const classId = makeString(req.body.classId)
+    const studentIc = makeString(req.body.icNumber)
     // consider adding customizable filtering
     const students = await Student.find({'profile.icNumber': studentIc})
     var class1 = await Class.findById(classId)
@@ -87,8 +92,8 @@ module.exports.addStudentToClass = async (req, res) => {
 
 module.exports.deleteStudentFromClass = async (req, res) => {
   try {
-    const classId = req.body.classId
-    const studentIc = req.body.icNumber
+    const classId = makeString(req.body.classId)
+    const studentIc = makeString(req.body.icNumber)
     const student = await Student.findOne({'profile.icNumber': studentIc})
     var class1 = await Class.findById(classId)
 

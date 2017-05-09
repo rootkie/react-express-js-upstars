@@ -1,10 +1,13 @@
 const Student = require('../models/student')
 
-// This is authenticated, user info stored in req.decoded
 
+function makeString(obj){
+  return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
+}
+// This is authenticated, user info stored in req.decoded
 module.exports.addEditStudent = async (req, res) => {
   try {
-    const { name, icNumber, email, contactNumber, dateOfBirth, address, gender, schoolType, schoolName } = req.body
+    let { name, icNumber, email, contactNumber, dateOfBirth, address, gender, schoolType, schoolName } = req.body
     let student = new Student({
       profile: {
         name: name,
@@ -19,6 +22,7 @@ module.exports.addEditStudent = async (req, res) => {
       schoolType: schoolType,
       schoolName: schoolName
     })
+    icNumber = makeString(icNumber)
     const newStudent = await Student.findOneAndUpdate({ 'profile.icNumber': icNumber}, student, {upsert: true, new: true})
 
     res.json({
@@ -38,7 +42,7 @@ module.exports.getAll = function (req, res) {
   })
 }
 module.exports.getStudentById = function (req, res) {
-  var studentId = req.params.id
+  var studentId = makeString(req.params.id)
   Student.findOne({
     _id: studentId
   }, (err, student) => {

@@ -11,6 +11,10 @@ function formatDate (yymmdd) {
   return new Date(dateString)
 }
 
+function makeString(obj){
+	return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
+}
+
 module.exports.addEditAttendance = async (req, res) => {
   try {
 // Sample raw request
@@ -22,7 +26,7 @@ module.exports.addEditAttendance = async (req, res) => {
 //   "students":["591062e9edea5d1ce9fef38d","591064c77780a11e23d72705"]
 // }
 
-    const { date, hours, classId, tutors, students } = req.body
+    let { date, hours, classId, tutors, students } = req.body
     // TO BE DONE ON THE FRONT END
     // class should be the id of the class
     // tutors should be an array of tutor id
@@ -34,6 +38,8 @@ module.exports.addEditAttendance = async (req, res) => {
     if (classId == null) {
       throw 'ClassId can not be null'
     }
+	  classId = makeString(classId)
+    date = makeString(date)
     let hoursInt = parseInt(hours, 10)
     let attendance1 = {
       date: formatDate(date),
@@ -57,7 +63,9 @@ module.exports.addEditAttendance = async (req, res) => {
 
 module.exports.deleteAttendance = async (req, res) => {
   try {
-    const {date, classId} = req.body
+    let {date, classId} = req.body
+    classId = makeString(classId)
+    date = makeString(date)
     const removed = await Attendance.remove({class: classId, date: formatDate(date)})
 
     res.json({
@@ -72,10 +80,13 @@ module.exports.deleteAttendance = async (req, res) => {
 
 module.exports.getAttendanceBetween = async (req, res) => {
   try {
-    const { dateStart, dateEnd, classId } = req.body
+    let { dateStart, dateEnd, classId } = req.body
     if (classId == null) {
       throw 'ClassId cannot be null'
     }
+    dateStart = makeString(dateStart)
+    dateEnd = makeString(dateEnd)
+    classId = makeString(classId)
     const foundAttendance = await Attendance.find({ date: {'$gte': formatDate(dateStart), '$lte': formatDate(dateEnd) }, class: classId })
 
     res.json({
@@ -90,8 +101,8 @@ module.exports.getAttendanceBetween = async (req, res) => {
 
 module.exports.getAttendanceByClass = async (req, res) => {
   try {
-    const { classId } = req.params
-    console.log(classId)
+    let { classId } = req.params
+    classId = makeString(classId)
     const foundAttendances = await Attendance.find({ class: classId })
     res.json({
       status: 'success',
@@ -105,8 +116,8 @@ module.exports.getAttendanceByClass = async (req, res) => {
 
 module.exports.getAttendanceByUser = async (req, res) => {
   try {
-    const { userId } = req.params
-
+    let { userId } = req.params
+    userId = makeString(userId)
     const foundAttendances = await Attendance.find({ tutors: userId }).populate('tutors', ['profile'])
     res.json({
       status: 'success',
@@ -120,8 +131,8 @@ module.exports.getAttendanceByUser = async (req, res) => {
 
 module.exports.getAttendanceByStudent = async (req, res) => {
   try {
-    const { studentId } = req.params
-
+    let { studentId } = req.params
+    studentId = makeString(studentId)
     const foundAttendances = await Attendance.find({ students: studentId }).populate('students', ['profile.name'])
     res.json({
       status: 'success',

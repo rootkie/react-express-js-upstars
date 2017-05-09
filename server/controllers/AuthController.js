@@ -14,10 +14,16 @@ function makeUser (req) {
   return { _id, firstName, lastName, role, email }
 }
 
+function makeString(obj){
+	return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
+}
+
 module.exports.login = async (req, res) => {
   try {
-    const { password, email } = req.body
+    let { password, email } = req.body
     // get user
+	password = makeString(password)
+	email = makeString(email)
     const user = await User.findOne({email})
     if (!user) {
       return res.status(403).send('Wrong email or password')
@@ -57,6 +63,11 @@ module.exports.register = function (req, res) {
     return res.status(422).send({ error: 'You must enter a password.' })
   }
 
+  email = makeString(email)
+  firstName = makeString(firstName)
+  lastName = makeString(lastName)
+  password = makeString(password)
+  
   User.findOne({email: email}, function (err, exisitingUser) {
     if (err) {
       return res.status(500).send({ error: 'db something wrong' })
