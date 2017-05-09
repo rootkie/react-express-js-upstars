@@ -41,6 +41,7 @@ const classControl = require('./controllers/ClassController')
 const userControl = require('./controllers/UserController')
 const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
+const attendanceControl = require('./controllers/AttendanceController')
 
 if (config.debug) {
   app.get('/api/getClasses', classControl.getAll)
@@ -54,6 +55,9 @@ if (config.debug) {
   app.get('/api/getStudents', studentControl.getAll)
   app.get('/api/getStudent/:id', studentControl.getStudentById)
   app.post('/api/addEditStudent', studentControl.addEditStudent)
+
+  app.post('/api/addEditAttendance',attendanceControl.addEditAttendance)
+
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
