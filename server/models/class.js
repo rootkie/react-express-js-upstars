@@ -13,7 +13,8 @@ const ClassSchema = new Schema({
   description: {
     type: String
   },
-  students: [{ type: Schema.ObjectId, ref: 'Student'}]
+  students: [{ type: Schema.ObjectId, ref: 'Student'}],
+  users: [{ type: Schema.ObjectId, ref: 'User'}]
 
 },
   {

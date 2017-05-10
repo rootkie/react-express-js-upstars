@@ -5,6 +5,10 @@ This project is to build a student volunteer content management system using rea
 This system is built using express.js as an API provider. The APIs are consumed by react.js to display. The datbase used is nedb.
 
 ## Documentation
+### Getting Started
+1. Install Node v7.x.x
+2. `npm install`
+
 ### Start running
 Start server using: nodemon server/
 
