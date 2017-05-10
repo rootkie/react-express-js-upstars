@@ -7,7 +7,9 @@ toc_footers:
   - <a href='https://github.com/tripit/slate'>Documentation Powered by Slate</a>
 
 includes:
+  - students
   - classes
+  - attendance
   - errors
 
 search: true
@@ -18,17 +20,6 @@ search: true
 Welcome to upstars volunteer management system API documentation. You won't need a developer key for now....
 
 # Registration
-
-> Sample request:
-
-```json
-{ 
-  "email": "a@a.com",
-  "password": "a",
-  "firstName": "a",
-  "lastName": "a"
-}
-```
 > Sample response:
 
 ```json
