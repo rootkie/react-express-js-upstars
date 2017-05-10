@@ -145,7 +145,7 @@ module.exports.deleteStudentFromClass = async(req, res) => {
 
 module.exports.addUserToClass = async(req, res) => {
   const classId = makeString(req.body.classId)
-  const userId = makeString(req.body._id)
+  const userId = makeString(req.body.userId)
   const classes = await Class.findByIdAndUpdate(classId, {
     $addToSet: {
       users: userId
@@ -171,7 +171,7 @@ module.exports.addUserToClass = async(req, res) => {
 module.exports.deleteUserFromClass = async(req, res) => {
 
   const classId = [makeString(req.body.classId)]
-  const userId = [makeString(req.body._id)]
+  const userId = [makeString(req.body.userId)]
   console.log(classId);
   const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
