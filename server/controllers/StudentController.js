@@ -8,7 +8,7 @@ function makeString(obj){
 module.exports.addEditStudent = async (req, res) => {
   try {
     let { name, icNumber, email, contactNumber, dateOfBirth, address, gender, schoolType, schoolName } = req.body
-    let student = new Student({
+    let student = {
       profile: {
         name: name,
         icNumber: icNumber,
@@ -21,7 +21,7 @@ module.exports.addEditStudent = async (req, res) => {
       classes: [],
       schoolType: schoolType,
       schoolName: schoolName
-    })
+    }
     icNumber = makeString(icNumber)
     const newStudent = await Student.findOneAndUpdate({ 'profile.icNumber': icNumber}, student, {upsert: true, new: true})
 
