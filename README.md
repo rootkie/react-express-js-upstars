@@ -21,22 +21,17 @@ Start server using: nodemon server/
 |/server            |Express.js stuff |
 |/server/controllers|All the application logic |
 |/server/models     |Schemas and database operations |
+|/docs/slate        |The documentation folder |
 
 
 ## API stuff
 
-All routes starting with /api and /api/admin is handled by express.js.  
-/api is accessible to all  
-/api/admin is accessible to authenticated user only  
-
-
-|method|path|uses|
-|------|----|----|
-|GET| /api/admin/getClasses | Get all classes from database|
-|GET| /api/admin/getClass/:id | Get class by id|
-|POST| /api/admin/addEditClass | Add or Edit class ({classname:'example',description:'example',students:'a,b,c'}) students are separated by ","|
-|POST| /api/register | Create a user ({password:'a',email:'a@a.com',firstName:'a',lastName:'a'}) cannot be null.|
-|POST| /api/login | Login as user ({email:'a@a.com',password:'a'}) Will return a jwt token if authed. Use the token to access /api/admin|
+All API documentation is in /docs/slate/ folder
+```
+$ cd docs/slate/
+$ bundle install
+$ bundle exec middleman server
+```
 
 
 ## Troubleshoot
