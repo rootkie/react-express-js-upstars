@@ -47,7 +47,7 @@ module.exports.login = async (req, res) => {
 }
 
 module.exports.register = function (req, res) {
-  const { email, firstName, lastName, password } = req.body
+  let { email, firstName, lastName, password } = req.body
   // Return error if no email provided
   if (!email) {
     return res.status(422).send({error: 'You must enter an email address.'})

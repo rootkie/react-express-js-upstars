@@ -1,52 +1,68 @@
 const Class = require('../models/class')
 const Student = require('../models/student')
+const User = require('../models/user')
 
-function makeString(obj){
+function makeString(obj) {
   return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
 }
 
 // This is authenticated, user info stored in req.decoded
-module.exports.addEditClass = async (req, res) => {
+module.exports.addEditClass = async(req, res) => {
   try {
-    let { className, description } = req.body
+    let {
+      className,
+      description
+    } = req.body
     var students = []
+    var users = []
     className = makeString(className)
     const class1 = {
       className: className,
       description: description,
-      students: students
+      students: students,
+      tutors: users
     }
-    const newClass = await Class.findOneAndUpdate({ className: className}, class1, {upsert: true, new: true})
+    const newClass = await Class.findOneAndUpdate({
+      className: className
+    }, class1, {
+      upsert: true,
+      new: true
+    })
 
     console.log(newClass)
     res.json({
       status: 'success',
       class: newClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAll = function (req, res) {
+module.exports.getAll = function(req, res) {
   Class.find({}).then((err, classes) => {
     if (err) return res.send(err)
-    return res.json({classes: classes, info: req.decoded})
+    return res.json({
+      classes: classes,
+      info: req.decoded
+    })
   })
 }
-module.exports.getClassById = async (req, res) => {
+module.exports.getClassById = async(req, res) => {
   var classId = makeString(req.params.id)
   try {
-    class1 = await Class.findById(classId).populate('students', ['profile.name'])
+    const class1 = await Class.findById(classId).populate('students', ['profile.name'])
     return res.json(class1)
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-function removeDups (arr) {
+function removeDups(arr) {
   var x,
     out = [],
     obj = {},
@@ -60,12 +76,14 @@ function removeDups (arr) {
   return out
 }
 
-module.exports.addStudentToClass = async (req, res) => {
+module.exports.addStudentToClass = async(req, res) => {
   try {
     const classId = makeString(req.body.classId)
     const studentIc = makeString(req.body.icNumber)
-    // consider adding customizable filtering
-    const students = await Student.find({'profile.icNumber': studentIc})
+      // consider adding customizable filtering
+    const students = await Student.find({
+      'profile.icNumber': studentIc
+    })
     var class1 = await Class.findById(classId)
 
     // Add each student to the class
@@ -84,28 +102,31 @@ module.exports.addStudentToClass = async (req, res) => {
       class: class1,
       studentAdded: students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.deleteStudentFromClass = async (req, res) => {
+module.exports.deleteStudentFromClass = async(req, res) => {
   try {
     const classId = makeString(req.body.classId)
     const studentIc = makeString(req.body.icNumber)
-    const student = await Student.findOne({'profile.icNumber': studentIc})
+    const student = await Student.findOne({
+      'profile.icNumber': studentIc
+    })
     var class1 = await Class.findById(classId)
 
     let index = class1.students.indexOf(student._id)
-    // if the student is not found in the class
+      // if the student is not found in the class
     if (index == -1) {
       return res.status(422).send('student not found in the class')
     }
     // remove the student id from the array
     class1.students.splice(index, 1)
-    // no need for checking if student has the class.
-    // no other modifier of class and student refs.
+      // no need for checking if student has the class.
+      // no other modifier of class and student refs.
     let classIndex = student.classes.indexOf(class1._id)
     student.classes.splice(classIndex, 1)
 
@@ -115,15 +136,72 @@ module.exports.deleteStudentFromClass = async (req, res) => {
       status: 'removed',
       studentRemoved: student
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.dropDB = function (req, res) {
+module.exports.addUserToClass = async(req, res) => {
+  const classId = makeString(req.body.classId)
+  const userId = makeString(req.body._id)
+  const classes = await Class.findByIdAndUpdate(classId, {
+    $addToSet: {
+      users: userId
+    }
+  }, {
+    new: true
+  })
+
+  const user = await User.findByIdAndUpdate(userId, {
+    $addToSet: {
+      classes: classId
+    }
+  }, {
+    new: true
+  })
+
+  return res.json({
+    class: classes,
+    user: user
+  })
+}
+
+module.exports.deleteUserFromClass = async(req, res) => {
+
+  const classId = [makeString(req.body.classId)]
+  const userId = [makeString(req.body._id)]
+  console.log(classId);
+  const classes = await Class.findByIdAndUpdate(classId, {
+      $pullAll: {
+        users: userId
+      }
+    }, {
+      new: true
+    })
+
+  const user = await User.findByIdAndUpdate(userId, {
+      $pullAll: {
+        classes: classId
+      }
+    }, {
+      new: true
+    })
+
+  return res.json({
+    class: classes,
+    user: user
+  })
+
+}
+
+
+module.exports.dropDB = function(req, res) {
   Class.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
-    return res.json({removed: num})
+    return res.json({
+      removed: num
+    })
   })
 }
