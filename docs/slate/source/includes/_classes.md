@@ -157,3 +157,102 @@ Parameter  | Required | Description
 token      | true     | Obtained from login or register.
 classId    | true     | The id of the class.
 studentIc  | true     | The ic number of the student
+
+
+
+## Add User/Tutor To Class
+> Sample Response
+
+```json
+{
+  "class": {
+    "_id": "59098787aa54171143d3f3ae",
+    "updatedAt": "2017-05-11T05:46:29.848Z",
+    "createdAt": "2017-05-03T07:32:23.406Z",
+    "className": "ajsidjfais11231221",
+    "description": "jdsiafjsidjfiasjdiidsa",
+    "__v": 11,
+    "users": [
+      "5908abfad4d25a79a80a9c53"
+    ],
+    "students": [
+      "591062e9edea5d1ce9fef38d"
+    ]
+  },
+  "user": {
+    "_id": "5908abfad4d25a79a80a9c53",
+    "updatedAt": "2017-05-11T05:46:29.887Z",
+    "createdAt": "2017-05-02T15:55:38.974Z",
+    "email": "test@email.com",
+    "password": "$2a$05$LL4N.Iomc66RvuEQFBTmI.1tLxcQU4o4KDLAfn6f0bPetfwwzRQpy",
+    "__v": 0,
+    "classes": [
+      "59098787aa54171143d3f3ae"
+    ],
+    "role": "Member",
+    "profile": {
+      "firstName": "Wong",
+      "lastName": "Sarah"
+    }
+  }
+}
+```
+This end point allows you to add a single student to a single class.
+
+### HTTP Request
+`POST http://localhost:3000/api/admin/addUserToClass`
+
+### Query Parameters
+Parameter  | Required | Description
+---------  | -------  | -----------
+token      | true     | Obtained from login or register.
+classId    | true     | The _id of the class.
+userId     | true     | The _ic of the user.
+
+
+
+## Delete User/Tutor From Class
+>Sample Response
+
+```json
+{
+  "class": {
+    "_id": "59098787aa54171143d3f3ae",
+    "updatedAt": "2017-05-11T05:47:35.330Z",
+    "createdAt": "2017-05-03T07:32:23.406Z",
+    "className": "ajsidjfais11231221",
+    "description": "jdsiafjsidjfiasjdiidsa",
+    "__v": 11,
+    "users": [],
+    "students": [
+      "591062e9edea5d1ce9fef38d"
+    ]
+  },
+  "user": {
+    "_id": "5908abfad4d25a79a80a9c53",
+    "updatedAt": "2017-05-11T05:47:35.347Z",
+    "createdAt": "2017-05-02T15:55:38.974Z",
+    "email": "test@email.com",
+    "password": "$2a$05$LL4N.Iomc66RvuEQFBTmI.1tLxcQU4o4KDLAfn6f0bPetfwwzRQpy",
+    "__v": 0,
+    "classes": [],
+    "role": "Member",
+    "profile": {
+      "firstName": "Wong",
+      "lastName": "Sarah"
+    }
+  }
+}
+```
+
+This end point allows you to delete a student from a class
+
+### HTTP Request
+`POST http://localhost:3000/api/admin/deleteStudentFromClass`
+
+### Query Parameters
+Parameter  | Required | Description
+---------  | -------  | -----------
+token      | true     | Obtained from login or register.
+classId    | true     | The _id of the class.
+userId     | true     | The _ic of the user.
