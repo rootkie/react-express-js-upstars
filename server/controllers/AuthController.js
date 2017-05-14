@@ -1,6 +1,7 @@
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
+let functions = require('../functions.js')
 
 function generateToken (user) {
   return jwt.sign(user, config.secret, {
@@ -14,16 +15,12 @@ function makeUser (req) {
   return { _id, firstName, lastName, role, email }
 }
 
-function makeString(obj){
-	return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
-}
-
 module.exports.login = async (req, res) => {
   try {
     let { password, email } = req.body
     // get user
-	password = makeString(password)
-	email = makeString(email)
+	password = functions.makeString(password)
+	email = functions.makeString(email)
     const user = await User.findOne({email})
     if (!user) {
       return res.status(403).send('Wrong email or password')
@@ -63,10 +60,10 @@ module.exports.register = function (req, res) {
     return res.status(422).send({ error: 'You must enter a password.' })
   }
 
-  email = makeString(email)
-  firstName = makeString(firstName)
-  lastName = makeString(lastName)
-  password = makeString(password)
+  email = functions.makeString(email)
+  firstName = functions.makeString(firstName)
+  lastName = functions.makeString(lastName)
+  password = functions.makeString(password)
   
   User.findOne({email: email}, function (err, exisitingUser) {
     if (err) {
