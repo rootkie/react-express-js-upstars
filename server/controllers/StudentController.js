@@ -1,5 +1,5 @@
 const Student = require('../models/student')
-let functions = require('../functions.js')
+let util = require('../util.js')
 
 // This is authenticated, user info stored in req.decoded
 module.exports.addEditStudent = async (req, res) => {
@@ -19,7 +19,7 @@ module.exports.addEditStudent = async (req, res) => {
       schoolType: schoolType,
       schoolName: schoolName
     }
-    icNumber = functions.makeString(icNumber)
+    icNumber = util.makeString(icNumber)
     const newStudent = await Student.findOneAndUpdate({ 'profile.icNumber': icNumber}, student, {upsert: true, new: true, setDefaultsOnInsert: true})
 
     res.json({
@@ -39,7 +39,7 @@ module.exports.getAll = function (req, res) {
   })
 }
 module.exports.getStudentById = function (req, res) {
-  var studentId = functions.makeString(req.params.id)
+  var studentId = util.makeString(req.params.id)
   Student.findOne({
     _id: studentId
   }, (err, student) => {

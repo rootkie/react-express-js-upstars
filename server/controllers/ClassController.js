@@ -1,7 +1,7 @@
 const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
-let functions = require('../functions.js')
+let util = require('../util.js')
 
 // This is authenticated, user info stored in req.decoded
 module.exports.addEditClass = async(req, res) => {
@@ -10,7 +10,7 @@ module.exports.addEditClass = async(req, res) => {
       className,
       description
     } = req.body
-    className = functions.makeString(className)
+    className = util.makeString(className)
     const class1 = {
       className: className,
       description: description
@@ -43,7 +43,7 @@ module.exports.getAll = function(req, res) {
   })
 }
 module.exports.getClassById = async(req, res) => {
-  var classId = functions.makeString(req.params.id)
+  var classId = util.makeString(req.params.id)
   try {
     const class1 = await Class.findById(classId).populate('students', 'profile.name')
     return res.json(class1)
@@ -56,8 +56,8 @@ module.exports.getClassById = async(req, res) => {
 
 module.exports.addStudentToClass = async(req, res) => {
   try {
-    const classId = functions.makeString(req.body.classId)
-    const studentId = functions.makeString(req.body.studentId)
+    const classId = util.makeString(req.body.classId)
+    const studentId = util.makeString(req.body.studentId)
       // consider adding customizable filtering
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
@@ -92,8 +92,8 @@ module.exports.addStudentToClass = async(req, res) => {
 
 module.exports.deleteStudentFromClass = async(req, res) => {
   try {
-    const classId = functions.makeString(req.body.classId)
-    const studentId = functions.makeString(req.body.studentId)
+    const classId = util.makeString(req.body.classId)
+    const studentId = util.makeString(req.body.studentId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
         students: studentId
@@ -125,8 +125,8 @@ module.exports.deleteStudentFromClass = async(req, res) => {
 
 module.exports.addUserToClass = async(req, res) => {
   try {
-    const classId = functions.makeString(req.body.classId)
-    const userId = functions.makeString(req.body.userId)
+    const classId = util.makeString(req.body.classId)
+    const userId = util.makeString(req.body.userId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         users: userId
@@ -157,8 +157,8 @@ module.exports.addUserToClass = async(req, res) => {
 
 module.exports.deleteUserFromClass = async(req, res) => {
   try {
-    const classId = [functions.makeString(req.body.classId)]
-    const userId = [functions.makeString(req.body.userId)]
+    const classId = [util.makeString(req.body.classId)]
+    const userId = [util.makeString(req.body.userId)]
     console.log(classId);
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {

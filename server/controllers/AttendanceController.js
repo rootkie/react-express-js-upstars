@@ -2,7 +2,7 @@ const Attendance = require('../models/attendance'),
   Student = require('../models/student'),
   Class = require('../models/class'),
   Tutor = require('../models/user')
-let functions = require('../functions.js')
+let util = require('../util.js')
 
 function formatDate (yymmdd) {
   let year = yymmdd.substring(0, 4)
@@ -35,8 +35,8 @@ module.exports.addEditAttendance = async (req, res) => {
     if (classId == null) {
       throw 'ClassId can not be null'
     }
-	  classId = functions.makeString(classId)
-    date = functions.makeString(date)
+	  classId = util.makeString(classId)
+    date = util.makeString(date)
     let hoursInt = parseInt(hours, 10)
     let attendance1 = {
       date: formatDate(date),
@@ -61,8 +61,8 @@ module.exports.addEditAttendance = async (req, res) => {
 module.exports.deleteAttendance = async (req, res) => {
   try {
     let {date, classId} = req.body
-    classId = functions.makeString(classId)
-    date = functions.makeString(date)
+    classId = util.makeString(classId)
+    date = util.makeString(date)
     const removed = await Attendance.remove({class: classId, date: formatDate(date)})
 
     res.json({
@@ -81,9 +81,9 @@ module.exports.getAttendanceBetween = async (req, res) => {
     if (classId == null) {
       throw 'ClassId cannot be null'
     }
-    dateStart = functions.makeString(dateStart)
-    dateEnd = functions.makeString(dateEnd)
-    classId = functions.makeString(classId)
+    dateStart = util.makeString(dateStart)
+    dateEnd = util.makeString(dateEnd)
+    classId = util.makeString(classId)
     const foundAttendance = await Attendance.find({ date: {'$gte': formatDate(dateStart), '$lte': formatDate(dateEnd) }, class: classId })
 
     res.json({
@@ -99,7 +99,7 @@ module.exports.getAttendanceBetween = async (req, res) => {
 module.exports.getAttendanceByClass = async (req, res) => {
   try {
     let { classId } = req.params
-    classId = functions.makeString(classId)
+    classId = util.makeString(classId)
     const foundAttendances = await Attendance.find({ class: classId })
     res.json({
       status: 'success',
@@ -114,7 +114,7 @@ module.exports.getAttendanceByClass = async (req, res) => {
 module.exports.getAttendanceByUser = async (req, res) => {
   try {
     let { userId } = req.params
-    userId = functions.makeString(userId)
+    userId = util.makeString(userId)
     const foundAttendances = await Attendance.find({ tutors: userId }).populate('tutors', ['profile'])
     res.json({
       status: 'success',
@@ -129,7 +129,7 @@ module.exports.getAttendanceByUser = async (req, res) => {
 module.exports.getAttendanceByStudent = async (req, res) => {
   try {
     let { studentId } = req.params
-    studentId = functions.makeString(studentId)
+    studentId = util.makeString(studentId)
     const foundAttendances = await Attendance.find({ students: studentId }).populate('students', ['profile.name'])
     res.json({
       status: 'success',
