@@ -92,8 +92,8 @@ module.exports.addStudentToClass = async(req, res) => {
 
 module.exports.deleteStudentFromClass = async(req, res) => {
   try {
-    const classId = util.makeString(req.body.classId)
-    const studentId = util.makeString(req.body.studentId)
+    const classId = [util.makeString(req.body.classId)]
+    const studentId = [util.makeString(req.body.studentId)]
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
         students: studentId
