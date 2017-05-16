@@ -1,9 +1,6 @@
 const Student = require('../models/student')
+let util = require('../util.js')
 
-
-function makeString(obj){
-  return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
-}
 // This is authenticated, user info stored in req.decoded
 module.exports.addEditStudent = async (req, res) => {
   try {
@@ -22,8 +19,8 @@ module.exports.addEditStudent = async (req, res) => {
       schoolType: schoolType,
       schoolName: schoolName
     }
-    icNumber = makeString(icNumber)
-    const newStudent = await Student.findOneAndUpdate({ 'profile.icNumber': icNumber}, student, {upsert: true, new: true})
+    icNumber = util.makeString(icNumber)
+    const newStudent = await Student.findOneAndUpdate({ 'profile.icNumber': icNumber}, student, {upsert: true, new: true, setDefaultsOnInsert: true})
 
     res.json({
       status: 'success',
@@ -42,7 +39,7 @@ module.exports.getAll = function (req, res) {
   })
 }
 module.exports.getStudentById = function (req, res) {
-  var studentId = makeString(req.params.id)
+  var studentId = util.makeString(req.params.id)
   Student.findOne({
     _id: studentId
   }, (err, student) => {
