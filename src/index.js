@@ -1,12 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
+import Main from './components/Main'
+import Class from './components/Class'
+import './index.css'
 
-import createBrowserHistory from 'history/createBrowserHistory'
-const customHistory = createBrowserHistory()
+const Root = () => (
+  <Router>
+    <div>
+      <Route exact path='/' component={Main} />
+      <Route path='/class' component={Class} />
+    </div>
+  </Router>
+)
 
-import Routes from './routes';
-import './index.css';
-
-ReactDOM.render((
-  <Routes history={customHistory}/>
-),document.getElementById('root'));
+ReactDOM.render(<Root />, document.querySelector('#root'))
