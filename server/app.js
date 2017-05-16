@@ -15,7 +15,7 @@ app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
   // Serve static assets
 app.use(express.static(path.resolve(__dirname, '..', 'build')))
   // Enable Cross Origin Resource Sharing
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials')
@@ -44,6 +44,7 @@ const userControl = require('./controllers/UserController')
 const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
+const statisticsControl = require('./controllers/StatisticsController')
 
 // Start of development APIs
 if (config.debug) {
@@ -52,12 +53,11 @@ if (config.debug) {
   app.post('/api/addEditClass', classControl.addEditClass)
 
   // POC for refs
-  //Classes
+  // Classes
   app.post('/api/addStudentToClass', classControl.addStudentToClass)
   app.post('/api/deleteStudentFromClass', classControl.deleteStudentFromClass)
-  app.post('/api/addUserToClass', classControl.addUserToClass) //Handles both user -> class && class -> user
+  app.post('/api/addUserToClass', classControl.addUserToClass) // Handles both user -> class && class -> user
   app.post('/api/deleteUserFromClass', classControl.deleteUserFromClass)
-  
 
   app.get('/api/getStudents', studentControl.getAll)
   app.get('/api/getStudent/:id', studentControl.getStudentById)
@@ -71,6 +71,15 @@ if (config.debug) {
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
   app.post('/api/getAttendanceUserFromClass',attendanceControl.getAttendanceUserFromClass)
+
+  // CIP hours record
+  app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
+
+  // CIP hours record
+  app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
+
+  // CIP hours record
+  app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
