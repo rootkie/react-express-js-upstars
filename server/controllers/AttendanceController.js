@@ -111,7 +111,7 @@ module.exports.getAttendanceByUser = async (req, res) => {
   try {
     let { userId } = req.params
     userId = util.makeString(userId)
-    const foundAttendances = await Attendance.find({ tutors: userId }).populate('tutors', ['profile'])
+    const foundAttendances = await Attendance.find({ users: userId }).populate('users', ['profile'])
     res.json({
       status: 'success',
       foundAttendances: foundAttendances

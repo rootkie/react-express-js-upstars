@@ -6,7 +6,7 @@ const util = require('../util')
 module.exports.getCipUser = async (req, res) => {
   try {
     const userId = util.makeString(req.params.userId)
-    let records = await Attendance.find({ tutors: userId }, {hours: 1})
+    let records = await Attendance.find({ users: userId }, {hours: 1})
     const size = records.length
     let sum = 0
     for (let i = 0; i < size; i++) {
@@ -34,7 +34,7 @@ async function genUserARStat (dateFrom, dateEnd, userId) {
       let classAttendance = await Attendance.find({ date: { '$gte': util.formatDate(dateFrom), '$lte': util.formatDate(dateEnd) }, class: user.classes[i] })
       let attendanceCount = classAttendance.length
       for (let j = 0; j < attendanceCount; j++) {
-        if (classAttendance[j].tutors.indexOf(userId) !== -1) userAttendance += 1
+        if (classAttendance[j].users.indexOf(userId) !== -1) userAttendance += 1
       }
 
       totalAttendance += attendanceCount
