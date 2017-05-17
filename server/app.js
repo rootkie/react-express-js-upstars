@@ -80,7 +80,8 @@ if (config.debug) {
 
   // Statistics controls
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
-  app.post('/api/getAttendanceRate/user/', statisticsControl.getAttendanceRateUser)
+  app.post('/api/getAttendanceRate/user', statisticsControl.getAttendanceRateUser)
+  app.post('/api/getAttendanceRate/student', statisticsControl.getAttendanceRateStudent)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)

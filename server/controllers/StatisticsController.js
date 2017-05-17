@@ -1,5 +1,6 @@
 const Attendance = require('../models/attendance')
 const User = require('../models/user')
+const Student = require('../models/student')
 const util = require('../util')
 
 module.exports.getCipUser = async (req, res) => {
@@ -37,12 +38,45 @@ module.exports.getAttendanceRateUser = async (req, res) => {
       let classAttendance = await Attendance.find({ date: { '$gte': util.formatDate(dateFrom), '$lte': util.formatDate(dateEnd) }, class: user.classes[i] })
       let attendanceCount = classAttendance.length
       for (let j = 0; j < attendanceCount; j++) {
-        if (classAttendance[j].tutors.indexOf(userId)) userAttendance += 1
+        if (classAttendance[j].tutors.indexOf(userId) != -1) userAttendance += 1
       }
 
-      totalAttendance += classAttendance.length
+      totalAttendance += attendanceCount
     }
     const attendanceRate = (userAttendance / totalAttendance * 100).toFixed(2)
+    res.json({
+      status: 'success',
+      attendanceRate: attendanceRate
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.getAttendanceRateStudent = async (req, res) => {
+  try {
+    let {dateFrom, dateEnd, studentId} = req.body
+    dateFrom = util.makeString(dateFrom)
+    dateEnd = util.makeString(dateEnd)
+    studentId = util.makeString(studentId)
+    let student = await Student.findById(studentId)
+    let numOfClasses = student.classes.length
+
+    let totalAttendance = 0
+    let studentAttendance = 0
+    console.log(studentId)
+    for (let i = 0; i < numOfClasses; i++) {
+      let classAttendance = await Attendance.find({ date: { '$gte': util.formatDate(dateFrom), '$lte': util.formatDate(dateEnd) }, class: student.classes[i] })
+      let attendanceCount = classAttendance.length
+      for (let j = 0; j < attendanceCount; j++) {
+        if (classAttendance[j].students.indexOf(studentId) != -1) studentAttendance += 1
+      }
+      totalAttendance += attendanceCount
+    }
+    console.log(totalAttendance)
+    console.log(studentAttendance)
+    const attendanceRate = (studentAttendance / totalAttendance * 100).toFixed(2)
     res.json({
       status: 'success',
       attendanceRate: attendanceRate
