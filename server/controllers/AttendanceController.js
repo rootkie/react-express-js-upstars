@@ -1,7 +1,7 @@
-const Attendance = require('../models/attendance'),
-  Student = require('../models/student'),
-  Class = require('../models/class'),
-  Tutor = require('../models/user')
+const Attendance = require('../models/attendance')
+  // Student = require('../models/student'),
+  // Class = require('../models/class'),
+  // Tutor = require('../models/user')
 let util = require('../util.js')
 
 module.exports.addEditAttendance = async (req, res) => {
@@ -11,14 +11,14 @@ module.exports.addEditAttendance = async (req, res) => {
 //   "date":"20170102",
 //   "hours":"2",
 //   "classId":"59098787aa54171143d3f3ae",
-//   "tutors":["5908abfad4d25a79a80a9c53","5908ac4bd4d25a79a80a9c54"],
+//   "users":["5908abfad4d25a79a80a9c53","5908ac4bd4d25a79a80a9c54"],
 //   "students":["591062e9edea5d1ce9fef38d","591064c77780a11e23d72705"]
 // }
 
-    let { date, hours, classId, tutors, students } = req.body
+    let { date, hours, classId, users, students, type } = req.body
     // TO BE DONE ON THE FRONT END
     // class should be the id of the class
-    // tutors should be an array of tutor id
+    // users should be an array of user id
     // students should be an array of student id
 
     // Validation is temporarily neglected
@@ -29,16 +29,20 @@ module.exports.addEditAttendance = async (req, res) => {
     }
 	  classId = util.makeString(classId)
     date = util.makeString(date)
+    type = util.makeString(type)
     let hoursInt = parseInt(hours, 10)
+    if (type !== 'Class') hoursInt = 0
+
     let attendance1 = {
       date: util.formatDate(date),
-      hours: hoursInt,
+      hours:hoursInt,
       class: classId,
-      tutors: tutors,
-      students: students
+      users: users,
+      students: students,
+      type: type
     }
 
-    const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: util.formatDate(date)}, attendance1, {upsert: true, new: true})
+    const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: util.formatDate(date)}, attendance1, {upsert: true, new: true, setDefaultsOnInsert: true})
 
     res.json({
       status: 'success',
@@ -126,6 +130,22 @@ module.exports.getAttendanceByStudent = async (req, res) => {
     res.json({
       status: 'success',
       foundAttendances: foundAttendances
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.getAttendanceUserFromClass = async (req, res) => {
+  try {
+    let {classId, userId} = req.body
+    classId = util.makeString(classId)
+    userId = util.makeString(userId)
+    let records = await Attendance.find({ class: classId, tutor: userId})
+    res.json({
+      status: 'success',
+      records: records
     })
   } catch (err) {
     console.log(err)

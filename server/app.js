@@ -70,6 +70,7 @@ if (config.debug) {
   app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
+  app.post('/api/getAttendanceUserFromClass',attendanceControl.getAttendanceUserFromClass)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
