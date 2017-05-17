@@ -136,3 +136,19 @@ module.exports.getAttendanceByStudent = async (req, res) => {
     res.status(500).send('server error')
   }
 }
+
+module.exports.getAttendanceUserFromClass = async (req, res) => {
+  try {
+    let {classId, userId} = req.body
+    classId = util.makeString(classId)
+    userId = util.makeString(userId)
+    let records = await Attendance.find({ class: classId, tutor: userId})
+    res.json({
+      status: 'success',
+      records: records
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
