@@ -9,11 +9,17 @@ const AttendanceSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  hours: Number,
+  hours: {
+    type: Number,
+    default: 0
+  },
   class: { type: Schema.ObjectId, ref: 'Class' },
-  tutors: [{ type: Schema.ObjectId, ref: 'User' }],
+  users: [{ type: Schema.ObjectId, ref: 'User' }],
   students: [{ type: Schema.ObjectId, ref: 'Student' }],
-
+  type: {
+    type: String,
+    enum: ['Class', 'PHoliday', 'Cancelled']
+  }
 },
   {
     timestamps: true
