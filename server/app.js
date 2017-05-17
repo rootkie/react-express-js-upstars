@@ -78,8 +78,9 @@ if (config.debug) {
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
 
-  // CIP hours record
+  // Statistics controls
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
+  app.post('/api/getAttendanceRate/user/', statisticsControl.getAttendanceRateUser)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
