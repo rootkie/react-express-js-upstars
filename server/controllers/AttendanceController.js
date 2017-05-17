@@ -31,17 +31,15 @@ module.exports.addEditAttendance = async (req, res) => {
     date = util.makeString(date)
     type = util.makeString(type)
     let hoursInt = parseInt(hours, 10)
+    if (type !== 'Class') hoursInt = 0
+
     let attendance1 = {
       date: util.formatDate(date),
+      hours:hoursInt,
       class: classId,
       users: users,
       students: students,
       type: type
-    }
-    if (type == 'Class') {
-      attendance1.hours = hoursInt
-    } else {
-      attendance1.hours = 0
     }
 
     const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: util.formatDate(date)}, attendance1, {upsert: true, new: true, setDefaultsOnInsert: true})
