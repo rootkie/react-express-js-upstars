@@ -4,14 +4,6 @@ const Attendance = require('../models/attendance'),
   Tutor = require('../models/user')
 let util = require('../util.js')
 
-function formatDate (yymmdd) {
-  let year = yymmdd.substring(0, 4)
-  let month = yymmdd.substring(4, 6)
-  let day = yymmdd.substring(6, 8)
-  let dateString = year + '-' + month + '-' + day
-  return new Date(dateString)
-}
-
 module.exports.addEditAttendance = async (req, res) => {
   try {
 // Sample raw request
@@ -39,14 +31,14 @@ module.exports.addEditAttendance = async (req, res) => {
     date = util.makeString(date)
     let hoursInt = parseInt(hours, 10)
     let attendance1 = {
-      date: formatDate(date),
+      date: util.formatDate(date),
       hours: hoursInt,
       class: classId,
       tutors: tutors,
       students: students
     }
 
-    const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: formatDate(date)}, attendance1, {upsert: true, new: true})
+    const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: util.formatDate(date)}, attendance1, {upsert: true, new: true})
 
     res.json({
       status: 'success',
@@ -63,7 +55,7 @@ module.exports.deleteAttendance = async (req, res) => {
     let {date, classId} = req.body
     classId = util.makeString(classId)
     date = util.makeString(date)
-    const removed = await Attendance.remove({class: classId, date: formatDate(date)})
+    const removed = await Attendance.remove({class: classId, date: util.formatDate(date)})
 
     res.json({
       status: 'success',
@@ -84,7 +76,7 @@ module.exports.getAttendanceBetween = async (req, res) => {
     dateStart = util.makeString(dateStart)
     dateEnd = util.makeString(dateEnd)
     classId = util.makeString(classId)
-    const foundAttendance = await Attendance.find({ date: {'$gte': formatDate(dateStart), '$lte': formatDate(dateEnd) }, class: classId })
+    const foundAttendance = await Attendance.find({ date: {'$gte': util.formatDate(dateStart), '$lte': util.formatDate(dateEnd) }, class: classId })
 
     res.json({
       status: 'success',
