@@ -142,7 +142,7 @@ module.exports.getAttendanceUserFromClass = async (req, res) => {
     let {classId, userId} = req.body
     classId = util.makeString(classId)
     userId = util.makeString(userId)
-    let records = await Attendance.find({ class: classId, tutor: userId})
+    let records = await Attendance.find({ class: classId, users: userId})
     res.json({
       status: 'success',
       records: records
