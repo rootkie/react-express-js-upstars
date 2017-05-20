@@ -42,6 +42,7 @@ module.exports = function (app) {
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
   app.post('/api/getAttendanceRate/user', statisticsControl.getAttendanceRateUser)
   app.post('/api/getAttendanceRate/student', statisticsControl.getAttendanceRateStudent)
+  app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
 
   // app.get('/api/admin/getClasses', classControl.getAll)
   // app.get('/api/admin/getClass/:id', classControl.getClassById)
