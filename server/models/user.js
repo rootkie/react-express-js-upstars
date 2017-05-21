@@ -28,11 +28,16 @@ const UserSchema = new Schema({
     }
 
   },
+  
+  status: {
+    type: String,
+    default: 'Active'
+  },
 
   role: {
     type: String,
-    enum: ['Member', 'Tutor', 'Admin'],
-    default: 'Member'
+    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'],
+    default: 'Tutor'
   },
 
   classes: [{
