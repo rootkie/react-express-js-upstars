@@ -46,12 +46,13 @@ module.exports = function (app) {
   app.post('/api/getAttendanceRate/student', statisticsControl.getAttendanceRateStudent)
   app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
 
-  // User controls
+  // User controls for any user
   app.post('/api/editUserParticulars', userControl.editUserParticulars)
-  app.post('/api/changePassword', userControl.changePassword) //For Users to change their own password
-  app.post('/api/adminChangePassword', userControl.adminChangePassword) //For admin to change anyone's password
-  app.post('/api/changeUserStatus', userControl.changeUserStatus) //For Admin / SuperAdmin
-  app.post('/api/ChangePermissions', userControl.changePermissions) //Change from tutor -> mentor
+  app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
+  
+  // Admin controls under user
+  app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
+  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions)
 
   // app.get('/api/admin/getClasses', classControl.getAll)
   // app.get('/api/admin/getClass/:id', classControl.getClassById)

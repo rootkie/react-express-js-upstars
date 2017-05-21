@@ -1,7 +1,7 @@
 const Attendance = require('../models/attendance')
   // Student = require('../models/student'),
   // Class = require('../models/class'),
-  // Tutor = require('../models/user')
+  // User = require('../models/user')
 let util = require('../util.js')
 
 module.exports.addEditAttendance = async (req, res) => {
