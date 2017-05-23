@@ -21,7 +21,7 @@ module.exports.setAdminRouteMiddleware = function (app) {
           next()
         }
       })
-    } else if (config.debug){
+    } else if (config.debug) {
       next()
     } else {
         // if there is no token
@@ -34,4 +34,14 @@ module.exports.setAdminRouteMiddleware = function (app) {
   })
 
   app.use('/api/admin', routes)
+}
+
+module.exports.hasRole = function (role) {
+  return (req, res, next) => {
+    let len = role.length
+    for (let i = 0; i < len; i++) {
+      if (req.decoded.role.indexOf(role[i]) !== -1) return next()
+    }
+    return res.status(403).send('Your do not have sufficient permission to access this endpoint')
+  }
 }

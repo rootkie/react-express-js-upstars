@@ -3,12 +3,12 @@ const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const statisticsControl = require('./controllers/StatisticsController')
-
+const hasRole = require('./routeMiddleware').hasRole
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
 module.exports = function (app) {
-  app.get('/api/getClasses', classControl.getAll)
+  app.get('/api/admin/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
 
