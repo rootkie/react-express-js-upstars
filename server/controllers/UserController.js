@@ -105,6 +105,25 @@ module.exports.adminChangePassword = async(req, res) => {
     }
 }
 
-module.exports.changeUserStatusAndPermissions = function(req, res) {
-
+module.exports.changeUserStatusAndPermissions = async(req, res) => {
+    try {
+        let {
+            userId,
+            newStatus
+        } = req.body
+        userId = util.makeString(userId)
+        newStatus = util.makeString(newStatus)
+        const updatedUser = await User.findByIdAndUpdate(userId, {
+            status: newStatus
+        }, {
+            new: true
+        })
+        res.json({
+            user: updatedUser
+        })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send('server error')
+    }
 }
