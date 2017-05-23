@@ -29,11 +29,10 @@ const UserSchema = new Schema({
 
   },
 
-  role: {
+  role: [{
     type: String,
-    enum: ['Member', 'Tutor', 'Admin'],
-    default: 'Member'
-  },
+    enum: ['Member', 'Tutor', 'Admin']
+  }],
 
   classes: [{
     type: Schema.ObjectId,

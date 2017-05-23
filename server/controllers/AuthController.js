@@ -79,11 +79,12 @@ module.exports.register = function (req, res) {
         firstName: firstName,
         lastName: lastName
       },
-      password: password
+      password: password,
+      role:['Member']
     })
-
     user.save(function (err, user) {
       if (err) {
+        console.log(err)
         return res.status(500).send({error: 'db something wrong'})
       }
       // generate tokens
