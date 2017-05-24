@@ -7,7 +7,7 @@ const statisticsControl = require('./controllers/StatisticsController')
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
-module.exports = function (app) {
+module.exports = function(app) {
   app.get('/api/getClasses', classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
@@ -30,8 +30,8 @@ module.exports = function (app) {
   app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
-  app.get('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
-  app.get('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
+  app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
+  app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
 
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
