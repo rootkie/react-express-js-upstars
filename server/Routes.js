@@ -35,9 +35,6 @@ module.exports = function (app) {
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
 
-  // CIP hours record
-  app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
-
   // Statistics controls
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
   app.post('/api/getAttendanceRate/user', statisticsControl.getAttendanceRateUser)
