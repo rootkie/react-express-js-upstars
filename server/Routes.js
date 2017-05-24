@@ -3,12 +3,12 @@ const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const statisticsControl = require('./controllers/StatisticsController')
-
+const hasRole = require('./routeMiddleware').hasRole
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
-module.exports = function(app) {
-  app.get('/api/getClasses', classControl.getAll)
+module.exports = function (app) {
+  app.get('/api/admin/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
 
@@ -32,9 +32,6 @@ module.exports = function(app) {
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
   app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
   app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
-
-  // CIP hours record
-  app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
 
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
