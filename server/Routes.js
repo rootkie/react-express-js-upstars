@@ -31,8 +31,8 @@ module.exports = function (app) {
   app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
-  app.get('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
-  app.get('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
+  app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
+  app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
 
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
@@ -52,7 +52,7 @@ module.exports = function (app) {
   
   // Admin controls under user
   app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
-  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions)
+  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) //If there's a need to split them up into 2 API... Waiting for the permissions table.
 
   // app.get('/api/admin/getClasses', classControl.getAll)
   // app.get('/api/admin/getClass/:id', classControl.getClassById)
