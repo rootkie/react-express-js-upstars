@@ -31,6 +31,7 @@ module.exports = function (app) {
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
   app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
+  app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
 
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
