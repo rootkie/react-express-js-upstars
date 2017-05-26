@@ -5,6 +5,35 @@ const crypto = require('crypto')
 const User = require('../models/user')
 let util = require('../util.js')
 
+
+module.exports.getAllUsers = async(req, res) => {
+    try {
+        const usersList = await User.find({})
+        res.json({
+            users: usersList
+        })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send('server error')
+    }
+}
+
+module.exports.getUser = async(req, res) => {
+    try {
+        const userId = util.makeString(req.params.id)
+        const user = await User.findById(userId)
+        res.json({
+            user: user
+        })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send('server error')
+    }
+}
+
+
 module.exports.editUserParticulars = async(req, res) => {
     try {
         //Did not include firstName, lastName, classes as this API is meant for users like tutor to update their particulars. (They can't change their name either..)

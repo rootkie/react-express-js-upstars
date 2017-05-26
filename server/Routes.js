@@ -47,6 +47,8 @@ module.exports = function (app) {
   app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
 
   // User controls for any user
+  app.get('/api/getAllUsers', userControl.getAllUsers)
+  app.get('/api/getUser/:id', userControl.getUser)
   app.post('/api/editUserParticulars', userControl.editUserParticulars)
   app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
   

@@ -26,6 +26,7 @@ app.use(function (req, res, next) {
 // Connecting to database
 mongoose.Promise = global.Promise
 mongoose.connect(config.database)
+mongoose.set('debug', true);
 
 // Body parser stuff
 app.use(bodyParser.urlencoded({
