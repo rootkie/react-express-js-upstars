@@ -1,7 +1,7 @@
 const Attendance = require('../models/attendance')
   // Student = require('../models/student'),
   // Class = require('../models/class'),
-  // Tutor = require('../models/user')
+  // User = require('../models/user')
 let util = require('../util.js')
 
 module.exports.addEditAttendance = async (req, res) => {
@@ -143,6 +143,22 @@ module.exports.getAttendanceUserFromClass = async (req, res) => {
     classId = util.makeString(classId)
     userId = util.makeString(userId)
     let records = await Attendance.find({ class: classId, users: userId})
+    res.json({
+      status: 'success',
+      records: records
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.getAttendanceStudentFromClass = async (req, res) => {
+  try {
+    let {classId, studentId} = req.body
+    classId = util.makeString(classId)
+    studentId = util.makeString(studentId)
+    let records = await Attendance.find({ class: classId, students: studentId})
     res.json({
       status: 'success',
       records: records

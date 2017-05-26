@@ -31,7 +31,11 @@ const StudentSchema = new Schema({
     default: 'Primary'
   },
   schoolName: String,
-  classes: [{ type: Schema.ObjectId, ref: 'Class' }]
+  classes: [{ type: Schema.ObjectId, ref: 'Class' }],
+  status: {
+    type: String,
+    default: 'Active'
+  }
 },
   {
     timestamps: true

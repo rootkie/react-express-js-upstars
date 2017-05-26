@@ -3,7 +3,9 @@ const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const statisticsControl = require('./controllers/StatisticsController')
+const userControl = require('./controllers/UserController.js')
 const hasRole = require('./routeMiddleware').hasRole
+
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
@@ -31,6 +33,7 @@ module.exports = function (app) {
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
   app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
   app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
+  app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
 
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
@@ -40,6 +43,16 @@ module.exports = function (app) {
   app.post('/api/getAttendanceRate/user', statisticsControl.getAttendanceRateUser)
   app.post('/api/getAttendanceRate/student', statisticsControl.getAttendanceRateStudent)
   app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
+
+  // User controls for any user
+  app.get('/api/getAllUsers', userControl.getAllUsers)
+  app.get('/api/getUser/:id', userControl.getUser)
+  app.post('/api/editUserParticulars', userControl.editUserParticulars)
+  app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
+  
+  // Admin controls under user
+  app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
+  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) //If there's a need to split them up into 2 API... Waiting for the permissions table.
 
   // app.get('/api/admin/getClasses', classControl.getAll)
   // app.get('/api/admin/getClass/:id', classControl.getClassById)
