@@ -49,10 +49,10 @@ module.exports = function (app) {
   app.get('/api/getUser/:id', userControl.getUser)
   app.post('/api/editUserParticulars', userControl.editUserParticulars)
   app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
-  
+
   // Admin controls under user
   app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
-  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) //If there's a need to split them up into 2 API... Waiting for the permissions table.
+  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) // If there's a need to split them up into 2 API... Waiting for the permissions table.
 
   // app.get('/api/admin/getClasses', classControl.getAll)
   // app.get('/api/admin/getClass/:id', classControl.getClassById)
