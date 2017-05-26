@@ -34,11 +34,11 @@ const UserSchema = new Schema({
     default: 'Active'
   },
 
-  role: {
+  role: [{
     type: String,
     enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'],
-    default: 'Tutor'
-  },
+    default: ['Tutor']
+  }],
 
   classes: [{
     type: Schema.ObjectId,
