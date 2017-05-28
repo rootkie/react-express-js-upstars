@@ -10,10 +10,11 @@ function generateToken (user) {
   })
 }
 
+// Just leaving this here as the profile field might have other non-necessary stuff and need to form a custom token
+// Else this function is currently useless
 function makeUser (req) {
   const { _id, email, role, profile } = req
-  const { firstName, lastName } = profile
-  return { _id, firstName, lastName, role, email }
+  return { _id, profile, role, email }
 }
 
 module.exports.login = async (req, res) => {
@@ -31,7 +32,7 @@ module.exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(403).send('Wrong email or password')
     }
-    const userInfo = makeUser(user)
+    const userInfo = await makeUser(user)
     res.json({
       token: generateToken(userInfo),
       user: userInfo,
@@ -46,15 +47,10 @@ module.exports.login = async (req, res) => {
 
 module.exports.register = async (req, res) => {
   try {
-    let { email, firstName, lastName, password } = req.body
+    let { email, name, password } = req.body
     // Return error if no email provided
     if (!email) {
       return res.status(422).send({error: 'You must enter an email address.'})
-    }
-
-    // Return error if full name not provided
-    if (!firstName || !lastName) {
-      return res.status(422).send({error: 'You must enter your full name.'})
     }
 
     // Return error if no password provided
@@ -63,20 +59,18 @@ module.exports.register = async (req, res) => {
     }
 
     email = util.makeString(email)
-    firstName = util.makeString(firstName)
-    lastName = util.makeString(lastName)
+    name = util.makeString(name)
     password = util.makeString(password)
 
     const existingUser = await User.findOne({email: email})
     if (existingUser) return res.status(422).send({error: 'This email is already in use'})
     const user = new User({
       email: email,
+      role: 'Tutor',
       profile: {
-        firstName: firstName,
-        lastName: lastName
+        name: name
       },
       password: password,
-      role: ['Member']
     })
     const userObject = await user.save()
     const userInfo = makeUser(userObject)

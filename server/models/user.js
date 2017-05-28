@@ -19,14 +19,9 @@ const UserSchema = new Schema({
   },
 
   profile: {
-    firstName: {
-      type: String
-    },
-
-    lastName: {
+    name: {
       type: String
     }
-
   },
   
   status: {
@@ -37,7 +32,6 @@ const UserSchema = new Schema({
   role: [{
     type: String,
     enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'],
-    default: ['Tutor']
   }],
 
   classes: [{

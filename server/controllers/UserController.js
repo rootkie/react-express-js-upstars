@@ -7,7 +7,8 @@ module.exports.getAllUsers = async(req, res) => {
     res.json({
       users: usersList
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -20,7 +21,8 @@ module.exports.getUser = async(req, res) => {
     res.json({
       user: user
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -28,12 +30,12 @@ module.exports.getUser = async(req, res) => {
 
 module.exports.editUserParticulars = async(req, res) => {
   try {
-        // Did not include firstName, lastName, classes as this API is meant for users like tutor to update their particulars. (They can't change their name either..)
-        // For the real API, there will be much more details like HP number and stuff
+    // Did not include firstName, lastName, classes as this API is meant for users like tutor to update their particulars. (They can't change their name either..)
+    // For the real API, there will be much more details like HP number and stuff
     let {
-            userId,
-            email
-        } = req.body
+      userId,
+      email
+    } = req.body
     userId = util.makeString(userId)
     email = util.makeString(email)
     const user = await User.findByIdAndUpdate(userId, {
@@ -45,7 +47,8 @@ module.exports.editUserParticulars = async(req, res) => {
     return res.json({
       user: user
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -54,11 +57,11 @@ module.exports.editUserParticulars = async(req, res) => {
 module.exports.changePassword = async(req, res) => {
   try {
     let {
-            userId,
-            oldPassword,
-            newPassword,
-            confirmNewPassword
-        } = req.body
+      userId,
+      oldPassword,
+      newPassword,
+      confirmNewPassword
+    } = req.body
     userId = util.makeString(userId)
     oldPassword = util.makeString(oldPassword)
     newPassword = util.makeString(newPassword)
@@ -73,7 +76,9 @@ module.exports.changePassword = async(req, res) => {
 
     const user = await User.findById(userId)
     const isMatch = await user.comparePasswordPromise(oldPassword)
-    if (!isMatch) { return res.status(403).send('Wrong Password') }
+    if (!isMatch) {
+      return res.status(403).send('Wrong Password')
+    }
 
     // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
     user.password = confirmNewPassword
@@ -81,7 +86,8 @@ module.exports.changePassword = async(req, res) => {
     return res.json({
       user: pwChanged
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -90,21 +96,21 @@ module.exports.changePassword = async(req, res) => {
 module.exports.adminChangePassword = async(req, res) => {
   try {
     let {
-            userId,
-            newPassword,
-            confirmNewPassword
-        } = req.body
+      userId,
+      newPassword,
+      confirmNewPassword
+    } = req.body
     userId = util.makeString(userId)
     newPassword = util.makeString(newPassword)
     confirmNewPassword = util.makeString(confirmNewPassword)
-    // Just in case the front end screws up
+      // Just in case the front end screws up
     if (newPassword !== confirmNewPassword) {
       return res.status(422).send({
         error: 'The 2 new passwords do not match'
       })
     }
     const user = await User.findById(userId)
-    // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
+      // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
     user.password = confirmNewPassword
     const pwChanged = await user.save()
 
@@ -112,7 +118,8 @@ module.exports.adminChangePassword = async(req, res) => {
       user: pwChanged
         // token:
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -121,9 +128,9 @@ module.exports.adminChangePassword = async(req, res) => {
 module.exports.changeUserStatusAndPermissions = async(req, res) => {
   try {
     let {
-            userId,
-            newStatus
-        } = req.body
+      userId,
+      newStatus
+    } = req.body
     userId = util.makeString(userId)
     newStatus = util.makeString(newStatus)
     const updatedUser = await User.findByIdAndUpdate(userId, {
@@ -134,7 +141,8 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     res.json({
       user: updatedUser
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
