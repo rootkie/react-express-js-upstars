@@ -1,8 +1,14 @@
 import React, { Component } from 'react'
-import { Container, Sidebar, Grid, Segment, Menu, Icon, Header } from 'semantic-ui-react'
+import { Container, Grid, Segment, Menu } from 'semantic-ui-react'
 
 const GridStyle = {
-  paddingTop: '4em'
+  paddingTop: '4em',
+  height: '100vh',
+  overflow: 'none'
+}
+
+const MainContentStyle = {
+  overflow: 'auto'
 }
 
 class Main extends Component {
@@ -26,10 +32,10 @@ class Main extends Component {
             <Menu pointing secondary vertical fluid>
               <Menu.Item name='home' active={activeItem === 'home'} onClick={this.handleItemClick} />
               <Menu.Item name='messages' active={activeItem === 'messages'} onClick={this.handleItemClick} />
-              <Menu.Item name='friends' active={activeItem === 'class'} onClick={this.handleItemClick} />
+              <Menu.Item name='class' active={activeItem === 'class'} onClick={this.handleItemClick} />
             </Menu>
           </Grid.Column>
-          <Grid.Column width={13}>
+          <Grid.Column width={13} style={MainContentStyle}>
             <Container fluid>
               <Segment>
          I'm here to tell you something, and you will probably read me first.
