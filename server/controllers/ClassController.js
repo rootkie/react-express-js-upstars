@@ -33,19 +33,23 @@ module.exports.addEditClass = async(req, res) => {
   }
 }
 
-module.exports.getAll = function(req, res) {
-  Class.find({}).then((err, classes) => {
-    if (err) return res.send(err)
+module.exports.getAll = async(req, res) => {
+  try {
+    const classes = await Class.find({}).select('-createdAt');
     return res.json({
       classes: classes,
-      info: req.decoded
+      info: req.decoded //This is quite useless
     })
-  })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
 }
 module.exports.getClassById = async(req, res) => {
   var classId = util.makeString(req.params.id)
   try {
-    const class1 = await Class.findById(classId).populate('students', 'profile.name')
+    const class1 = await Class.findById(classId).populate('students users', 'profile.name')
     return res.json(class1)
   }
   catch (err) {

@@ -17,7 +17,7 @@ module.exports.getAllUsers = async(req, res) => {
 module.exports.getUser = async(req, res) => {
   try {
     const userId = util.makeString(req.params.id)
-    const user = await User.findById(userId)
+    const user = await User.findById(userId).populate('classes', 'className')
     res.json({
       user: user
     })
