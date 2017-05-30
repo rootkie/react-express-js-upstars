@@ -6,7 +6,7 @@ const Filler = ({num}) => (
 
   <Container fluid >
     {[...Array(num)].map((x, i) => (
-      <Segment>Here are some sample texts for you to enjoy</Segment>
+      <Segment key={i}>Here are some sample texts for you to enjoy</Segment>
   ))}
   </Container>
   )

@@ -1,25 +1,18 @@
 import React from 'react'
 import { Grid, Menu } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
 
-const SideMenu = ({activeItem, handleItemClick}) => (
+const SideMenu = ({activeItem}) => (
   <Grid.Column width={3}>
     <Menu vertical fluid>
-      <Menu.Item name='home' active={activeItem === 'home'} onClick={handleItemClick} />
-      <Menu.Item name='messages' active={activeItem === 'messages'} onClick={handleItemClick} />
+      <Link to='/' className={`item ${activeItem === 'home' && 'active'}`}>Home</Link>
       <Menu.Item>
         <Menu.Header>Class</Menu.Header>
-
         <Menu.Menu>
-          <Menu.Item name='addClass' active={activeItem === 'addClass'} onClick={handleItemClick}>
-            add
-          </Menu.Item>
-          <Menu.Item name='editClass' active={activeItem === 'editClass'} onClick={handleItemClick}>
-            edit
-          </Menu.Item>
-          <Menu.Item name='viewClass' active={activeItem === 'viewClass'} onClick={handleItemClick}>
-            view
-          </Menu.Item>
+          <Link to='/classes/add' className={`item ${activeItem === 'add' && 'active'}`}>add</Link>
+          <Link to='/classes/edit' className={`item ${activeItem === 'edit' && 'active'}`}>edit</Link>
+          <Link to='/classes/view' className={`item ${activeItem === 'view' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>
     </Menu>
@@ -27,8 +20,7 @@ const SideMenu = ({activeItem, handleItemClick}) => (
 )
 
 SideMenu.propTypes = {
-  activeItem: PropTypes.string.isRequired,
-  handleItemClick: PropTypes.func.isRequired
+  activeItem: PropTypes.string.isRequired
 }
 
 export default SideMenu
