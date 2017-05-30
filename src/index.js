@@ -10,7 +10,7 @@ const Root = () => (
   <Router>
     <div id='page-layout'>
       <Route exact path='/' component={Main} />
-      <Route path='/:main/:op' component={MainCtrl} />
+      <Route path='/:main/:op?' component={MainCtrl} />
     </div>
   </Router>
 )

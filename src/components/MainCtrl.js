@@ -3,6 +3,7 @@ import { Container, Grid } from 'semantic-ui-react'
 import Topbar from './Topbar'
 import SideMenu from './SideMenu'
 import Classes from './Classes'
+import Home from './Home'
 import PropTypes from 'prop-types'
 
 const GridStyle = {
@@ -21,10 +22,11 @@ class MainCtrl extends Component {
     const { main, op } = this.props.match.params || ''
     return (
       <Container fluid>
-        <Topbar tab='Classes' />
+        <Topbar tab={main} />
         <Grid style={GridStyle}>
-          <SideMenu activeItem={op} />
+          <SideMenu activeItem={op || ''} />
           <Grid.Column width={13} style={MainContentStyle}>
+            {main === 'home' && <Home />}
             {main === 'classes' && <Classes op={op} />}
           </Grid.Column>
         </Grid>

@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 const SideMenu = ({activeItem}) => (
   <Grid.Column width={3}>
     <Menu vertical fluid>
-      <Link to='/' className={`item ${activeItem === 'home' && 'active'}`}>Home</Link>
+      <Link to='/home' className={`item ${activeItem === 'home' && 'active'}`}>Home</Link>
       <Menu.Item>
         <Menu.Header>Class</Menu.Header>
         <Menu.Menu>
