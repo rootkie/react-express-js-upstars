@@ -15,6 +15,7 @@ const SideMenu = ({activeItem}) => (
           <Link to='/classes/view' className={`item ${activeItem === 'view' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>
+      <Link to='/volunteer' className={`item ${activeItem === 'volunteer' && 'active'}`}>Volunteer</Link>
     </Menu>
   </Grid.Column>
 )

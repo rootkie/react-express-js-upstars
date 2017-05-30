@@ -5,6 +5,7 @@ import SideMenu from './SideMenu'
 import Classes from './Classes'
 import Home from './Home'
 import PropTypes from 'prop-types'
+import VolunteerForm from './VolunteerForm'
 
 const GridStyle = {
   paddingTop: '4em',
@@ -28,6 +29,7 @@ class MainCtrl extends Component {
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
             {main === 'classes' && <Classes op={op} />}
+            {main === 'volunteer' && <VolunteerForm />}
           </Grid.Column>
         </Grid>
       </Container>
