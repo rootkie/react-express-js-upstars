@@ -11,16 +11,16 @@ const hasRole = require('./routeMiddleware').hasRole
 
 module.exports = app => {
   app.get('/api/admin/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
+  
+  // Classes
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
-
-  // POC for refs
-  // Classes
   app.post('/api/addStudentToClass', classControl.addStudentToClass)
   app.post('/api/deleteStudentFromClass', classControl.deleteStudentFromClass)
   app.post('/api/addUserToClass', classControl.addUserToClass) // Handles both user -> class && class -> user
   app.post('/api/deleteUserFromClass', classControl.deleteUserFromClass)
 
+  // Students
   app.get('/api/getStudents', studentControl.getAll)
   app.get('/api/getStudent/:id', studentControl.getStudentById)
   app.post('/api/addEditStudent', studentControl.addEditStudent)
@@ -53,17 +53,6 @@ module.exports = app => {
   // Admin controls under user
   app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
   app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) // If there's a need to split them up into 2 API... Waiting for the permissions table.
-
-  // app.get('/api/admin/getClasses', classControl.getAll)
-  // app.get('/api/admin/getClass/:id', classControl.getClassById)
-  // app.post('/api/admin/addEditClass', classControl.addEditClass)
-
-  // // POC for refs
-  // app.get('/api/admin/addStudentToClass', classControl.addStudentToClass)
-
-  // app.get('/api/admin/getStudents', studentControl.getAll)
-   app.get('/api/admin/getStudent/:id', studentControl.getStudentById)
-  // app.post('/api/admin/addEditStudent', studentControl.addEditStudent)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
