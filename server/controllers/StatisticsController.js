@@ -56,7 +56,7 @@ module.exports.getAttendanceRateUser = async (req, res) => {
     const attendanceRate = await genUserARStat(dateFrom, dateEnd, userId)
     res.json({
       status: 'success',
-      attendanceRate: attendanceRate
+      attendanceRate
     })
   } catch (err) {
     console.log(err)
@@ -96,7 +96,7 @@ module.exports.getAttendanceRateStudent = async (req, res) => {
     const attendanceRate = await genStudentARStat(dateFrom, dateEnd, studentId)
     res.json({
       status: 'success',
-      attendanceRate: attendanceRate
+      attendanceRate
     })
   } catch (err) {
     console.log(err)

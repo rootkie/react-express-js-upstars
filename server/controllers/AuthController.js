@@ -62,15 +62,15 @@ module.exports.register = async (req, res) => {
     name = util.makeString(name)
     password = util.makeString(password)
 
-    const existingUser = await User.findOne({email: email})
+    const existingUser = await User.findOne({email})
     if (existingUser) return res.status(422).send({error: 'This email is already in use'})
     const user = new User({
-      email: email,
+      email,
       role: 'Tutor',
       profile: {
         name: name
       },
-      password: password,
+      password,
     })
     const userObject = await user.save()
     const userInfo = makeUser(userObject)

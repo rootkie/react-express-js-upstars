@@ -3,9 +3,9 @@ let util = require('../util.js')
 
 module.exports.getAllUsers = async(req, res) => {
   try {
-    const usersList = await User.find({})
+    const users = await User.find({})
     res.json({
-      users: usersList
+      users
     })
   }
   catch (err) {
@@ -19,7 +19,7 @@ module.exports.getUser = async(req, res) => {
     const userId = util.makeString(req.params.id)
     const user = await User.findById(userId).populate('classes', 'className')
     res.json({
-      user: user
+      user
     })
   }
   catch (err) {
@@ -34,12 +34,12 @@ module.exports.editUserParticulars = async(req, res) => {
     // For the real API, there will be much more details like HP number and stuff
     let {
       userId,
-      email
+      email,
     } = req.body
     userId = util.makeString(userId)
     email = util.makeString(email)
     const user = await User.findByIdAndUpdate(userId, {
-      email: email
+      email
     }, {
       new: true
     })
