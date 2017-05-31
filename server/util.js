@@ -1,4 +1,6 @@
 'use strict';
+const jwt = require('jsonwebtoken')
+const config = require('./config/constConfig')
 
 module.exports.makeString = obj => {
     if (obj) {
@@ -15,4 +17,15 @@ module.exports.formatDate = yymmdd => {
   let day = yymmdd.substring(6, 8)
   let dateString = year + '-' + month + '-' + day
   return new Date(dateString)
+}
+
+module.exports.generateToken = user => {
+  return jwt.sign(user, config.secret, {
+    expiresIn: 3600 // 1 hour
+  })
+}
+
+module.exports.makeUser = req => {
+  const { _id, email, role, profile } = req
+  return { _id, profile, role, email }
 }

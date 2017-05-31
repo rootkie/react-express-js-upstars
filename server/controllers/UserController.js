@@ -7,8 +7,7 @@ module.exports.getAllUsers = async(req, res) => {
     res.json({
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -21,8 +20,7 @@ module.exports.getUser = async(req, res) => {
     res.json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -34,7 +32,7 @@ module.exports.editUserParticulars = async(req, res) => {
     // For the real API, there will be much more details like HP number and stuff
     let {
       userId,
-      email,
+      email
     } = req.body
     userId = util.makeString(userId)
     email = util.makeString(email)
@@ -44,11 +42,13 @@ module.exports.editUserParticulars = async(req, res) => {
       new: true
     })
 
+    let tokenUser = util.makeUser(user)
+
     return res.json({
-      user: user
+      user: user,
+      newToken: util.generateToken(tokenUser)
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -86,8 +86,7 @@ module.exports.changePassword = async(req, res) => {
     return res.json({
       user: pwChanged
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -118,8 +117,7 @@ module.exports.adminChangePassword = async(req, res) => {
       user: pwChanged
         // token:
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -141,8 +139,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     res.json({
       user: updatedUser
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
