@@ -12,11 +12,11 @@ module.exports.addEditClass = async(req, res) => {
     } = req.body
     className = util.makeString(className)
     const class1 = {
-      className: className,
-      description: description
+      className,
+      description
     }
     const newClass = await Class.findOneAndUpdate({
-      className: className
+      className
     }, class1, {
       upsert: true,
       new: true
@@ -37,7 +37,7 @@ module.exports.getAll = async(req, res) => {
   try {
     const classes = await Class.find({}).select('-createdAt');
     return res.json({
-      classes: classes,
+      classes,
       info: req.decoded //This is quite useless
     })
   }
@@ -149,7 +149,7 @@ module.exports.addUserToClass = async(req, res) => {
 
     return res.json({
       class: classes,
-      user: user
+      user
     })
   }
   catch (err) {
@@ -182,7 +182,7 @@ module.exports.deleteUserFromClass = async(req, res) => {
 
     return res.json({
       class: classes,
-      user: user
+      user
     })
   }
   catch (err) {

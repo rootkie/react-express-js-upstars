@@ -1,7 +1,4 @@
 const Attendance = require('../models/attendance')
-  // Student = require('../models/student'),
-  // Class = require('../models/class'),
-  // User = require('../models/user')
 let util = require('../util.js')
 
 module.exports.addEditAttendance = async (req, res) => {
@@ -63,7 +60,7 @@ module.exports.deleteAttendance = async (req, res) => {
 
     res.json({
       status: 'success',
-      removed: removed
+      removed
     })
   } catch (err) {
     console.log(err)
@@ -84,7 +81,7 @@ module.exports.getAttendanceBetween = async (req, res) => {
 
     res.json({
       status: 'success',
-      foundAttendance: foundAttendance
+      foundAttendance
     })
   } catch (err) {
     console.log(err)
@@ -99,7 +96,7 @@ module.exports.getAttendanceByClass = async (req, res) => {
     const foundAttendances = await Attendance.find({ class: classId })
     res.json({
       status: 'success',
-      foundAttendances: foundAttendances
+      foundAttendances
     })
   } catch (err) {
     console.log(err)
@@ -114,7 +111,7 @@ module.exports.getAttendanceByUser = async (req, res) => {
     const foundAttendances = await Attendance.find({ users: userId }).populate('users', ['profile'])
     res.json({
       status: 'success',
-      foundAttendances: foundAttendances
+      foundAttendances
     })
   } catch (err) {
     console.log(err)
@@ -129,7 +126,7 @@ module.exports.getAttendanceByStudent = async (req, res) => {
     const foundAttendances = await Attendance.find({ students: studentId }).populate('students', ['profile.name'])
     res.json({
       status: 'success',
-      foundAttendances: foundAttendances
+      foundAttendances
     })
   } catch (err) {
     console.log(err)
@@ -145,7 +142,7 @@ module.exports.getAttendanceUserFromClass = async (req, res) => {
     let records = await Attendance.find({ class: classId, users: userId})
     res.json({
       status: 'success',
-      records: records
+      records
     })
   } catch (err) {
     console.log(err)
