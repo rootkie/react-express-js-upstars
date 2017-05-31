@@ -1,21 +1,9 @@
 const config = require('../config/constConfig')
-const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const util = require('../util.js')
+const generateToken = util.generateToken
+const makeUser = util.makeUser
 // ============== Start of all the functions ==============
-
-function generateToken (user) {
-  return jwt.sign(user, config.secret, {
-    expiresIn: 3600 // 1 hour
-  })
-}
-
-// Just leaving this here as the profile field might have other non-necessary stuff and need to form a custom token
-// Else this function is currently useless
-function makeUser (req) {
-  const { _id, email, role, profile } = req
-  return { _id, profile, role, email }
-}
 
 module.exports.login = async (req, res) => {
   try {
