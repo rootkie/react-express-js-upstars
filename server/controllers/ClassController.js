@@ -38,7 +38,7 @@ module.exports.getAll = async(req, res) => {
     const classes = await Class.find({}).select('-createdAt');
     return res.json({
       classes,
-      info: req.decoded //This is quite useless
+      info: req.decoded
     })
   }
   catch (err) {
@@ -58,25 +58,34 @@ module.exports.getClassById = async(req, res) => {
   }
 }
 
-module.exports.addStudentToClass = async(req, res) => {
+module.exports.addStudentsToClass = async(req, res) => {
   try {
-    const classId = util.makeString(req.body.classId)
-    const studentId = util.makeString(req.body.studentId)
+    let {
+      classId,
+      studentIds
+    } = req.body
       // consider adding customizable filtering
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
-        students: studentId
+        students: {
+          $each: studentIds
+        }
       }
     }, {
       new: true
     })
 
-    const student = await Student.findByIdAndUpdate(studentId, {
+    const students = await Student.update({
+      _id: {
+        $in: studentIds
+      }
+    }, {
       $addToSet: {
         classes: classId
       }
     }, {
-      new: true
+      new: true,
+      multi: true
     })
 
     // Add each student to the class
@@ -85,7 +94,7 @@ module.exports.addStudentToClass = async(req, res) => {
 
     return res.json({
       class: classes,
-      studentAdded: student
+      students
     })
   }
   catch (err) {
@@ -94,31 +103,40 @@ module.exports.addStudentToClass = async(req, res) => {
   }
 }
 
-module.exports.deleteStudentFromClass = async(req, res) => {
+module.exports.deleteStudentsFromClass = async(req, res) => {
   try {
-    const classId = [util.makeString(req.body.classId)]
-    const studentId = [util.makeString(req.body.studentId)]
+    // Special case in which studentsId must be an array and classId should be a single string
+    let {
+      classId,
+      studentIds
+    } = req.body
+
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
-        students: studentId
+        students: studentIds
       }
     }, {
       new: true
     })
 
-    const student = await User.findByIdAndUpdate(studentId, {
-      $pullAll: {
+    const students = await Student.update({
+      _id: {
+        $in: studentIds
+      }
+    }, {
+      $pull: {
         classes: classId
       }
     }, {
-      new: true
+      new: true,
+      multi: true
     })
 
 
     return res.json({
       status: 'removed',
       class: classes,
-      studentRemoved: student
+      studentsRemoved: students
     })
   }
   catch (err) {
@@ -127,29 +145,39 @@ module.exports.deleteStudentFromClass = async(req, res) => {
   }
 }
 
-module.exports.addUserToClass = async(req, res) => {
+module.exports.addUsersToClass = async(req, res) => {
   try {
-    const classId = util.makeString(req.body.classId)
-    const userId = util.makeString(req.body.userId)
+    let {
+      classId,
+      userIds
+    } = req.body
+    classId = utils.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
-        users: userId
+        users: {
+          $each: userIds
+        }
       }
     }, {
       new: true
     })
 
-    const user = await User.findByIdAndUpdate(userId, {
+    const users = await User.update({
+      _id: {
+        $in: userIds
+      }
+    }, {
       $addToSet: {
         classes: classId
       }
     }, {
-      new: true
+      new: true,
+      multi: true
     })
 
     return res.json({
       class: classes,
-      user
+      users
     })
   }
   catch (err) {
@@ -159,30 +187,38 @@ module.exports.addUserToClass = async(req, res) => {
 
 }
 
-module.exports.deleteUserFromClass = async(req, res) => {
+module.exports.deleteUsersFromClass = async(req, res) => {
   try {
-    const classId = [util.makeString(req.body.classId)]
-    const userId = [util.makeString(req.body.userId)]
-    console.log(classId);
+    let {
+      classId,
+      userIds
+    } = req.body
+    classId = util.makeString(req.body.classId)
+
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
-        users: userId
+        users: userIds
       }
     }, {
       new: true
     })
 
-    const user = await User.findByIdAndUpdate(userId, {
-      $pullAll: {
+    const users = await User.update({
+      _id: {
+        $in: userId
+      }
+    }, {
+      $pull: {
         classes: classId
       }
     }, {
-      new: true
+      new: true,
+      multi: true
     })
 
     return res.json({
       class: classes,
-      user
+      users
     })
   }
   catch (err) {
