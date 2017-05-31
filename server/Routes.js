@@ -15,10 +15,10 @@ module.exports = app => {
   // Classes
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
-  app.post('/api/addStudentToClass', classControl.addStudentToClass)
-  app.post('/api/deleteStudentFromClass', classControl.deleteStudentFromClass)
-  app.post('/api/addUserToClass', classControl.addUserToClass) // Handles both user -> class && class -> user
-  app.post('/api/deleteUserFromClass', classControl.deleteUserFromClass)
+  app.post('/api/addStudentsToClass', classControl.addStudentsToClass)
+  app.post('/api/deleteStudentsFromClass', classControl.deleteStudentsFromClass)
+  app.post('/api/addUsersToClass', classControl.addUsersToClass) // Handles both user -> class && class -> user
+  app.post('/api/deleteUsersFromClass', classControl.deleteUsersFromClass)
 
   // Students
   app.get('/api/getStudents', studentControl.getAll)
