@@ -2,30 +2,36 @@ const express = require('express')
 const config = require('./config/constConfig')
 const jwt = require('jsonwebtoken')
 
-module.exports.setAdminRouteMiddleware = function (app) {
+module.exports.setAdminRouteMiddleware = app => {
   var routes = express.Router()
 
-  routes.use(function (req, res, next) {
-      // check header or url parameters or post parameters for token
+  routes.use((req, res, next) => {
+    // check header or url parameters or post parameters for token
 
     var token = req.body.token || req.query.token || req.headers['x-access-token']
-    // decode token
+      // decode token
     if (token) {
-        // verifies secret and checks exp
-      jwt.verify(token, config.secret, function (err, decoded) {
+      // verifies secret and checks exp
+      jwt.verify(token, config.secret, (err, decoded) => {
         if (err) {
-          return res.json({ success: false, message: 'Failed to authenticate token.' })
-        } else {
-            // if everything is good, save to request for use in other routes
+          return res.json({
+            success: false,
+            message: 'Failed to authenticate token.'
+          })
+        }
+        else {
+          // if everything is good, save to request for use in other routes
           req.decoded = decoded
           next()
         }
       })
-    } else if (config.debug) {
+    }
+    else if (config.debug) {
       next()
-    } else {
-        // if there is no token
-        // return an error
+    }
+    else {
+      // if there is no token
+      // return an error
       return res.status(403).send({
         success: false,
         message: 'No token provided.'
@@ -36,7 +42,7 @@ module.exports.setAdminRouteMiddleware = function (app) {
   app.use('/api/admin', routes)
 }
 
-module.exports.hasRole = function (role) {
+module.exports.hasRole = role => {
   return (req, res, next) => {
     let len = role.length
     for (let i = 0; i < len; i++) {

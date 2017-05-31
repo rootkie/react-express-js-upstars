@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports.makeString = function(obj) {
+module.exports.makeString = obj => {
     if (obj) {
         return (typeof(obj) == 'string') ? obj: JSON.stringify(obj);
     }
@@ -9,7 +9,7 @@ module.exports.makeString = function(obj) {
     }
 }
 
-module.exports.formatDate = function (yymmdd) {
+module.exports.formatDate = yymmdd => {
   let year = yymmdd.substring(0, 4)
   let month = yymmdd.substring(4, 6)
   let day = yymmdd.substring(6, 8)

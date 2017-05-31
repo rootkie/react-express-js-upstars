@@ -52,16 +52,17 @@ const UserSchema = new Schema({
 })
 
 // Pre-save of user to database, hash password if password is modified or new
+// Coz of lexical this, didn't use =>
 UserSchema.pre('save', function(next) {
   const user = this
   const SALT_FACTOR = 5
 
   if (!user.isModified('password')) return next()
 
-  bcrypt.genSalt(SALT_FACTOR, function(err, salt) {
+  bcrypt.genSalt(SALT_FACTOR, (err, salt) => {
     if (err) return next(err)
 
-    bcrypt.hash(user.password, salt, null, function(err, hash) {
+    bcrypt.hash(user.password, salt, null, (err, hash) => {
       if (err) return next(err)
       user.password = hash
       next()
@@ -70,7 +71,7 @@ UserSchema.pre('save', function(next) {
 })
 
 UserSchema.methods.comparePassword = function(candidatePassword, cb) {
-  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     if (err) {
       return cb(err)
     }
@@ -79,9 +80,9 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   })
 }
 
-UserSchema.methods.comparePasswordPromise = function(candidatePassword) {
+UserSchema.methods.comparePasswordPromise = function(candidatePassword) { //Coz of lexical this
   return new Promise((resolve, reject) => {
-    bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+    bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
       if (err) {
         return reject(err)
       }
