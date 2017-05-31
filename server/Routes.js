@@ -9,7 +9,7 @@ const hasRole = require('./routeMiddleware').hasRole
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
-module.exports = function (app) {
+module.exports = app => {
   app.get('/api/admin/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
@@ -62,7 +62,7 @@ module.exports = function (app) {
   // app.get('/api/admin/addStudentToClass', classControl.addStudentToClass)
 
   // app.get('/api/admin/getStudents', studentControl.getAll)
-  // app.get('/api/admin/getStudent/:id', studentControl.getStudentById)
+   app.get('/api/admin/getStudent/:id', studentControl.getStudentById)
   // app.post('/api/admin/addEditStudent', studentControl.addEditStudent)
 
   app.post('/api/register', authControl.register)
