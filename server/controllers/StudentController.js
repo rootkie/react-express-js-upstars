@@ -42,8 +42,7 @@ module.exports.addEditStudent = async(req, res) => {
       status: 'success',
       student: newStudent
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -56,8 +55,7 @@ module.exports.getAll = async(req, res) => {
       students: students,
       info: req.decoded
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -70,14 +68,13 @@ module.exports.getStudentById = async(req, res) => {
     return res.json({
       student
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.dropDB = function(req, res) {
+module.exports.dropDB = function (req, res) {
   Student.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({

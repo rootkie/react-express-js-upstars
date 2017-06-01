@@ -1,4 +1,3 @@
-const config = require('../config/constConfig')
 const User = require('../models/user')
 const util = require('../util.js')
 const generateToken = util.generateToken
@@ -54,11 +53,11 @@ module.exports.register = async (req, res) => {
     if (existingUser) return res.status(422).send({error: 'This email is already in use'})
     const user = new User({
       email,
-      role: 'Tutor',
+      role: ['Tutor'],
       profile: {
         name: name
       },
-      password,
+      password
     })
     const userObject = await user.save()
     const userInfo = makeUser(userObject)
