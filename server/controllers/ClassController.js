@@ -64,7 +64,7 @@ module.exports.addStudentsToClass = async(req, res) => {
       classId,
       studentIds
     } = req.body
-      // consider adding customizable filtering
+    classId = util.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         students: {
@@ -110,7 +110,7 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       classId,
       studentIds
     } = req.body
-
+    classId = util.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
         students: studentIds
@@ -151,7 +151,7 @@ module.exports.addUsersToClass = async(req, res) => {
       classId,
       userIds
     } = req.body
-    classId = utils.makeString(classId)
+    classId = util.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         users: {
