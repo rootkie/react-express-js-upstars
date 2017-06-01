@@ -34,6 +34,11 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(bodyParser.json())
 
+app.use((err,req,res,next)=>{
+    console.log(err)
+    return res.send({error:"something wrong with parsing"})
+})
+
 routeMiddlware.setAdminRouteMiddleware(app)
 
 require('./Routes')(app)
