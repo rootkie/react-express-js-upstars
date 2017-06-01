@@ -22,9 +22,9 @@ module.exports.addEditAttendance = async (req, res) => {
     // Consider validating if class has the students and tutors.
 
     if (classId == null) {
-      throw 'ClassId can not be null'
+      throw new Error('ClassId can not be null')
     }
-	  classId = util.makeString(classId)
+    classId = util.makeString(classId)
     date = util.makeString(date)
     type = util.makeString(type)
     let hoursInt = parseInt(hours, 10)
@@ -32,7 +32,7 @@ module.exports.addEditAttendance = async (req, res) => {
 
     let attendance1 = {
       date: util.formatDate(date),
-      hours:hoursInt,
+      hours: hoursInt,
       class: classId,
       users: users,
       students: students,
@@ -72,12 +72,12 @@ module.exports.getAttendanceBetween = async (req, res) => {
   try {
     let { dateStart, dateEnd, classId } = req.body
     if (classId == null) {
-      throw 'ClassId cannot be null'
+      throw new Error('ClassId cannot be null')
     }
     dateStart = util.makeString(dateStart)
     dateEnd = util.makeString(dateEnd)
     classId = util.makeString(classId)
-    const foundAttendance = await Attendance.find({ date: {'$gte': util.formatDate(dateStart), '$lte': util.formatDate(dateEnd) }, class: classId })
+    const foundAttendance = await Attendance.find({ date: { '$gte': util.formatDate(dateStart), '$lte': util.formatDate(dateEnd) }, class: classId })
 
     res.json({
       status: 'success',
@@ -139,7 +139,7 @@ module.exports.getAttendanceUserFromClass = async (req, res) => {
     let {classId, userId} = req.body
     classId = util.makeString(classId)
     userId = util.makeString(userId)
-    let records = await Attendance.find({ class: classId, users: userId})
+    let records = await Attendance.find({ class: classId, users: userId })
     res.json({
       status: 'success',
       records
@@ -155,7 +155,7 @@ module.exports.getAttendanceStudentFromClass = async (req, res) => {
     let {classId, studentId} = req.body
     classId = util.makeString(classId)
     studentId = util.makeString(studentId)
-    let records = await Attendance.find({ class: classId, students: studentId})
+    let records = await Attendance.find({ class: classId, students: studentId })
     res.json({
       status: 'success',
       records: records

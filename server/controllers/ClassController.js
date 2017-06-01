@@ -26,8 +26,7 @@ module.exports.addEditClass = async(req, res) => {
       status: 'success',
       class: newClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -35,13 +34,12 @@ module.exports.addEditClass = async(req, res) => {
 
 module.exports.getAll = async(req, res) => {
   try {
-    const classes = await Class.find({}).select('-createdAt');
+    const classes = await Class.find({}).select('-createdAt')
     return res.json({
       classes,
       info: req.decoded
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -51,8 +49,7 @@ module.exports.getClassById = async(req, res) => {
   try {
     const class1 = await Class.findById(classId).populate('students users', 'profile.name')
     return res.json(class1)
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -96,8 +93,7 @@ module.exports.addStudentsToClass = async(req, res) => {
       class: classes,
       students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -132,14 +128,12 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       multi: true
     })
 
-
     return res.json({
       status: 'removed',
       class: classes,
       studentsRemoved: students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -179,12 +173,10 @@ module.exports.addUsersToClass = async(req, res) => {
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
-
 }
 
 module.exports.deleteUsersFromClass = async(req, res) => {
@@ -205,7 +197,7 @@ module.exports.deleteUsersFromClass = async(req, res) => {
 
     const users = await User.update({
       _id: {
-        $in: userId
+        $in: userIds
       }
     }, {
       $pull: {
@@ -220,16 +212,13 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
-
 }
 
-
-module.exports.dropDB = function(req, res) {
+module.exports.dropDB = function (req, res) {
   Class.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({
