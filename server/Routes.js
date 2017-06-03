@@ -9,10 +9,10 @@ const hasRole = require('./routeMiddleware').hasRole
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
+
 module.exports = app => {
-  app.get('/api/admin/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
-  
   // Classes
+  app.get('/api/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
   app.post('/api/addStudentsToClass', classControl.addStudentsToClass)

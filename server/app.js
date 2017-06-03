@@ -2,9 +2,7 @@ const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const path = require('path')
-const routeMiddlware = require('./routeMiddleware')
 const app = express()
-
 const mongoose = require('mongoose')
 const config = require('./config/constConfig')
 
@@ -38,8 +36,6 @@ app.use((err,req,res,next)=>{
     console.log(err)
     return res.send({error:"something wrong with parsing"})
 })
-
-routeMiddlware.setAdminRouteMiddleware(app)
 
 require('./Routes')(app)
 // ==================End of Initialization=========================

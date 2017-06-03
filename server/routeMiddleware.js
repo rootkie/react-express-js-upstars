@@ -1,14 +1,9 @@
-const express = require('express')
 const config = require('./config/constConfig')
 const jwt = require('jsonwebtoken')
 
-module.exports.setAdminRouteMiddleware = app => {
-  var routes = express.Router()
-
-  routes.use((req, res, next) => {
-    // check header or url parameters or post parameters for token
-
-    var token = req.body.token || req.query.token || req.headers['x-access-token']
+module.exports.hasRole = function(role) {
+  return (req, res, next) => {
+    let token = req.body.token || req.query.token || req.headers['x-access-token']
       // decode token
     if (token) {
       // verifies secret and checks exp
@@ -22,7 +17,11 @@ module.exports.setAdminRouteMiddleware = app => {
         else {
           // if everything is good, save to request for use in other routes
           req.decoded = decoded
-          next()
+          let len = role.length
+          for (let i = 0; i < len; i++) {
+            if (req.decoded.role.indexOf(role[i]) !== -1) return next()
+          }
+          return res.status(403).send('Your do not have sufficient permission to access this endpoint')
         }
       })
     }
@@ -37,17 +36,5 @@ module.exports.setAdminRouteMiddleware = app => {
         message: 'No token provided.'
       })
     }
-  })
-
-  app.use('/api/admin', routes)
-}
-
-module.exports.hasRole = role => {
-  return (req, res, next) => {
-    let len = role.length
-    for (let i = 0; i < len; i++) {
-      if (req.decoded.role.indexOf(role[i]) !== -1) return next()
-    }
-    return res.status(403).send('Your do not have sufficient permission to access this endpoint')
   }
 }
