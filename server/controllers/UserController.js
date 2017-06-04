@@ -7,7 +7,8 @@ module.exports.getAllUsers = async(req, res) => {
     res.json({
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -20,7 +21,8 @@ module.exports.getUser = async(req, res) => {
     res.json({
       user
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -48,7 +50,8 @@ module.exports.editUserParticulars = async(req, res) => {
       user: user,
       newToken: util.generateToken(tokenUser)
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error: ' + err.message)
   }
@@ -86,7 +89,8 @@ module.exports.changePassword = async(req, res) => {
     return res.json({
       user: pwChanged
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -117,7 +121,8 @@ module.exports.adminChangePassword = async(req, res) => {
       user: pwChanged
         // token:
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -139,7 +144,8 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     res.json({
       user: updatedUser
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }

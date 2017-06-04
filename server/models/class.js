@@ -1,8 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const Student = require('./student')
 // ================================
-// User Schema
+// Class Student Schema
 // ================================
 const ClassSchema = new Schema({
   className: {
@@ -13,12 +12,20 @@ const ClassSchema = new Schema({
   description: {
     type: String
   },
-  students: [{ type: Schema.ObjectId, ref: 'Student'}],
-  users: [{ type: Schema.ObjectId, ref: 'User'}]
+  students: [{
+    type: Schema.ObjectId,
+    ref: 'Student'
+  }],
+  users: [{
+    type: Schema.ObjectId,
+    ref: 'User'
+  }],
+  externalPersonnel: {
+    type: String
+  }
 
-},
-  {
-    timestamps: true
-  })
+}, {
+  timestamps: true
+})
 
 module.exports = mongoose.model('Class', ClassSchema)

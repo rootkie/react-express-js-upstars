@@ -1,6 +1,7 @@
 const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
+const External = require('../models/external-personnel')
 let util = require('../util.js')
 
 // This is authenticated, user info stored in req.decoded
@@ -26,7 +27,8 @@ module.exports.addEditClass = async(req, res) => {
       status: 'success',
       class: newClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -39,7 +41,8 @@ module.exports.getAll = async(req, res) => {
       classes,
       info: req.decoded
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -49,7 +52,8 @@ module.exports.getClassById = async(req, res) => {
   try {
     const class1 = await Class.findById(classId).populate('students users', 'profile.name')
     return res.json(class1)
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -93,7 +97,8 @@ module.exports.addStudentsToClass = async(req, res) => {
       class: classes,
       students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -133,7 +138,8 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       class: classes,
       studentsRemoved: students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -173,7 +179,8 @@ module.exports.addUsersToClass = async(req, res) => {
       class: classes,
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -212,13 +219,59 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       class: classes,
       users
     })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+
+module.exports.assignExternalPersonnelToClass = async(req, res) => {
+  try {
+    let {
+      classId,
+      name,
+      nric,
+      organisation,
+      relationTo,
+      nameOfRelatedPersonnel
+    } = req.body
+    classId = util.makeString(classId)
+    name = util.makeString(name)
+    nric = util.makeString(nric)
+    organisation = util.makeString(organisation)
+    relationTo = util.makeString(relationTo)
+    nameOfRelatedPersonnel = util.makeString(nameOfRelatedPersonnel)
+
+    const externalPersonnelInformation = new External({
+      classId,
+      name,
+      nric,
+      organisation,
+      relationTo,
+      nameOfRelatedPersonnel
+    })
+    const externalPersonnel = await externalPersonnelInformation.save()
+    const updatedClass = await Class.findByIdAndUpdate(classId, {
+      $addToSet: {
+        externalPersonnel: externalPersonnel._id
+      }
+    }, {
+      new: true
+    })
+    res.json({
+      externalPersonnel,
+      updatedClass
+    })
   } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.dropDB = function (req, res) {
+
+module.exports.dropDB = function(req, res) {
   Class.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({
