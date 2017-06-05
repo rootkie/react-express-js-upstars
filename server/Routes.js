@@ -20,7 +20,7 @@ module.exports = app => {
   app.post('/api/addUsersToClass', classControl.addUsersToClass) // Handles both user -> class && class -> user
   app.post('/api/deleteUsersFromClass', classControl.deleteUsersFromClass)
   app.post('/api/assignExternalPersonnelToClass', classControl.assignExternalPersonnelToClass)
-
+  app.post('/api/removeExternalPersonnelFromClass', classControl.removeExternalPersonnelFromClass)
   // Students
   app.get('/api/getStudents', studentControl.getAll)
   app.get('/api/getStudent/:id', studentControl.getStudentById)

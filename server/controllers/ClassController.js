@@ -253,15 +253,42 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       nameOfRelatedPersonnel
     })
     const externalPersonnel = await externalPersonnelInformation.save()
+      // Chose to just add name instead of id since it is for recording only
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
-        externalPersonnel: externalPersonnel._id
+        externalPersonnel: name
       }
     }, {
       new: true
     })
     res.json({
       externalPersonnel,
+      updatedClass
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.removeExternalPersonnelFromClass = async(req, res) => {
+  try {
+    let {
+      classId,
+      name
+    } = req.body
+    classId = util.makeString(classId)
+    name = util.makeString(name)
+
+    const updatedClass = await Class.findByIdAndUpdate(classId, {
+      $pull: {
+        externalPersonnel: name
+      }
+    }, {
+      new: true
+    })
+
+    res.json({
       updatedClass
     })
   } catch (err) {
