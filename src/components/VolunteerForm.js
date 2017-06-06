@@ -12,7 +12,9 @@ const initialState = {
   email: '',
   dateSelect: '',
   aboutInput: '',
-  gender: ''
+  gender: '',
+  terms: false,
+  error: []
 }
 
 class VolunteerForm extends Component {
@@ -26,19 +28,36 @@ class VolunteerForm extends Component {
     submittedGender: ''
   }
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+  checkRequired = (checkArray) => {
+    const error = []
+    for (let i of checkArray) {
+      const item = this.state[i]
+      if (!item || item === '') error.push(i)
+    }
+    return error
+  }
+
+  handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
   handleSubmit = e => {
     e.preventDefault()
     const { firstName, lastName, email, dateSelect, aboutInput, gender } = this.state
+    // check required fields
+    const error = this.checkRequired(['firstName', 'lastName', 'email', 'terms'])
 
-    this.setState({ submittedFirstName: firstName, submittedLastName: lastName, submittedEmail: email, submittedDate: dateSelect, submittedAboutInput: aboutInput, submittedGender: gender }) // this is just to display the information, in reality a POST request will be sent here
+    if (error.length === 0) {
+      console.log('success')
+      this.setState({ submittedFirstName: firstName, submittedLastName: lastName, submittedEmail: email, submittedDate: dateSelect, submittedAboutInput: aboutInput, submittedGender: gender }) // this is just to display the information, in reality a POST request will be sent here
 
-    this.setState(initialState) // reset form
+      this.setState(initialState) // reset form
+    } else {
+      console.log('error occured')
+      this.setState({error})
+    }
   }
 
   render () {
-    const { dateSelect, firstName, lastName, email, aboutInput, gender, submittedFirstName, submittedLastName, submittedEmail, submittedDate, submittedAboutInput, submittedGender } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { dateSelect, firstName, lastName, email, aboutInput, gender, error, submittedFirstName, submittedLastName, submittedEmail, submittedDate, submittedAboutInput, submittedGender } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     return (
       <div>
@@ -60,7 +79,7 @@ class VolunteerForm extends Component {
             <Form.Radio label='Sun' value='su' checked={dateSelect === 'su'} onChange={this.handleChange} name='dateSelect' />
           </Form.Group>
           <Form.TextArea label='About' name='aboutInput' value={aboutInput} onChange={this.handleChange} placeholder='Tell us more about you...' />
-          <Form.Checkbox label='I agree to the Terms and Conditions' required /> {/* required does not work. I think it's an issue with semantic-ui-react */}
+          <Form.Checkbox label='I agree to the Terms and Conditions' name='terms' required onChange={this.handleChange} error={error.includes('terms')} />
           <Form.Button>Submit</Form.Button>
         </Form>
         <Message>{JSON.stringify({ submittedFirstName, submittedLastName, submittedEmail, submittedDate, submittedAboutInput, submittedGender }, null, 2)}</Message>
