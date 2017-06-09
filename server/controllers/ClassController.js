@@ -297,7 +297,7 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       new: true
     })
 
-    const updatedUser = await External.findByIdAndUpdate(externalId, {
+    const updatedExternal = await External.findByIdAndUpdate(externalId, {
       $pull: {
         classId
       }
@@ -307,7 +307,7 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
 
     res.json({
       updatedClass,
-      updatedUser
+      updatedExternal
     })
   }
   catch (err) {
