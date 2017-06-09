@@ -20,9 +20,9 @@ const ClassSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   }],
-  externalPersonnel: {
+  externalPersonnel: [{
     type: String
-  }
+  }]
 
 }, {
   timestamps: true

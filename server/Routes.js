@@ -50,6 +50,8 @@ module.exports = app => {
   app.get('/api/getUser/:id', userControl.getUser)
   app.post('/api/editUserParticulars', userControl.editUserParticulars)
   app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
+  
+  app.get('/api/getExternal/:name', userControl.getExternal)
 
   // Admin controls under user
   app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password

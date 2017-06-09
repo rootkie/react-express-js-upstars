@@ -265,7 +265,8 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       externalPersonnel,
       updatedClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -288,10 +289,20 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       new: true
     })
 
-    res.json({
-      updatedClass
+    const updatedUser = await External.findOneAndUpdate({
+      name
+    }, {
+      classId: null
+    }, {
+      new: true
     })
-  } catch (err) {
+
+    res.json({
+      updatedClass,
+      updatedUser
+    })
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }

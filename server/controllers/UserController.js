@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const External = require('../models/external-personnel')
 let util = require('../util.js')
 
 module.exports.getAllUsers = async(req, res) => {
@@ -143,6 +144,22 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     })
     res.json({
       user: updatedUser
+    })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.getExternal = async(req, res) => {
+  try {
+    const name = util.makeString(req.params.name)
+    const user = await External.findOne({
+      name: name
+    }).populate('classId', 'className')
+    res.json({
+      user
     })
   }
   catch (err) {
