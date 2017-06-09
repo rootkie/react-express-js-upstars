@@ -115,7 +115,7 @@ Parameter  | Required | Description
 ---------  | -------  | -----------
 token      | true     | Obtained from login or register.
 classId    | true     | The id of the class.
-studentIc  | true     | The ic number of the student
+studentId  | true     | The id of the student
 
 
 
@@ -156,7 +156,7 @@ Parameter  | Required | Description
 ---------  | -------  | -----------
 token      | true     | Obtained from login or register.
 classId    | true     | The id of the class.
-studentIc  | true     | The ic number of the student
+studentId  | true     | The id of the student
 
 
 
