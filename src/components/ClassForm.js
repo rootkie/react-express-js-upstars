@@ -1,0 +1,73 @@
+import React, { Component } from 'react'
+import { Form, Message } from 'semantic-ui-react'
+const typeOptions = [
+  { key: 't', text: 'Tuition', value: 'Tuition' },
+  { key: 'e', text: 'Enrichment', value: 'Enrichment' }
+]
+
+const initialState = {
+  name: '',
+  type: '',
+  venue: '',
+  dayAndTime: '',
+  startDate: ''
+}
+
+class ClassForm extends Component {
+  state = {
+    ...initialState,
+    submittedName: '',
+    submittedType: '',
+    submittedVenue: '',
+    submittedDayAndTime: '',
+    submittedStartDate: ''
+  }
+
+  checkRequired = (checkArray) => {
+    const error = []
+    for (let i of checkArray) {
+      const item = this.state[i]
+      if (!item || item === '') error.push(i)
+    }
+    return error
+  }
+
+  handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
+
+  handleSubmit = e => {
+    e.preventDefault()
+    const { name, type, venue, dayAndTime, startDate } = this.state
+    // check required fields
+    const error = this.checkRequired(['name', 'type', 'venue', 'dayAndTime', 'startDate'])
+
+    if (error.length === 0) {
+      console.log('success')
+      this.setState({ submittedName: name, submittedType: type, submittedVenue: venue, submittedDayAndTime: dayAndTime, submittedStartDate: startDate }) // this is just to display the information, in reality a POST request will be sent here
+
+      this.setState(initialState) // reset form
+    } else {
+      console.log('error occured')
+      this.setState({error})
+    }
+  }
+
+  render () {
+    const { name, type, venue, dayAndTime, startDate, submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate } = this.state // submitted version are used to display the info sent through POST (not necessary)
+
+    return (
+      <div>
+        <Form onSubmit={this.handleSubmit}>
+          <Form.Input label='Name of Class' placeholder='name of the class' name='name' value={name} onChange={this.handleChange} required />
+          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='type' value={type} onChange={this.handleChange} required />
+          <Form.Input label='Venue' placeholder='venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
+          <Form.Input label='Day and Time' placeholder='day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} required /> //may be change to radio
+          <Form.Input label='Start Date' placeholder='Class starting date' name='startDate' value={startDate} onChange={this.handleChange} required />  //Need to use a datepicker here
+          <Form.Button>Submit</Form.Button>
+        </Form>
+        <Message>{JSON.stringify({ submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate }, null, 2)}</Message>
+      </div>
+    )
+  }
+}
+
+export default ClassForm
