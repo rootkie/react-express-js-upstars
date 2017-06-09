@@ -1,5 +1,9 @@
 import React, { Component } from 'react'
 import { Form, Message } from 'semantic-ui-react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import moment from 'moment'
+
 const typeOptions = [
   { key: 't', text: 'Tuition', value: 'Tuition' },
   { key: 'e', text: 'Enrichment', value: 'Enrichment' }
@@ -10,7 +14,7 @@ const initialState = {
   type: '',
   venue: '',
   dayAndTime: '',
-  startDate: ''
+  startDate: moment()
 }
 
 class ClassForm extends Component {
@@ -34,6 +38,8 @@ class ClassForm extends Component {
 
   handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
+  handleDateChange = (startDate) => this.setState({startDate})
+
   handleSubmit = e => {
     e.preventDefault()
     const { name, type, venue, dayAndTime, startDate } = this.state
@@ -52,7 +58,7 @@ class ClassForm extends Component {
   }
 
   render () {
-    const { name, type, venue, dayAndTime, startDate, submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { name, type, venue, dayAndTime, submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     return (
       <div>
@@ -60,8 +66,14 @@ class ClassForm extends Component {
           <Form.Input label='Name of Class' placeholder='name of the class' name='name' value={name} onChange={this.handleChange} required />
           <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='type' value={type} onChange={this.handleChange} required />
           <Form.Input label='Venue' placeholder='venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-          <Form.Input label='Day and Time' placeholder='day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} required /> //may be change to radio
-          <Form.Input label='Start Date' placeholder='Class starting date' name='startDate' value={startDate} onChange={this.handleChange} required />  //Need to use a datepicker here
+          <Form.Field required>
+            <label>Starting Date</label>
+            <DatePicker
+              dateFormat='DD/MM/YYYY'
+              selected={this.state.startDate}
+              onChange={this.handleDateChange} />
+          </Form.Field>
+          <Form.Input label='Day and Time' placeholder='day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} required /> {/* may be change to radio */}
           <Form.Button>Submit</Form.Button>
         </Form>
         <Message>{JSON.stringify({ submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate }, null, 2)}</Message>
