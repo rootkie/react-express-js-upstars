@@ -154,10 +154,8 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
 
 module.exports.getExternal = async(req, res) => {
   try {
-    const name = util.makeString(req.params.name)
-    const user = await External.findOne({
-      name: name
-    }).populate('classId', 'className')
+    const id = util.makeString(req.params.id)
+    const user = await External.findById(id).populate('classId', 'className')
     res.json({
       user
     })

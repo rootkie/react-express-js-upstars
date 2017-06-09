@@ -50,7 +50,7 @@ module.exports.getAll = async(req, res) => {
 module.exports.getClassById = async(req, res) => {
   var classId = util.makeString(req.params.id)
   try {
-    const class1 = await Class.findById(classId).populate('students users', 'profile.name')
+    const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
     return res.json(class1)
   }
   catch (err) {
@@ -244,19 +244,34 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
     relationTo = util.makeString(relationTo)
     nameOfRelatedPersonnel = util.makeString(nameOfRelatedPersonnel)
 
-    const externalPersonnelInformation = new External({
-      classId,
-      name,
-      nric,
-      organisation,
-      relationTo,
-      nameOfRelatedPersonnel
+    const externalPersonnel = await External.findOneAndUpdate(nric, {
+      $addToSet: {
+        classId
+      },
+      $set: {
+        name,
+        organisation,
+        relationTo,
+        nameOfRelatedPersonnel
+      }
+    }, {
+      new: true,
+      upsert: true
     })
-    const externalPersonnel = await externalPersonnelInformation.save()
-      // Chose to just add name instead of id since it is for recording only
+
+    /*  const externalPersonnelInformation = new External({
+        classId,
+        name,
+        nric,
+        organisation,
+        relationTo,
+        nameOfRelatedPersonnel
+      })
+      const externalPersonnel = await externalPersonnelInformation.save()
+        // Chose to just add name instead of id since it is for recording only */
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
-        externalPersonnel: name
+        externalPersonnel: externalPersonnel._id
       }
     }, {
       new: true
@@ -276,23 +291,23 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
   try {
     let {
       classId,
-      name
+      externalId
     } = req.body
     classId = util.makeString(classId)
-    name = util.makeString(name)
+    externalId = util.makeString(externalId)
 
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $pull: {
-        externalPersonnel: name
+        externalPersonnel: externalId
       }
     }, {
       new: true
     })
 
-    const updatedUser = await External.findOneAndUpdate({
-      name
-    }, {
-      classId: null
+    const updatedUser = await External.findByIdAndUpdate(externalId, {
+      $pull: {
+        classId
+      }
     }, {
       new: true
     })

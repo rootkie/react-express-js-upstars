@@ -21,7 +21,8 @@ const ClassSchema = new Schema({
     ref: 'User'
   }],
   externalPersonnel: [{
-    type: String
+    type: Schema.ObjectId,
+    ref: 'External'
   }]
 
 }, {

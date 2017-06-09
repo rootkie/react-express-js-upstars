@@ -4,18 +4,18 @@ const Schema = mongoose.Schema
 // External-personnel Schema
 // ================================
 const ExternalSchema = new Schema({
-  classId: {
+  classId: [{
     type: Schema.ObjectId,
     ref: 'Class'
-  },
+  }],
   name: {
       type: String,
       required: true,
-      unique: true
   },
   nric: {
       type: String,
-      required: true
+      required: true,
+      unique: true
   },
   organisation: {
       type: String
