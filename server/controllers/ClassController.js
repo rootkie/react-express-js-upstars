@@ -244,11 +244,14 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
     relationTo = util.makeString(relationTo)
     nameOfRelatedPersonnel = util.makeString(nameOfRelatedPersonnel)
 
-    const externalPersonnel = await External.findOneAndUpdate(nric, {
+    const externalPersonnel = await External.findOneAndUpdate({
+      nric: nric
+    }, {
       $addToSet: {
         classId
       },
       $set: {
+        nric,
         name,
         organisation,
         relationTo,
@@ -259,16 +262,6 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       upsert: true
     })
 
-    /*  const externalPersonnelInformation = new External({
-        classId,
-        name,
-        nric,
-        organisation,
-        relationTo,
-        nameOfRelatedPersonnel
-      })
-      const externalPersonnel = await externalPersonnelInformation.save()
-        // Chose to just add name instead of id since it is for recording only */
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         externalPersonnel: externalPersonnel._id
