@@ -14,7 +14,7 @@ const initialState = {
   type: '',
   venue: '',
   dayAndTime: '',
-  startDate: moment()
+  startDate: ''
 }
 
 class ClassForm extends Component {
@@ -48,7 +48,7 @@ class ClassForm extends Component {
 
     if (error.length === 0) {
       console.log('success')
-      this.setState({ submittedName: name, submittedType: type, submittedVenue: venue, submittedDayAndTime: dayAndTime, submittedStartDate: startDate }) // this is just to display the information, in reality a POST request will be sent here
+      this.setState({ submittedName: name, submittedType: type, submittedVenue: venue, submittedDayAndTime: dayAndTime, submittedStartDate: moment(startDate).format('DDMMYYYY') }) // this is just to display the information, in reality a POST request will be sent here
 
       this.setState(initialState) // reset form
     } else {
@@ -63,17 +63,18 @@ class ClassForm extends Component {
     return (
       <div>
         <Form onSubmit={this.handleSubmit}>
-          <Form.Input label='Name of Class' placeholder='name of the class' name='name' value={name} onChange={this.handleChange} required />
+          <Form.Input label='Name of Class' placeholder='Name of the class' name='name' value={name} onChange={this.handleChange} required />
           <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='type' value={type} onChange={this.handleChange} required />
-          <Form.Input label='Venue' placeholder='venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
+          <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
           <Form.Field required>
             <label>Starting Date</label>
             <DatePicker
+              placeholderText='Click to select a date'
               dateFormat='DD/MM/YYYY'
               selected={this.state.startDate}
               onChange={this.handleDateChange} />
           </Form.Field>
-          <Form.Input label='Day and Time' placeholder='day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} required /> {/* may be change to radio */}
+          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} required /> {/* may be change to radio */}
           <Form.Button>Submit</Form.Button>
         </Form>
         <Message>{JSON.stringify({ submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate }, null, 2)}</Message>
