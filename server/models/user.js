@@ -20,18 +20,210 @@ const UserSchema = new Schema({
 
   profile: {
     name: {
+      type: String,
+      required: true
+    },
+    dob: {
+      type: Date
+    },
+    gender: {
+      type: String,
+      enum: ['M', 'F']
+    },
+    nationality: {
+      type: String
+    },
+    nric: {
+      type: String,
+      required: true
+    },
+    address: {
+      type: String,
+      required: true
+    },
+    postalCode: {
+      type: String,
+      required: true
+    },
+    handphone: {
+      type: String,
+      required: true
+    },
+    homephone: {
+      type: String
+    },
+    schoolName: {
+      type: String
+    },
+    schoolLevel: {
+      type: String
+    },
+    schoolClass: {
+      type: String
+    },
+
+    father: {
+      name: {
+        type: String
+      },
+      occupation: {
+        type: String
+      },
+      email: {
+        type: String
+      }
+    },
+
+    mother: {
+      name: {
+        type: String
+      },
+      occupation: {
+        type: String
+      },
+      email: {
+        type: String
+      }
+    },
+
+    hobbies: [{  // array of hobbies
+      type: String
+    }],
+
+    careerGoal: {
+      type: String
+    },
+
+    education: { 
+      formerEducation: [{ // require at least 1 entry
+        dateFrom: { // MMYYYY
+          type: Date
+        },
+        dateTo: {
+          type: Date
+        },
+        school: {
+          type: String
+        },
+        highestLevel: {
+          type: String
+        }
+      }],
+
+      coursesSeminar: [{
+        year: { // YYYY only
+          type: Date
+        },
+        courseAndObjective: {
+          type: String
+        }
+      }]
+    },
+
+    achievements: [{
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      description: {
+        type: String
+      }
+    }],
+
+    cca: [{
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    cip: [{
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    workInternExp: [{
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    competence: [{
+      languages: [{
+        type: String,
+        required: true
+      }],
+      subjects: [{
+        type: String,
+        required: true
+      }],
+      interests: [{
+        type: String
+      }]
+    }],
+
+    purposeObjectives: {
+      type: String
+    },
+
+    developmentGoals: {
       type: String
     }
-  },
-  
-  status: {
-    type: String,
-    default: 'Active'
+
   },
 
-  role: [{
+  commencementDate: {
+    type: Date
+  },
+
+  exitDate: {
+    type: Date
+  },
+
+  preferredTimeSlot: [{
+    type: String
+  }],
+
+  status: {
     type: String,
-    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'],
+    default: 'Pending'
+  },
+
+  roles: [{
+    type: String,
+    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper']
   }],
 
   classes: [{
@@ -53,7 +245,7 @@ const UserSchema = new Schema({
 
 // Pre-save of user to database, hash password if password is modified or new
 // Coz of lexical this, didn't use =>
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   const user = this
   const SALT_FACTOR = 5
 
@@ -70,7 +262,7 @@ UserSchema.pre('save', function(next) {
   })
 })
 
-UserSchema.methods.comparePassword = function(candidatePassword, cb) {
+UserSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     if (err) {
       return cb(err)
@@ -80,7 +272,7 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   })
 }
 
-UserSchema.methods.comparePasswordPromise = function(candidatePassword) { //Coz of lexical this
+UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Coz of lexical this
   return new Promise((resolve, reject) => {
     bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
       if (err) {
