@@ -88,7 +88,7 @@ class Attendance extends Component {
                 {moreOptions && <div>
                   <Form.Field style={{paddingTop: '10px'}}>
                     <label>Classes</label>
-                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Students' search multiple selection options={classOptions} onChange={this.handleSearchOptions} />
+                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search multiple selection options={classOptions} onChange={this.handleSearchOptions} />
                   </Form.Field>
                   <Form.Field>
                     <label>Volunteers</label>
