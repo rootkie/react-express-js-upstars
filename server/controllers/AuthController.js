@@ -34,7 +34,12 @@ module.exports.login = async (req, res) => {
 
 module.exports.register = async (req, res) => {
   try {
-    let { email, name, password } = req.body
+    // Make all req body strings
+    Object.keys(req.body).forEach(function (k) {
+      req.body[k] = util.makeString(req.body[k])
+    })
+
+    let { email, name, password, dob, gender, nationality, nric, address, postalCode, handphone, homephone, schoolName, schoolLevel, schoolClass, careerGoal, commencementDate, exitDate } = req.body
     // Return error if no email provided
     if (!email) {
       return res.status(422).send({error: 'You must enter an email address.'})
@@ -45,19 +50,30 @@ module.exports.register = async (req, res) => {
       return res.status(422).send({ error: 'You must enter a password.' })
     }
 
-    email = util.makeString(email)
-    name = util.makeString(name)
-    password = util.makeString(password)
-
-    const existingUser = await User.findOne({email})
+    const existingUser = await User.findOne({ email })
     if (existingUser) return res.status(422).send({error: 'This email is already in use'})
+
     const user = new User({
       email,
-      role: ['Tutor'],
+      password,
       profile: {
-        name: name
+        name,
+        gender,
+        nationality,
+        dob,
+        nric,
+        address,
+        postalCode,
+        handphone,
+        homephone,
+        schoolName,
+        schoolLevel,
+        schoolClass,
+        careerGoal
       },
-      password
+      commencementDate,
+      exitDate,
+      roles: ['Tutor']
     })
     const userObject = await user.save()
     const userInfo = makeUser(userObject)
@@ -68,6 +84,6 @@ module.exports.register = async (req, res) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    res.status(500).send(err.message)
   }
 }

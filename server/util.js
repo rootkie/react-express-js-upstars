@@ -26,6 +26,6 @@ module.exports.generateToken = user => {
 }
 
 module.exports.makeUser = req => {
-  const { _id, email, role, profile } = req
-  return { _id, profile, role, email }
+  const { _id, email, role, profile, status } = req
+  return { _id, profile, role, email, status }
 }
