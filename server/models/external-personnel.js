@@ -29,7 +29,8 @@ const ExternalSchema = new Schema({
   }
 },
   {
-    timestamps: true
+    timestamps: true,
+    minimize: false
   })
 
 module.exports = mongoose.model('External', ExternalSchema)

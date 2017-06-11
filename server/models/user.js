@@ -240,7 +240,8 @@ const UserSchema = new Schema({
   }
 
 }, {
-  timestamps: true
+  timestamps: true,
+  minimize: false
 })
 
 // Pre-save of user to database, hash password if password is modified or new

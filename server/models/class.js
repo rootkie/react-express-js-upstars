@@ -26,7 +26,8 @@ const ClassSchema = new Schema({
   }]
 
 }, {
-  timestamps: true
+  timestamps: true,
+  minimize: falses
 })
 
 module.exports = mongoose.model('Class', ClassSchema)
