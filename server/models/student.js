@@ -61,7 +61,7 @@ const StudentSchema = new Schema({
       type: String
     },
     contactNumber: {
-      type: Number
+      type: String
     },
     email: {
       type: String
@@ -70,7 +70,7 @@ const StudentSchema = new Schema({
       type: String
     },
     income: {
-      type: Number
+      type: String
     }
   },
   mother: {
@@ -84,7 +84,7 @@ const StudentSchema = new Schema({
       type: String
     },
     contactNumber: {
-      type: Number
+      type: String
     },
     email: {
       type: String
@@ -93,10 +93,11 @@ const StudentSchema = new Schema({
       type: String
     },
     income: {
-      type: Number
+      type: String
     }
   },
   otherFamily: [{
+    _id: false,
     name: {
       type: String
     },
@@ -115,11 +116,11 @@ const StudentSchema = new Schema({
     type: String,
     enum: ['CDAC', 'Mendaki', 'Private', 'None']
   }],
-  interview: {
-    date: {
+  admin: {
+    interviewDate: {
       type: Date
     },
-    notes: {
+    interviewNotes: {
       type: String
     },
     commencementDate: {
@@ -136,6 +137,7 @@ const StudentSchema = new Schema({
     }
   },
   academicInfo: [{
+    _id: false,
     year: {
       type: Number
     },
