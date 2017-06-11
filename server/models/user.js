@@ -94,7 +94,7 @@ const UserSchema = new Schema({
       type: String
     },
 
-    education: { 
+    education: {
       formerEducation: [{ // require at least 1 entry
         dateFrom: { // MMYYYY
           type: Date

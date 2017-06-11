@@ -109,21 +109,27 @@ module.exports.addEditStudent = async(req, res) => {
         overall
       }
     }
-    
-    /* The bottom is ideal for parsing in JSON Objects, but will not work after makeString(). Other middleware to check is preferred
+
+    /* The bottom is ideal for parsing in JSON Objects, but will not work after makeString(). Other middleware to check is preferred 
       
-    let student = req.body
-    
-    assuming req.body has these objects of 
-    profile, father, mother, etc..
-    if req.body doesnt have them for any reason, they will be saved as null
-      
+    let student = req.body // This will work as mongoose by default discard any fields that are not defined in schema and doesn't throw an err if extra is inputed
+    // If you worry, you can defined it this way:
+    let {profile, father, mother, otherFamily, fas, tuition, academicInfo, admin} = req.body
+    let student = {
+      profile,
+      father,
+      mother,
+      otherFamily,
+      fas,
+      tuition,
+      academicInfo,
+      admin
     }
     */
-    
-    
+
+
     const newStudent = await Student.findOneAndUpdate({
-      'profile.icNumber': icNumber
+      'profile.icNumber': student.icNumber
     }, student, {
       upsert: true,
       new: true,

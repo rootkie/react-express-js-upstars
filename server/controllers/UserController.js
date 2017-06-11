@@ -31,16 +31,64 @@ module.exports.getUser = async(req, res) => {
 
 module.exports.editUserParticulars = async(req, res) => {
   try {
-    // Did not include firstName, lastName, classes as this API is meant for users like tutor to update their particulars. (They can't change their name either..)
-    // For the real API, there will be much more details like HP number and stuff
+    Object.keys(req.body).forEach(k => {
+        req.body[k] = util.makeString(req.body[k])
+      })
+      // The following is just a temp fix. If we move to using content-filter, we can put the req.body as a nested object in JSON.
+      // Not as tons of strings
     let {
       userId,
-      email
+      email,
+      address,
+      postalCode,
+      handphone,
+      homephone,
+      schoolName,
+      schoolClass,
+      schoolLevel,
+
+      FatherName,
+      FatherEmail,
+      FatherOccupation,
+
+      MotherName,
+      MotherEmail,
+      MotherOccupation,
+
+      hobbies,
+      careerGoal,
+      purposeObjectives,
+      developmentGoals
+      // Did not include formal education, cca, seminar, cip, achievement, intern, competency, 
     } = req.body
-    userId = util.makeString(userId)
-    email = util.makeString(email)
+
     const user = await User.findByIdAndUpdate(userId, {
-      email
+      email,
+      profile: {
+        address,
+        postalCode,
+        handphone,
+        homephone,
+        schoolName,
+        schoolClass,
+        schoolLevel,
+        // Need some form of standardisation between students and users. In Students I seperate the parent profile from the main "Profile".
+        // Here its under profile. so 3 layers of nest.. Partly becoz the docs structure both differently, we shd agree on one.
+        father: {
+          name: FatherName,
+          email: FatherEmail,
+          occupation: FatherOccupation
+        },
+        mother: {
+          name: MotherName,
+          email: MotherEmail,
+          occupation: MotherOccupation
+        },
+        hobbies,
+        careerGoal,
+        purposeObjectives,
+        developmentGoals
+      }
     }, {
       new: true
     })
