@@ -4,7 +4,16 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const app = express()
 const mongoose = require('mongoose')
+const filter = require('content-filter')
 const config = require('./config/constConfig')
+const filterOptions = {
+    urlBlackList:['$','{','&&','||', '.', '$ne', '$where', 'eval'],
+    urlMessage: 'A forbidden expression has been found in URL: ',
+    bodyBlackList:['$','{','&&','||', '.', '$ne', '$where', 'eval'],
+    bodyMessage: 'A forbidden expression has been found in form data: ',
+    methodList:['POST', 'PUT', 'DELETE', 'GET'],
+    dispatchToErrorHandler: false,
+}
 
 // ===================Initialization ==============================
 
@@ -21,6 +30,8 @@ app.use(function (req, res, next) {
   next()
 })
 
+app.use(filter(filterOptions))
+
 // Connecting to database
 mongoose.Promise = global.Promise
 mongoose.connect(config.database)
@@ -34,7 +45,7 @@ app.use(bodyParser.json())
 
 app.use((err,req,res,next)=>{
     console.log(err)
-    return res.send({error:"something wrong with parsing"})
+    return res.status(err.status).send({error:"something wrong with parsing"})
 })
 
 require('./Routes')(app)

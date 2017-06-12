@@ -9,7 +9,7 @@ module.exports.hasRole = function(role) {
       // verifies secret and checks exp
       jwt.verify(token, config.secret, (err, decoded) => {
         if (err) {
-          return res.json({
+          return res.status(401).json({
             success: false,
             message: 'Failed to authenticate token.'
           })
@@ -21,7 +21,7 @@ module.exports.hasRole = function(role) {
           for (let i = 0; i < len; i++) {
             if (req.decoded.role.indexOf(role[i]) !== -1) return next()
           }
-          return res.status(403).send('Your do not have sufficient permission to access this endpoint')
+          return res.status(403).send('You do not have sufficient permission to access this endpoint')
         }
       })
     }
@@ -31,7 +31,7 @@ module.exports.hasRole = function(role) {
     else {
       // if there is no token
       // return an error
-      return res.status(403).send({
+      return res.status(401).send({
         success: false,
         message: 'No token provided.'
       })

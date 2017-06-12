@@ -12,7 +12,7 @@ const hasRole = require('./routeMiddleware').hasRole
 
 module.exports = app => {
   // Classes
-  app.get('/api/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
+  app.get('/api/getClasses', hasRole(['Tutor','Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
   app.post('/api/addStudentsToClass', classControl.addStudentsToClass)
@@ -27,7 +27,7 @@ module.exports = app => {
 
   // Attendance controls
   app.post('/api/addEditAttendance', attendanceControl.addEditAttendance)
-  app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
+  app.post('/api/deleteAttendance/:id', attendanceControl.deleteAttendance)
   app.post('/api/getAttendanceBetween', attendanceControl.getAttendanceBetween)
   app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
   app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
