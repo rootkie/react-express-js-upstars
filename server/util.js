@@ -11,10 +11,10 @@ module.exports.makeString = obj => {
     }
 }
 
-module.exports.formatDate = yymmdd => {
-  let year = yymmdd.substring(0, 4)
-  let month = yymmdd.substring(4, 6)
-  let day = yymmdd.substring(6, 8)
+module.exports.formatDate = yyyymmdd => {
+  let year = yyyymmdd.substring(0, 4)
+  let month = yyyymmdd.substring(4, 6)
+  let day = yyyymmdd.substring(6, 8)
   let dateString = year + '-' + month + '-' + day
   return new Date(dateString)
 }

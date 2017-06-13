@@ -1,28 +1,35 @@
 const Attendance = require('../models/attendance')
 let util = require('../util.js')
 
-module.exports.addEditAttendance = async (req, res) => {
+module.exports.addEditAttendance = async(req, res) => {
   try {
-// Sample raw request
-// {
-//   "date":"20170102",
-//   "hours":"2",
-//   "classId":"59098787aa54171143d3f3ae",
-//   "users":["5908abfad4d25a79a80a9c53","5908ac4bd4d25a79a80a9c54"],
-//   "students":["591062e9edea5d1ce9fef38d","591064c77780a11e23d72705"]
-// }
+    // Sample raw request
+    // {
+    //   "date":"20170102",
+    //   "hours":"2",
+    //   "classId":"59098787aa54171143d3f3ae",
+    //   "users":["5908abfad4d25a79a80a9c53","5908ac4bd4d25a79a80a9c54"],
+    //   "students":["591062e9edea5d1ce9fef38d","591064c77780a11e23d72705"]
+    // }
 
-    let { date, hours, classId, users, students, type } = req.body
-    // TO BE DONE ON THE FRONT END
-    // class should be the id of the class
-    // users should be an array of user id
-    // students should be an array of student id
+    let {
+      date,
+      hours,
+      classId,
+      users,
+      students,
+      type
+    } = req.body
+      // TO BE DONE ON THE FRONT END
+      // class should be the id of the class
+      // users should be an array of user id
+      // students should be an array of student id
 
     // Validation is temporarily neglected
     // Consider validating if class has the students and tutors.
 
     if (classId == null) {
-      throw new Error('ClassId can not be null')
+      res.status(400).json('ClassId can not be null')
     }
     classId = util.makeString(classId)
     date = util.makeString(date)
@@ -34,133 +41,193 @@ module.exports.addEditAttendance = async (req, res) => {
       date: util.formatDate(date),
       hours: hoursInt,
       class: classId,
-      users: users,
-      students: students,
+      users,
+      students,
       type: type
     }
 
-    const newAttendance = await Attendance.findOneAndUpdate({class: classId, date: util.formatDate(date)}, attendance1, {upsert: true, new: true, setDefaultsOnInsert: true})
+    const newAttendance = await Attendance.findOneAndUpdate({
+      class: classId,
+      date: util.formatDate(date)
+    }, attendance1, {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true
+    })
 
     res.json({
       status: 'success',
       attendance: newAttendance
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.deleteAttendance = async (req, res) => {
+module.exports.deleteAttendance = async(req, res) => {
   try {
-    let {date, classId} = req.body
+    let {
+      date,
+      classId
+    } = req.body
     classId = util.makeString(classId)
     date = util.makeString(date)
-    const removed = await Attendance.remove({class: classId, date: util.formatDate(date)})
+    const removed = await Attendance.remove({
+      class: classId,
+      date: util.formatDate(date)
+    })
 
     res.json({
       status: 'success',
       removed
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAttendanceBetween = async (req, res) => {
+module.exports.getAttendanceBetween = async(req, res) => {
   try {
-    let { dateStart, dateEnd, classId } = req.body
+    let {
+      dateStart,
+      dateEnd,
+      classId
+    } = req.body
     if (classId == null) {
-      throw new Error('ClassId cannot be null')
+      res.status(400).json('ClassId cannot be null')
     }
     dateStart = util.makeString(dateStart)
     dateEnd = util.makeString(dateEnd)
     classId = util.makeString(classId)
-    const foundAttendance = await Attendance.find({ date: { '$gte': util.formatDate(dateStart), '$lte': util.formatDate(dateEnd) }, class: classId })
+    const foundAttendance = await Attendance.find({
+      date: {
+        '$gte': util.formatDate(dateStart),
+        '$lte': util.formatDate(dateEnd)
+      },
+      class: classId
+    })
 
     res.json({
       status: 'success',
       foundAttendance
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAttendanceByClass = async (req, res) => {
+module.exports.getAttendanceByClass = async(req, res) => {
   try {
-    let { classId } = req.params
+    let {
+      classId
+    } = req.params
     classId = util.makeString(classId)
-    const foundAttendances = await Attendance.find({ class: classId })
+    const foundAttendances = await Attendance
+      .find({
+        class: classId
+      })
+      .limit(200)
+
     res.json({
       status: 'success',
       foundAttendances
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAttendanceByUser = async (req, res) => {
+module.exports.getAttendanceByUser = async(req, res) => {
   try {
-    let { userId } = req.params
+    let {
+      userId
+    } = req.params
     userId = util.makeString(userId)
-    const foundAttendances = await Attendance.find({ users: userId }).populate('users', ['profile'])
+    const foundAttendances = await Attendance.find({
+      users: userId
+    }).populate('users', ['profile']).limit(200)
+
     res.json({
       status: 'success',
       foundAttendances
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAttendanceByStudent = async (req, res) => {
+module.exports.getAttendanceByStudent = async(req, res) => {
   try {
-    let { studentId } = req.params
+    let {
+      studentId
+    } = req.params
     studentId = util.makeString(studentId)
-    const foundAttendances = await Attendance.find({ students: studentId }).populate('students', ['profile.name'])
+    const foundAttendances = await Attendance.find({
+      students: studentId
+    }).populate('students', ['profile.name']).limit(200)
     res.json({
       status: 'success',
       foundAttendances
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAttendanceUserFromClass = async (req, res) => {
+module.exports.getAttendanceUserFromClass = async(req, res) => {
   try {
-    let {classId, userId} = req.body
+    let {
+      classId,
+      userId
+    } = req.body
     classId = util.makeString(classId)
     userId = util.makeString(userId)
-    let records = await Attendance.find({ class: classId, users: userId })
+    let records = await Attendance.find({
+      class: classId,
+      users: userId
+    }).populate('users', ['profile.name']).limit(200)
+
     res.json({
       status: 'success',
       records
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.getAttendanceStudentFromClass = async (req, res) => {
+module.exports.getAttendanceStudentFromClass = async(req, res) => {
   try {
-    let {classId, studentId} = req.body
+    let {
+      classId,
+      studentId
+    } = req.body
     classId = util.makeString(classId)
     studentId = util.makeString(studentId)
-    let records = await Attendance.find({ class: classId, students: studentId })
+    let records = await Attendance.find({
+      class: classId,
+      students: studentId
+    })
     res.json({
       status: 'success',
       records: records
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
