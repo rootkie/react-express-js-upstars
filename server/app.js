@@ -30,8 +30,6 @@ app.use(function (req, res, next) {
   next()
 })
 
-app.use(filter(filterOptions))
-
 // Connecting to database
 mongoose.Promise = global.Promise
 mongoose.connect(config.database)
@@ -42,6 +40,8 @@ app.use(bodyParser.urlencoded({
   extended: true
 }))
 app.use(bodyParser.json())
+
+app.use(filter(filterOptions))
 
 app.use((err,req,res,next)=>{
     console.log(err)
