@@ -4,13 +4,26 @@ let util = require('../util.js')
 module.exports.addEditAttendance = async(req, res) => {
   try {
     // Sample raw request
-    // {
-    //   "date":"20170102",
-    //   "hours":"2",
-    //   "classId":"59098787aa54171143d3f3ae",
-    //   "users":["5908abfad4d25a79a80a9c53","5908ac4bd4d25a79a80a9c54"],
-    //   "students":["591062e9edea5d1ce9fef38d","591064c77780a11e23d72705"]
-    // }
+/*{
+    "date":"20170104",
+    "hours":2,
+    "classId":"5912f4202a23635d58e7a67e",
+    "users":[{
+    		"list": "5908abfad4d25a79a80a9c53",
+    		"status": 1
+    }, {
+    	"list": "5908ac4bd4d25a79a80a9c54",
+    	"status": 0
+    }],
+    "students":[{
+    		"list": "591062e9edea5d1ce9fef38d",
+    		"status": 1
+    }, {
+    		"list": "591064c77780a11e23d72705",
+    		"status": 1
+    	}],
+    "type": "Class"
+  } */
 
     let {
       date,
