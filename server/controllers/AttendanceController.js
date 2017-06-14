@@ -4,26 +4,26 @@ let util = require('../util.js')
 module.exports.addEditAttendance = async(req, res) => {
   try {
     // Sample raw request
-/*{
-    "date":"20170104",
-    "hours":2,
-    "classId":"5912f4202a23635d58e7a67e",
-    "users":[{
-    		"list": "5908abfad4d25a79a80a9c53",
-    		"status": 1
-    }, {
-    	"list": "5908ac4bd4d25a79a80a9c54",
-    	"status": 0
-    }],
-    "students":[{
-    		"list": "591062e9edea5d1ce9fef38d",
-    		"status": 1
-    }, {
-    		"list": "591064c77780a11e23d72705",
-    		"status": 1
-    	}],
-    "type": "Class"
-  } */
+    /*{
+        "date":"20170104",
+        "hours":2,
+        "classId":"5912f4202a23635d58e7a67e",
+        "users":[{
+        		"list": "5908abfad4d25a79a80a9c53",
+        		"status": 1
+        }, {
+        	"list": "5908ac4bd4d25a79a80a9c54",
+        	"status": 0
+        }],
+        "students":[{
+        		"list": "591062e9edea5d1ce9fef38d",
+        		"status": 1
+        }, {
+        		"list": "591064c77780a11e23d72705",
+        		"status": 1
+        	}],
+        "type": "Class"
+      } */
 
     let {
       date,
@@ -161,12 +161,29 @@ module.exports.getAttendanceByClass = async(req, res) => {
 module.exports.getAttendanceByUser = async(req, res) => {
   try {
     let {
-      userId
-    } = req.params
+      userId,
+      classId,
+      dateStart,
+      dateEnd
+    } = req.body
     userId = util.makeString(userId)
+    classId = util.makeString(classId)
+    dateStart = util.makeString(dateStart)
+    dateEnd = util.makeString(dateEnd)
+
     const foundAttendances = await Attendance.find({
-      users: userId
-    }).populate('users', ['profile']).limit(200)
+      'users.list': userId
+    }).populate('users.list', ['profile'])
+
+    if (classId) {
+      foundAttendances = foundAttendances.where('class').equals(classId)
+    }
+    if (dateStart) {
+      foundAttendances = foundAttendances.where('date').gte(util.formatDate(dateStart))
+    }
+    if (dateEnd) {
+      foundAttendances = foundAttendances.where('date').lte(util.formatDate(dateEnd))
+    }
 
     res.json({
       status: 'success',
@@ -199,7 +216,7 @@ module.exports.getAttendanceByStudent = async(req, res) => {
   }
 }
 
-module.exports.getAttendanceUserFromClass = async(req, res) => {
+/*module.exports.getAttendanceUserFromClass = async(req, res) => {
   try {
     let {
       classId,
@@ -244,4 +261,4 @@ module.exports.getAttendanceStudentFromClass = async(req, res) => {
     console.log(err)
     res.status(500).send('server error')
   }
-}
+}*/

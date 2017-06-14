@@ -31,10 +31,10 @@ module.exports = app => {
   app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
   app.post('/api/getAttendanceBetween', attendanceControl.getAttendanceBetween)
   app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
-  app.get('/api/getAttendanceByUser/:userId', attendanceControl.getAttendanceByUser)
-  app.get('/api/getAttendanceByStudent/:studentId', attendanceControl.getAttendanceByStudent)
-  app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
-  app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
+  app.post('/api/getAttendanceByUser', attendanceControl.getAttendanceByUser)
+  app.post('/api/getAttendanceByStudent', attendanceControl.getAttendanceByStudent)
+  // app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
+  // app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
 
   // CIP hours record
   app.get('/api/getCipRecords/user/:userId', statisticsControl.getCipUser)
