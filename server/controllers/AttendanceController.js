@@ -172,8 +172,10 @@ module.exports.getAttendanceByUser = async(req, res) => {
     dateEnd = util.makeString(dateEnd)
 
     let attendances = Attendance.find({
-      'users.list': userId
-    }).populate('users.list', ['profile'])
+        'users.list': userId
+      }).populate('users.list', ['profile'])
+      .sort('class date')
+      // .select('-students')
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
@@ -201,12 +203,34 @@ module.exports.getAttendanceByUser = async(req, res) => {
 module.exports.getAttendanceByStudent = async(req, res) => {
   try {
     let {
-      studentId
-    } = req.params
+      studentId,
+      classId,
+      dateStart,
+      dateEnd
+    } = req.body
     studentId = util.makeString(studentId)
-    const foundAttendances = await Attendance.find({
-      students: studentId
-    }).populate('students', ['profile.name']).limit(200)
+    classId = util.makeString(classId)
+    dateStart = util.makeString(dateStart)
+    dateEnd = util.makeString(dateEnd)
+
+    let attendances = Attendance.find({
+        'students.list': studentId
+      }).populate('students.list', ['profile'])
+      .sort('class date')
+      .select('-users')
+
+    if (classId) {
+      attendances = attendances.where('class').equals(classId)
+    }
+    if (dateStart) {
+      attendances = attendances.where('date').gte(util.formatDate(dateStart))
+    }
+    if (dateEnd) {
+      attendances = attendances.where('date').lte(util.formatDate(dateEnd))
+    }
+
+    const foundAttendances = await attendances.exec()
+
     res.json({
       status: 'success',
       foundAttendances
