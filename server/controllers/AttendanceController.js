@@ -171,19 +171,21 @@ module.exports.getAttendanceByUser = async(req, res) => {
     dateStart = util.makeString(dateStart)
     dateEnd = util.makeString(dateEnd)
 
-    const foundAttendances = await Attendance.find({
+    let attendances = Attendance.find({
       'users.list': userId
     }).populate('users.list', ['profile'])
 
     if (classId) {
-      foundAttendances = foundAttendances.where('class').equals(classId)
+      attendances = attendances.where('class').equals(classId)
     }
     if (dateStart) {
-      foundAttendances = foundAttendances.where('date').gte(util.formatDate(dateStart))
+      attendances = attendances.where('date').gte(util.formatDate(dateStart))
     }
     if (dateEnd) {
-      foundAttendances = foundAttendances.where('date').lte(util.formatDate(dateEnd))
+      attendances = attendances.where('date').lte(util.formatDate(dateEnd))
     }
+
+    const foundAttendances = await attendances.exec()
 
     res.json({
       status: 'success',
