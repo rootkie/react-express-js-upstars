@@ -29,11 +29,11 @@ module.exports = app => {
   // Attendance controls
   app.post('/api/addEditAttendance', attendanceControl.addEditAttendance)
   app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
-  app.post('/api/getAttendanceBetween', attendanceControl.getAttendanceBetween)
-  app.get('/api/getAttendanceByClass/:classId', attendanceControl.getAttendanceByClass)
+  // app.post('/api/getAttendanceBetween', attendanceControl.getAttendanceBetween)
+  app.post('/api/getAttendanceByClass', attendanceControl.getAttendanceByClass)
   app.post('/api/getAttendanceByUser', attendanceControl.getAttendanceByUser)
   app.post('/api/getAttendanceByStudent', attendanceControl.getAttendanceByStudent)
-  // app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
+  app.post('/api/getAttendanceUserFromClass', attendanceControl.getAttendanceUserFromClass)
   // app.post('/api/getAttendanceStudentFromClass', attendanceControl.getAttendanceStudentFromClass)
 
   // CIP hours record

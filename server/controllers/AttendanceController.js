@@ -103,7 +103,7 @@ module.exports.deleteAttendance = async(req, res) => {
   }
 }
 
-module.exports.getAttendanceBetween = async(req, res) => {
+/*module.exports.getAttendanceBetween = async(req, res) => {
   try {
     let {
       dateStart,
@@ -133,19 +133,36 @@ module.exports.getAttendanceBetween = async(req, res) => {
     console.log(err)
     res.status(500).send('server error')
   }
-}
+} */
 
 module.exports.getAttendanceByClass = async(req, res) => {
   try {
     let {
-      classId
-    } = req.params
+      classId,
+      dateStart,
+      dateEnd
+    } = req.body
     classId = util.makeString(classId)
-    const foundAttendances = await Attendance
-      .find({
-        class: classId
-      })
-      .limit(200)
+    dateStart = util.makeString(dateStart)
+    dateEnd = util.makeString(dateEnd)
+
+    let attendances = Attendance.find()
+      .limit(100)
+      .sort('class date')
+
+    if (classId) {
+      attendances = attendances.where('class').equals(classId)
+    }
+    if (dateStart) {
+      attendances = attendances.where('date').gte(util.formatDate(dateStart))
+    }
+    if (dateEnd) {
+      attendances = attendances.where('date').lte(util.formatDate(dateEnd))
+    }
+    // else the query is empty and every single record from past till now is obtained, similar to a getAll function
+
+
+    const foundAttendances = await attendances.exec()
 
     res.json({
       status: 'success',
@@ -242,49 +259,49 @@ module.exports.getAttendanceByStudent = async(req, res) => {
   }
 }
 
-/*module.exports.getAttendanceUserFromClass = async(req, res) => {
-  try {
-    let {
-      classId,
-      userId
-    } = req.body
-    classId = util.makeString(classId)
-    userId = util.makeString(userId)
-    let records = await Attendance.find({
-      class: classId,
-      users: userId
-    }).populate('users', ['profile.name']).limit(200)
+module.exports.getAttendanceUserFromClass = async(req, res) => {
+    try {
+      let {
+        classId,
+        userId
+      } = req.body
+      classId = util.makeString(classId)
+      userId = util.makeString(userId)
+      let records = await Attendance.find({
+        class: classId,
+        users: userId
+      }).populate('users', ['profile.name']).limit(200)
 
-    res.json({
-      status: 'success',
-      records
-    })
+      res.json({
+        status: 'success',
+        records
+      })
+    }
+    catch (err) {
+      console.log(err)
+      res.status(500).send('server error')
+    }
   }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-}
-
-module.exports.getAttendanceStudentFromClass = async(req, res) => {
-  try {
-    let {
-      classId,
-      studentId
-    } = req.body
-    classId = util.makeString(classId)
-    studentId = util.makeString(studentId)
-    let records = await Attendance.find({
-      class: classId,
-      students: studentId
-    })
-    res.json({
-      status: 'success',
-      records: records
-    })
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-}*/
+  /*
+  module.exports.getAttendanceStudentFromClass = async(req, res) => {
+    try {
+      let {
+        classId,
+        studentId
+      } = req.body
+      classId = util.makeString(classId)
+      studentId = util.makeString(studentId)
+      let records = await Attendance.find({
+        class: classId,
+        students: studentId
+      })
+      res.json({
+        status: 'success',
+        records: records
+      })
+    }
+    catch (err) {
+      console.log(err)
+      res.status(500).send('server error')
+    }
+  }*/
