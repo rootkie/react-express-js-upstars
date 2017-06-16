@@ -175,7 +175,7 @@ module.exports.getAttendanceByUser = async(req, res) => {
         'users.list': userId
       }).populate('users.list', ['profile'])
       .sort('class date')
-      // .select('-students')
+      .select('users.$ date')
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
@@ -217,7 +217,7 @@ module.exports.getAttendanceByStudent = async(req, res) => {
         'students.list': studentId
       }).populate('students.list', ['profile'])
       .sort('class date')
-      .select('-users')
+      .select('students.$ date')
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
