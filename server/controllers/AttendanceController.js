@@ -284,6 +284,13 @@ module.exports.getAttendanceUserFromClass = async(req, res) => {
             }
           }
         })
+        .lookup({
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user-name'
+        })
+        .project('user-name.roles users-info')
 
       const foundAttendanceforStudent = await Attendance.aggregate()
         .match({
@@ -300,6 +307,13 @@ module.exports.getAttendanceUserFromClass = async(req, res) => {
             }
           }
         })
+        .lookup({
+          from: 'students',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'student-name'
+        })
+        .project('student-name students-info')
 
       res.json({
         status: 'success',
