@@ -1,5 +1,6 @@
 const Attendance = require('../models/attendance')
 let util = require('../util.js')
+let mongoose = require('mongoose')
 
 module.exports.addEditAttendance = async(req, res) => {
   try {
@@ -262,19 +263,48 @@ module.exports.getAttendanceByStudent = async(req, res) => {
 module.exports.getAttendanceUserFromClass = async(req, res) => {
     try {
       let {
-        classId,
-        userId
+        classId
       } = req.body
+      if (classId == null) {
+        res.status(400).json('ClassId cannot be null')
+      }
       classId = util.makeString(classId)
-      userId = util.makeString(userId)
-      let records = await Attendance.find({
-        class: classId,
-        users: userId
-      }).populate('users', ['profile.name']).limit(200)
+      const foundAttendanceforUser = await Attendance.aggregate()
+        .match({
+          'class': mongoose.Types.ObjectId(classId)
+        })
+        .unwind('users')
+        .sort('-date')
+        .group({
+          '_id': '$users.list',
+          'users-info': {
+            '$push': {
+              'status': '$users.status',
+              'date': '$date'
+            }
+          }
+        })
+
+      const foundAttendanceforStudent = await Attendance.aggregate()
+        .match({
+          'class': mongoose.Types.ObjectId(classId)
+        })
+        .unwind('students')
+        .sort('-date')
+        .group({
+          '_id': '$students.list',
+          'students-info': {
+            '$push': {
+              'status': '$students.status',
+              'date': '$date'
+            }
+          }
+        })
 
       res.json({
         status: 'success',
-        records
+        foundAttendanceforUser,
+        foundAttendanceforStudent
       })
     }
     catch (err) {
