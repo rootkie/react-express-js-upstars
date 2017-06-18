@@ -63,31 +63,34 @@ module.exports.editUserParticulars = async(req, res) => {
     } = req.body
 
     const user = await User.findByIdAndUpdate(userId, {
-      email,
-      profile: {
-        address,
-        postalCode,
-        handphone,
-        homephone,
-        schoolName,
-        schoolClass,
-        schoolLevel,
-        // Need some form of standardisation between students and users. In Students I seperate the parent profile from the main "Profile".
-        // Here its under profile. so 3 layers of nest.. Partly becoz the docs structure both differently, we shd agree on one.
-        father: {
-          name: FatherName,
-          email: FatherEmail,
-          occupation: FatherOccupation
-        },
-        mother: {
-          name: MotherName,
-          email: MotherEmail,
-          occupation: MotherOccupation
-        },
-        hobbies,
-        careerGoal,
-        purposeObjectives,
-        developmentGoals
+      '$set': {
+        email,
+        profile: {
+          address,
+          postalCode,
+          handphone,
+          homephone,
+          schoolName,
+          schoolClass,
+          schoolLevel,
+          // Need some form of standardisation between students and users. In Students I seperate the parent profile from the main "Profile".
+          // Here its under profile. so 3 layers of nest.. Partly becoz the docs structure both differently, we shd agree on one.
+          father: {
+            name: FatherName,
+            email: FatherEmail,
+            occupation: FatherOccupation
+          },
+          mother: {
+            name: MotherName,
+            email: MotherEmail,
+            occupation: MotherOccupation
+          },
+          hobbies,
+          careerGoal,
+          purposeObjectives,
+          developmentGoals,
+          name
+        }
       }
     }, {
       new: true
