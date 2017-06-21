@@ -282,6 +282,12 @@ module.exports.getAttendanceUserFromClass = async(req, res) => {
               'status': '$users.status',
               'date': '$date'
             }
+          },
+          'total': {
+            '$sum': 1
+          },
+          'attended': {
+            '$sum': '$users.status'
           }
         })
         .lookup({
@@ -290,7 +296,7 @@ module.exports.getAttendanceUserFromClass = async(req, res) => {
           foreignField: '_id',
           as: 'user-name'
         })
-        .project('user-name.roles users-info')
+        .project('user-name.roles users-info total attended')
 
       const foundAttendanceforStudent = await Attendance.aggregate()
         .match({
@@ -305,6 +311,12 @@ module.exports.getAttendanceUserFromClass = async(req, res) => {
               'status': '$students.status',
               'date': '$date'
             }
+          },
+          'total': {
+            '$sum': 1
+          },
+          'attended': {
+            '$sum': '$students.status'
           }
         })
         .lookup({
@@ -313,7 +325,7 @@ module.exports.getAttendanceUserFromClass = async(req, res) => {
           foreignField: '_id',
           as: 'student-name'
         })
-        .project('student-name students-info')
+        .project('student-name students-info total attended')
 
       res.json({
         status: 'success',
