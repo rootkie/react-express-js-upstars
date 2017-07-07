@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken')
 module.exports.hasRole = function(role) {
   return (req, res, next) => {
     let token = req.body.token || req.query.token || req.headers['x-access-token']
-      // decode token
     if (token) {
       // verifies secret and checks exp
       jwt.verify(token, config.secret, (err, decoded) => {
@@ -25,9 +24,13 @@ module.exports.hasRole = function(role) {
         }
       })
     }
+
+
     else if (config.debug) {
       next()
     }
+
+
     else {
       // if there is no token
       // return an error
