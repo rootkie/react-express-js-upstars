@@ -17,8 +17,7 @@ module.exports.getAllUsers = async(req, res) => {
 
 module.exports.getUser = async(req, res) => {
   try {
-    const userId = util.makeString(req.params.id)
-    const user = await User.findById(userId).populate('classes', 'className')
+    const user = await User.findById(req.params.id).populate('classes', 'className')
     res.json({
       user
     })
@@ -91,11 +90,8 @@ module.exports.editUserParticulars = async(req, res) => {
       new: true
     })
 
-    let tokenUser = util.makeUser(user)
-
     return res.json({
-      user: user,
-      newToken: util.generateToken(tokenUser)
+      user,
     })
   }
   catch (err) {

@@ -36,7 +36,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
             newStatus,
             newRoles
         } = req.body
-        const updatedUser = await User.findOneAndUpdate(userId, {
+        const updatedUser = await User.findByIdAndUpdate(userId, {
             status: newStatus,
             roles: newRoles //Use JSON arrays for validation to work
         }, {
@@ -49,6 +49,9 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(500).send('server error')
+        if (err.name == 'ValidationError') {
+            res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
+        }
+        else res.status(500).send('server error')
     }
 }
