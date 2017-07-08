@@ -8,22 +8,27 @@ const ExternalSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'Class'
   }],
+  
   name: {
       type: String,
       required: true,
   },
+  
   nric: {
       type: String,
       required: true,
       unique: true
   },
+  
   organisation: {
       type: String
   },
+  
   relationTo: {
       type: String,
       enum: ['Student', 'Volunteer']
   },
+  
   nameOfRelatedPersonnel: {
       type: String
   }

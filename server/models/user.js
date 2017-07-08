@@ -18,202 +18,216 @@ const UserSchema = new Schema({
     required: true
   },
 
-  profile: {
+  name: {
+    type: String,
+    required: true
+  },
+
+  dob: {
+    type: Date,
+    required: true
+  },
+
+  gender: {
+    type: String,
+    enum: ['M', 'F'],
+    required: true
+  },
+
+  nationality: {
+    type: String,
+    required: true
+  },
+
+  nric: {
+    type: String,
+    required: true
+  },
+
+  address: {
+    type: String,
+    required: true
+  },
+
+  postalCode: {
+    type: String,
+    required: true
+  },
+
+  handphone: {
+    type: String,
+    required: true
+  },
+
+  homephone: {
+    type: String,
+    required: true
+  },
+
+  schoolName: {
+    type: String,
+    required: true
+  },
+
+  schoolLevel: {
+    type: String,
+    required: true
+  },
+
+  schoolClass: {
+    type: String,
+    required: true
+  },
+
+  father: {
     name: {
-      type: String,
-      required: true
-    },
-    dob: {
-      type: Date
-    },
-    gender: {
-      type: String,
-      enum: ['M', 'F']
-    },
-    nationality: {
       type: String
     },
-    nric: {
-      type: String,
-      required: true
-    },
-    address: {
-      type: String,
-      required: true
-    },
-    postalCode: {
-      type: String,
-      required: true
-    },
-    handphone: {
-      type: String,
-      required: true
-    },
-    homephone: {
+    occupation: {
       type: String
     },
-    schoolName: {
-      type: String
-    },
-    schoolLevel: {
-      type: String
-    },
-    schoolClass: {
-      type: String
-    },
-
-    father: {
-      name: {
-        type: String
-      },
-      occupation: {
-        type: String
-      },
-      email: {
-        type: String
-      }
-    },
-
-    mother: {
-      name: {
-        type: String
-      },
-      occupation: {
-        type: String
-      },
-      email: {
-        type: String
-      }
-    },
-
-    hobbies: [{  // array of hobbies
-      type: String
-    }],
-
-    careerGoal: {
-      type: String
-    },
-
-    education: {
-      formerEducation: [{ // require at least 1 entry
-        dateFrom: { // MMYYYY
-          type: Date
-        },
-        dateTo: {
-          type: Date
-        },
-        school: {
-          type: String
-        },
-        highestLevel: {
-          type: String
-        }
-      }],
-
-      coursesSeminar: [{
-        year: { // YYYY only
-          type: Date
-        },
-        courseAndObjective: {
-          type: String
-        }
-      }]
-    },
-
-    achievements: [{
-      dateFrom: { // MMYYYY
-        type: Date
-      },
-      dateTo: {
-        type: Date
-      },
-      organisation: {
-        type: String
-      },
-      description: {
-        type: String
-      }
-    }],
-
-    cca: [{
-      dateFrom: { // MMYYYY
-        type: Date
-      },
-      dateTo: {
-        type: Date
-      },
-      organisation: {
-        type: String
-      },
-      rolePosition: {
-        type: String
-      }
-    }],
-
-    cip: [{
-      dateFrom: { // MMYYYY
-        type: Date
-      },
-      dateTo: {
-        type: Date
-      },
-      organisation: {
-        type: String
-      },
-      rolePosition: {
-        type: String
-      }
-    }],
-
-    workInternExp: [{
-      dateFrom: { // MMYYYY
-        type: Date
-      },
-      dateTo: {
-        type: Date
-      },
-      organisation: {
-        type: String
-      },
-      rolePosition: {
-        type: String
-      }
-    }],
-
-    competence: [{
-      languages: [{
-        type: String,
-        required: true
-      }],
-      subjects: [{
-        type: String,
-        required: true
-      }],
-      interests: [{
-        type: String
-      }]
-    }],
-
-    purposeObjectives: {
-      type: String
-    },
-
-    developmentGoals: {
+    email: {
       type: String
     }
+  },
 
+  mother: {
+    name: {
+      type: String
+    },
+    occupation: {
+      type: String
+    },
+    email: {
+      type: String
+    }
+  },
+
+  hobbies: [{ // array of hobbies
+    type: String
+    }],
+
+  careerGoal: {
+    type: String
+  },
+
+  formerEducation: [{ // require at least 1 entry
+    dateFrom: { // MMYYYY
+      type: Date
+    },
+    dateTo: {
+      type: Date
+    },
+    school: {
+      type: String
+    },
+    highestLevel: {
+      type: String
+    }
+      }],
+
+  coursesSeminar: [{
+    year: { // YYYY only
+      type: Date
+    },
+    courseAndObjective: {
+      type: String
+    }
+      }],
+
+  achievements: [{
+    dateFrom: { // MMYYYY
+      type: Date
+    },
+    dateTo: {
+      type: Date
+    },
+    organisation: {
+      type: String
+    },
+    description: {
+      type: String
+    }
+    }],
+
+  cca: [{
+    dateFrom: { // MMYYYY
+      type: Date
+    },
+    dateTo: {
+      type: Date
+    },
+    organisation: {
+      type: String
+    },
+    rolePosition: {
+      type: String
+    }
+    }],
+
+  cip: [{
+    dateFrom: { // MMYYYY
+      type: Date
+    },
+    dateTo: {
+      type: Date
+    },
+    organisation: {
+      type: String
+    },
+    rolePosition: {
+      type: String
+    }
+    }],
+
+  workInternExp: [{
+    dateFrom: { // MMYYYY
+      type: Date
+    },
+    dateTo: {
+      type: Date
+    },
+    organisation: {
+      type: String
+    },
+    rolePosition: {
+      type: String
+    }
+    }],
+
+  competence: [{
+    languages: [{
+      type: String,
+      }],
+    subjects: [{
+      type: String,
+      }],
+    interests: [{
+      type: String
+      }]
+    }],
+
+  purposeObjectives: {
+    type: String
+  },
+
+  developmentGoals: {
+    type: String
   },
 
   commencementDate: {
-    type: Date
+    type: Date,
+    required: true
   },
 
   exitDate: {
-    type: Date
+    type: Date,
+    required: true
   },
 
   preferredTimeSlot: [{
-    type: String
+    type: String,
+    required: true
   }],
 
   status: {
@@ -231,6 +245,21 @@ const UserSchema = new Schema({
     ref: 'Class'
   }],
 
+  admin: {
+    interviewDate: {
+      type: Date
+    },
+    interviewNotes: {
+      type: String
+    },
+    commencementDate: {
+      type: Date
+    },
+    adminNotes: {
+      type: String
+    }
+  },
+
   resetPasswordToken: {
     type: String
   },
@@ -246,7 +275,7 @@ const UserSchema = new Schema({
 
 // Pre-save of user to database, hash password if password is modified or new
 // Coz of lexical this, didn't use =>
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', function(next) {
   const user = this
   const SALT_FACTOR = 5
 
@@ -263,7 +292,7 @@ UserSchema.pre('save', function (next) {
   })
 })
 
-UserSchema.methods.comparePassword = function (candidatePassword, cb) {
+UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     if (err) {
       return cb(err)
@@ -273,7 +302,7 @@ UserSchema.methods.comparePassword = function (candidatePassword, cb) {
   })
 }
 
-UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Coz of lexical this
+UserSchema.methods.comparePasswordPromise = function(candidatePassword) { // Coz of lexical this
   return new Promise((resolve, reject) => {
     bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
       if (err) {

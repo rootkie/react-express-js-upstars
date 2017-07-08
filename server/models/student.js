@@ -5,51 +5,58 @@ const Schema = mongoose.Schema
 // User Schema
 // ================================
 const StudentSchema = new Schema({
-  profile: {
-    name: {
-      type: String,
-      required: true
-    },
-    icNumber: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    contactNumber: {
-      type: Number,
-      required: true
-    },
-    dateOfBirth: {
-      type: String,
-      required: true
-    },
-    address: {
-      type: String,
-      required: true
-    },
-    gender: {
-      type: String,
-      required: true,
-      enum: ['Male', 'Female'],
-      default: 'Male'
-    },
-    nationality: {
-      type: String,
-      required: true
-    }
+  name: {
+    type: String,
+    required: true
   },
+  
+  icNumber: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  
+  contactNumber: {
+    type: Number,
+    required: true
+  },
+  
+  dateOfBirth: {
+    type: String,
+    required: true
+  },
+  
+  address: {
+    type: String,
+    required: true
+  },
+  
+  gender: {
+    type: String,
+    required: true,
+    enum: ['Male', 'Female'],
+  },
+  
+  nationality: {
+    type: String,
+    required: true
+  },
+  
   schoolType: {
     type: String,
     enum: ['Primary', 'Secondary'],
     default: 'Primary'
   },
+  
   schoolName: {
     type: String
   },
+  
   classes: [{
     type: Schema.ObjectId,
     ref: 'Class'
   }],
+  
   father: {
     name: {
       type: String
@@ -73,6 +80,7 @@ const StudentSchema = new Schema({
       type: String
     }
   },
+  
   mother: {
     name: {
       type: String
@@ -96,6 +104,7 @@ const StudentSchema = new Schema({
       type: String
     }
   },
+  
   otherFamily: [{
     _id: false,
     name: {
@@ -108,14 +117,17 @@ const StudentSchema = new Schema({
       type: Number
     }
   }],
+  
   fas: [{
     type: String,
     enum: ['MOE', 'Mendaki', 'Others', 'None']
   }],
+  
   tuition: [{
     type: String,
     enum: ['CDAC', 'Mendaki', 'Private', 'None']
   }],
+  
   admin: {
     interviewDate: {
       type: Date
@@ -136,6 +148,7 @@ const StudentSchema = new Schema({
       type: String
     }
   },
+  
   academicInfo: [{
     _id: false,
     year: {
@@ -160,10 +173,12 @@ const StudentSchema = new Schema({
       type: Number
     }
     }],
+    
   status: {
     type: String,
     default: 'Active'
   }
+  
 }, {
   timestamps: true,
   minimize: false
