@@ -232,11 +232,13 @@ const UserSchema = new Schema({
 
   status: {
     type: String,
-    default: 'Pending'
+    default: 'Pending',
+    required: true
   },
 
   roles: [{
     type: String,
+    required: true,
     enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper']
   }],
 

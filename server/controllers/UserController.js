@@ -31,11 +31,6 @@ module.exports.getUser = async(req, res) => {
 
 module.exports.editUserParticulars = async(req, res) => {
   try {
-    Object.keys(req.body).forEach(k => {
-        req.body[k] = util.makeString(req.body[k])
-      })
-      // The following is just a temp fix. If we move to using content-filter, we can put the req.body as a nested object in JSON.
-      // Not as tons of strings
     let {
       userId,
       email,
@@ -148,60 +143,6 @@ module.exports.changePassword = async(req, res) => {
   }
 }
 
-module.exports.adminChangePassword = async(req, res) => {
-  try {
-    let {
-      userId,
-      newPassword,
-      confirmNewPassword
-    } = req.body
-    userId = util.makeString(userId)
-    newPassword = util.makeString(newPassword)
-    confirmNewPassword = util.makeString(confirmNewPassword)
-      // Just in case the front end screws up
-    if (newPassword !== confirmNewPassword) {
-      return res.status(422).send({
-        error: 'The 2 new passwords do not match'
-      })
-    }
-    const user = await User.findById(userId)
-      // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
-    user.password = confirmNewPassword
-    const pwChanged = await user.save()
-
-    res.json({
-      user: pwChanged
-        // token:
-    })
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-}
-
-module.exports.changeUserStatusAndPermissions = async(req, res) => {
-  try {
-    let {
-      userId,
-      newStatus
-    } = req.body
-    userId = util.makeString(userId)
-    newStatus = util.makeString(newStatus)
-    const updatedUser = await User.findByIdAndUpdate(userId, {
-      status: newStatus
-    }, {
-      new: true
-    })
-    res.json({
-      user: updatedUser
-    })
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-}
 
 module.exports.getExternal = async(req, res) => {
   try {

@@ -4,6 +4,7 @@ const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const statisticsControl = require('./controllers/StatisticsController')
 const userControl = require('./controllers/UserController.js')
+const adminControl = require('./controllers/AdminController.js')
 const hasRole = require('./routeMiddleware').hasRole
 
 // ==============Serving api======================
@@ -45,7 +46,7 @@ module.exports = app => {
   app.post('/api/getAttendanceRate/student', statisticsControl.getAttendanceRateStudent)
   app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
 
-  // User controls for any user
+  // User controls
   app.get('/api/getAllUsers', userControl.getAllUsers)
   app.get('/api/getUser/:id', userControl.getUser)
   app.post('/api/editUserParticulars', userControl.editUserParticulars)
@@ -54,8 +55,8 @@ module.exports = app => {
   app.get('/api/getExternal/:id', userControl.getExternal)
 
   // Admin controls under user
-  app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
-  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) // If there's a need to split them up into 2 API... Waiting for the permissions table.
+  app.post('/api/adminChangePassword', adminControl.adminChangePassword)
+  app.post('/api/changeUserStatusAndPermissions', adminControl.changeUserStatusAndPermissions)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
