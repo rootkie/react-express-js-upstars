@@ -31,63 +31,34 @@ module.exports.getUser = async(req, res) => {
 module.exports.editUserParticulars = async(req, res) => {
   try {
     let {
-      userId,
-      email,
-      address,
-      postalCode,
-      handphone,
-      homephone,
-      schoolName,
-      schoolClass,
-      schoolLevel,
-
-      FatherName,
-      FatherEmail,
-      FatherOccupation,
-
-      MotherName,
-      MotherEmail,
-      MotherOccupation,
-
-      hobbies,
-      careerGoal,
-      purposeObjectives,
-      developmentGoals
-      // Did not include formal education, cca, seminar, cip, achievement, intern, competency, 
+      userId
     } = req.body
 
-    const user = await User.findByIdAndUpdate(userId, {
-      '$set': {
-        email,
-        profile: {
-          address,
-          postalCode,
-          handphone,
-          homephone,
-          schoolName,
-          schoolClass,
-          schoolLevel,
-          // Need some form of standardisation between students and users. In Students I seperate the parent profile from the main "Profile".
-          // Here its under profile. so 3 layers of nest.. Partly becoz the docs structure both differently, we shd agree on one.
-          father: {
-            name: FatherName,
-            email: FatherEmail,
-            occupation: FatherOccupation
-          },
-          mother: {
-            name: MotherName,
-            email: MotherEmail,
-            occupation: MotherOccupation
-          },
-          hobbies,
-          careerGoal,
-          purposeObjectives,
-          developmentGoals,
-          name
-        }
+    let edited = {}
+
+    if (!userId) {
+      res.status(422).send('Please provide a valid userId')
+    }
+    if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+      res.status(403).send('Operation denied')
+    }
+    if (req.decoded.roles.indexOf('Admin') != -1) {
+      if (req.body.admin) {
+        edited['admin'] = req.body.admin
       }
-    }, {
-      new: true
+    }
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot'] //email is left out because unique: true is not a validator. Only works on create.
+
+    for (let checkChanged of list) {
+      if (req.body[checkChanged]) {
+        edited[checkChanged] = await req.body[checkChanged]
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(userId, edited, {
+      new: true,
+      runValidators: true,
+      runSettersOnQuery: true
     })
 
     return res.json({
@@ -96,9 +67,13 @@ module.exports.editUserParticulars = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error: ' + err.message)
+    if (err.name == 'ValidationError') {
+      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+    }
+    else res.status(500).send('server error')
   }
 }
+
 
 module.exports.changePassword = async(req, res) => {
   try {
@@ -108,7 +83,7 @@ module.exports.changePassword = async(req, res) => {
       newPassword,
       confirmNewPassword
     } = req.body
-    // Just in case the front end screws up
+      // Just in case the front end screws up
     if (newPassword !== confirmNewPassword) {
       return res.status(422).json({
         error: 'The 2 new passwords do not match'

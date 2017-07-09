@@ -2,85 +2,87 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 // ================================
-// User Schema
+// Student Schema
 // ================================
 const StudentSchema = new Schema({
-  name: {
-    type: String,
-    required: true
+  profile: {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    icNumber: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true
+    },
+
+    contactNumber: {
+      type: Number,
+      required: true
+    },
+
+    dob: {
+      type: Number,
+      required: true
+    },
+
+    address: {
+      type: String,
+      required: true
+    },
+
+    gender: {
+      type: String,
+      required: true,
+      enum: ['M', 'F'],
+    },
+
+    nationality: {
+      type: String,
+      required: true
+    },
+
+    schoolType: {
+      type: String,
+      enum: ['Primary', 'Secondary'],
+      default: 'Primary'
+    },
+
+    schoolName: {
+      type: String,
+      required: true
+    }
   },
-  
-  icNumber: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  
-  contactNumber: {
-    type: Number,
-    required: true
-  },
-  
-  dateOfBirth: {
-    type: String,
-    required: true
-  },
-  
-  address: {
-    type: String,
-    required: true
-  },
-  
-  gender: {
-    type: String,
-    required: true,
-    enum: ['Male', 'Female'],
-  },
-  
-  nationality: {
-    type: String,
-    required: true
-  },
-  
-  schoolType: {
-    type: String,
-    enum: ['Primary', 'Secondary'],
-    default: 'Primary'
-  },
-  
-  schoolName: {
-    type: String
-  },
-  
-  classes: [{
-    type: Schema.ObjectId,
-    ref: 'Class'
-  }],
-  
+
   father: {
     name: {
       type: String
     },
     icNumber: {
-      type: String
+      type: String,
+      trim: true
     },
     nationality: {
       type: String
     },
     contactNumber: {
-      type: String
+      type: Number
     },
     email: {
-      type: String
+      type: String,
+      trim: true
     },
     occupation: {
       type: String
     },
     income: {
-      type: String
+      type: Number
     }
   },
-  
+
   mother: {
     name: {
       type: String
@@ -92,19 +94,20 @@ const StudentSchema = new Schema({
       type: String
     },
     contactNumber: {
-      type: String
+      type: Number
     },
     email: {
-      type: String
+      type: String,
+      trim: true
     },
     occupation: {
       type: String
     },
     income: {
-      type: String
+      type: Number
     }
   },
-  
+
   otherFamily: [{
     _id: false,
     name: {
@@ -118,16 +121,49 @@ const StudentSchema = new Schema({
     }
   }],
   
-  fas: [{
-    type: String,
-    enum: ['MOE', 'Mendaki', 'Others', 'None']
+  misc: {
+    fas: [{
+      type: String,
+      enum: ['MOE', 'Mendaki', 'Others', 'None']
   }],
-  
-  tuition: [{
-    type: String,
-    enum: ['CDAC', 'Mendaki', 'Private', 'None']
+
+    tuition: [{
+      type: String,
+      enum: ['CDAC', 'Mendaki', 'Private', 'None']
   }],
-  
+
+    academicInfo: [{
+      _id: false,
+      year: {
+        type: Number
+      },
+      term: {
+        type: Number
+      },
+      english: {
+        type: Number
+      },
+      math: {
+        type: Number
+      },
+      motherTongue: {
+        type: Number
+      },
+      science: {
+        type: Number
+      },
+      overall: {
+        type: Number
+      }
+    }]
+  },
+
+  classes: [{
+    type: Schema.ObjectId,
+    ref: 'Class'
+  }],
+
+
   admin: {
     interviewDate: {
       type: Date
@@ -148,37 +184,12 @@ const StudentSchema = new Schema({
       type: String
     }
   },
-  
-  academicInfo: [{
-    _id: false,
-    year: {
-      type: Number
-    },
-    term: {
-      type: Number
-    },
-    english: {
-      type: Number
-    },
-    math: {
-      type: Number
-    },
-    motherTongue: {
-      type: Number
-    },
-    science: {
-      type: Number
-    },
-    overall: {
-      type: Number
-    }
-    }],
-    
+
   status: {
     type: String,
     default: 'Active'
   }
-  
+
 }, {
   timestamps: true,
   minimize: false

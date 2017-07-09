@@ -10,6 +10,7 @@ const UserSchema = new Schema({
     type: String,
     lowercase: true,
     unique: true,
+    trim: true,
     required: true
   },
 
@@ -20,6 +21,7 @@ const UserSchema = new Schema({
   profile: {
     name: {
       type: String,
+      trim: true,
       required: true
     },
 
@@ -41,6 +43,7 @@ const UserSchema = new Schema({
 
     nric: {
       type: String,
+      trim: true,
       required: true
     },
 
@@ -88,7 +91,8 @@ const UserSchema = new Schema({
       type: String
     },
     email: {
-      type: String
+      type: String,
+      trim: true
     }
   },
 
@@ -100,120 +104,130 @@ const UserSchema = new Schema({
       type: String
     },
     email: {
-      type: String
+      type: String,
+      trim: true
     }
   },
 
-  hobbies: [{ // array of hobbies
-    type: String
+  misc: {
+    hobbies: { // array of hobbies
+      type: [String]
+    },
+
+    careerGoal: {
+      type: String
+    },
+
+    formalEducation: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      school: {
+        type: String
+      },
+      highestLevel: {
+        type: String
+      }
     }],
 
-  careerGoal: {
-    type: String
-  },
-
-  formerEducation: [{ // require at least 1 entry
-    dateFrom: { // MMYYYY
-      type: Date
-    },
-    dateTo: {
-      type: Date
-    },
-    school: {
-      type: String
-    },
-    highestLevel: {
-      type: String
-    }
+    coursesSeminar: [{
+      _id: false,
+      year: { // YYYY only
+        type: Date
+      },
+      courseAndObjective: {
+        type: String
+      }
       }],
 
-  coursesSeminar: [{
-    year: { // YYYY only
-      type: Date
-    },
-    courseAndObjective: {
-      type: String
-    }
+    achievements: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      description: {
+        type: String
+      }
+    }],
+
+    cca: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    cip: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    workInternExp: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    competence: [{
+      _id: false,
+      languages: [{
+        type: String,
       }],
-
-  achievements: [{
-    dateFrom: { // MMYYYY
-      type: Date
-    },
-    dateTo: {
-      type: Date
-    },
-    organisation: {
-      type: String
-    },
-    description: {
-      type: String
-    }
-    }],
-
-  cca: [{
-    dateFrom: { // MMYYYY
-      type: Date
-    },
-    dateTo: {
-      type: Date
-    },
-    organisation: {
-      type: String
-    },
-    rolePosition: {
-      type: String
-    }
-    }],
-
-  cip: [{
-    dateFrom: { // MMYYYY
-      type: Date
-    },
-    dateTo: {
-      type: Date
-    },
-    organisation: {
-      type: String
-    },
-    rolePosition: {
-      type: String
-    }
-    }],
-
-  workInternExp: [{
-    dateFrom: { // MMYYYY
-      type: Date
-    },
-    dateTo: {
-      type: Date
-    },
-    organisation: {
-      type: String
-    },
-    rolePosition: {
-      type: String
-    }
-    }],
-
-  competence: [{
-    languages: [{
-      type: String,
+      subjects: [{
+        type: String,
       }],
-    subjects: [{
-      type: String,
-      }],
-    interests: [{
-      type: String
+      interests: [{
+        type: String
       }]
     }],
 
-  purposeObjectives: {
-    type: String
-  },
+    purposeObjectives: {
+      type: String
+    },
 
-  developmentGoals: {
-    type: String
+    developmentGoals: {
+      type: String
+    }
   },
 
   commencementDate: {

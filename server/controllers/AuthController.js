@@ -98,7 +98,7 @@ module.exports.register = async(req, res) => {
     })
     const error = await user.validateSync();
     if (error) {
-      res.status(400).send('Error Saving: Fill in all required fields accurately')
+      res.status(422).send('Error Saving: Fill in all required fields accurately')
     }
     const userObject = await user.save()
     res.json({

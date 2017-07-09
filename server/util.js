@@ -22,12 +22,12 @@ module.exports.formatDate = yymmdd => {
 module.exports.generateToken = req => {
   const {
     _id,
-    role,
+    roles,
     status
   } = req
   const user = {
     _id,
-    role,
+    roles,
     status
   }
   return jwt.sign(user, config.secret, {

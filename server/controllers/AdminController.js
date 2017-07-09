@@ -50,7 +50,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     catch (err) {
         console.log(err)
         if (err.name == 'ValidationError') {
-            res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
+            res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
         }
         else res.status(500).send('server error')
     }

@@ -49,7 +49,7 @@ module.exports = app => {
   // User controls
   app.get('/api/getAllUsers', userControl.getAllUsers)
   app.get('/api/getUser/:id', userControl.getUser)
-  app.post('/api/editUserParticulars', userControl.editUserParticulars)
+  app.post('/api/editUserParticulars', hasRole(['Tutor', 'Admin']), userControl.editUserParticulars)
   app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
   
   app.get('/api/getExternal/:id', userControl.getExternal)
