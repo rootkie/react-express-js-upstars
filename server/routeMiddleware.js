@@ -18,7 +18,7 @@ module.exports.hasRole = function(role) {
           req.decoded = decoded
           let len = role.length
           for (let i = 0; i < len; i++) {
-            if (req.decoded.role.indexOf(role[i]) !== -1) return next()
+            if (req.decoded.roles.indexOf(role[i]) !== -1) return next()
           }
           return res.status(403).send('You do not have sufficient permission to access this endpoint')
         }
