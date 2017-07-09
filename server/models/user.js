@@ -17,66 +17,67 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  profile: {
+    name: {
+      type: String,
+      required: true
+    },
 
-  name: {
-    type: String,
-    required: true
-  },
+    dob: {
+      type: Date,
+      required: true
+    },
 
-  dob: {
-    type: Date,
-    required: true
-  },
+    gender: {
+      type: String,
+      enum: ['M', 'F'],
+      required: true
+    },
 
-  gender: {
-    type: String,
-    enum: ['M', 'F'],
-    required: true
-  },
+    nationality: {
+      type: String,
+      required: true
+    },
 
-  nationality: {
-    type: String,
-    required: true
-  },
+    nric: {
+      type: String,
+      required: true
+    },
 
-  nric: {
-    type: String,
-    required: true
-  },
+    address: {
+      type: String,
+      required: true
+    },
 
-  address: {
-    type: String,
-    required: true
-  },
+    postalCode: {
+      type: Number,
+      required: true
+    },
 
-  postalCode: {
-    type: String,
-    required: true
-  },
+    handphone: {
+      type: Number,
+      required: true
+    },
 
-  handphone: {
-    type: String,
-    required: true
-  },
+    homephone: {
+      type: Number,
+      required: true
+    },
 
-  homephone: {
-    type: String,
-    required: true
-  },
+    schoolName: {
+      type: String,
+      required: true
+    },
 
-  schoolName: {
-    type: String,
-    required: true
-  },
+    schoolLevel: {
+      type: String,
+      required: true
+    },
 
-  schoolLevel: {
-    type: String,
-    required: true
-  },
-
-  schoolClass: {
-    type: String,
-    required: true
+    schoolClass: {
+      type: String,
+      required: true
+    },
   },
 
   father: {
@@ -236,11 +237,11 @@ const UserSchema = new Schema({
     required: true
   },
 
-  roles: [{
-    type: String,
+  roles: {
+    type: [String],
     required: true,
-    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper']
-  }],
+    // enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'] //Mongoose error, can't use enum with required. Chose required
+  },
 
   classes: [{
     type: Schema.ObjectId,

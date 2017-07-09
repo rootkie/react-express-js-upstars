@@ -91,7 +91,7 @@ module.exports.editUserParticulars = async(req, res) => {
     })
 
     return res.json({
-      user,
+      user
     })
   }
   catch (err) {
@@ -108,11 +108,6 @@ module.exports.changePassword = async(req, res) => {
       newPassword,
       confirmNewPassword
     } = req.body
-    userId = util.makeString(userId)
-    oldPassword = util.makeString(oldPassword)
-    newPassword = util.makeString(newPassword)
-    confirmNewPassword = util.makeString(confirmNewPassword)
-
     // Just in case the front end screws up
     if (newPassword !== confirmNewPassword) {
       return res.status(422).json({
@@ -142,8 +137,7 @@ module.exports.changePassword = async(req, res) => {
 
 module.exports.getExternal = async(req, res) => {
   try {
-    const id = util.makeString(req.params.id)
-    const user = await External.findById(id).populate('classId', 'className')
+    const user = await External.findById(req.params.id).populate('classId', 'className')
     res.json({
       user
     })

@@ -36,22 +36,32 @@ module.exports.login = async(req, res) => {
 
 module.exports.register = async(req, res) => {
   try {
-
+    // All compulsory fields: Full test input with validation
+    /*{	
+    	"email": "test@gmail.com",
+    	"password": "password",
+    	"profile": {
+    		"name": "Scrub",
+    		"gender": "M",
+    		"dob": 123,
+    		"nationality": "SG",
+    		"nric": "S1102s",
+    		"address": "Blk Scrub",
+    		"postalCode": 122222,
+    		"homephone": 123,
+    		"handphone": 123,
+    		"schoolName": "HCI",
+    		"schoolClass": "2-3",
+    		"schoolLevel": "J2"
+    	},
+    	"commencementDate": 123123,
+    	"exitDate": 123,
+    	"preferredTimeSlot": "Friday"
+    }*/
     let {
       email,
-      name,
       password,
-      dob,
-      gender,
-      nationality,
-      nric,
-      address,
-      postalCode,
-      handphone,
-      homephone,
-      schoolName,
-      schoolLevel,
-      schoolClass,
+      profile,
       commencementDate,
       exitDate,
       preferredTimeSlot
@@ -80,18 +90,7 @@ module.exports.register = async(req, res) => {
     const user = new User({
       email,
       password,
-      name,
-      gender,
-      nationality,
-      dob,
-      nric,
-      address,
-      postalCode,
-      handphone,
-      homephone,
-      schoolName,
-      schoolLevel,
-      schoolClass,
+      profile,
       commencementDate,
       exitDate,
       preferredTimeSlot,

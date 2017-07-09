@@ -31,6 +31,6 @@ module.exports.generateToken = req => {
     status
   }
   return jwt.sign(user, config.secret, {
-    expiresIn: 3600 // 1 hour
+    expiresIn: 10800 // 3 hour
   })
 }
