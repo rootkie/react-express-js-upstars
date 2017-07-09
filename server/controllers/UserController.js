@@ -5,6 +5,9 @@ let util = require('../util.js')
 module.exports.getAllUsers = async(req, res) => {
   try {
     const users = await User.find({})
+    users.forEach((val,k)=>{
+      users[k] = util.makeUser(val)
+    })
     res.json({
       users
     })

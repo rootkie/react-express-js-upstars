@@ -7,17 +7,29 @@ let util = require('../util.js')
 // This is authenticated, user info stored in req.decoded
 module.exports.addEditClass = async(req, res) => {
   try {
+    // Sanitize input of body, this only works for non array inputs
+    Object.keys(req.body).forEach(function (k) {
+      req.body[k] = util.makeString(req.body[k])
+    })
+
     let {
       className,
-      description
+      classType,
+      venue,
+      dayAndTime,
+      startDate
     } = req.body
-    className = util.makeString(className)
     const class1 = {
       className,
-      description
+      classType,
+      venue,
+      dayAndTime,
+      startDate
     }
+
     const newClass = await Class.findOneAndUpdate({
-      className
+      className,
+      dayAndTime
     }, class1, {
       upsert: true,
       new: true
@@ -27,8 +39,7 @@ module.exports.addEditClass = async(req, res) => {
       status: 'success',
       class: newClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -38,11 +49,9 @@ module.exports.getAll = async(req, res) => {
   try {
     const classes = await Class.find({}).select('-createdAt')
     return res.json({
-      classes,
-      info: req.decoded
+      classes
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -52,8 +61,7 @@ module.exports.getClassById = async(req, res) => {
   try {
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
     return res.json(class1)
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -97,8 +105,7 @@ module.exports.addStudentsToClass = async(req, res) => {
       class: classes,
       students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -138,8 +145,7 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       class: classes,
       studentsRemoved: students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -179,8 +185,7 @@ module.exports.addUsersToClass = async(req, res) => {
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -219,16 +224,18 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-
 module.exports.assignExternalPersonnelToClass = async(req, res) => {
   try {
+    // Sanitize input of body, this only works for non array inputs
+    Object.keys(req.body).forEach(function (k) {
+      req.body[k] = util.makeString(req.body[k])
+    })
     let {
       classId,
       name,
@@ -237,12 +244,6 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       relationTo,
       nameOfRelatedPersonnel
     } = req.body
-    classId = util.makeString(classId)
-    name = util.makeString(name)
-    nric = util.makeString(nric)
-    organisation = util.makeString(organisation)
-    relationTo = util.makeString(relationTo)
-    nameOfRelatedPersonnel = util.makeString(nameOfRelatedPersonnel)
 
     const externalPersonnel = await External.findOneAndUpdate({
       nric: nric
@@ -273,8 +274,7 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       externalPersonnel,
       updatedClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -309,15 +309,13 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       updatedClass,
       updatedExternal
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-
-module.exports.dropDB = function(req, res) {
+module.exports.dropDB = function (req, res) {
   Class.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({
