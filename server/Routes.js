@@ -48,7 +48,7 @@ module.exports = app => {
 
   // User controls
   app.get('/api/getAllUsers', userControl.getAllUsers)
-  app.get('/api/getUser/:id', userControl.getUser)
+  app.get('/api/getUser/:id', hasRole(['Tutor', 'Admin']), userControl.getUser)
   app.post('/api/editUserParticulars', hasRole(['Tutor', 'Admin']), userControl.editUserParticulars)
   app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
   

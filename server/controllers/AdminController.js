@@ -36,10 +36,16 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
             newStatus,
             newRoles
         } = req.body
-        const updatedUser = await User.findByIdAndUpdate(userId, {
-            status: newStatus,
-            roles: newRoles //Use JSON arrays for validation to work
-        }, {
+        let edited = {}
+        
+        if (newStatus) {
+            edited.status = newStatus
+        }
+        if (newRoles) {
+            edited.roles = newRoles
+        }
+        console.log(edited)
+        const updatedUser = await User.findByIdAndUpdate(userId, edited, {
             new: true,
             runValidators: true,
         })

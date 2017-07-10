@@ -3,8 +3,8 @@ const External = require('../models/external-personnel')
 
 module.exports.getAllUsers = async(req, res) => {
   try {
-    const users = await User.find({})
-    res.json({
+    const users = await User.find({}).select('profile.name').sort('profile.name')
+    return res.json({
       users
     })
   }
@@ -16,7 +16,12 @@ module.exports.getAllUsers = async(req, res) => {
 
 module.exports.getUser = async(req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate('classes', 'className')
+    
+    if (req.params.id !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+      return res.status(403).send('Operation denied')
+    }
+
+    const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
     res.json({
       user
     })
@@ -36,10 +41,10 @@ module.exports.editUserParticulars = async(req, res) => {
     let edited = {}
 
     if (!userId) {
-      res.status(422).send('Please provide a valid userId')
+      return res.status(422).send('Please provide a valid userId')
     }
     if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
-      res.status(403).send('Operation denied')
+      return res.status(403).send('Operation denied')
     }
     if (req.decoded.roles.indexOf('Admin') != -1) {
       if (req.body.admin) {
@@ -112,7 +117,7 @@ module.exports.changePassword = async(req, res) => {
 module.exports.getExternal = async(req, res) => {
   try {
     const user = await External.findById(req.params.id).populate('classId', 'className')
-    res.json({
+    return res.json({
       user
     })
   }

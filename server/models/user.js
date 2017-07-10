@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt-nodejs')
 const UserSchema = new Schema({
   email: {
     type: String,
-    lowercase: true,
     unique: true,
     trim: true,
     required: true
@@ -251,11 +250,11 @@ const UserSchema = new Schema({
     required: true
   },
 
-  roles: {
-    type: [String],
+  roles: [{
+    type: String,
     required: true,
-    // enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'] //Mongoose error, can't use enum with required. Chose required
-  },
+    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper']
+  }],
 
   classes: [{
     type: Schema.ObjectId,
