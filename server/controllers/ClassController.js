@@ -24,7 +24,7 @@ module.exports.addEditClass = async(req, res) => {
       classType,
       venue,
       dayAndTime,
-      startDate
+      startDate: util.formatDate(startDate)
     }
 
     const newClass = await Class.findOneAndUpdate({
