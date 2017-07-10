@@ -60,4 +60,7 @@ module.exports = app => {
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
+  
+  //Special Treats
+  app.post('/api/generateAdminUser', adminControl.generateAdminUser)
 }
