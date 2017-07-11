@@ -4,14 +4,8 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 let util = require('../util.js')
 
-// This is authenticated, user info stored in req.decoded
 module.exports.addEditClass = async(req, res) => {
   try {
-    // Sanitize input of body, this only works for non array inputs
-    Object.keys(req.body).forEach(function (k) {
-      req.body[k] = util.makeString(req.body[k])
-    })
-
     let {
       className,
       classType,
@@ -32,7 +26,8 @@ module.exports.addEditClass = async(req, res) => {
       dayAndTime
     }, class1, {
       upsert: true,
-      new: true
+      new: true,
+      runValidators: true
     })
 
     res.json({
@@ -73,7 +68,6 @@ module.exports.addStudentsToClass = async(req, res) => {
       classId,
       studentIds
     } = req.body
-    classId = util.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         students: {
@@ -81,7 +75,8 @@ module.exports.addStudentsToClass = async(req, res) => {
         }
       }
     }, {
-      new: true
+      new: true,
+      runValidators: true
     })
 
     const students = await Student.update({
@@ -118,7 +113,6 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       classId,
       studentIds
     } = req.body
-    classId = util.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
         students: studentIds
@@ -157,7 +151,6 @@ module.exports.addUsersToClass = async(req, res) => {
       classId,
       userIds
     } = req.body
-    classId = util.makeString(classId)
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         users: {
@@ -165,7 +158,8 @@ module.exports.addUsersToClass = async(req, res) => {
         }
       }
     }, {
-      new: true
+      new: true,
+      runValidators: true
     })
 
     const users = await User.update({
@@ -197,7 +191,6 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       classId,
       userIds
     } = req.body
-    classId = util.makeString(req.body.classId)
 
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
@@ -232,10 +225,6 @@ module.exports.deleteUsersFromClass = async(req, res) => {
 
 module.exports.assignExternalPersonnelToClass = async(req, res) => {
   try {
-    // Sanitize input of body, this only works for non array inputs
-    Object.keys(req.body).forEach(function (k) {
-      req.body[k] = util.makeString(req.body[k])
-    })
     let {
       classId,
       name,
@@ -260,7 +249,8 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       }
     }, {
       new: true,
-      upsert: true
+      upsert: true,
+      runValidators: true
     })
 
     const updatedClass = await Class.findByIdAndUpdate(classId, {
@@ -286,8 +276,6 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       classId,
       externalId
     } = req.body
-    classId = util.makeString(classId)
-    externalId = util.makeString(externalId)
 
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $pull: {
