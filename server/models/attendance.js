@@ -12,7 +12,7 @@ const AttendanceSchema = new Schema({
   },
   hours: {
     type: Number,
-    default: 0,
+    min: 0,
     required: true
   },
   class: {
@@ -26,7 +26,8 @@ const AttendanceSchema = new Schema({
       ref: 'User'
     },
     status: {
-      type: Number
+      type: Number,
+      required: true
     },
     _id: false
   }],

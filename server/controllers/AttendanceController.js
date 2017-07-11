@@ -34,20 +34,10 @@ module.exports.addEditAttendance = async(req, res) => {
       students,
       type
     } = req.body
-      // TO BE DONE ON THE FRONT END
-      // class should be the id of the class
-      // users should be an array of user id
-      // students should be an array of student id
 
-    // Validation is temporarily neglected
-    // Consider validating if class has the students and tutors.
-
-    if (classId == null) {
-      res.status(400).json('ClassId can not be null')
+    if (!classId) {
+      return res.status(422).json('ClassId can not be null')
     }
-    classId = util.makeString(classId)
-    date = util.makeString(date)
-    type = util.makeString(type)
     let hoursInt = parseInt(hours, 10)
     if (type !== 'Class') hoursInt = 0
 
@@ -66,7 +56,7 @@ module.exports.addEditAttendance = async(req, res) => {
     }, attendance1, {
       upsert: true,
       new: true,
-      setDefaultsOnInsert: true
+      runValidators: true
     })
 
     res.json({
@@ -76,7 +66,10 @@ module.exports.addEditAttendance = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.name == 'ValidationError') {
+      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+    }
+    else res.status(500).send('server error')
   }
 }
 
@@ -86,8 +79,9 @@ module.exports.deleteAttendance = async(req, res) => {
       date,
       classId
     } = req.body
-    classId = util.makeString(classId)
-    date = util.makeString(date)
+    if (!classId || !date) {
+      return res.status(422).json('ClassId or date cannot be empty')
+    }
     const removed = await Attendance.remove({
       class: classId,
       date: util.formatDate(date)
@@ -104,37 +98,6 @@ module.exports.deleteAttendance = async(req, res) => {
   }
 }
 
-/*module.exports.getAttendanceBetween = async(req, res) => {
-  try {
-    let {
-      dateStart,
-      dateEnd,
-      classId
-    } = req.body
-    if (classId == null) {
-      res.status(400).json('ClassId cannot be null')
-    }
-    dateStart = util.makeString(dateStart)
-    dateEnd = util.makeString(dateEnd)
-    classId = util.makeString(classId)
-    const foundAttendance = await Attendance.find({
-      date: {
-        '$gte': util.formatDate(dateStart),
-        '$lte': util.formatDate(dateEnd)
-      },
-      class: classId
-    })
-
-    res.json({
-      status: 'success',
-      foundAttendance
-    })
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-} */
 
 module.exports.getAttendanceByClass = async(req, res) => {
   try {
@@ -143,13 +106,12 @@ module.exports.getAttendanceByClass = async(req, res) => {
       dateStart,
       dateEnd
     } = req.body
-    classId = util.makeString(classId)
-    dateStart = util.makeString(dateStart)
-    dateEnd = util.makeString(dateEnd)
+
 
     let attendances = Attendance.find()
       .limit(100)
-      .sort('class date')
+      .populate('class', ['className'])
+      .sort('class.className -date')
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
@@ -184,16 +146,14 @@ module.exports.getAttendanceByUser = async(req, res) => {
       dateStart,
       dateEnd
     } = req.body
-    userId = util.makeString(userId)
-    classId = util.makeString(classId)
-    dateStart = util.makeString(dateStart)
-    dateEnd = util.makeString(dateEnd)
 
     let attendances = Attendance.find({
         'users.list': userId
-      }).populate('users.list', ['profile'])
-      .sort('class date')
-      .select('users.$ date')
+      })
+      .populate('users.list', ['profile.name'])
+      .populate('class', ['className'])
+      .sort('class.className -date')
+      .select('users.$ date class')
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
@@ -226,16 +186,15 @@ module.exports.getAttendanceByStudent = async(req, res) => {
       dateStart,
       dateEnd
     } = req.body
-    studentId = util.makeString(studentId)
-    classId = util.makeString(classId)
-    dateStart = util.makeString(dateStart)
-    dateEnd = util.makeString(dateEnd)
+
 
     let attendances = Attendance.find({
         'students.list': studentId
-      }).populate('students.list', ['profile'])
-      .sort('class date')
-      .select('students.$ date')
+      })
+      .populate('students.list', ['profile.name'])
+      .populate('class', ['className'])
+      .sort('class.className -date')
+      .select('students.$ date class')
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
@@ -260,104 +219,80 @@ module.exports.getAttendanceByStudent = async(req, res) => {
   }
 }
 
-module.exports.getAttendanceUserFromClass = async(req, res) => {
-    try {
-      let {
-        classId
-      } = req.body
-      if (classId == null) {
-        res.status(400).json('ClassId cannot be null')
-      }
-      classId = util.makeString(classId)
-      const foundAttendanceforUser = await Attendance.aggregate()
-        .match({
-          'class': mongoose.Types.ObjectId(classId)
-        })
-        .unwind('users')
-        .sort('-date')
-        .group({
-          '_id': '$users.list',
-          'users-info': {
-            '$push': {
-              'status': '$users.status',
-              'date': '$date'
-            }
-          },
-          'total': {
-            '$sum': 1
-          },
-          'attended': {
-            '$sum': '$users.status'
-          }
-        })
-        .lookup({
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'user-name'
-        })
-        .project('user-name.roles users-info total attended')
-
-      const foundAttendanceforStudent = await Attendance.aggregate()
-        .match({
-          'class': mongoose.Types.ObjectId(classId)
-        })
-        .unwind('students')
-        .sort('-date')
-        .group({
-          '_id': '$students.list',
-          'students-info': {
-            '$push': {
-              'status': '$students.status',
-              'date': '$date'
-            }
-          },
-          'total': {
-            '$sum': 1
-          },
-          'attended': {
-            '$sum': '$students.status'
-          }
-        })
-        .lookup({
-          from: 'students',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'student-name'
-        })
-        .project('student-name students-info total attended')
-
-      res.json({
-        status: 'success',
-        foundAttendanceforUser,
-        foundAttendanceforStudent
+module.exports.getClassAttendanceSummary = async(req, res) => {
+  try {
+    let {
+      classId
+    } = req.body
+    if (!classId) {
+      return res.status(422).json('ClassId cannot be null')
+    }
+    const foundAttendanceforUser = await Attendance.aggregate()
+      .match({
+        'class': mongoose.Types.ObjectId(classId)
       })
-    }
-    catch (err) {
-      console.log(err)
-      res.status(500).send('server error')
-    }
+      .unwind('users')
+      .sort('-date')
+      .group({
+        '_id': '$users.list',
+        'user-attendance': {
+          '$push': {
+            'status': '$users.status',
+            'date': '$date'
+          }
+        },
+        'total': {
+          '$sum': 1
+        },
+        'attended': {
+          '$sum': '$users.status'
+        }
+      })
+      .lookup({
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'user-name'
+      })
+      .project('user-name.profile.name user-attendance total attended')
+
+    const foundAttendanceforStudent = await Attendance.aggregate()
+      .match({
+        'class': mongoose.Types.ObjectId(classId)
+      })
+      .unwind('students')
+      .sort('-date')
+      .group({
+        '_id': '$students.list',
+        'student-attendance': {
+          '$push': {
+            'status': '$students.status',
+            'date': '$date'
+          }
+        },
+        'total': {
+          '$sum': 1
+        },
+        'attended': {
+          '$sum': '$students.status'
+        }
+      })
+      .lookup({
+        from: 'students',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'student-name'
+      })
+      .project('student-name.profile.name student-attendance total attended')
+
+    res.json({
+      status: 'success',
+      foundAttendanceforUser,
+      foundAttendanceforStudent
+    })
   }
-  /*
-  module.exports.getAttendanceStudentFromClass = async(req, res) => {
-    try {
-      let {
-        classId,
-        studentId
-      } = req.body
-      classId = util.makeString(classId)
-      studentId = util.makeString(studentId)
-      let records = await Attendance.find({
-        class: classId,
-        students: studentId
-      })
-      res.json({
-        status: 'success',
-        records: records
-      })
-    }
-    catch (err) {
-      console.log(err)
-      res.status(500).send('server error')
-    }
-  }*/
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
