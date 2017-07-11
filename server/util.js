@@ -3,12 +3,12 @@ const jwt = require('jsonwebtoken')
 const config = require('./config/constConfig')
 
 module.exports.makeString = obj => {
-    if (obj) {
-        return (typeof(obj) == 'string') ? obj: JSON.stringify(obj);
-    }
-    else {
-        return null;
-    }
+  if (obj) {
+    return (typeof(obj) == 'string') ? obj : JSON.stringify(obj);
+  }
+  else {
+    return null;
+  }
 }
 
 module.exports.formatDate = yyyymmdd => {
@@ -19,13 +19,18 @@ module.exports.formatDate = yyyymmdd => {
   return new Date(dateString)
 }
 
-module.exports.generateToken = user => {
+module.exports.generateToken = req => {
+  const {
+    _id,
+    roles,
+    status
+  } = req
+  const user = {
+    _id,
+    roles,
+    status
+  }
   return jwt.sign(user, config.secret, {
-    expiresIn: 3600 // 1 hour
+    expiresIn: 10800 // 3 hour
   })
-}
-
-module.exports.makeUser = req => {
-  const { _id, email, role, profile } = req
-  return { _id, profile, role, email }
 }

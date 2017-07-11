@@ -1,12 +1,19 @@
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const filter = require('content-filter')
 const path = require('path')
-const routeMiddlware = require('./routeMiddleware')
 const app = express()
-
 const mongoose = require('mongoose')
 const config = require('./config/constConfig')
+const filterOptions = {
+    urlBlackList:['$','%7B','&&','||', '.', '$ne', '$where', 'eval'], //ASCII code: %7B = { due to urlencoding
+    urlMessage: 'A forbidden expression has been found in URL',
+    bodyBlackList:['$', '{', '&&', '||', '$ne', '$where', 'eval'],
+    bodyMessage: 'A forbidden expression has been found in form data',
+    methodList:['POST', 'PUT', 'DELETE', 'GET'],
+    dispatchToErrorHandler: false,
+}
 
 // ===================Initialization ==============================
 
@@ -34,12 +41,13 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(bodyParser.json())
 
+app.use(filter(filterOptions))
+
+
 app.use((err,req,res,next)=>{
     console.log(err)
-    return res.send({error:"something wrong with parsing"})
+    return res.status(err.status).send({error:"something wrong with parsing"})
 })
-
-routeMiddlware.setAdminRouteMiddleware(app)
 
 require('./Routes')(app)
 // ==================End of Initialization=========================

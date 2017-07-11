@@ -46,8 +46,10 @@ const AttendanceSchema = new Schema({
     enum: ['Class', 'PHoliday', 'Cancelled'],
     required: true
   }
-}, {
-  timestamps: true
-})
+},
+  {
+    timestamps: true,
+    minimize: false
+  })
 
 module.exports = mongoose.model('Attendance', AttendanceSchema)

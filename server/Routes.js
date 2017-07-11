@@ -4,15 +4,16 @@ const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const statisticsControl = require('./controllers/StatisticsController')
 const userControl = require('./controllers/UserController.js')
+const adminControl = require('./controllers/AdminController.js')
 const hasRole = require('./routeMiddleware').hasRole
 
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
+
 module.exports = app => {
-  app.get('/api/admin/getClasses', hasRole(['Tutor', 'Admin']), classControl.getAll)
-  
   // Classes
+  app.get('/api/getClasses', hasRole(['Tutor','Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
   app.post('/api/addEditClass', classControl.addEditClass)
   app.post('/api/addStudentsToClass', classControl.addStudentsToClass)
@@ -28,6 +29,7 @@ module.exports = app => {
 
   // Attendance controls
   app.post('/api/addEditAttendance', attendanceControl.addEditAttendance)
+
   app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
   app.post('/api/getAttendanceByClass', attendanceControl.getAttendanceByClass)
   app.post('/api/getAttendanceByUser', attendanceControl.getAttendanceByUser)
@@ -43,18 +45,21 @@ module.exports = app => {
   app.post('/api/getAttendanceRate/student', statisticsControl.getAttendanceRateStudent)
   app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
 
-  // User controls for any user
+  // User controls
   app.get('/api/getAllUsers', userControl.getAllUsers)
-  app.get('/api/getUser/:id', userControl.getUser)
-  app.post('/api/editUserParticulars', userControl.editUserParticulars)
+  app.get('/api/getUser/:id', hasRole(['Tutor', 'Admin']), userControl.getUser)
+  app.post('/api/editUserParticulars', hasRole(['Tutor', 'Admin']), userControl.editUserParticulars)
   app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
   
   app.get('/api/getExternal/:id', userControl.getExternal)
 
   // Admin controls under user
-  app.post('/api/adminChangePassword', userControl.adminChangePassword) // For admin to change anyone's password
-  app.post('/api/changeUserStatusAndPermissions', userControl.changeUserStatusAndPermissions) // If there's a need to split them up into 2 API... Waiting for the permissions table.
+  app.post('/api/adminChangePassword', adminControl.adminChangePassword)
+  app.post('/api/changeUserStatusAndPermissions', adminControl.changeUserStatusAndPermissions)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
+  
+  //Special Treats
+  app.post('/api/generateAdminUser', adminControl.generateAdminUser)
 }

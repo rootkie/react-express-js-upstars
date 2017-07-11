@@ -8,28 +8,34 @@ const ExternalSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'Class'
   }],
+  
   name: {
       type: String,
       required: true,
   },
+  
   nric: {
       type: String,
       required: true,
       unique: true
   },
+  
   organisation: {
       type: String
   },
+  
   relationTo: {
       type: String,
       enum: ['Student', 'Volunteer']
   },
+  
   nameOfRelatedPersonnel: {
       type: String
   }
 },
   {
-    timestamps: true
+    timestamps: true,
+    minimize: false
   })
 
 module.exports = mongoose.model('External', ExternalSchema)

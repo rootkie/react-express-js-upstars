@@ -8,8 +8,8 @@ const bcrypt = require('bcrypt-nodejs')
 const UserSchema = new Schema({
   email: {
     type: String,
-    lowercase: true,
     unique: true,
+    trim: true,
     required: true
   },
 
@@ -17,27 +17,264 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
-
   profile: {
     name: {
+      type: String,
+      trim: true,
+      required: true
+    },
+
+    dob: {
+      type: Date,
+      required: true
+    },
+
+    gender: {
+      type: String,
+      enum: ['M', 'F'],
+      required: true
+    },
+
+    nationality: {
+      type: String,
+      required: true
+    },
+
+    nric: {
+      type: String,
+      trim: true,
+      required: true
+    },
+
+    address: {
+      type: String,
+      required: true
+    },
+
+    postalCode: {
+      type: Number,
+      required: true
+    },
+
+    handphone: {
+      type: Number,
+      required: true
+    },
+
+    homephone: {
+      type: Number,
+      required: true
+    },
+
+    schoolName: {
+      type: String,
+      required: true
+    },
+
+    schoolLevel: {
+      type: String,
+      required: true
+    },
+
+    schoolClass: {
+      type: String,
+      required: true
+    },
+  },
+
+  father: {
+    name: {
+      type: String
+    },
+    occupation: {
+      type: String
+    },
+    email: {
+      type: String,
+      trim: true
+    }
+  },
+
+  mother: {
+    name: {
+      type: String
+    },
+    occupation: {
+      type: String
+    },
+    email: {
+      type: String,
+      trim: true
+    }
+  },
+
+  misc: {
+    hobbies: { // array of hobbies
+      type: [String]
+    },
+
+    careerGoal: {
+      type: String
+    },
+
+    formalEducation: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      school: {
+        type: String
+      },
+      highestLevel: {
+        type: String
+      }
+    }],
+
+    coursesSeminar: [{
+      _id: false,
+      year: { // YYYY only
+        type: Date
+      },
+      courseAndObjective: {
+        type: String
+      }
+      }],
+
+    achievements: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      description: {
+        type: String
+      }
+    }],
+
+    cca: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    cip: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    workInternExp: [{
+      _id: false,
+      dateFrom: { // MMYYYY
+        type: Date
+      },
+      dateTo: {
+        type: Date
+      },
+      organisation: {
+        type: String
+      },
+      rolePosition: {
+        type: String
+      }
+    }],
+
+    competence: [{
+      _id: false,
+      languages: [{
+        type: String,
+      }],
+      subjects: [{
+        type: String,
+      }],
+      interests: [{
+        type: String
+      }]
+    }],
+
+    purposeObjectives: {
+      type: String
+    },
+
+    developmentGoals: {
       type: String
     }
   },
-  
-  status: {
-    type: String,
-    default: 'Active'
+
+  commencementDate: {
+    type: Date,
+    required: true
   },
 
-  role: [{
+  exitDate: {
+    type: Date,
+    required: true
+  },
+
+  preferredTimeSlot: [{
     type: String,
-    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper'],
+    required: true
+  }],
+
+  status: {
+    type: String,
+    default: 'Pending',
+    required: true
+  },
+
+  roles: [{
+    type: String,
+    required: true,
+    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper']
   }],
 
   classes: [{
     type: Schema.ObjectId,
     ref: 'Class'
   }],
+
+  admin: {
+    interviewDate: {
+      type: Date
+    },
+    interviewNotes: {
+      type: String
+    },
+    commencementDate: {
+      type: Date
+    },
+    adminNotes: {
+      type: String
+    }
+  },
 
   resetPasswordToken: {
     type: String
@@ -48,7 +285,8 @@ const UserSchema = new Schema({
   }
 
 }, {
-  timestamps: true
+  timestamps: true,
+  minimize: false
 })
 
 // Pre-save of user to database, hash password if password is modified or new
@@ -80,7 +318,7 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   })
 }
 
-UserSchema.methods.comparePasswordPromise = function(candidatePassword) { //Coz of lexical this
+UserSchema.methods.comparePasswordPromise = function(candidatePassword) { // Coz of lexical this
   return new Promise((resolve, reject) => {
     bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
       if (err) {

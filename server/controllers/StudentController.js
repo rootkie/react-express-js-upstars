@@ -5,46 +5,43 @@ let util = require('../util.js')
 module.exports.addEditStudent = async(req, res) => {
   try {
     let {
-      name,
-      icNumber,
-      email,
-      contactNumber,
-      dateOfBirth,
-      address,
-      gender,
-      schoolType,
-      schoolName
+      profile
     } = req.body
-    let student = {
-      profile: {
-        name: name,
-        icNumber: icNumber,
-        email: email,
-        contactNumber: contactNumber,
-        dateOfBirth: dateOfBirth,
-        address: address,
-        gender: gender
-      },
-      classes: [],
-      schoolType: schoolType,
-      schoolName: schoolName
+
+    let edited = {}
+
+    if (!profile.icNumber) {
+      res.status(422).send('Please provide a valid NRIC number')
     }
-    icNumber = util.makeString(icNumber)
+    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'misc', 'admin', 'status']
+
+    for (let checkChanged of list) {
+      if (req.body[checkChanged]) {
+        edited[checkChanged] = await req.body[checkChanged]
+      }
+    }
+
     const newStudent = await Student.findOneAndUpdate({
-      'profile.icNumber': icNumber
-    }, student, {
+      'profile.icNumber': edited.profile.icNumber
+    }, edited, {
       upsert: true,
       new: true,
-      setDefaultsOnInsert: true
+      setDefaultsOnInsert: true,
+      runValidators: true,
+      runSettersOnQuery: true
     })
 
     res.json({
       status: 'success',
-      student: newStudent
+      newStudent
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.name == 'ValidationError') {
+      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+    }
+    else res.status(500).send('server error')
   }
 }
 
@@ -55,7 +52,8 @@ module.exports.getAll = async(req, res) => {
       students: students,
       info: req.decoded
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -63,18 +61,18 @@ module.exports.getAll = async(req, res) => {
 
 module.exports.getStudentById = async(req, res) => {
   try {
-    const studentId = util.makeString(req.params.id)
     const student = await Student.findById(studentId).populate('classes', 'className')
     return res.json({
       student
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.dropDB = function (req, res) {
+module.exports.dropDB = function(req, res) {
   Student.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({

@@ -1,14 +1,10 @@
 const User = require('../models/user')
 const External = require('../models/external-personnel')
-let util = require('../util.js')
 
 module.exports.getAllUsers = async(req, res) => {
   try {
-    const users = await User.find({})
-    users.forEach((val,k)=>{
-      users[k] = util.makeUser(val)
-    })
-    res.json({
+    const users = await User.find({}).select('profile.name').sort('profile.name')
+    return res.json({
       users
     })
   }
@@ -20,8 +16,12 @@ module.exports.getAllUsers = async(req, res) => {
 
 module.exports.getUser = async(req, res) => {
   try {
-    const userId = util.makeString(req.params.id)
-    const user = await User.findById(userId).populate('classes', 'className')
+    
+    if (req.params.id !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+      return res.status(403).send('Operation denied')
+    }
+
+    const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
     res.json({
       user
     })
@@ -34,32 +34,50 @@ module.exports.getUser = async(req, res) => {
 
 module.exports.editUserParticulars = async(req, res) => {
   try {
-    // Did not include firstName, lastName, classes as this API is meant for users like tutor to update their particulars. (They can't change their name either..)
-    // For the real API, there will be much more details like HP number and stuff
     let {
-      userId,
-      email
+      userId
     } = req.body
-    userId = util.makeString(userId)
-    email = util.makeString(email)
-    const user = await User.findByIdAndUpdate(userId, {
-      email
-    }, {
-      new: true
+
+    let edited = {}
+
+    if (!userId) {
+      return res.status(422).send('Please provide a valid userId')
+    }
+    if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+      return res.status(403).send('Operation denied')
+    }
+    if (req.decoded.roles.indexOf('Admin') != -1) {
+      if (req.body.admin) {
+        edited['admin'] = req.body.admin
+      }
+    }
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot'] //email is left out because unique: true is not a validator. Only works on create.
+
+    for (let checkChanged of list) {
+      if (req.body[checkChanged]) {
+        edited[checkChanged] = await req.body[checkChanged]
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(userId, edited, {
+      new: true,
+      runValidators: true,
+      runSettersOnQuery: true
     })
 
-    let tokenUser = util.makeUser(user)
-
     return res.json({
-      user: user,
-      newToken: util.generateToken(tokenUser)
+      user
     })
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error: ' + err.message)
+    if (err.name == 'ValidationError') {
+      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+    }
+    else res.status(500).send('server error')
   }
 }
+
 
 module.exports.changePassword = async(req, res) => {
   try {
@@ -69,12 +87,7 @@ module.exports.changePassword = async(req, res) => {
       newPassword,
       confirmNewPassword
     } = req.body
-    userId = util.makeString(userId)
-    oldPassword = util.makeString(oldPassword)
-    newPassword = util.makeString(newPassword)
-    confirmNewPassword = util.makeString(confirmNewPassword)
-
-    // Just in case the front end screws up
+      // Just in case the front end screws up
     if (newPassword !== confirmNewPassword) {
       return res.status(422).json({
         error: 'The 2 new passwords do not match'
@@ -100,66 +113,11 @@ module.exports.changePassword = async(req, res) => {
   }
 }
 
-module.exports.adminChangePassword = async(req, res) => {
-  try {
-    let {
-      userId,
-      newPassword,
-      confirmNewPassword
-    } = req.body
-    userId = util.makeString(userId)
-    newPassword = util.makeString(newPassword)
-    confirmNewPassword = util.makeString(confirmNewPassword)
-      // Just in case the front end screws up
-    if (newPassword !== confirmNewPassword) {
-      return res.status(422).send({
-        error: 'The 2 new passwords do not match'
-      })
-    }
-    const user = await User.findById(userId)
-      // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
-    user.password = confirmNewPassword
-    const pwChanged = await user.save()
-
-    res.json({
-      user: pwChanged
-        // token:
-    })
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-}
-
-module.exports.changeUserStatusAndPermissions = async(req, res) => {
-  try {
-    let {
-      userId,
-      newStatus
-    } = req.body
-    userId = util.makeString(userId)
-    newStatus = util.makeString(newStatus)
-    const updatedUser = await User.findByIdAndUpdate(userId, {
-      status: newStatus
-    }, {
-      new: true
-    })
-    res.json({
-      user: updatedUser
-    })
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
-  }
-}
 
 module.exports.getExternal = async(req, res) => {
   try {
-    const id = util.makeString(req.params.id)
-    const user = await External.findById(id).populate('classId', 'className')
-    res.json({
+    const user = await External.findById(req.params.id).populate('classId', 'className')
+    return res.json({
       user
     })
   }
