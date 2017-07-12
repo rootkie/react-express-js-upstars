@@ -15,7 +15,8 @@ module.exports = app => {
   // Classes
   app.get('/api/getClasses', hasRole(['Tutor','Admin']), classControl.getAll)
   app.get('/api/getClass/:id', classControl.getClassById)
-  app.post('/api/addEditClass', classControl.addEditClass)
+  app.post('/api/addClass', classControl.addClass)
+  app.post('/api/editClass', classControl.editClass)
   app.post('/api/addStudentsToClass', classControl.addStudentsToClass)
   app.post('/api/deleteStudentsFromClass', classControl.deleteStudentsFromClass)
   app.post('/api/addUsersToClass', classControl.addUsersToClass) // Handles both user -> class && class -> user

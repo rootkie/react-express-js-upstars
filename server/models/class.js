@@ -12,19 +12,19 @@ const ClassSchema = new Schema({
   classType: {
     type: String,
     enum: ['Tuition','Enrichment'],
-    require: true
+    required: true
   },
   venue: {
     type: String,
-    require: true
+    required: true
   },
   dayAndTime: {
     type: String,
-    require: true
+    required: true
   },
   startDate: {
     type: Date,
-    require: true
+    required: true
   },
   // Refs to other models
   students: [{

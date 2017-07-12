@@ -4,9 +4,44 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 let util = require('../util.js')
 
-module.exports.addEditClass = async(req, res) => {
+module.exports.addClass = async(req, res) => {
   try {
     let {
+      className,
+      classType,
+      venue,
+      dayAndTime,
+      startDate
+    } = req.body
+
+    const newClass = new Class({
+      className,
+      classType,
+      venue,
+      dayAndTime,
+      startDate: util.formatDate(startDate)
+    })
+    const error = await newClass.validateSync();
+    if (error) {
+      return res.status(422).send('Error Saving: Fill in all required fields accurately')
+    }
+    const newClassCreated = await newClass.save()
+
+    res.json({
+      status: 'success',
+      class: newClassCreated
+    })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}
+
+module.exports.editClass = async(req, res) => {
+  try {
+    let {
+      classId,
       className,
       classType,
       venue,
@@ -21,11 +56,7 @@ module.exports.addEditClass = async(req, res) => {
       startDate: util.formatDate(startDate)
     }
 
-    const newClass = await Class.findOneAndUpdate({
-      className,
-      dayAndTime
-    }, class1, {
-      upsert: true,
+    const newClass = await Class.findByIdAndUpdate(classId, class1, {
       new: true,
       runValidators: true
     })
@@ -34,9 +65,13 @@ module.exports.addEditClass = async(req, res) => {
       status: 'success',
       class: newClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.name == 'ValidationError') {
+      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+    }
+    else res.status(500).send('server error')
   }
 }
 
@@ -46,7 +81,8 @@ module.exports.getAll = async(req, res) => {
     return res.json({
       classes
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -56,7 +92,8 @@ module.exports.getClassById = async(req, res) => {
   try {
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
     return res.json(class1)
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -100,7 +137,8 @@ module.exports.addStudentsToClass = async(req, res) => {
       class: classes,
       students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -139,7 +177,8 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       class: classes,
       studentsRemoved: students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -179,7 +218,8 @@ module.exports.addUsersToClass = async(req, res) => {
       class: classes,
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -217,7 +257,8 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       class: classes,
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -264,7 +305,8 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       externalPersonnel,
       updatedClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -297,13 +339,14 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       updatedClass,
       updatedExternal
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.dropDB = function (req, res) {
+module.exports.dropDB = function(req, res) {
   Class.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({
