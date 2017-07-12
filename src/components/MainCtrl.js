@@ -7,6 +7,7 @@ import Home from './Home'
 import PropTypes from 'prop-types'
 import VolunteerForm from './VolunteerForm'
 import Attendance from './Attendance'
+import StudentWrap from './StudentWrap'
 
 const GridStyle = {
   paddingTop: '4em',
@@ -29,6 +30,7 @@ class MainCtrl extends Component {
           <SideMenu activeItem={op || ''} />
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
+            {main === 'students' && <StudentWrap op={op} />}
             {main === 'classes' && <Classes op={op} />}
             {main === 'volunteer' && <VolunteerForm />}
             {main === 'attendance' && <Attendance />}

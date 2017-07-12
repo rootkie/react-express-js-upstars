@@ -1,0 +1,43 @@
+
+  fullname: '',
+  firstName: '', // Family name
+  lastName: '', // Personal name
+  studentIC: '',
+  dateOfBirth: '',
+  nationality: '',
+  gender: '',
+  address: '', // I don't think we should break the field into such granular sections like name of road, unit number etc
+  school: '',
+  classLevel: '',
+
+  /* Family Information */
+  fatherName: '',
+  fatherIC: '',
+  fatherNumber: '',
+  fatherEmail: '',
+  fatherOccupation: '',
+  fatherMonthlyIncome: '',
+  motherName: '',
+  motherIC: '',
+  motherNumber: '',
+  motherEmail: '',
+  motherOccupation: '',
+  motherMonthlyIncome: '',
+  otherFamilyMembers: '', // object with all the info
+  otherName: '',
+  otherRelationship: '',
+  otherDateOfBirth: '',
+  fas: '',
+  learningSupport: '',
+
+  /* Terms and conditions */
+  terms: false,
+  termsDetails: false,
+
+  /* Official use */
+  interviewDate: '',
+  interviewNotes: '',
+  commencementDate: '',
+  adminNotes: '',
+  dateOfExit: '',
+  reasonForExit: '',

@@ -8,6 +8,14 @@ const SideMenu = ({activeItem}) => (
     <Menu vertical fluid>
       <Link to='/home' className={`item ${activeItem === 'home' && 'active'}`}>Home</Link>
       <Menu.Item>
+        <Menu.Header>Student</Menu.Header>
+        <Menu.Menu>
+          <Link to='/students/add' className={`item ${activeItem === 'addStudent' && 'active'}`}>add</Link>
+          <Link to='/students/edit' className={`item ${activeItem === 'editStudent' && 'active'}`}>edit</Link>
+          <Link to='/students/view' className={`item ${activeItem === 'viewStudent' && 'active'}`}>view</Link>
+        </Menu.Menu>
+      </Menu.Item>
+      <Menu.Item>
         <Menu.Header>Class</Menu.Header>
         <Menu.Menu>
           <Link to='/classes/add' className={`item ${activeItem === 'add' && 'active'}`}>add</Link>
