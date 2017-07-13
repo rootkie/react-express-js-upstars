@@ -1,5 +1,5 @@
 ## React-Express-upstars
-This project is to build a student volunteer content management system using react.js as front-end and express.js as backend for the beneficiary upstars.
+This project is to build a student volunteer content management system using react.js as front-end and express.js as backend for the beneficiary UPStars.
 
 ## Overview
 This system is built using express.js as an API provider. The APIs are consumed by react.js to display. The database used is [MongoDB](https://www.mongodb.com/).
@@ -11,7 +11,10 @@ This system is built using express.js as an API provider. The APIs are consumed 
 3. [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
 
 ### Start running
-Start server using: nodemon server/
+Type these commands into the shell:
+
+1. `mongod --bind_ip=$IP`
+2. `nodemon server/`
 
 
 ### Directory
@@ -20,26 +23,13 @@ Start server using: nodemon server/
 |------------|---------------------|
 |/src               |React.js stuff   |
 |/server            |Express.js stuff |
-|/server/controllers|All the application logic |
+|/server/controllers|All the application backend logic |
 |/server/models     |Schemas and database operations |
-|/docs/slate        |The documentation folder |
 
 
-## API stuff
+## Resources
 
-All API documentation is in /docs/slate/ folder
-```
-$ cd docs/slate/
-$ bundle install
-$ bundle exec middleman server
-```
-
-### Quick API Reference
-
-* [Attendance](https://github.com/rootkie/react-express-js-upstars/blob/master/docs/slate/source/includes/_attendance.md)
-* [Classes](https://github.com/rootkie/react-express-js-upstars/blob/master/docs/slate/source/includes/_classes.md)
-* [Errors](https://github.com/rootkie/react-express-js-upstars/blob/master/docs/slate/source/includes/_errors.md)
-* [Students](https://github.com/rootkie/react-express-js-upstars/blob/master/docs/slate/source/includes/_students.md)
+All API documentation is in the [wiki](https://github.com/rootkie/react-express-js-upstars/wiki).
 
 ## Troubleshoot
 ```
@@ -57,9 +47,10 @@ This repository is where we do development and there are many ways you can parti
 
 * [Submit bugs and feature requests](https://github.com/rootkie/react-express-js-upstars/issues)
 * [Review source code changes](https://github.com/rootkie/react-express-js-upstars/pulls)
-* Review the documentation and make pull requests for anything from typos to new content
+* Review the [documentation](https://github.com/rootkie/react-express-js-upstars/wiki) and make pull requests for anything from typos to new content
+* [Join us in developing upcoming features or tackling bugs and issues](https://github.com/rootkie/react-express-js-upstars/projects)
 
 ## Licence
 
-Copyright &copy; r3:c0d3 | Ulu Pandan Stars. All rights reserved.
+Copyright &copy; R3:C0D3 | Ulu Pandan Stars. All rights reserved.
 
