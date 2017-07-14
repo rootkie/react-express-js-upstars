@@ -238,11 +238,16 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
         'userAttendance': {
           '$push': {
             'status': '$users.status',
-            'date': '$date'
+            'date': '$date',
+            'type': '$type'
           }
         },
         'total': {
-          '$sum': 1
+          '$sum': {
+            '$cond': [{
+              '$eq': ["$type", 'Class']
+            }, 1, 0]
+          }
         },
         'attended': {
           '$sum': '$users.status'
@@ -275,11 +280,16 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
         'studentAttendance': {
           '$push': {
             'status': '$students.status',
-            'date': '$date'
+            'date': '$date',
+            'type': '$type'
           }
         },
         'total': {
-          '$sum': 1
+          '$sum': {
+            '$cond': [{
+              '$eq': ["$type", 'Class']
+            }, 1, 0]
+          }
         },
         'attended': {
           '$sum': '$students.status'
@@ -293,7 +303,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
       })
       .project({
         studentName: '$studentName.profile.name',
-        studentAttendance: '$userAttendance',
+        studentAttendance: '$studentAttendance',
         total: '$total',
         attended: '$attended',
         percentage: {
