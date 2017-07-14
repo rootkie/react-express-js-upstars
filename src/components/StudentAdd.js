@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Form, Message, Button, Modal, Header, Table, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import moment from 'moment'
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'male' },
@@ -97,13 +96,6 @@ class StudentForm extends Component {
 
   handleDateChange = (dateType) => (date) => this.setState({[dateType]: date})
 
-  handleRawDateChange = (dateType) => (value) => {
-    console.log(value)
-    console.log(moment(value))
-    console.log(moment(value).isValid())
-    if (!moment(value).isValid()) { this.handleChange(dateType)('') }
-  } // fix this
-
   handleSubmit = e => {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
@@ -174,7 +166,7 @@ class StudentForm extends Component {
       motherName, motherIC, motherCitizenship, motherNumber, motherOccupation, motherMonthlyIncome,
       otherFamilyMembers,
       fas, fscName, learningSupport,
-      terms, termsDetails,
+      termsDetails,
       interviewDate, interviewNotes, commencementDate, adminNotes, dateOfExit, reasonForExit, academics,
       submitSuccess, error
     } = this.state
@@ -196,7 +188,6 @@ class StudentForm extends Component {
                 placeholderText='Click to select a date'
                 dateFormat='YYYY/MM/DD'
                 selected={dateOfBirth}
-                onChangeRaw={(e) => this.handleRawDateChange('dateOfBirth')(e)}
                 onChange={this.handleDateChange('dateOfBirth')} />
             </Form.Field>
           </Form.Group>
