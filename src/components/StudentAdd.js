@@ -56,9 +56,6 @@ const initialState = {
   motherOccupation: '',
   motherMonthlyIncome: '',
   otherFamilyMembers: [], // object with all the info
-  otherName: '',
-  otherRelationship: '',
-  otherDateOfBirth: '',
   fas: '',
   fscName: '',
   learningSupport: '',
@@ -76,19 +73,10 @@ const initialState = {
   reasonForExit: '',
 
   /* Student's acad */
-  year1: '',
+  academics: [],
 
   error: []
 }
-
-const fieldsArray = ['fullname', 'firstName', 'lastName', 'studentIC', 'dateOfBirth',
-  'nationality', 'gender', 'address', 'school', 'classLevel',
-  'fatherName', 'fatherIC', 'fatherNumber', 'fatherOccupation', 'fatherMonthlyIncome',
-  'motherName', 'motherIC', 'motherNumber', 'motherOccupation', 'motherMonthlyIncome',
-  'otherFamilyMembers', 'otherName', 'otherRelationship', 'otherDateOfBirth',
-  'fas', 'learningSupport',
-  'terms', 'termsDetails',
-  'interviewDate', 'interviewNotes', 'commencementDate', 'adminNotes', 'dateOfExit', 'reasonForExit']
 
 class StudentForm extends Component {
   state = {
@@ -142,17 +130,45 @@ class StudentForm extends Component {
   }
   handleTermsClose = (e) => this.setState({termsDetails: false})
 
+  handleRepeatable = (option, field) => (e) => {
+    e.preventDefault()
+    const updatingArray = this.state[field]
+    if (option === 'inc') {
+      if (field === 'otherFamilyMembers') {
+        updatingArray.push({
+          name: '',
+          relationship: '',
+          age: ''
+        })
+      } else if (field === 'academics') {
+        updatingArray.push({test: 'test'})
+      }
+      this.setState({[field]: updatingArray})
+    } else if (option === 'dec') { // remove last item
+      this.setState({[field]: updatingArray.slice(0, updatingArray.length - 1)})
+    }
+  }
+
+  handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
+
+  updateRepeatableChange = (field) => (e, {name, value}) => {
+    const updatingArray = this.state[field]
+    const index = name[name.length - 1]
+    const property = /\w+(?=-)/.exec(name)[0]
+    updatingArray[index][property] = value
+    this.setState({[field]: updatingArray})
+  }
+
   render () {
     const {
       fullname, firstName, lastName, studentIC, nationality, gender, address, school, classLevel, dateOfBirth,
       fatherName, fatherIC, fatherCitizenship, fatherNumber, fatherOccupation, fatherMonthlyIncome,
       motherName, motherIC, motherCitizenship, motherNumber, motherOccupation, motherMonthlyIncome,
-      otherFamilyMembers, otherName, otherRelationship, otherDateOfBirth,
+      otherFamilyMembers,
       fas, fscName, learningSupport,
       terms, termsDetails,
       interviewDate, interviewNotes, commencementDate, adminNotes, dateOfExit, reasonForExit,
-      submitSuccess, error,
-      year1
+      submitSuccess, error
     } = this.state
 
     return (
@@ -217,7 +233,7 @@ class StudentForm extends Component {
             <Form.Input label='Monthly Income' placeholder='Monthly Income' name='motherMonthlyIncome' value={motherMonthlyIncome} onChange={this.handleChange} required />
           </Form.Group>
 
-          {/* adding additional family members (TODO) */}
+          {/* adding additional family members */}
           <Table celled striped columns={3} fixed>
             <Table.Header>
               <Table.Row>
@@ -230,25 +246,27 @@ class StudentForm extends Component {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              <Table.Row>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-              </Table.Row>
+              {otherFamilyMembers.map((member, i) => (
+                <Table.Row key={i}>
+                  <Table.Cell>
+                    <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={otherFamilyMembers[i].name} placeholder='test' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamilyMembers[i].relationship} placeholder='test' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`age-${i}`} name={`age-${i}`} value={otherFamilyMembers[i].age} placeholder='test' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
+                  </Table.Cell>
+                </Table.Row>
+              ))}
             </Table.Body>
             <Table.Footer>
               <Table.Row>
                 <Table.HeaderCell colSpan='3'>
-                  <Button floated='right' icon labelPosition='left' primary size='small'>
+                  <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'otherFamilyMembers')}>
                     <Icon name='user' /> Add Member
                   </Button>
-                  <Button floated='right' icon labelPosition='left' negative size='small'>
+                  <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'otherFamilyMembers')} >
                     <Icon name='user' /> Remove Member
                   </Button>
                 </Table.HeaderCell>
@@ -258,7 +276,7 @@ class StudentForm extends Component {
 
           <Form.Group widths='equal'>
             <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='fas' value={fas} onChange={this.handleChange} required />
-            <Form.Input hidden={fas !== 'fsc'} label='Name of Family Service Centre' placeholder='name of FSC' name='fscName' value={fscName} onChange={this.handleChange} />
+            {fas === 'fsc' && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='fscName' value={fscName} onChange={this.handleChange} /> }
           </Form.Group>
           <Form.Input label='Other Learning Support' placeholder='Other Learning Support' name='learningSupport' value={learningSupport} onChange={this.handleChange} required />
           <Form.Group inline>
