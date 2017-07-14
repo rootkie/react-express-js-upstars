@@ -141,7 +141,15 @@ class StudentForm extends Component {
           age: ''
         })
       } else if (field === 'academics') {
-        updatingArray.push({test: 'test'})
+        updatingArray.push({
+          year: '',
+          term: '',
+          english: '',
+          maths: '',
+          motherTongue: '',
+          science: '',
+          overall: ''
+        })
       }
       this.setState({[field]: updatingArray})
     } else if (option === 'dec') { // remove last item
@@ -167,7 +175,7 @@ class StudentForm extends Component {
       otherFamilyMembers,
       fas, fscName, learningSupport,
       terms, termsDetails,
-      interviewDate, interviewNotes, commencementDate, adminNotes, dateOfExit, reasonForExit,
+      interviewDate, interviewNotes, commencementDate, adminNotes, dateOfExit, reasonForExit, academics,
       submitSuccess, error
     } = this.state
 
@@ -249,13 +257,13 @@ class StudentForm extends Component {
               {otherFamilyMembers.map((member, i) => (
                 <Table.Row key={i}>
                   <Table.Cell>
-                    <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={otherFamilyMembers[i].name} placeholder='test' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
+                    <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={otherFamilyMembers[i].name} placeholder='Name' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
                   </Table.Cell>
                   <Table.Cell>
-                    <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamilyMembers[i].relationship} placeholder='test' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
+                    <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamilyMembers[i].relationship} placeholder='Relationship' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
                   </Table.Cell>
                   <Table.Cell>
-                    <Form.Input transparent key={`age-${i}`} name={`age-${i}`} value={otherFamilyMembers[i].age} placeholder='test' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
+                    <Form.Input transparent key={`age-${i}`} name={`age-${i}`} value={otherFamilyMembers[i].age} placeholder='Age' onChange={this.updateRepeatableChange('otherFamilyMembers')} />
                   </Table.Cell>
                 </Table.Row>
               ))}
@@ -335,38 +343,40 @@ class StudentForm extends Component {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              <Table.Row>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-                <Table.Cell>
-                  <Form.Input transparent placeholder='test' />
-                </Table.Cell>
-              </Table.Row>
+              {academics.map((year, i) => (
+                <Table.Row key={i}>
+                  <Table.Cell>
+                    <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={academics[i].year} placeholder='Year' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`term-${i}`} name={`term-${i}`} value={academics[i].term} placeholder='Term' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`english-${i}`} name={`english-${i}`} value={academics[i].english} placeholder='English' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`maths-${i}`} name={`maths-${i}`} value={academics[i].maths} placeholder='Maths' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academics[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`science-${i}`} name={`science-${i}`} value={academics[i].science} placeholder='Science' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Form.Input transparent key={`overall-${i}`} name={`overall-${i}`} value={academics[i].overall} placeholder='Overall' onChange={this.updateRepeatableChange('academics')} />
+                  </Table.Cell>
+                </Table.Row>
+              ))}
             </Table.Body>
             <Table.Footer>
               <Table.Row>
                 <Table.HeaderCell colSpan='7'>
-                  <Button floated='right' icon labelPosition='left' primary size='small'>
-                    <Icon name='user' /> Add Year
+                  <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'academics')}>
+                    <Icon name='plus' /> Add Year
                   </Button>
-                  <Button floated='right' icon labelPosition='left' negative size='small'>
-                    <Icon name='user' /> Remove Year
+                  <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'academics')}>
+                    <Icon name='minus' /> Remove Year
                   </Button>
                 </Table.HeaderCell>
               </Table.Row>
