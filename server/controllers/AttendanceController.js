@@ -47,7 +47,7 @@ module.exports.addEditAttendance = async(req, res) => {
       class: classId,
       users,
       students,
-      type: type
+      type
     }
 
     const newAttendance = await Attendance.findOneAndUpdate({
@@ -235,7 +235,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
       .sort('-date')
       .group({
         '_id': '$users.list',
-        'user-attendance': {
+        'userAttendance': {
           '$push': {
             'status': '$users.status',
             'date': '$date'
@@ -252,9 +252,17 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
         from: 'users',
         localField: '_id',
         foreignField: '_id',
-        as: 'user-name'
+        as: 'userName'
       })
-      .project('user-name.profile.name user-attendance total attended')
+      .project({
+        userName: '$userName.profile.name',
+        userAttendance: '$userAttendance',
+        total: '$total',
+        attended: '$attended',
+        percentage: {
+          $divide: ['$attended', '$total']
+        }
+      })
 
     const foundAttendanceforStudent = await Attendance.aggregate()
       .match({
@@ -264,7 +272,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
       .sort('-date')
       .group({
         '_id': '$students.list',
-        'student-attendance': {
+        'studentAttendance': {
           '$push': {
             'status': '$students.status',
             'date': '$date'
@@ -281,9 +289,17 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
         from: 'students',
         localField: '_id',
         foreignField: '_id',
-        as: 'student-name'
+        as: 'studentName'
       })
-      .project('student-name.profile.name student-attendance total attended')
+      .project({
+        studentName: '$studentName.profile.name',
+        studentAttendance: '$userAttendance',
+        total: '$total',
+        attended: '$attended',
+        percentage: {
+          $divide: ['$attended', '$total']
+        }
+      })
 
     res.json({
       status: 'success',
