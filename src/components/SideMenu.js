@@ -10,17 +10,17 @@ const SideMenu = ({activeItem}) => (
       <Menu.Item>
         <Menu.Header>Student</Menu.Header>
         <Menu.Menu>
-          <Link to='/students/add' className={`item ${activeItem === 'addStudent' && 'active'}`}>add</Link>
-          <Link to='/students/edit' className={`item ${activeItem === 'editStudent' && 'active'}`}>edit</Link>
-          <Link to='/students/view' className={`item ${activeItem === 'viewStudent' && 'active'}`}>view</Link>
+          <Link to='/students/add' className={`item ${activeItem === 'studentsadd' && 'active'}`}>add</Link>
+          <Link to='/students/edit' className={`item ${activeItem === 'studentsedit' && 'active'}`}>edit</Link>
+          <Link to='/students/view' className={`item ${activeItem === 'studentsview' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>
       <Menu.Item>
         <Menu.Header>Class</Menu.Header>
         <Menu.Menu>
-          <Link to='/classes/add' className={`item ${activeItem === 'add' && 'active'}`}>add</Link>
-          <Link to='/classes/edit' className={`item ${activeItem === 'edit' && 'active'}`}>edit</Link>
-          <Link to='/classes/view' className={`item ${activeItem === 'view' && 'active'}`}>view</Link>
+          <Link to='/classes/add' className={`item ${activeItem === 'classesadd' && 'active'}`}>add</Link>
+          <Link to='/classes/edit' className={`item ${activeItem === 'classesedit' && 'active'}`}>edit</Link>
+          <Link to='/classes/view' className={`item ${activeItem === 'classesview' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>
       <Link to='/volunteer' className={`item ${activeItem === 'volunteer' && 'active'}`}>Volunteer</Link>

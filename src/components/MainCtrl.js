@@ -27,7 +27,7 @@ class MainCtrl extends Component {
       <Container fluid>
         <Topbar tab={main} />
         <Grid style={GridStyle}>
-          <SideMenu activeItem={op || ''} />
+          <SideMenu activeItem={main + op || ''} />
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
             {main === 'students' && <StudentWrap op={op} />}

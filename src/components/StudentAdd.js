@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Modal, Header } from 'semantic-ui-react'
+import { Form, Message, Button, Modal, Header, Table, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
@@ -7,6 +7,24 @@ import moment from 'moment'
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'male' },
   { key: 'f', text: 'Female', value: 'female' }
+]
+
+const citizenshipOptions = [
+  { key: 'citizen', text: 'Singapore Citizen', value: 'citizen' },
+  { key: 'pr', text: 'Singapore PR', value: 'pr' },
+  { key: 'other', text: 'Other', value: 'other' }
+]
+
+const fasOptions = [
+  { key: 'fsc', text: 'Family Service Centre', value: 'fsc' },
+  { key: 'moe', text: 'MOE', value: 'moe' },
+  { key: 'mendaki', text: 'Mendaki', value: 'mendaki' }
+]
+
+const learningSupportOptions = [
+  {value: 'cdac', text: 'CDAC'},
+  {value: 'mendaki', text: 'Mendaki'},
+  {value: 'private', text: 'Private'}
 ]
 
 const initialState = {
@@ -25,21 +43,24 @@ const initialState = {
   /* Family Information */
   fatherName: '',
   fatherIC: '',
+  fatherCitizenship: '',
   fatherNumber: '',
   fatherEmail: '',
   fatherOccupation: '',
   fatherMonthlyIncome: '',
   motherName: '',
   motherIC: '',
+  motherCitizenship: '',
   motherNumber: '',
   motherEmail: '',
   motherOccupation: '',
   motherMonthlyIncome: '',
-  otherFamilyMembers: '', // object with all the info
+  otherFamilyMembers: [], // object with all the info
   otherName: '',
   otherRelationship: '',
   otherDateOfBirth: '',
   fas: '',
+  fscName: '',
   learningSupport: '',
 
   /* Terms and conditions */
@@ -53,6 +74,9 @@ const initialState = {
   adminNotes: '',
   dateOfExit: '',
   reasonForExit: '',
+
+  /* Student's acad */
+  year1: '',
 
   error: []
 }
@@ -83,7 +107,14 @@ class StudentForm extends Component {
 
   handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
-  handleDateChange = (dateOfBirth) => this.setState({dateOfBirth})
+  handleDateChange = (dateType) => (date) => this.setState({[dateType]: date})
+
+  handleRawDateChange = (dateType) => (value) => {
+    console.log(value)
+    console.log(moment(value))
+    console.log(moment(value).isValid())
+    if (!moment(value).isValid()) { this.handleChange(dateType)('') }
+  } // fix this
 
   handleSubmit = e => {
     e.preventDefault()
@@ -113,19 +144,21 @@ class StudentForm extends Component {
 
   render () {
     const {
-      fullname, firstName, lastName, studentIC, nationality, gender, address, school, classLevel,
-      fatherName, fatherIC, fatherNumber, fatherOccupation, fatherMonthlyIncome,
-      motherName, motherIC, motherNumber, motherOccupation, motherMonthlyIncome,
+      fullname, firstName, lastName, studentIC, nationality, gender, address, school, classLevel, dateOfBirth,
+      fatherName, fatherIC, fatherCitizenship, fatherNumber, fatherOccupation, fatherMonthlyIncome,
+      motherName, motherIC, motherCitizenship, motherNumber, motherOccupation, motherMonthlyIncome,
       otherFamilyMembers, otherName, otherRelationship, otherDateOfBirth,
-      fas, learningSupport,
+      fas, fscName, learningSupport,
       terms, termsDetails,
       interviewDate, interviewNotes, commencementDate, adminNotes, dateOfExit, reasonForExit,
-      submitSuccess, error
+      submitSuccess, error,
+      year1
     } = this.state
 
     return (
       <div>
         <Form onSubmit={this.handleSubmit}>
+          <Header as='h3' dividing>Student Information</Header>
           <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='fullname' value={fullname} onChange={this.handleChange} required />
           <Form.Group widths='equal'>
             <Form.Input label='Personal name' placeholder='Personal name' name='lastName' value={lastName} onChange={this.handleChange} required />
@@ -133,13 +166,14 @@ class StudentForm extends Component {
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='studentIC' value={studentIC} onChange={this.handleChange} required />
-            <Form.Field required>
+            <Form.Field error={error.includes('dateOfBirth')} required>
               <label>Date of Birth</label>
               <DatePicker
                 placeholderText='Click to select a date'
                 dateFormat='YYYY/MM/DD'
-                selected={this.state.dateOfBirth}
-                onChange={this.handleDateChange} />
+                selected={dateOfBirth}
+                onChangeRaw={(e) => this.handleRawDateChange('dateOfBirth')(e)}
+                onChange={this.handleDateChange('dateOfBirth')} />
             </Form.Field>
           </Form.Group>
           <Form.Group widths='equal'>
@@ -151,17 +185,184 @@ class StudentForm extends Component {
             <Form.Input label='Name of School' placeholder='Name of School' name='school' value={school} onChange={this.handleChange} required />
             <Form.Input label='Class level' placeholder='e.g. Pri 1' name='classLevel' value={classLevel} onChange={this.handleChange} required />
           </Form.Group>
+          <Header as='h3' dividing>Family Information</Header>
+
+          {/* Father's information */}
+          <Form.Input label="Father's name" placeholder='as in IC card' name='fatherName' value={fatherName} onChange={this.handleChange} required />
+          <Form.Group widths='equal'>
+            <Form.Input label='Identification Card Number' placeholder='IC number' name='fatherIC' value={fatherIC} onChange={this.handleChange} required />
+            <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='fatherCitizenship' value={fatherCitizenship} onChange={this.handleChange} required />
+          </Form.Group>
+          <Form.Group widths='equal'>
+            <Form.Input label='Identification Card Number' placeholder='IC number' name='fatherIC' value={fatherIC} onChange={this.handleChange} required />
+            <Form.Input label='Mobile number' placeholder='Mobile number' name='fatherNumber' value={fatherNumber} onChange={this.handleChange} required />
+          </Form.Group>
+          <Form.Group widths='equal'>
+            <Form.Input label='Occupation' placeholder='Occupation' name='fatherOccupation' value={fatherOccupation} onChange={this.handleChange} required />
+            <Form.Input label='Monthly Income' placeholder='Monthly Income' name='fatherMonthlyIncome' value={fatherMonthlyIncome} onChange={this.handleChange} required />
+          </Form.Group>
+
+          {/* Mother's information */}
+          <Form.Input label="Mother's name" placeholder='as in IC card' name='motherName' value={motherName} onChange={this.handleChange} required />
+          <Form.Group widths='equal'>
+            <Form.Input label='Identification Card Number' placeholder='IC number' name='motherIC' value={motherIC} onChange={this.handleChange} required />
+            <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='motherCitizenship' value={motherCitizenship} onChange={this.handleChange} required />
+          </Form.Group>
+          <Form.Group widths='equal'>
+            <Form.Input label='Identification Card Number' placeholder='IC number' name='motherIC' value={motherIC} onChange={this.handleChange} required />
+            <Form.Input label='Mobile number' placeholder='Mobile number' name='motherNumber' value={motherNumber} onChange={this.handleChange} required />
+          </Form.Group>
+          <Form.Group widths='equal'>
+            <Form.Input label='Occupation' placeholder='Occupation' name='motherOccupation' value={motherOccupation} onChange={this.handleChange} required />
+            <Form.Input label='Monthly Income' placeholder='Monthly Income' name='motherMonthlyIncome' value={motherMonthlyIncome} onChange={this.handleChange} required />
+          </Form.Group>
+
+          {/* adding additional family members (TODO) */}
+          <Table celled striped columns={3} fixed>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell colSpan='3'>Other family members in the same household</Table.HeaderCell>
+              </Table.Row>
+              <Table.Row>
+                <Table.HeaderCell>Name</Table.HeaderCell>
+                <Table.HeaderCell>Relationship</Table.HeaderCell>
+                <Table.HeaderCell>Age</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              <Table.Row>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+              </Table.Row>
+            </Table.Body>
+            <Table.Footer>
+              <Table.Row>
+                <Table.HeaderCell colSpan='3'>
+                  <Button floated='right' icon labelPosition='left' primary size='small'>
+                    <Icon name='user' /> Add Member
+                  </Button>
+                  <Button floated='right' icon labelPosition='left' negative size='small'>
+                    <Icon name='user' /> Remove Member
+                  </Button>
+                </Table.HeaderCell>
+              </Table.Row>
+            </Table.Footer>
+          </Table>
+
+          <Form.Group widths='equal'>
+            <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='fas' value={fas} onChange={this.handleChange} required />
+            <Form.Input hidden={fas !== 'fsc'} label='Name of Family Service Centre' placeholder='name of FSC' name='fscName' value={fscName} onChange={this.handleChange} />
+          </Form.Group>
+          <Form.Input label='Other Learning Support' placeholder='Other Learning Support' name='learningSupport' value={learningSupport} onChange={this.handleChange} required />
+          <Form.Group inline>
+            <label>Other Learning Support</label>
+            {learningSupportOptions.map((option, i) => {
+              return (
+                <Form.Checkbox label={option.text} key={`option-${i}`} name={option.value} onChange={this.handleChange} />
+              )
+            })}
+          </Form.Group>
+
+          <Header as='h3' dividing>For Office Use</Header>
+          <Form.Field error={error.includes('interviewDate')}>
+            <label>Interview date</label>
+            <DatePicker
+              placeholderText='Click to select a date'
+              dateFormat='YYYY/MM/DD'
+              selected={interviewDate}
+              onChange={this.handleDateChange('interviewDate')}
+              isClearable />
+          </Form.Field>
+          <Form.Input label='Interview notes' placeholder='reason for acceptance' name='interviewNotes' value={interviewNotes} onChange={this.handleChange} />
+          <Form.Field error={error.includes('commencementDate')} >
+            <label>Commencement date</label>
+            <DatePicker
+              placeholderText='Click to select a date'
+              dateFormat='YYYY/MM/DD'
+              selected={commencementDate}
+              onChange={this.handleDateChange('commencementDate')}
+              isClearable />
+          </Form.Field>
+          <Form.Input label='Admin notes' placeholder='up to 1000 words' name='adminNotes' value={adminNotes} onChange={this.handleChange} />
+          <Form.Field error={error.includes('dateOfExit')} >
+            <label>Date of exit</label>
+            <DatePicker
+              placeholderText='Click to select a date'
+              dateFormat='YYYY/MM/DD'
+              selected={dateOfExit}
+              onChange={this.handleDateChange('dateOfExit')}
+              isClearable />
+          </Form.Field>
+          <Form.Input label='Reason for exit' placeholder='reason for exit' name='reasonForExit' value={reasonForExit} onChange={this.handleChange} />
+
+          {/* TODO Student academic information */}
+          <Header as='h3' dividing>Student's Academic Information</Header>
+          <Table celled striped columns={7} fixed>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Year</Table.HeaderCell>
+                <Table.HeaderCell>Term (1/2/3/4)</Table.HeaderCell>
+                <Table.HeaderCell>English (%)</Table.HeaderCell>
+                <Table.HeaderCell>Maths (%)</Table.HeaderCell>
+                <Table.HeaderCell>Mother tongue (%)</Table.HeaderCell>
+                <Table.HeaderCell>Science (%)</Table.HeaderCell>
+                <Table.HeaderCell>OVERALL (%)</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              <Table.Row>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+                <Table.Cell>
+                  <Form.Input transparent placeholder='test' />
+                </Table.Cell>
+              </Table.Row>
+            </Table.Body>
+            <Table.Footer>
+              <Table.Row>
+                <Table.HeaderCell colSpan='7'>
+                  <Button floated='right' icon labelPosition='left' primary size='small'>
+                    <Icon name='user' /> Add Year
+                  </Button>
+                  <Button floated='right' icon labelPosition='left' negative size='small'>
+                    <Icon name='user' /> Remove Year
+                  </Button>
+                </Table.HeaderCell>
+              </Table.Row>
+            </Table.Footer>
+          </Table>
+
+          {/* terms and conditions */}
           <Form.Checkbox label={<label onClick={this.handleTermsOpen}>I agree to the Terms and Conditions</label>} name='terms' required onChange={this.handleChange} error={error.includes('terms')} />
           <Modal open={termsDetails} onClose={this.close}>
             <Modal.Header>Terms and conditions</Modal.Header>
             <Modal.Content>
               <Modal.Description>
-                <Header>Volunteer rules</Header>
-                <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary or lower secondary students who need assistance with academic subjects but lack the funding to secure help.</p>
-                <p>2. Tutors are expected to be a role model for the tutees, care about their learning outcomes and behaviour, attend the tuition sessions punctually and regularly. In the event that the tutor will be absent from tuition, he/she should advise the Class Mentor and fellow tutors in advance. The programme organizer reserves the right to request the Tutor to leave the programme in the event that he/she exhibits inappropriate behaviour. </p>
-                <p>3. A Tutor is expected to serve 12 months with minimum attendance of 70% in order to receive a Certificate of Attendance. Any service period of less than 12 months must be approved by the PCF Vice-Chairman, Ulu Pandan branch prior to the commencement of service. In the exceptional event that tutors have to cease participation in Stars, at least one month’s notice should be given or the organizer reserves the right to deduct service hours from the earned service.</p>
-                <p>4. Tutors who made exceptional contributions to the Stars initiative and who have adopted and internalized the Stars selected Harvard competences can ask for testimonials from the programme organizer.</p>
-                <p>5. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
+                <Header>Student rules</Header>
+                <p>Ayy lmao</p>
               </Modal.Description>
             </Modal.Content>
             <Modal.Actions>
@@ -174,6 +375,11 @@ class StudentForm extends Component {
           hidden={!submitSuccess}
           success
           content='Submitted'
+          />
+        <Message
+          hidden={error.length === 0}
+          negative
+          content='Please Check Required Fields!'
           />
       </div>
     )
