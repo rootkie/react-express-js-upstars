@@ -1,13 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import StudentForm from './StudentAdd'
-import StudentTest from './StudentTest'
+import StudentView from './StudentView'
 
 const StudentWrap = ({ op }) => (
   <div>
     {op === 'add' && <StudentForm /> }
-    {op === 'edit' && <StudentTest />}
-    {op === 'view' && <h2>View</h2>}
+    {op === 'edit' && <div>edit</div>}
+    {op === 'view' && <StudentView />}
   </div>
 )
 
