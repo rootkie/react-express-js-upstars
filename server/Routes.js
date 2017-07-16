@@ -33,7 +33,7 @@ module.exports = app => {
 
   app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
   app.post('/api/getAttendanceByClass', attendanceControl.getAttendanceByClass)
-  app.post('/api/getAttendanceByUser', attendanceControl.getAttendanceByUser)
+  app.post('/api/getAttendanceByUser', hasRole(['Tutor', 'Admin']), attendanceControl.getAttendanceByUser)
   app.post('/api/getAttendanceByStudent', attendanceControl.getAttendanceByStudent)
   app.post('/api/getClassAttendanceSummary', attendanceControl.getClassAttendanceSummary)
 

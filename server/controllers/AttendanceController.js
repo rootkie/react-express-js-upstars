@@ -152,6 +152,11 @@ module.exports.getAttendanceByUser = async(req, res) => {
     if (!userId || !dateStart || !dateEnd || !userName) {
       return res.status(422).json('Unvalid request. Some fields cannot be null')
     }
+
+    if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+      return res.status(403).send('Operation denied')
+    }
+
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
     user.date = {
