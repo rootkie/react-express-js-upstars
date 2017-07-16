@@ -2,10 +2,10 @@ import React, { Component } from 'react'
 import { Container, Grid } from 'semantic-ui-react'
 import Topbar from './Topbar'
 import SideMenu from './SideMenu'
-import Classes from './Classes'
+import ClassWrap from './ClassWrap'
 import Home from './Home'
 import PropTypes from 'prop-types'
-import VolunteerForm from './VolunteerForm'
+import VolunteerWrap from './VolunteerWrap'
 import Attendance from './Attendance'
 import StudentWrap from './StudentWrap'
 
@@ -31,8 +31,8 @@ class MainCtrl extends Component {
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
             {main === 'students' && <StudentWrap op={op} />}
-            {main === 'classes' && <Classes op={op} />}
-            {main === 'volunteer' && <VolunteerForm />}
+            {main === 'classes' && <ClassWrap op={op} />}
+            {main === 'volunteer' && <VolunteerWrap op={op} />}
             {main === 'attendance' && <Attendance />}
           </Grid.Column>
         </Grid>
