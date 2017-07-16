@@ -67,18 +67,15 @@ const UserSchema = new Schema({
     },
 
     schoolName: {
-      type: String,
-      required: true
+      type: String
     },
 
     schoolLevel: {
-      type: String,
-      required: true
+      type: String
     },
 
     schoolClass: {
-      type: String,
-      required: true
+      type: String
     },
   },
 
@@ -240,8 +237,7 @@ const UserSchema = new Schema({
   },
 
   preferredTimeSlot: [{
-    type: String,
-    required: true
+    type: String
   }],
 
   status: {
@@ -253,7 +249,7 @@ const UserSchema = new Schema({
   roles: [{
     type: String,
     required: true,
-    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'External', 'Adhoc', 'Temporary', 'Helper']
+    enum: ['SuperAdmin', 'Tutor', 'Admin', 'SuperVisor', 'Mentor', 'Adhoc', 'Temporary', 'Helper']
   }],
 
   classes: [{
