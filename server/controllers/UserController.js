@@ -84,15 +84,8 @@ module.exports.changePassword = async(req, res) => {
     let {
       userId,
       oldPassword,
-      newPassword,
-      confirmNewPassword
+      newPassword
     } = req.body
-      // Just in case the front end screws up
-    if (newPassword !== confirmNewPassword) {
-      return res.status(422).json({
-        error: 'The 2 new passwords do not match'
-      })
-    }
 
     const user = await User.findById(userId)
     const isMatch = await user.comparePasswordPromise(oldPassword)
@@ -101,7 +94,7 @@ module.exports.changePassword = async(req, res) => {
     }
 
     // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
-    user.password = confirmNewPassword
+    user.password = newPassword
     const pwChanged = await user.save()
     return res.json({
       user: pwChanged
