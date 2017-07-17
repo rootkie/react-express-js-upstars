@@ -1,5 +1,6 @@
 const Attendance = require('../models/attendance')
 const User = require('../models/user')
+const Student = require('../models/student')
 const Class = require('../models/class')
 const util = require('../util')
 
@@ -24,6 +25,29 @@ async function genUserARStat (dateFrom, dateEnd, userId) {
     return attendanceRate
   } catch (err) {
     console.log(err)
+  }
+}
+
+async function genStudentARStat (dateFrom, dateEnd, studentId) {
+  try {
+    let student = await Student.findById(studentId)
+    let numOfClasses = student.classes.length
+
+    let totalAttendance = 0
+    let studentAttendance = 0
+
+    for (let i = 0; i < numOfClasses; i++) {
+      let classAttendance = await Attendance.find({ date: { '$gte': util.formatDate(dateFrom), '$lte': util.formatDate(dateEnd) }, class: student.classes[i] })
+      let attendanceCount = classAttendance.length
+      for (let j = 0; j < attendanceCount; j++) {
+        if (classAttendance[j].students.indexOf(studentId) !== -1) studentAttendance += 1
+      }
+      totalAttendance += attendanceCount
+    }
+    const attendanceRate = (studentAttendance / totalAttendance * 100).toFixed(2)
+    return attendanceRate
+  } catch (err) {
+    throw err
   }
 }
 
