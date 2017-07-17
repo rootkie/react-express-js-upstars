@@ -61,6 +61,7 @@ module.exports.getAll = async(req, res) => {
 
 module.exports.getStudentById = async(req, res) => {
   try {
+    let studentId = req.params.id
     const student = await Student.findById(studentId).populate('classes', 'className')
     return res.json({
       student
