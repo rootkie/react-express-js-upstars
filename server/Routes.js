@@ -13,44 +13,45 @@ const hasRole = require('./routeMiddleware').hasRole
 
 module.exports = app => {
   // Classes
-  app.get('/api/getClasses', hasRole(['Tutor','Admin']), classControl.getAll)
-  app.get('/api/getClass/:id', classControl.getClassById)
-  app.post('/api/addClass', classControl.addClass)
-  app.post('/api/editClass', classControl.editClass)
-  app.post('/api/addStudentsToClass', classControl.addStudentsToClass)
-  app.post('/api/deleteStudentsFromClass', classControl.deleteStudentsFromClass)
-  app.post('/api/addUsersToClass', classControl.addUsersToClass) // Handles both user -> class && class -> user
-  app.post('/api/deleteUsersFromClass', classControl.deleteUsersFromClass)
-  app.post('/api/assignExternalPersonnelToClass', classControl.assignExternalPersonnelToClass)
-  app.post('/api/removeExternalPersonnelFromClass', classControl.removeExternalPersonnelFromClass)
+  app.get('/api/class', hasRole(['Tutor','Admin']), classControl.getAll)
+  app.get('/api/class/:id', classControl.getClassById)
+  app.post('/api/class', classControl.addClass)
+  app.put('/api/class', classControl.editClass)
+
   // Students
-  app.get('/api/getStudents', studentControl.getAll)
-  app.get('/api/getStudent/:id', studentControl.getStudentById)
-  app.post('/api/addEditStudent', studentControl.addEditStudent)
+  app.get('/api/students', studentControl.getAll)
+  app.get('/api/students/:id', studentControl.getStudentById)
+  app.post('/api/students', studentControl.addEditStudent)
+  app.post('/api/students/class', classControl.addStudentsToClass)
+  app.delete('/api/students/class', classControl.deleteStudentsFromClass)
+
+  // Users
+  app.get('/api/users', userControl.getAllUsers)
+  app.get('/api/users/:id', hasRole(['Tutor', 'Admin']), userControl.getUser)
+  app.post('/api/users', hasRole(['Tutor', 'Admin']), userControl.editUserParticulars)
+  app.post('/api/users/changePassword', userControl.changePassword) // For Users to change their own password
+  app.post('/api/users/class', classControl.addUsersToClass) // Handles both user -> class && class -> user
+  app.delete('/api/users/class', classControl.deleteUsersFromClass)
+
+  // External
+  app.get('/api/external/:id', userControl.getExternal)
+  app.post('/api/external/class', classControl.assignExternalPersonnelToClass)
+  app.delete('/api/external/class', classControl.removeExternalPersonnelFromClass)
 
   // Attendance controls
-  app.post('/api/addEditAttendance', attendanceControl.addEditAttendance)
-
-  app.post('/api/deleteAttendance', attendanceControl.deleteAttendance)
-  app.post('/api/getAttendanceByClass', attendanceControl.getAttendanceByClass)
-  app.post('/api/getAttendanceByUser', hasRole(['Tutor', 'Admin']), attendanceControl.getAttendanceByUser)
-  app.post('/api/getAttendanceByStudent', attendanceControl.getAttendanceByStudent)
-  app.post('/api/getClassAttendanceSummary', attendanceControl.getClassAttendanceSummary)
+  app.post('/api/attendance', attendanceControl.addEditAttendance)
+  app.delete('/api/attendance', attendanceControl.deleteAttendance)
+  app.get('/api/attendance/class/:classId/:dateStart/:dateEnd', attendanceControl.getAttendanceByClass)
+  app.get('/api/attendance/user/:userId/class/:classId/:dateStart/:dateEnd', hasRole(['Tutor', 'Admin']), attendanceControl.getAttendanceByUser)
+  app.get('/api/attendance/student/:studentId/:dateStart/:dateEnd', attendanceControl.getAttendanceByStudent)
+  app.get('/api/attendance/:classId/summary', attendanceControl.getClassAttendanceSummary) // Very VERBOSE
 
   // Statistics controls
-  app.post('/api/admin/getClassSummary', statisticsControl.getClassSummary)
-
-  // User controls
-  app.get('/api/getAllUsers', userControl.getAllUsers)
-  app.get('/api/getUser/:id', hasRole(['Tutor', 'Admin']), userControl.getUser)
-  app.post('/api/editUserParticulars', hasRole(['Tutor', 'Admin']), userControl.editUserParticulars)
-  app.post('/api/changePassword', userControl.changePassword) // For Users to change their own password
-  
-  app.get('/api/getExternal/:id', userControl.getExternal)
+  app.get('/api/stats/:classId/summary/:dateStart/:dateEnd', statisticsControl.getClassSummary)
 
   // Admin controls under user
-  app.post('/api/adminChangePassword', adminControl.adminChangePassword)
-  app.post('/api/changeUserStatusAndPermissions', adminControl.changeUserStatusAndPermissions)
+  app.post('/api/admin/changePassword', adminControl.adminChangePassword)
+  app.post('/api/admin/userStatusPermissions', adminControl.changeUserStatusAndPermissions)
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)

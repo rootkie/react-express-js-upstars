@@ -105,7 +105,7 @@ module.exports.getAttendanceByClass = async(req, res) => {
       classId,
       dateStart,
       dateEnd
-    } = req.body
+    } = req.params
 
 
     let attendances = Attendance.find()
@@ -142,14 +142,13 @@ module.exports.getAttendanceByUser = async(req, res) => {
   try {
     let {
       userId,
-      userName, //Save time for doing another database lookup
       classId,
       dateStart,
       dateEnd
-    } = req.body // userId, dateStart and dateEnd is compulsory
+    } = req.params // userId, dateStart and dateEnd is compulsory
     let user = {}
 
-    if (!userId || !dateStart || !dateEnd || !userName) {
+    if (!userId || !dateStart || !dateEnd) {
       return res.status(422).json('Unvalid request. Some fields cannot be null')
     }
 
@@ -220,7 +219,6 @@ module.exports.getAttendanceByUser = async(req, res) => {
     res.json({
       status: 'success',
       attendances,
-      userName
     })
   }
   catch (err) {
@@ -233,13 +231,12 @@ module.exports.getAttendanceByStudent = async(req, res) => {
   try {
     let {
       studentId,
-      studentName,
       classId,
       dateStart,
       dateEnd
-    } = req.body
+    } = req.params
     let student = {}
-    if (!studentId || !dateStart || !dateEnd || !studentName) {
+    if (!studentId || !dateStart || !dateEnd) {
       return res.status(422).json('Unvalid request. Some fields cannot be null')
     }
     // Init what factors to search in student later
@@ -317,7 +314,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
   try {
     let {
       classId
-    } = req.body
+    } = req.params
     if (!classId) {
       return res.status(422).json('ClassId cannot be null')
     }
