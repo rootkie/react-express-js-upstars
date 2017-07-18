@@ -99,7 +99,7 @@ module.exports.deleteAttendance = async(req, res) => {
 }
 
 
-module.exports.getAttendanceByClass = async(req, res) => {
+module.exports.getAttendance = async(req, res) => {
   try {
     let {
       classId,

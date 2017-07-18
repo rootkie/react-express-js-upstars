@@ -41,9 +41,9 @@ module.exports = app => {
   // Attendance controls
   app.post('/api/attendance', attendanceControl.addEditAttendance)
   app.delete('/api/attendance', attendanceControl.deleteAttendance)
-  app.get('/api/attendance/class/:classId/:dateStart/:dateEnd', attendanceControl.getAttendanceByClass)
-  app.get('/api/attendance/user/:userId/class/:classId/:dateStart/:dateEnd', hasRole(['Tutor', 'Admin']), attendanceControl.getAttendanceByUser)
-  app.get('/api/attendance/student/:studentId/:dateStart/:dateEnd', attendanceControl.getAttendanceByStudent)
+  app.get('/api/attendance/class/:classId?/dateStart/:dateStart?/dateEnd/:dateEnd?', attendanceControl.getAttendance)
+  app.get('/api/attendance/user/:userId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Admin']), attendanceControl.getAttendanceByUser)
+  app.get('/api/attendance/student/:studentId/:dateStart-:dateEnd/:classId?', attendanceControl.getAttendanceByStudent)
   app.get('/api/attendance/:classId/summary', attendanceControl.getClassAttendanceSummary) // Very VERBOSE
 
   // Statistics controls
