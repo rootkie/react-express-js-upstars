@@ -99,6 +99,12 @@ module.exports.getClassById = async(req, res) => {
   }
 }
 
+module.exports.deleteClass = async(req, res) => {
+  return res.json({
+    status: 'success'
+  })
+}
+
 module.exports.addStudentsToClass = async(req, res) => {
   try {
     let {

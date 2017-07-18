@@ -77,6 +77,11 @@ module.exports.editUserParticulars = async(req, res) => {
   }
 }
 
+module.exports.deleteUser = async(req, res) => {
+  return res.json({
+    status: 'success'
+  })
+}
 
 module.exports.changePassword = async(req, res) => {
   try {

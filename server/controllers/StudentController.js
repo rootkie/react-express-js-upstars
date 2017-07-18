@@ -98,8 +98,6 @@ module.exports.getAll = async(req, res) => {
   }
 }
 
-
-
 module.exports.getStudentById = async(req, res) => {
   try {
     let studentId = req.params.id
@@ -114,11 +112,8 @@ module.exports.getStudentById = async(req, res) => {
   }
 }
 
-module.exports.dropDB = function(req, res) {
-  Student.remove({}, (err, num) => {
-    if (err) return res.status(500).send(err)
-    return res.json({
-      removed: num
-    })
+module.exports.deleteStudent = async(req, res) => {
+  return res.json({
+    status: 'success'
   })
 }
