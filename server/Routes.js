@@ -21,7 +21,8 @@ module.exports = app => {
   // Students
   app.get('/api/students', studentControl.getAll)
   app.get('/api/students/:id', studentControl.getStudentById)
-  app.post('/api/students', studentControl.addEditStudent)
+  app.post('/api/students', studentControl.addStudent)
+  app.put('/api/students', studentControl.editStudentById)
   app.post('/api/students/class', classControl.addStudentsToClass)
   app.delete('/api/students/class', classControl.deleteStudentsFromClass)
 
