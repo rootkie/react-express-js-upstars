@@ -5,8 +5,8 @@ import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 
 const typeOptions = [
-  { key: 't', text: 'Tuition', value: 'Tuition' },
-  { key: 'e', text: 'Enrichment', value: 'Enrichment' }
+  { key: 'tuition', text: 'Tuition', value: 'tuition' },
+  { key: 'enrichment', text: 'Enrichment', value: 'enrichment' }
 ]
 
 const initialState = {
@@ -66,7 +66,7 @@ class ClassForm extends Component {
           <Form.Input label='Name of Class' placeholder='Name of the class' name='name' value={name} onChange={this.handleChange} required />
           <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='type' value={type} onChange={this.handleChange} required />
           <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-          <Form.Field required>
+          <Form.Field disabled={type === 'enrichment'} required>
             <label>Starting Date</label>
             <DatePicker
               placeholderText='Click to select a date'
@@ -74,7 +74,7 @@ class ClassForm extends Component {
               selected={this.state.startDate}
               onChange={this.handleDateChange} />
           </Form.Field>
-          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} required /> {/* may be change to radio */}
+          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={type === 'enrichment'} required /> {/* may be change to radio */}
           <Form.Button>Submit</Form.Button>
         </Form>
         <Message>{JSON.stringify({ submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate }, null, 2)}</Message>
