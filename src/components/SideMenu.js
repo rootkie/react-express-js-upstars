@@ -8,14 +8,28 @@ const SideMenu = ({activeItem}) => (
     <Menu vertical fluid>
       <Link to='/home' className={`item ${activeItem === 'home' && 'active'}`}>Home</Link>
       <Menu.Item>
-        <Menu.Header>Class</Menu.Header>
+        <Menu.Header>Student</Menu.Header>
         <Menu.Menu>
-          <Link to='/classes/add' className={`item ${activeItem === 'add' && 'active'}`}>add</Link>
-          <Link to='/classes/edit' className={`item ${activeItem === 'edit' && 'active'}`}>edit</Link>
-          <Link to='/classes/view' className={`item ${activeItem === 'view' && 'active'}`}>view</Link>
+          <Link to='/students/add' className={`item ${activeItem === 'studentsadd' && 'active'}`}>add</Link>
+          <Link to='/students/edit' className={`item ${activeItem === 'studentsedit' && 'active'}`}>edit</Link>
+          <Link to='/students/view' className={`item ${activeItem === 'studentsview' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>
-      <Link to='/volunteer' className={`item ${activeItem === 'volunteer' && 'active'}`}>Volunteer</Link>
+      <Menu.Item>
+        <Menu.Header>Class</Menu.Header>
+        <Menu.Menu>
+          <Link to='/classes/add' className={`item ${activeItem === 'classesadd' && 'active'}`}>add</Link>
+          <Link to='/classes/edit' className={`item ${activeItem === 'classesedit' && 'active'}`}>edit</Link>
+          <Link to='/classes/view' className={`item ${activeItem === 'classesview' && 'active'}`}>view</Link>
+        </Menu.Menu>
+      </Menu.Item>
+      <Menu.Item>
+        <Menu.Header>Volunteer</Menu.Header>
+        <Menu.Menu>
+          <Link to='/volunteer/form-admin' className={`item ${activeItem === 'volunteerform-admin' && 'active'}`}>Admin Form</Link>
+          <Link to='/volunteer/form' className={`item ${activeItem === 'volunteerform' && 'active'}`}>Form</Link>
+        </Menu.Menu>
+      </Menu.Item>
       <Link to='/attendance' className={`item ${activeItem === 'attendance' && 'active'}`}>Attendance</Link>
     </Menu>
   </Grid.Column>

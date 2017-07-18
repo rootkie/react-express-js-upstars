@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import { Container, Grid } from 'semantic-ui-react'
 import Topbar from './Topbar'
 import SideMenu from './SideMenu'
-import Classes from './Classes'
+import ClassWrap from './ClassWrap'
 import Home from './Home'
 import PropTypes from 'prop-types'
-import VolunteerForm from './VolunteerForm'
+import VolunteerWrap from './VolunteerWrap'
 import Attendance from './Attendance'
+import StudentWrap from './StudentWrap'
 
 const GridStyle = {
   paddingTop: '4em',
@@ -26,11 +27,12 @@ class MainCtrl extends Component {
       <Container fluid>
         <Topbar tab={main} />
         <Grid style={GridStyle}>
-          <SideMenu activeItem={op || ''} />
+          <SideMenu activeItem={main + op || ''} />
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
-            {main === 'classes' && <Classes op={op} />}
-            {main === 'volunteer' && <VolunteerForm />}
+            {main === 'students' && <StudentWrap op={op} />}
+            {main === 'classes' && <ClassWrap op={op} />}
+            {main === 'volunteer' && <VolunteerWrap op={op} />}
             {main === 'attendance' && <Attendance />}
           </Grid.Column>
         </Grid>

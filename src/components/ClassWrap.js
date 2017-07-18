@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ClassForm from './ClassForm.js'
-const Classes = ({ op }) => (
+const ClassWrap = ({ op }) => (
   <div>
     {op === 'add' && <ClassForm /> }
     {op === 'edit' && <h2>Edit</h2>}
@@ -9,8 +9,8 @@ const Classes = ({ op }) => (
   </div>
 )
 
-Classes.propTypes = {
+ClassWrap.propTypes = {
   op: PropTypes.string
 }
 
-export default Classes
+export default ClassWrap
