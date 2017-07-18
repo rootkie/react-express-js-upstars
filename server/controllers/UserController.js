@@ -16,7 +16,7 @@ module.exports.getAllUsers = async(req, res) => {
 
 module.exports.getUser = async(req, res) => {
   try {
-    
+
     if (req.params.id !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
       return res.status(403).send('Operation denied')
     }
@@ -51,8 +51,7 @@ module.exports.editUserParticulars = async(req, res) => {
         edited['admin'] = req.body.admin
       }
     }
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot'] //email is left out because unique: true is not a validator. Only works on create.
-
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
     for (let checkChanged of list) {
       if (req.body[checkChanged]) {
         edited[checkChanged] = await req.body[checkChanged]
@@ -63,7 +62,7 @@ module.exports.editUserParticulars = async(req, res) => {
       new: true,
       runValidators: true,
       runSettersOnQuery: true
-    })
+    }).select('-password -updatedAt -createdAt')
 
     return res.json({
       user
@@ -96,9 +95,11 @@ module.exports.changePassword = async(req, res) => {
     // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
     user.password = newPassword
     const pwChanged = await user.save()
-    return res.json({
-      user: pwChanged
-    })
+    if (pwChanged) {
+      return res.json({
+        status: 'success'
+      })
+    }
   }
   catch (err) {
     console.log(err)
