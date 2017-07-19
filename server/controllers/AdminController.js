@@ -50,7 +50,10 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
             runValidators: true,
         })
         res.json({
-            user: util.generateToken(updatedUser)
+            user: util.generateToken(updatedUser),
+            _id: updatedUser._id,
+            email: updatedUser.email,
+            roles: updatedUser.roles
         })
     }
     catch (err) {
@@ -61,6 +64,13 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
         else res.status(500).send('server error')
     }
 }
+
+module.exports.createUser = async(req, res) => {
+    res.send({
+        status: 'success'
+    })
+}
+
 
 module.exports.generateAdminUser = async(req, res) => {
     try {
