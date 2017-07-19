@@ -17,14 +17,14 @@ module.exports = app => {
   app.get('/api/class/:id', classControl.getClassById)
   app.post('/api/class', classControl.addClass)
   app.put('/api/class', classControl.editClass)
-  app.delete('/api/class', classControl.deleteClass) // Left as empty for merge first
+  app.delete('/api/class', classControl.deleteClass)
 
   // Students
   app.get('/api/students', studentControl.getAll)
   app.get('/api/students/:id', studentControl.getStudentById)
   app.post('/api/students', studentControl.addStudent)
   app.put('/api/students', studentControl.editStudentById)
-  app.delete('/api/students', studentControl.deleteStudent) // Left empty for merge first
+  app.delete('/api/students', studentControl.deleteStudent)
   app.post('/api/students/class', classControl.addStudentsToClass)
   app.delete('/api/students/class', classControl.deleteStudentsFromClass)
 
@@ -32,7 +32,7 @@ module.exports = app => {
   app.get('/api/users', userControl.getAllUsers)
   app.get('/api/users/:id', hasRole(['Tutor', 'Admin']), userControl.getUser)
   app.post('/api/users', hasRole(['Tutor', 'Admin']), userControl.editUserParticulars)
-  app.delete('/api/users', userControl.deleteUser) // Left blank for merge first
+  app.delete('/api/users', userControl.deleteUser)
   app.post('/api/users/changePassword', userControl.changePassword)
   app.post('/api/users/class', classControl.addUsersToClass)
   app.delete('/api/users/class', classControl.deleteUsersFromClass)
@@ -54,6 +54,7 @@ module.exports = app => {
   app.get('/api/stats/:classId/summary/:dateStart/:dateEnd', statisticsControl.getClassSummary) // Will remove soon
 
   // Admin controls under user
+  app.post('/api/admin/user', adminControl.createUser) // Will make
   app.post('/api/admin/changePassword', adminControl.adminChangePassword)
   app.post('/api/admin/userStatusPermissions', adminControl.changeUserStatusAndPermissions)
 
@@ -61,5 +62,5 @@ module.exports = app => {
   app.post('/api/login', authControl.login)
   
   //Special Treats
-  app.post('/api/generateAdminUser', adminControl.generateAdminUser) // Will make a proper one to create real users by SuperAdmin
+  app.post('/api/generateAdminUser', adminControl.generateAdminUser)
 }

@@ -88,7 +88,8 @@ module.exports.getAll = async(req, res) => {
   }
 }
 module.exports.getClassById = async(req, res) => {
-  var classId = util.makeString(req.params.id)
+  let classId = req.params.id
+  if (!classId) return res.status(422).send('classId is required')
   try {
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
     return res.json(class1)
@@ -100,9 +101,20 @@ module.exports.getClassById = async(req, res) => {
 }
 
 module.exports.deleteClass = async(req, res) => {
-  return res.json({
-    status: 'success'
-  })
+  let {
+    classId
+  } = req.body
+  if (!classId) return res.status(422).send('classId is required')
+  try {
+    const classDeleted = await Class.findByIdAndRemove(classId)
+    return res.json({
+      classDeleted
+    })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
 }
 
 module.exports.addStudentsToClass = async(req, res) => {

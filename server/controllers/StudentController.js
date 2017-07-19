@@ -113,7 +113,18 @@ module.exports.getStudentById = async(req, res) => {
 }
 
 module.exports.deleteStudent = async(req, res) => {
-  return res.json({
-    status: 'success'
-  })
+  let {
+    studentId
+  } = req.body
+  if (!studentId) return res.status(422).send('studentId is required')
+  try {
+    const studentDeleted = await Student.findByIdAndRemove(studentId)
+    return res.json({
+      studentDeleted
+    })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
 }

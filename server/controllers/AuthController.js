@@ -98,12 +98,16 @@ module.exports.register = async(req, res) => {
     })
     const error = await user.validateSync();
     if (error) {
+      console.log(error)
       return res.status(422).send('Error Saving: Fill in all required fields accurately')
     }
     const userObject = await user.save()
     res.json({
       status: 'success',
       token: generateToken(userObject),
+      _id: userObject._id,
+      email: userObject.email,
+      roles: userObject.roles
     })
   }
   catch (err) {

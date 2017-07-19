@@ -78,9 +78,20 @@ module.exports.editUserParticulars = async(req, res) => {
 }
 
 module.exports.deleteUser = async(req, res) => {
-  return res.json({
-    status: 'success'
-  })
+  let {
+    userId
+  } = req.body
+  if (!userId) return res.status(422).send('userId is required')
+  try {
+    const userDeleted = await User.findByIdAndRemove(userId).select('-password')
+    return res.json({
+      userDeleted
+    })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
 }
 
 module.exports.changePassword = async(req, res) => {
