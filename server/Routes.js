@@ -54,7 +54,7 @@ module.exports = app => {
   app.get('/api/stats/:classId/summary/:dateStart/:dateEnd', statisticsControl.getClassSummary) // Will remove soon
 
   // Admin controls under user
-  app.post('/api/admin/user', adminControl.createUser) // Will make
+  app.post('/api/admin/user', adminControl.createUser)
   app.post('/api/admin/changePassword', adminControl.adminChangePassword)
   app.post('/api/admin/userStatusPermissions', adminControl.changeUserStatusAndPermissions)
 

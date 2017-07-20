@@ -54,9 +54,6 @@ async function genStudentARStat (dateFrom, dateEnd, studentId) {
 module.exports.getClassSummary = async (req, res) => {
   try {
     let {dateFrom, dateEnd, classId} = req.body
-    dateFrom = util.makeString(dateFrom)
-    dateEnd = util.makeString(dateEnd)
-    classId = util.makeString(classId)
     let class1 = await Class.findById(classId).populate('users', 'profile').populate('students', 'profile.name')
 
     // Generating Attendance Rate of class

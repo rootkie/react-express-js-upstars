@@ -24,7 +24,9 @@ module.exports.login = async(req, res) => {
     }
     res.json({
         token: generateToken(user),
-        status: 'success'
+        _id: user._id,
+        email: user.email,
+        roles: user.roles,
       })
       // End of try block, catch err
   }
