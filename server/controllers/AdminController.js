@@ -123,7 +123,8 @@ module.exports.createUser = async(req, res) => {
             profile,
             commencementDate,
             exitDate,
-            roles
+            roles,
+            status: 'Accepted'
         })
         const error = await user.validateSync();
         if (error) {
