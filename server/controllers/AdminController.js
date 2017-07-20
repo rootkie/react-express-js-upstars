@@ -66,9 +66,83 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
 }
 
 module.exports.createUser = async(req, res) => {
-    res.send({
-        status: 'success'
-    })
+    /* Test input
+        {	
+        	"email": "test@gmail.com",
+        	"password": "password",
+        	"profile": {
+        		"name": "Admin",
+        		"gender": "M",
+        		"dob": 123,
+        		"nationality": "SG",
+        		"nric": "S1102s",
+        		"address": "Blk Scrub",
+        		"postalCode": 122222,
+        		"homephone": 123,
+        		"handphone": 123
+        	},
+        	"commencementDate": 20072017,
+        	"exitDate": 20072057,
+        	"roles": ["SuperVisor", "Mentor"]
+        }
+        */
+    try {
+        let {
+            email,
+            password,
+            profile,
+            commencementDate,
+            exitDate,
+            roles
+        } = req.body
+            // Return error if no email provided
+        if (!email) {
+            return res.status(422).send({
+                error: 'You must enter an email address.'
+            })
+        }
+
+        // Return error if no password provided
+        if (!password) {
+            return res.status(422).send({
+                error: 'You must enter a password.'
+            })
+        }
+
+        const existingUser = await User.findOne({
+            email
+        })
+
+        if (existingUser) return res.status(422).send({
+            error: 'This email is already in use'
+        })
+
+        const user = new User({
+            email,
+            password,
+            profile,
+            commencementDate,
+            exitDate,
+            roles,
+            status: 'Accepted'
+        })
+        const error = await user.validateSync();
+        if (error) {
+            return res.status(422).send('Error Saving: Fill in all required fields accurately')
+        }
+        const userObject = await user.save()
+        res.json({
+            status: 'success',
+            token: util.generateToken(userObject),
+            _id: userObject._id,
+            email: userObject.email,
+            roles: userObject.roles
+        })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send(err.message)
+    }
 }
 
 
@@ -117,17 +191,12 @@ module.exports.generateAdminUser = async(req, res) => {
             error: 'This email is already in use'
         })
 
-        profile.schoolName = 'nil'
-        profile.schoolLevel = 'nil'
-        profile.schoolClass = 'nil'
-
         const user = new User({
             email,
             password,
             profile,
             commencementDate: '00000000',
             exitDate: '00000000',
-            preferredTimeSlot: 'nil',
             roles: ['Admin']
         })
         const error = await user.validateSync();
@@ -138,6 +207,9 @@ module.exports.generateAdminUser = async(req, res) => {
         res.json({
             status: 'success',
             token: util.generateToken(userObject),
+            _id: userObject._id,
+            email: userObject.email,
+            roles: userObject.roles
         })
     }
     catch (err) {
