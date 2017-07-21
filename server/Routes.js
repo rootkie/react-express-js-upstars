@@ -2,7 +2,6 @@ const classControl = require('./controllers/ClassController')
 const authControl = require('./controllers/AuthController')
 const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
-const statisticsControl = require('./controllers/StatisticsController')
 const userControl = require('./controllers/UserController.js')
 const adminControl = require('./controllers/AdminController.js')
 const hasRole = require('./routeMiddleware').hasRole
@@ -49,9 +48,6 @@ module.exports = app => {
   app.get('/api/attendance/user/:userId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceByUser)
   app.get('/api/attendance/student/:studentId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceByStudent)
   app.get('/api/attendance/:classId/summary', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getClassAttendanceSummary) // Very VERBOSE
-
-  // Statistics controls
-  // app.get('/api/stats/:classId/summary/:dateStart/:dateEnd', statisticsControl.getClassSummary) // Will remove soon
 
   // Admin controls under user
   app.post('/api/admin/user', hasRole(['SuperAdmin']), adminControl.createUser)
