@@ -27,8 +27,8 @@ module.exports.login = async(req, res) => {
         _id: user._id,
         email: user.email,
         roles: user.roles,
+        name: user.profile.name
       })
-      // End of try block, catch err
   }
   catch (err) {
     console.log(err)
@@ -109,7 +109,8 @@ module.exports.register = async(req, res) => {
       token: generateToken(userObject),
       _id: userObject._id,
       email: userObject.email,
-      roles: userObject.roles
+      roles: userObject.roles,
+      name: userObject.profile.name
     })
   }
   catch (err) {

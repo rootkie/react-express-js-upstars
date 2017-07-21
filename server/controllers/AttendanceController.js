@@ -403,11 +403,17 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
           $divide: ['$attended', '$total']
         }
       })
+      
+      let studentNumber = foundAttendanceforStudent.length
+      let tutorNumber = foundAttendanceforUser.length
+      let tutorStudentRatio = tutorNumber / studentNumber
+      
 
     res.json({
       status: 'success',
       foundAttendanceforUser,
-      foundAttendanceforStudent
+      foundAttendanceforStudent,
+      tutorStudentRatio
     })
   }
   catch (err) {
