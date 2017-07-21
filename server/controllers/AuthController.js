@@ -90,3 +90,47 @@ module.exports.register = async (req, res) => {
     res.status(500).send('server error')
   }
 }
+
+module.exports.simpleRegister = async (req, res) => {
+  try {
+    let { email, username, password } = req.body
+    // Return error if no email provided
+    if (!email) {
+      return res.status(422).send({error: 'You must enter an email address.'})
+    }
+
+    // Return error if full name not provided
+    if (!username) {
+      return res.status(422).send({error: 'You must enter your full name.'})
+    }
+
+    // Return error if no password provided
+    if (!password) {
+      return res.status(422).send({ error: 'You must enter a password.' })
+    }
+
+    email = util.makeString(email)
+    username = util.makeString(username)
+    password = util.makeString(password)
+
+    const existingUser = await User.findOne({email: email})
+    if (existingUser) return res.status(422).send({error: 'This email is already in use'})
+    const user = new User({
+      email: email,
+      profile: {
+        username
+      },
+      password: password
+    })
+    const userObject = await user.save()
+    const userInfo = makeUser(userObject)
+    res.json({
+      status: 'success',
+      token: generateToken(userInfo),
+      user: userInfo
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('server error')
+  }
+}

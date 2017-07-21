@@ -66,5 +66,6 @@ module.exports = function (app) {
   // app.post('/api/admin/addEditStudent', studentControl.addEditStudent)
 
   app.post('/api/register', authControl.register)
+  app.post('/api/simpleRegister', authControl.simpleRegister)
   app.post('/api/login', authControl.login)
 }
