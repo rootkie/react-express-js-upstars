@@ -55,6 +55,7 @@ module.exports = app => {
   app.post('/api/admin/userStatusPermissions', hasRole(['SuperAdmin']), adminControl.changeUserStatusAndPermissions)
 
   app.post('/api/register', authControl.register)
+  app.post('/api/simpleRegister', authControl.simpleRegister)
   app.post('/api/login', authControl.login)
 
   //Special Treats
