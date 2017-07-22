@@ -16,8 +16,14 @@ module.exports.getAllUsers = async(req, res) => {
 
 module.exports.getUser = async(req, res) => {
   try {
+    
+    sudo = true
+      // Check for Admin / SuperAdmin / Mentor
+    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
+      sudo = false
+    }
 
-    if (req.params.id !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+    if (req.params.id !== req.decoded._id && sudo == false) {
       return res.status(403).send('Operation denied')
     }
 
@@ -39,14 +45,19 @@ module.exports.editUserParticulars = async(req, res) => {
     } = req.body
 
     let edited = {}
+    sudo = true
+      // Check for Admin / SuperAdmin / Mentor
+    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
+      sudo = false
+    }
 
     if (!userId) {
       return res.status(422).send('Please provide a valid userId')
     }
-    if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
+    if (userId !== req.decoded._id && sudo == false) {
       return res.status(403).send('Operation denied')
     }
-    if (req.decoded.roles.indexOf('Admin') != -1) {
+    if (sudo) {
       if (req.body.admin) {
         edited['admin'] = req.body.admin
       }
@@ -107,8 +118,11 @@ module.exports.changePassword = async(req, res) => {
     if (!isMatch) {
       return res.status(403).send('Wrong Password')
     }
+    
+    if (userId !== req.decoded._id) {
+      return res.status(403).send('Operation denied')
+    }
 
-    // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {

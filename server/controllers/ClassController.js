@@ -88,9 +88,13 @@ module.exports.getAll = async(req, res) => {
   }
 }
 module.exports.getClassById = async(req, res) => {
-  let classId = req.params.id
-  if (!classId) return res.status(422).send('classId is required')
   try {
+    let classId = req.params.id
+    if (!classId) return res.status(422).send('classId is required')
+    // If the user do not belong to that class and not ADMIN / SuperADMIN, API won't get past
+    if (!req.decoded.classes.indexOf(classId) && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) {
+      return res.status(403).send('Operation denied')
+    }
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
     return res.json(class1)
   }
@@ -147,9 +151,6 @@ module.exports.addStudentsToClass = async(req, res) => {
       multi: true
     })
 
-    // Add each student to the class
-    // AND
-    // add the class to each student
 
     return res.json({
       class: classes,

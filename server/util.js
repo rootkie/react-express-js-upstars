@@ -14,12 +14,14 @@ module.exports.generateToken = req => {
   const {
     _id,
     roles,
-    status
+    status,
+    classes
   } = req
   const user = {
     _id,
     roles,
-    status
+    status,
+    classes
   }
   return jwt.sign(user, config.secret, {
     expiresIn: 10800 // 3 hour

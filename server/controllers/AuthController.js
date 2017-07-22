@@ -38,28 +38,6 @@ module.exports.login = async(req, res) => {
 
 module.exports.register = async(req, res) => {
   try {
-    // All compulsory fields: Full test input with validation
-    /*{	
-    	"email": "test@gmail.com",
-    	"password": "password",
-    	"profile": {
-    		"name": "Mr Student",
-    		"gender": "M",
-    		"dob": 123,
-    		"nationality": "SG",
-    		"nric": "S1102s",
-    		"address": "Blk 999",
-    		"postalCode": 122222,
-    		"homephone": 123,
-    		"handphone": 123,
-    		"schoolName": "HCI",
-    		"schoolClass": "2-3",
-    		"schoolLevel": "J2"
-    	},
-    	"commencementDate": 123123,
-    	"exitDate": 123,
-    	"preferredTimeSlot": "Friday"
-    }*/
     let {
       email,
       password,
@@ -136,10 +114,6 @@ module.exports.simpleRegister = async (req, res) => {
     if (!password) {
       return res.status(422).send({ error: 'You must enter a password.' })
     }
-
-    email = util.makeString(email)
-    username = util.makeString(username)
-    password = util.makeString(password)
 
     const existingUser = await User.findOne({email: email})
     if (existingUser) return res.status(422).send({error: 'This email is already in use'})

@@ -38,6 +38,16 @@ module.exports.addEditAttendance = async(req, res) => {
     if (!classId) {
       return res.status(422).json('ClassId can not be null')
     }
+
+    sudo = true
+      // Check for Admin / SuperAdmin / Mentor. If true, they have sudo rights
+    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
+      sudo = false
+    }
+
+    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) {
+      return res.status(403).send('Operation denied')
+    }
     let hoursInt = parseInt(hours, 10)
     if (type !== 'Class') hoursInt = 0
 
@@ -82,6 +92,18 @@ module.exports.deleteAttendance = async(req, res) => {
     if (!classId || !date) {
       return res.status(422).json('ClassId or date cannot be empty')
     }
+
+    sudo = true
+      // Check for Admin / SuperAdmin / Mentor. If true, they have sudo rights
+    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
+      sudo = false
+    }
+
+    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) {
+      return res.status(403).send('Operation denied')
+    }
+
+
     const removed = await Attendance.remove({
       class: classId,
       date: util.formatDate(date)
@@ -403,11 +425,11 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
           $divide: ['$attended', '$total']
         }
       })
-      
-      let studentNumber = foundAttendanceforStudent.length
-      let tutorNumber = foundAttendanceforUser.length
-      let tutorStudentRatio = tutorNumber / studentNumber
-      
+
+    let studentNumber = foundAttendanceforStudent.length
+    let tutorNumber = foundAttendanceforUser.length
+    let tutorStudentRatio = tutorNumber / studentNumber
+
 
     res.json({
       status: 'success',

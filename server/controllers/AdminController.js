@@ -5,18 +5,11 @@ module.exports.adminChangePassword = async(req, res) => {
     try {
         let {
             userId,
-            newPassword,
-            confirmNewPassword
+            newPassword
         } = req.body
             // Just in case the front end screws up
-        if (newPassword !== confirmNewPassword) {
-            return res.status(422).send({
-                error: 'The 2 new passwords do not match'
-            })
-        }
         const user = await User.findById(userId)
-            // Did not return the token. Pls add in so its standardised. I dont want to add the wrong things
-        user.password = confirmNewPassword
+        user.password = newPassword
         const pwChanged = await user.save()
 
         res.json({
@@ -133,9 +126,8 @@ module.exports.createUser = async(req, res) => {
         const userObject = await user.save()
         res.json({
             status: 'success',
-            token: util.generateToken(userObject),
             _id: userObject._id,
-            email: userObject.email,
+            name: userObject.profile.name,
             roles: userObject.roles
         })
     }
@@ -197,7 +189,7 @@ module.exports.generateAdminUser = async(req, res) => {
             profile,
             commencementDate: '00000000',
             exitDate: '00000000',
-            roles: ['Admin']
+            roles: ['SuperAdmin']
         })
         const error = await user.validateSync();
         if (error) {
