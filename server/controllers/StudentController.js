@@ -22,7 +22,7 @@ module.exports.addStudent = async(req, res) => {
     const newStudent = new Student(edited)
     const error = await newStudent.validateSync();
     if (error) {
-      return res.status(422).send('Error Saving: Fill in all required fields accurately')
+      return res.status(400).send('Error Saving: Fill in all required fields accurately')
     }
     const successStudentSignup = await newStudent.save()
     res.json({
@@ -33,10 +33,10 @@ module.exports.addStudent = async(req, res) => {
   catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      return res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+      return res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     if (err.code == 11000) {
-      return res.status(422).send('You have already signed up an account. If this is a mistake please contact our system admin.')
+      return res.status(400).send('You have already signed up an account. If this is a mistake please contact our system admin.')
     }
     else res.status(500).send('server error')
   }
@@ -46,7 +46,7 @@ module.exports.editStudentById = async(req, res) => {
   try {
 
     if (!req.body.studentId) {
-      return res.status(422).send('Please provide a valid studentId')
+      return res.status(400).send('Please provide a valid studentId')
     }
 
     let edited = {}
@@ -75,10 +75,10 @@ module.exports.editStudentById = async(req, res) => {
   catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+      res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     if (err.code == 11000) {
-      return res.status(422).send('You have already signed up an account. If this is a mistake please contact our system admin.')
+      return res.status(400).send('You have already signed up an account. If this is a mistake please contact our system admin.')
     }
     else res.status(500).send('server error')
   }
@@ -116,7 +116,7 @@ module.exports.deleteStudent = async(req, res) => {
   let {
     studentId
   } = req.body
-  if (!studentId) return res.status(422).send('studentId is required')
+  if (!studentId) return res.status(400).send('studentId is required')
   try {
     const studentDeleted = await Student.findByIdAndRemove(studentId)
     return res.json({

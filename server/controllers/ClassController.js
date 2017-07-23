@@ -14,6 +14,14 @@ module.exports.addClass = async(req, res) => {
       startDate
     } = req.body
 
+    // Check if the class already exist and prevent duplicate creation
+    const classExist = await Class.findOne({
+      className,
+      dayAndTime
+    })
+    
+    if (classExist) return res.status(400).send("Duplicate class slot. Operation denied.")
+
     const newClass = new Class({
       className,
       classType,
@@ -23,7 +31,7 @@ module.exports.addClass = async(req, res) => {
     })
     const error = await newClass.validateSync();
     if (error) {
-      return res.status(422).send('Error Saving: Fill in all required fields accurately')
+      return res.status(400).send('Error Saving: Fill in all required fields accurately')
     }
     const newClassCreated = await newClass.save()
 
@@ -69,7 +77,7 @@ module.exports.editClass = async(req, res) => {
   catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+      res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     else res.status(500).send('server error')
   }
@@ -90,8 +98,8 @@ module.exports.getAll = async(req, res) => {
 module.exports.getClassById = async(req, res) => {
   try {
     let classId = req.params.id
-    if (!classId) return res.status(422).send('classId is required')
-    // If the user do not belong to that class and not ADMIN / SuperADMIN, API won't get past
+    if (!classId) return res.status(400).send('classId is required')
+      // If the user do not belong to that class and not ADMIN / SuperADMIN, API won't get past
     if (!req.decoded.classes.indexOf(classId) && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) {
       return res.status(403).send('Operation denied')
     }
@@ -108,7 +116,7 @@ module.exports.deleteClass = async(req, res) => {
   let {
     classId
   } = req.body
-  if (!classId) return res.status(422).send('classId is required')
+  if (!classId) return res.status(400).send('classId is required')
   try {
     const classDeleted = await Class.findByIdAndRemove(classId)
     return res.json({

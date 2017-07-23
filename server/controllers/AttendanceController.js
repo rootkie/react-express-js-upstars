@@ -36,7 +36,7 @@ module.exports.addEditAttendance = async(req, res) => {
     } = req.body
 
     if (!classId) {
-      return res.status(422).json('ClassId can not be null')
+      return res.status(400).json('ClassId can not be null')
     }
 
     sudo = true
@@ -77,7 +77,7 @@ module.exports.addEditAttendance = async(req, res) => {
   catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+      res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     else res.status(500).send('server error')
   }
@@ -90,7 +90,7 @@ module.exports.deleteAttendance = async(req, res) => {
       classId
     } = req.body
     if (!classId || !date) {
-      return res.status(422).json('ClassId or date cannot be empty')
+      return res.status(400).json('ClassId or date cannot be empty')
     }
 
     sudo = true
@@ -171,7 +171,7 @@ module.exports.getAttendanceByUser = async(req, res) => {
     let user = {}
 
     if (!userId || !dateStart || !dateEnd) {
-      return res.status(422).json('Unvalid request. Some fields cannot be null')
+      return res.status(400).json('Unvalid request. Some fields cannot be null')
     }
 
     if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
@@ -259,7 +259,7 @@ module.exports.getAttendanceByStudent = async(req, res) => {
     } = req.params
     let student = {}
     if (!studentId || !dateStart || !dateEnd) {
-      return res.status(422).json('Unvalid request. Some fields cannot be null')
+      return res.status(400).json('Unvalid request. Some fields cannot be null')
     }
     // Init what factors to search in student later
     student['students.list'] = mongoose.Types.ObjectId(studentId)
@@ -338,7 +338,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
       classId
     } = req.params
     if (!classId) {
-      return res.status(422).json('ClassId cannot be null')
+      return res.status(400).json('ClassId cannot be null')
     }
     const foundAttendanceforUser = await Attendance.aggregate()
       .match({

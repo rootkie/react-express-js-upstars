@@ -33,6 +33,12 @@ app.use(function(req, res, next) {
 // Connecting to database
 mongoose.Promise = global.Promise
 mongoose.connect(config.database)
+  /* Production & for Mongoose 4.11.0 and above
+  mongoose.openUri(config.database, {
+  useMongoClient: true,
+  ssl: true
+  })
+  */
 mongoose.set('debug', true);
 
 process.on('SIGINT', () => {

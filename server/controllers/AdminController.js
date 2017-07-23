@@ -52,7 +52,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     catch (err) {
         console.log(err)
         if (err.name == 'ValidationError') {
-            res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+            res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
         }
         else res.status(500).send('server error')
     }
@@ -90,14 +90,14 @@ module.exports.createUser = async(req, res) => {
         } = req.body
             // Return error if no email provided
         if (!email) {
-            return res.status(422).send({
+            return res.status(400).send({
                 error: 'You must enter an email address.'
             })
         }
 
         // Return error if no password provided
         if (!password) {
-            return res.status(422).send({
+            return res.status(400).send({
                 error: 'You must enter a password.'
             })
         }
@@ -106,7 +106,7 @@ module.exports.createUser = async(req, res) => {
             email
         })
 
-        if (existingUser) return res.status(422).send({
+        if (existingUser) return res.status(400).send({
             error: 'This email is already in use'
         })
 
@@ -121,7 +121,7 @@ module.exports.createUser = async(req, res) => {
         })
         const error = await user.validateSync();
         if (error) {
-            return res.status(422).send('Error Saving: Fill in all required fields accurately')
+            return res.status(400).send('Error Saving: Fill in all required fields accurately')
         }
         const userObject = await user.save()
         res.json({
@@ -163,14 +163,14 @@ module.exports.generateAdminUser = async(req, res) => {
         } = req.body
             // Return error if no email provided
         if (!email) {
-            return res.status(422).send({
+            return res.status(400).send({
                 error: 'You must enter an email address.'
             })
         }
 
         // Return error if no password provided
         if (!password) {
-            return res.status(422).send({
+            return res.status(400).send({
                 error: 'You must enter a password.'
             })
         }
@@ -179,7 +179,7 @@ module.exports.generateAdminUser = async(req, res) => {
             email
         })
 
-        if (existingUser) return res.status(422).send({
+        if (existingUser) return res.status(400).send({
             error: 'This email is already in use'
         })
 
@@ -193,7 +193,7 @@ module.exports.generateAdminUser = async(req, res) => {
         })
         const error = await user.validateSync();
         if (error) {
-            return res.status(422).send('Error Saving: Fill in all required fields accurately')
+            return res.status(400).send('Error Saving: Fill in all required fields accurately')
         }
         const userObject = await user.save()
         res.json({

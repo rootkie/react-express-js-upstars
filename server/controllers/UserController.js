@@ -52,7 +52,7 @@ module.exports.editUserParticulars = async(req, res) => {
     }
 
     if (!userId) {
-      return res.status(422).send('Please provide a valid userId')
+      return res.status(400).send('Please provide a valid userId')
     }
     if (userId !== req.decoded._id && sudo == false) {
       return res.status(403).send('Operation denied')
@@ -82,7 +82,7 @@ module.exports.editUserParticulars = async(req, res) => {
   catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      res.status(422).send('Our server had issues validating your inputs. Please fill in using proper values')
+      res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     else res.status(500).send('server error')
   }
@@ -92,7 +92,7 @@ module.exports.deleteUser = async(req, res) => {
   let {
     userId
   } = req.body
-  if (!userId) return res.status(422).send('userId is required')
+  if (!userId) return res.status(400).send('userId is required')
   try {
     const userDeleted = await User.findByIdAndRemove(userId).select('-password')
     return res.json({

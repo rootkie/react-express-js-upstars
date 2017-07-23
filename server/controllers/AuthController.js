@@ -48,14 +48,14 @@ module.exports.register = async(req, res) => {
     } = req.body
       // Return error if no email provided
     if (!email) {
-      return res.status(422).send({
+      return res.status(400).send({
         error: 'You must enter an email address.'
       })
     }
 
     // Return error if no password provided
     if (!password) {
-      return res.status(422).send({
+      return res.status(400).send({
         error: 'You must enter a password.'
       })
     }
@@ -63,7 +63,7 @@ module.exports.register = async(req, res) => {
     const existingUser = await User.findOne({
       email
     })
-    if (existingUser) return res.status(422).send({
+    if (existingUser) return res.status(400).send({
       error: 'This email is already in use'
     })
 
@@ -79,7 +79,7 @@ module.exports.register = async(req, res) => {
     const error = await user.validateSync();
     if (error) {
       console.log(error)
-      return res.status(422).send('Error Saving: Fill in all required fields accurately')
+      return res.status(400).send('Error Saving: Fill in all required fields accurately')
     }
     const userObject = await user.save()
     res.json({
@@ -102,21 +102,21 @@ module.exports.simpleRegister = async (req, res) => {
     let { email, username, password } = req.body
     // Return error if no email provided
     if (!email) {
-      return res.status(422).send({error: 'You must enter an email address.'})
+      return res.status(400).send({error: 'You must enter an email address.'})
     }
 
     // Return error if full name not provided
     if (!username) {
-      return res.status(422).send({error: 'You must enter your full name.'})
+      return res.status(400).send({error: 'You must enter your full name.'})
     }
 
     // Return error if no password provided
     if (!password) {
-      return res.status(422).send({ error: 'You must enter a password.' })
+      return res.status(400).send({ error: 'You must enter a password.' })
     }
 
     const existingUser = await User.findOne({email: email})
-    if (existingUser) return res.status(422).send({error: 'This email is already in use'})
+    if (existingUser) return res.status(400).send({error: 'This email is already in use'})
     const user = new User({
       email: email,
       profile: {
