@@ -16,6 +16,9 @@ Type these commands into the shell:
 1. `mongod --bind_ip=$IP`
 2. `nodemon server/`
 
+### Basic Guide
+Proceed to [here](GUIDE.md) for a guide on backend development
+
 
 ### Directory
 

@@ -21,7 +21,7 @@ module.exports = app => {
   // Students
   app.get('/api/students', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getAll)
   app.get('/api/students/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getStudentById)
-  app.post('/api/students', hasRole(['SuperAdmin']), studentControl.addStudent)
+  app.post('/api/students', studentControl.addStudent)
   app.put('/api/students', hasRole(['Mentor', 'Admin', 'SuperAdmin']), studentControl.editStudentById)
   app.delete('/api/students', hasRole(['SuperAdmin']), studentControl.deleteStudent)
   app.post('/api/students/class', hasRole(['Admin', 'SuperAdmin']), classControl.addStudentsToClass)
@@ -50,6 +50,7 @@ module.exports = app => {
   app.get('/api/attendance/:classId/summary', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getClassAttendanceSummary) // Very VERBOSE
 
   // Admin controls under user
+  app.get('/api/admin/pendingUsers', hasRole(['SuperAdmin']), adminControl.getPendingUsers)
   app.post('/api/admin/user', hasRole(['SuperAdmin']), adminControl.createUser)
   app.post('/api/admin/changePassword', hasRole(['SuperAdmin']), adminControl.adminChangePassword)
   app.post('/api/admin/userStatusPermissions', hasRole(['SuperAdmin']), adminControl.changeUserStatusAndPermissions)

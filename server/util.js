@@ -24,6 +24,6 @@ module.exports.generateToken = req => {
     classes
   }
   return jwt.sign(user, config.secret, {
-    expiresIn: 10800 // 3 hour
+    expiresIn: '100h'
   })
 }

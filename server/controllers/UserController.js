@@ -17,10 +17,10 @@ module.exports.getAllUsers = async(req, res) => {
 module.exports.getUser = async(req, res) => {
   try {
     
-    sudo = true
+    sudo = false
       // Check for Admin / SuperAdmin / Mentor
-    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
-      sudo = false
+    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
+      sudo = true
     }
 
     if (req.params.id !== req.decoded._id && sudo == false) {
@@ -47,7 +47,7 @@ module.exports.editUserParticulars = async(req, res) => {
     let edited = {}
     sudo = false
       // Check for Admin / SuperAdmin / Mentor
-    if (req.decoded.roles.indexOf('Admin') !== -1 && req.decoded.roles.indexOf('SuperAdmin') !== -1 && req.decoded.roles.indexOf('Mentor') !== -1) {
+    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
       sudo = true
     }
 

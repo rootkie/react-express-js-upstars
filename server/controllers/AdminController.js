@@ -138,6 +138,20 @@ module.exports.createUser = async(req, res) => {
 }
 
 
+module.exports.getPendingUsers = async(req, res) => {
+    try {
+        const users = await User.find({'status': 'Pending'}).select('profile.name roles').sort('profile.name')
+        return res.json({
+            users
+        })
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).send('server error')
+    }
+}
+
+
 module.exports.generateAdminUser = async(req, res) => {
     try {
         // All compulsory fields: Full test input with validation
@@ -200,7 +214,6 @@ module.exports.generateAdminUser = async(req, res) => {
             status: 'success',
             token: util.generateToken(userObject),
             _id: userObject._id,
-            email: userObject.email,
             roles: userObject.roles
         })
     }
