@@ -1,7 +1,6 @@
 const User = require('../models/user')
 const util = require('../util.js')
 const generateToken = util.generateToken
-const makeUser = util.makeUser
   // ============== Start of all the functions ==============
 
 module.exports.login = async(req, res) => {
@@ -120,16 +119,17 @@ module.exports.simpleRegister = async (req, res) => {
     const user = new User({
       email: email,
       profile: {
-        username
+        name: username
       },
       password: password
     })
-    const userObject = await user.save()
-    const userInfo = makeUser(userObject)
+    const userObject = await user.save({validateBeforeSave: false})
+    delete userObject.password // this is a temporary hack.
+    console.log(userObject)
     res.json({
       status: 'success',
-      token: generateToken(userInfo),
-      user: userInfo
+      token: generateToken(userObject),
+      user: userObject
     })
   } catch (err) {
     console.log(err)
