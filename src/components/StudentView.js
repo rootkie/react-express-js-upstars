@@ -1,13 +1,8 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
-
-let sampleStudentData = [
-  {name: 'xiaoMing', age: 12, attendanceRate: '60%', dank: 'yes'},
-  {name: 'xiaoXing', age: 24, attendanceRate: '40%', dank: 'yes'},
-  {name: 'Michael', age: 6, attendanceRate: '90%', dank: 'no'}
-]
 
 const classOptions = [
   { key: 'python420', text: 'Python 420pm', value: 'py420' },
@@ -27,9 +22,12 @@ const studentOptions = [
   { key: 'borhk', text: 'Borhk', value: 'borhk' }
 ]
 class StudentView extends Component {
+  static propTypes = {
+    studentData: PropTypes.array.isRequired
+  }
   state = {
     selected: [],
-    studentData: sampleStudentData,
+    studentData: this.props.studentData,
     deleteConfirmationVisibility: false,
 
     searchName: '',
@@ -130,21 +128,21 @@ class StudentView extends Component {
             <Table.HeaderCell />
             <Table.HeaderCell>Name</Table.HeaderCell>
             <Table.HeaderCell>Age</Table.HeaderCell>
-            <Table.HeaderCell>Attendance Rate</Table.HeaderCell>
-            <Table.HeaderCell>Dank</Table.HeaderCell>
+            <Table.HeaderCell>IC Number</Table.HeaderCell>
+            <Table.HeaderCell>Gender</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {studentData.map((student, i) => (
+          {studentData.map(({profile}, i) => (
             <Table.Row key={`student-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={student.name} onChange={this.handleCheckboxChange} checked={selected.includes(student.name)} />
+                <Checkbox name={profile.name} onChange={this.handleCheckboxChange} checked={selected.includes(profile.name)} />
               </Table.Cell>
-              <Table.Cell>{student.name}</Table.Cell>
-              <Table.Cell>{student.age}</Table.Cell>
-              <Table.Cell>{student.attendanceRate}</Table.Cell>
-              <Table.Cell>{student.dank}</Table.Cell>
+              <Table.Cell>{profile.name}</Table.Cell>
+              <Table.Cell>{profile.dob}</Table.Cell>
+              <Table.Cell>{profile.icNumber}</Table.Cell>
+              <Table.Cell>{profile.gender === 'F' ? 'female' : 'male'}</Table.Cell>
             </Table.Row>))}
         </Table.Body>
 
