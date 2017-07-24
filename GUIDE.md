@@ -13,10 +13,10 @@
     "profile": {
     	"name": "Admin",
     	"gender": "M",
-    	"dob": 123,
+    	"dob": 19990721,
     	"nationality": "SG",
     	"nric": "S1102s",
-    	"address": "Blk Scrub",
+    	"address": "Blk ABC",
     	"postalCode": 122222,
     	"homephone": 123,
     	"handphone": 123,

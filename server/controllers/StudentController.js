@@ -7,7 +7,7 @@ module.exports.addStudent = async(req, res) => {
 
     const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'misc', 'status']
       // If not admin editing, restrict the entering of Admin Field
-    if (req.decoded && req.decoded.roles.indexOf('Admin') != -1) {
+    if (req.decoded && (req.decoded.roles.indexOf('Admin') != -1 || req.decoded.roles.indexOf('SuperAdmin') != -1)) {
       if (req.body.admin) {
         edited['admin'] = req.body.admin
       }
