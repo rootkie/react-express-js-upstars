@@ -45,10 +45,10 @@ module.exports.editUserParticulars = async(req, res) => {
     } = req.body
 
     let edited = {}
-    sudo = true
+    sudo = false
       // Check for Admin / SuperAdmin / Mentor
-    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
-      sudo = false
+    if (req.decoded.roles.indexOf('Admin') !== -1 && req.decoded.roles.indexOf('SuperAdmin') !== -1 && req.decoded.roles.indexOf('Mentor') !== -1) {
+      sudo = true
     }
 
     if (!userId) {
