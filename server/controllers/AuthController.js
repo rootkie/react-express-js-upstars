@@ -14,25 +14,21 @@ module.exports.login = async(req, res) => {
     const user = await User.findOne({
       email
     })
-    if (!user) {
-      return res.status(403).send('Wrong email or password')
-    }
+    if (!user) throw { code: 403, message: 'Wrong email or password' }
     // compare password
     const isMatch = await user.comparePasswordPromise(password)
-    if (!isMatch) {
-      return res.status(403).send('Wrong email or password')
-    }
+    if (!isMatch) throw { code: 403, message: 'Wrong email or password' }
     res.json({
-        token: generateToken(user),
-        _id: user._id,
-        email: user.email,
-        roles: user.roles,
-        name: user.profile.name
-      })
-  }
-  catch (err) {
+      token: generateToken(user),
+      _id: user._id,
+      email: user.email,
+      roles: user.roles,
+      name: user.profile.name
+    })
+  } catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.code === 403) return res.status(403).send(err.message)
+    else return res.status(500).send('server error')
   }
 }
 
@@ -47,25 +43,15 @@ module.exports.register = async(req, res) => {
       preferredTimeSlot
     } = req.body
       // Return error if no email provided
-    if (!email) {
-      return res.status(400).send({
-        error: 'You must enter an email address.'
-      })
-    }
+    if (!email) throw { code: 400, message: 'You must enter an email address.' }
 
     // Return error if no password provided
-    if (!password) {
-      return res.status(400).send({
-        error: 'You must enter a password.'
-      })
-    }
+    if (!password) throw { code: 400, message: 'You must enter a password.' }
 
     const existingUser = await User.findOne({
       email
     })
-    if (existingUser) return res.status(400).send({
-      error: 'This email is already in use'
-    })
+    if (existingUser) throw { code: 400, message: 'This email is already in use' }
 
     const user = new User({
       email,
@@ -76,10 +62,10 @@ module.exports.register = async(req, res) => {
       preferredTimeSlot,
       roles: ['Tutor']
     })
-    const error = await user.validateSync();
+    const error = await user.validateSync()
     if (error) {
       console.log(error)
-      return res.status(400).send('Error Saving: Fill in all required fields accurately')
+      throw { code: 400, message: 'Error Saving: Fill in all required fields accurately'}
     }
     const userObject = await user.save()
     res.json({
@@ -90,10 +76,10 @@ module.exports.register = async(req, res) => {
       roles: userObject.roles,
       name: userObject.profile.name
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
-    res.status(500).send(err.message)
+    if (err.code === 400) return res.status(400).send(err.message)
+    else return res.status(500).send('server error')
   }
 }
 
