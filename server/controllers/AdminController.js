@@ -12,7 +12,7 @@ module.exports.adminChangePassword = async(req, res) => {
         user.password = newPassword
         const pwChanged = await user.save()
 
-        res.json({
+        res.status(200).json({
             user: pwChanged
         })
     }
@@ -42,8 +42,8 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
             new: true,
             runValidators: true,
         })
-        res.json({
-            user: util.generateToken(updatedUser),
+        res.status(200).json({
+            newUserToken: util.generateToken(updatedUser),
             _id: updatedUser._id,
             email: updatedUser.email,
             roles: updatedUser.roles
@@ -124,11 +124,15 @@ module.exports.createUser = async(req, res) => {
             return res.status(400).send('Error Saving: Fill in all required fields accurately')
         }
         const userObject = await user.save()
-        res.json({
-            status: 'success',
+
+        newUser = {
             _id: userObject._id,
             name: userObject.profile.name,
             roles: userObject.roles
+        }
+
+        res.status(201).json({
+            newUser
         })
     }
     catch (err) {
@@ -210,8 +214,7 @@ module.exports.generateAdminUser = async(req, res) => {
             return res.status(400).send('Error Saving: Fill in all required fields accurately')
         }
         const userObject = await user.save()
-        res.json({
-            status: 'success',
+        res.status(201).json({
             token: util.generateToken(userObject),
             _id: userObject._id,
             roles: userObject.roles

@@ -19,8 +19,8 @@ module.exports.addClass = async(req, res) => {
       className,
       dayAndTime
     })
-    
-    if (classExist) return res.status(400).send("Duplicate class slot. Operation denied.")
+
+    if (classExist) return res.status(400).send('Duplicate class slot. Operation denied.')
 
     const newClass = new Class({
       className,
@@ -29,18 +29,16 @@ module.exports.addClass = async(req, res) => {
       dayAndTime,
       startDate: util.formatDate(startDate)
     })
-    const error = await newClass.validateSync();
+    const error = await newClass.validateSync()
     if (error) {
       return res.status(400).send('Error Saving: Fill in all required fields accurately')
     }
     const newClassCreated = await newClass.save()
 
-    res.json({
-      status: 'success',
-      class: newClassCreated
+    res.status(201).json({
+      newClass: newClassCreated
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -69,28 +67,24 @@ module.exports.editClass = async(req, res) => {
       runValidators: true
     })
 
-    res.json({
-      status: 'success',
-      class: newClass
+    res.status(200).json({
+      editedClass: newClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
-    }
-    else res.status(500).send('server error')
+    } else res.status(500).send('server error')
   }
 }
 
 module.exports.getAll = async(req, res) => {
   try {
     const classes = await Class.find({}).select('-createdAt')
-    return res.json({
+    return res.status(200).json({
       classes
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -104,9 +98,10 @@ module.exports.getClassById = async(req, res) => {
       return res.status(403).send('Operation denied')
     }
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
-    return res.json(class1)
-  }
-  catch (err) {
+    return res.status(200).json({
+      class: class1
+    })
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -119,11 +114,10 @@ module.exports.deleteClass = async(req, res) => {
   if (!classId) return res.status(400).send('classId is required')
   try {
     const classDeleted = await Class.findByIdAndRemove(classId)
-    return res.json({
+    return res.status(200).json({
       classDeleted
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -159,13 +153,11 @@ module.exports.addStudentsToClass = async(req, res) => {
       multi: true
     })
 
-
-    return res.json({
+    return res.status(200).json({
       class: classes,
       students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -199,13 +191,11 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       multi: true
     })
 
-    return res.json({
-      status: 'removed',
+    return res.status(200).json({
       class: classes,
       studentsRemoved: students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -241,12 +231,11 @@ module.exports.addUsersToClass = async(req, res) => {
       multi: true
     })
 
-    return res.json({
+    return res.status(200).json({
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -280,12 +269,11 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       multi: true
     })
 
-    return res.json({
+    return res.status(200).json({
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -328,12 +316,11 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
     }, {
       new: true
     })
-    res.json({
+    res.status(201).json({
       externalPersonnel,
       updatedClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -366,14 +353,13 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       updatedClass,
       updatedExternal
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-module.exports.dropDB = function(req, res) {
+module.exports.dropDB = function (req, res) {
   Class.remove({}, (err, num) => {
     if (err) return res.status(500).send(err)
     return res.json({

@@ -4,11 +4,10 @@ const External = require('../models/external-personnel')
 module.exports.getAllUsers = async(req, res) => {
   try {
     const users = await User.find({}).select('profile.name').sort('profile.name')
-    return res.json({
+    return res.status(200).json({
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -16,7 +15,6 @@ module.exports.getAllUsers = async(req, res) => {
 
 module.exports.getUser = async(req, res) => {
   try {
-    
     sudo = false
       // Check for Admin / SuperAdmin / Mentor
     if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
@@ -28,11 +26,10 @@ module.exports.getUser = async(req, res) => {
     }
 
     const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
-    res.json({
+    res.status(200).json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -75,16 +72,14 @@ module.exports.editUserParticulars = async(req, res) => {
       runSettersOnQuery: true
     }).select('-password -updatedAt -createdAt')
 
-    return res.json({
-      user
+    return res.status(200).json({
+      editedUser: user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
-    }
-    else res.status(500).send('server error')
+    } else res.status(500).send('server error')
   }
 }
 
@@ -98,8 +93,7 @@ module.exports.deleteUser = async(req, res) => {
     return res.json({
       userDeleted
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -118,7 +112,7 @@ module.exports.changePassword = async(req, res) => {
     if (!isMatch) {
       return res.status(403).send('Wrong Password')
     }
-    
+
     if (userId !== req.decoded._id) {
       return res.status(403).send('Operation denied')
     }
@@ -126,26 +120,21 @@ module.exports.changePassword = async(req, res) => {
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
-      return res.json({
-        status: 'success'
-      })
+      return res.status(204).send()
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
 }
 
-
 module.exports.getExternal = async(req, res) => {
   try {
     const user = await External.findById(req.params.id).populate('classId', 'className')
-    return res.json({
+    return res.status(200).json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }

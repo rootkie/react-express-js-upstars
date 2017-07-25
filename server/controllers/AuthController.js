@@ -21,15 +21,14 @@ module.exports.login = async(req, res) => {
     if (!isMatch) {
       return res.status(403).send('Wrong email or password')
     }
-    res.json({
-        token: generateToken(user),
-        _id: user._id,
-        email: user.email,
-        roles: user.roles,
-        name: user.profile.name
-      })
-  }
-  catch (err) {
+    res.status(200).json({
+      token: generateToken(user),
+      _id: user._id,
+      email: user.email,
+      roles: user.roles,
+      name: user.profile.name
+    })
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -62,9 +61,11 @@ module.exports.register = async(req, res) => {
     const existingUser = await User.findOne({
       email
     })
-    if (existingUser) return res.status(400).send({
-      error: 'This email is already in use'
-    })
+    if (existingUser) {
+      return res.status(400).send({
+        error: 'This email is already in use'
+      })
+    }
 
     const user = new User({
       email,
@@ -75,22 +76,20 @@ module.exports.register = async(req, res) => {
       preferredTimeSlot,
       roles: ['Tutor']
     })
-    const error = await user.validateSync();
+    const error = await user.validateSync()
     if (error) {
       console.log(error)
       return res.status(400).send('Error Saving: Fill in all required fields accurately')
     }
     const userObject = await user.save()
-    res.json({
-      status: 'success',
+    res.status(201).json({
       token: generateToken(userObject),
       _id: userObject._id,
       email: userObject.email,
       roles: userObject.roles,
       name: userObject.profile.name
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send(err.message)
   }

@@ -20,31 +20,27 @@ module.exports.addStudent = async(req, res) => {
     }
     // Update student based on IC Number
     const newStudent = new Student(edited)
-    const error = await newStudent.validateSync();
+    const error = await newStudent.validateSync()
     if (error) {
       return res.status(400).send('Error Saving: Fill in all required fields accurately')
     }
     const successStudentSignup = await newStudent.save()
-    res.json({
-      status: 'success',
-      successStudentSignup
+    res.status(201).json({
+      newStudent: successStudentSignup
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       return res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     if (err.code == 11000) {
       return res.status(400).send('You have already signed up an account. If this is a mistake please contact our system admin.')
-    }
-    else res.status(500).send('server error')
+    } else res.status(500).send('server error')
   }
 }
 
 module.exports.editStudentById = async(req, res) => {
   try {
-
     if (!req.body.studentId) {
       return res.status(400).send('Please provide a valid studentId')
     }
@@ -67,32 +63,27 @@ module.exports.editStudentById = async(req, res) => {
       runSettersOnQuery: true
     })
 
-    res.json({
-      status: 'success',
+    res.status(200).json({
       editedStudent
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
     if (err.code == 11000) {
       return res.status(400).send('You have already signed up an account. If this is a mistake please contact our system admin.')
-    }
-    else res.status(500).send('server error')
+    } else res.status(500).send('server error')
   }
 }
 
 module.exports.getAll = async(req, res) => {
   try {
     const students = await Student.find({})
-    return res.json({
-      students: students,
-      info: req.decoded
+    return res.status(200).json({
+      students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -102,11 +93,10 @@ module.exports.getStudentById = async(req, res) => {
   try {
     let studentId = req.params.id
     const student = await Student.findById(studentId).populate('classes', 'className')
-    return res.json({
+    return res.status(200).json({
       student
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
@@ -119,11 +109,11 @@ module.exports.deleteStudent = async(req, res) => {
   if (!studentId) return res.status(400).send('studentId is required')
   try {
     const studentDeleted = await Student.findByIdAndRemove(studentId)
-    return res.json({
-      studentDeleted
+    if (!studentDeleted) return res.status(404).json({ error: 'student not found' })
+    return res.status(200).json({
+      deleted: studentDeleted.profile
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     res.status(500).send('server error')
   }
