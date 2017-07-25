@@ -56,16 +56,16 @@ app.use(bodyParser.json())
 
 app.use(filter(filterOptions))
 
+require('./Routes')(app)
 
 app.use((err, req, res, next) => {
   console.log(err)
-  return res.status(err.status).send({
-    error: "something wrong with parsing"
+  res.status(500).send({
+    error: "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."
   })
 })
 
-require('./Routes')(app)
-  // ==================End of Initialization=========================
+// ==================End of Initialization=========================
 
 // Always return the main index.html, so react-router render the route in the client
 app.get('*', (req, res) => {
