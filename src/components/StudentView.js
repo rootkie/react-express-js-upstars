@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import { array, func } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -23,11 +23,11 @@ const studentOptions = [
 ]
 class StudentView extends Component {
   static propTypes = {
-    studentData: PropTypes.array.isRequired
+    studentData: array.isRequired,
+    deleteStudent: func.isRequired
   }
   state = {
     selected: [],
-    studentData: this.props.studentData,
     deleteConfirmationVisibility: false,
 
     searchName: '',
@@ -46,7 +46,7 @@ class StudentView extends Component {
   handleCheckboxChange = (e, { name, checked }) => {
     let { selected } = this.state
     if (checked) {
-      selected.push(name)
+      selected.push(name) // name here is actually IC number, for uniqueness
     } else {
       selected = selected.filter((element) => element !== name)
     }
@@ -57,6 +57,7 @@ class StudentView extends Component {
 
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
+  /*
   removeStudents = (studentsToRemove) => {
     console.log(`removing ${studentsToRemove.join('')}`)
     let { studentData, selected } = this.state
@@ -68,10 +69,13 @@ class StudentView extends Component {
 
     this.setState({studentData, selected})
   }
+  */
 
   handleDelete = () => {
     const { selected } = this.state
-    this.removeStudents(selected)
+    const { deleteStudent, studentData } = this.props
+    const toDeleteArray = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
+    deleteStudent(toDeleteArray)
   }
 
   handleDeleteConfirmation = (option) => () => {
@@ -92,7 +96,8 @@ class StudentView extends Component {
   }
 
   render () {
-    const { selected, searchName, studentData, deleteConfirmationVisibility, moreOptions, classSelector, volunteerSelector, studentSelector } = this.state
+    const { selected, searchName, deleteConfirmationVisibility, moreOptions, classSelector, volunteerSelector, studentSelector } = this.state
+    const { studentData } = this.props
     return (
       <Table compact celled>
         <Table.Header>
@@ -137,7 +142,7 @@ class StudentView extends Component {
           {studentData.map(({profile}, i) => (
             <Table.Row key={`student-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={profile.name} onChange={this.handleCheckboxChange} checked={selected.includes(profile.name)} />
+                <Checkbox name={profile.icNumber} onChange={this.handleCheckboxChange} checked={selected.includes(profile.icNumber)} />
               </Table.Cell>
               <Table.Cell>{profile.name}</Table.Cell>
               <Table.Cell>{profile.dob}</Table.Cell>

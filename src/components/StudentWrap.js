@@ -25,6 +25,22 @@ class StudentWrap extends Component {
       })
   }
 
+  deleteStudent = (studentId) => {
+    axios.delete('/students',
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          studentId
+        }
+      })
+      .then((response) => {
+        this.setState({studentData: this.state.studentData.filter((student) => !studentId.includes(student._id))})
+      })
+      .catch((err) => console.log(err))
+  }
+
   render () {
     const { isLoading } = this.state
     const { op } = this.props
@@ -41,7 +57,7 @@ class StudentWrap extends Component {
         <div>
           {op === 'add' && <StudentForm /> }
           {op === 'edit' && <div>edit</div>}
-          {op === 'view' && <StudentView studentData={this.state.studentData} />}
+          {op === 'view' && <StudentView studentData={this.state.studentData} deleteStudent={this.deleteStudent} />}
         </div>
       )
     }
