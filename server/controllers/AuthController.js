@@ -2,22 +2,41 @@ const User = require('../models/user')
 const util = require('../util.js')
 const generateToken = util.generateToken
 const makeUser = util.makeUser
-  // ============== Start of all the functions ==============
 
-module.exports.login = async(req, res) => {
+module.exports.login = async(req, res, next) => {
   try {
     let {
       password,
       email
     } = req.body
 
+    if (!email) throw ({
+      status: 400,
+      error: 'Please provide an email address.'
+    })
+
+    // Return error if no password provided
+    if (!password) throw ({
+      status: 400,
+      error: 'Please provide a password.'
+    })
+
     const user = await User.findOne({
       email
     })
-    if (!user) throw { code: 403, message: 'Wrong email or password' }
-    // compare password
+
+    // Checks if user exists
+    if (!user) throw ({
+        status: 401,
+        error: 'Wrong email or password'
+      })
+      // compare password
     const isMatch = await user.comparePasswordPromise(password)
-    if (!isMatch) throw { code: 403, message: 'Wrong email or password' }
+    if (!isMatch) throw ({
+      status: 401,
+      error: 'Wrong email or password'
+    })
+
     res.json({
       token: generateToken(user),
       _id: user._id,
@@ -25,14 +44,19 @@ module.exports.login = async(req, res) => {
       roles: user.roles,
       name: user.profile.name
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
-    if (err.code === 403) return res.status(403).send(err.message)
-    else return res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.register = async(req, res) => {
+module.exports.register = async(req, res, next) => {
   try {
     let {
       email,
@@ -42,17 +66,29 @@ module.exports.register = async(req, res) => {
       exitDate,
       preferredTimeSlot
     } = req.body
-      // Return error if no email provided
-    if (!email) throw { code: 400, message: 'You must enter an email address.' }
+
+    // Return error if no email provided
+    if (!email) throw ({
+      status: 400,
+      error: 'Please provide an email address.'
+    })
 
     // Return error if no password provided
-    if (!password) throw { code: 400, message: 'You must enter a password.' }
+    if (!password) throw ({
+      status: 400,
+      error: 'Please provide a password.'
+    })
 
+    // Find the user based on email
     const existingUser = await User.findOne({
       email
     })
-    if (existingUser) throw { code: 400, message: 'This email is already in use' }
+    if (existingUser) throw {
+      status: 409,
+      error: 'Email already exists.'
+    }
 
+    // Create a new user after validating
     const user = new User({
       email,
       password,
@@ -64,10 +100,13 @@ module.exports.register = async(req, res) => {
     })
     const error = await user.validateSync()
     if (error) {
-      console.log(error)
-      throw { code: 400, message: 'Error Saving: Fill in all required fields accurately'}
+      throw {
+        status: 400,
+        error: 'There is something wrong with the client input. That is all we know.'
+      }
     }
     const userObject = await user.save()
+
     res.json({
       status: 'success',
       token: generateToken(userObject),
@@ -76,33 +115,52 @@ module.exports.register = async(req, res) => {
       roles: userObject.roles,
       name: userObject.profile.name
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
-    if (err.code === 400) return res.status(400).send(err.message)
-    else return res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.simpleRegister = async (req, res) => {
+module.exports.simpleRegister = async(req, res, next) => {
   try {
-    let { email, username, password } = req.body
-    // Return error if no email provided
-    if (!email) {
-      return res.status(400).send({error: 'You must enter an email address.'})
-    }
+    let {
+      email,
+      username,
+      password
+    } = req.body
 
-    // Return error if full name not provided
-    if (!username) {
-      return res.status(400).send({error: 'You must enter your full name.'})
-    }
+    // Return error if no email provided
+    if (!email) throw ({
+      status: 400,
+      error: 'Please provide an email address.'
+    })
 
     // Return error if no password provided
-    if (!password) {
-      return res.status(400).send({ error: 'You must enter a password.' })
-    }
+    if (!password) throw ({
+      status: 400,
+      error: 'Please provide a password.'
+    })
 
-    const existingUser = await User.findOne({email: email})
-    if (existingUser) return res.status(400).send({error: 'This email is already in use'})
+    // Return error if full name not provided
+    if (!username) throw ({
+      status: 400,
+      error: 'Please provide a username.'
+    })
+
+    const existingUser = await User.findOne({
+      email: email
+    })
+    if (existingUser) throw ({
+      status: 409,
+      error: 'Email already exists.'
+    })
+
     const user = new User({
       email: email,
       profile: {
@@ -117,8 +175,14 @@ module.exports.simpleRegister = async (req, res) => {
       token: generateToken(userInfo),
       user: userInfo
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }

@@ -4,7 +4,7 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 let util = require('../util.js')
 
-module.exports.addClass = async(req, res) => {
+module.exports.addClass = async(req, res, next) => {
   try {
     let {
       className,
@@ -19,9 +19,13 @@ module.exports.addClass = async(req, res) => {
       className,
       dayAndTime
     })
-    
-    if (classExist) return res.status(400).send("Duplicate class slot. Operation denied.")
 
+    if (classExist) throw ({
+      status: 409,
+      error: 'Class already exist. Create a new class or edit a current class.'
+    })
+
+    // Create a new class
     const newClass = new Class({
       className,
       classType,
@@ -29,10 +33,13 @@ module.exports.addClass = async(req, res) => {
       dayAndTime,
       startDate: util.formatDate(startDate)
     })
+
+    // Validate that all fields are filled in.
     const error = await newClass.validateSync();
-    if (error) {
-      return res.status(400).send('Error Saving: Fill in all required fields accurately')
-    }
+    if (error) throw ({
+      status: 400,
+      error: 'There is something wrong with the client input. That is all we know.'
+    })
     const newClassCreated = await newClass.save()
 
     res.json({
@@ -42,11 +49,16 @@ module.exports.addClass = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.editClass = async(req, res) => {
+module.exports.editClass = async(req, res, next) => {
   try {
     let {
       classId,
@@ -56,14 +68,16 @@ module.exports.editClass = async(req, res) => {
       dayAndTime,
       startDate
     } = req.body
-    const class1 = {
-      className,
-      classType,
-      venue,
-      dayAndTime,
-      startDate: util.formatDate(startDate)
-    }
 
+    // Create a class instance
+    const class1 = {
+        className,
+        classType,
+        venue,
+        dayAndTime,
+        startDate: util.formatDate(startDate)
+      }
+      // Find and update class
     const newClass = await Class.findByIdAndUpdate(classId, class1, {
       new: true,
       runValidators: true
@@ -79,62 +93,101 @@ module.exports.editClass = async(req, res) => {
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
-    else res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.getAll = async(req, res) => {
+module.exports.getAll = async(req, res, next) => {
   try {
+    // Find all classes
     const classes = await Class.find({}).select('-createdAt')
-    return res.json({
+    res.json({
       classes
     })
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
-  }
-}
-module.exports.getClassById = async(req, res) => {
-  try {
-    let classId = req.params.id
-    if (!classId) return res.status(400).send('classId is required')
-      // If the user do not belong to that class and not ADMIN / SuperADMIN, API won't get past
-    if (!req.decoded.classes.indexOf(classId) && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) {
-      return res.status(403).send('Operation denied')
-    }
-    const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
-    return res.json(class1)
-  }
-  catch (err) {
-    console.log(err)
-    res.status(500).send('server error')
+    next(err)
   }
 }
 
-module.exports.deleteClass = async(req, res) => {
+module.exports.getClassById = async(req, res, next) => {
+  try {
+    let classId = req.params.id
+
+    // Check if classId is given
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
+
+    // If the user do not belong to that class and not ADMIN / SuperADMIN, API won't get past
+    if (!req.decoded.classes.indexOf(classId) && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
+      status: 403,
+      error: 'Your client does not have the permissions to access this function.'
+    })
+
+    // Find a class and populate the students, users and external people to get their name
+    const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
+    res.json(class1)
+  }
+  catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
+  }
+}
+
+module.exports.deleteClass = async(req, res, next) => {
   let {
     classId
   } = req.body
-  if (!classId) return res.status(400).send('classId is required')
   try {
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
+
+    // Remove class from database
     const classDeleted = await Class.findByIdAndRemove(classId)
-    return res.json({
+    res.json({
       classDeleted
     })
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.addStudentsToClass = async(req, res) => {
+module.exports.addStudentsToClass = async(req, res, next) => {
   try {
     let {
       classId,
-      studentIds
+      studentIds // Should be an array
     } = req.body
+
+    // Check that classId exist
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
+
+    // Update the class by adding those array of students into the class student field
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         students: {
@@ -146,6 +199,7 @@ module.exports.addStudentsToClass = async(req, res) => {
       runValidators: true
     })
 
+    // For every student in the array, add the class added into their class field
     const students = await Student.update({
       _id: {
         $in: studentIds
@@ -159,25 +213,36 @@ module.exports.addStudentsToClass = async(req, res) => {
       multi: true
     })
 
-
-    return res.json({
+    res.json({
       class: classes,
       students
     })
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.deleteStudentsFromClass = async(req, res) => {
+module.exports.deleteStudentsFromClass = async(req, res, next) => {
   try {
-    // Special case in which studentsId must be an array and classId should be a single string
     let {
       classId,
-      studentIds
+      studentIds // Should be an array
     } = req.body
+
+    // Check that classId exist
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
+
+    // Delete students from the class's student field
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
         students: studentIds
@@ -186,6 +251,7 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
       new: true
     })
 
+    // Delete the class in student's class field
     const students = await Student.update({
       _id: {
         $in: studentIds
@@ -207,16 +273,29 @@ module.exports.deleteStudentsFromClass = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.addUsersToClass = async(req, res) => {
+module.exports.addUsersToClass = async(req, res, next) => {
   try {
     let {
       classId,
       userIds
     } = req.body
+
+    // Check that classId exist
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
+
+    // Add users into class's lists of users
     const classes = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         users: {
@@ -228,6 +307,7 @@ module.exports.addUsersToClass = async(req, res) => {
       runValidators: true
     })
 
+    // Add class into users' list of classes
     const users = await User.update({
       _id: {
         $in: userIds
@@ -241,24 +321,36 @@ module.exports.addUsersToClass = async(req, res) => {
       multi: true
     })
 
-    return res.json({
+    res.json({
       class: classes,
       users
     })
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.deleteUsersFromClass = async(req, res) => {
+module.exports.deleteUsersFromClass = async(req, res, next) => {
   try {
     let {
       classId,
       userIds
     } = req.body
 
+    // Check that classId exist
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
+
+    // Delete users from class's list of users
     const classes = await Class.findByIdAndUpdate(classId, {
       $pullAll: {
         users: userIds
@@ -267,6 +359,7 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       new: true
     })
 
+    // Delete class from users' list of classes
     const users = await User.update({
       _id: {
         $in: userIds
@@ -280,18 +373,23 @@ module.exports.deleteUsersFromClass = async(req, res) => {
       multi: true
     })
 
-    return res.json({
+    res.json({
       class: classes,
       users
     })
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.assignExternalPersonnelToClass = async(req, res) => {
+module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
   try {
     let {
       classId,
@@ -302,8 +400,15 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       nameOfRelatedPersonnel
     } = req.body
 
+    // Check that nric exist
+    if (!nric) throw ({
+      status: 400,
+      error: 'Please provide an nric'
+    })
+
+    // Find from database. If exist, update; else create.
     const externalPersonnel = await External.findOneAndUpdate({
-      nric: nric
+      nric
     }, {
       $addToSet: {
         classId
@@ -321,6 +426,7 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
       runValidators: true
     })
 
+    // Add external into class's list of externals
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $addToSet: {
         externalPersonnel: externalPersonnel._id
@@ -335,17 +441,34 @@ module.exports.assignExternalPersonnelToClass = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    if (err.name == 'ValidationError') {
+      res.status(400).send({
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.removeExternalPersonnelFromClass = async(req, res) => {
+module.exports.removeExternalPersonnelFromClass = async(req, res, next) => {
   try {
     let {
       classId,
       externalId
     } = req.body
 
+    // Check that externalId and classId provided
+    if (!externalId || !classId) throw ({
+      status: 400,
+      error: 'Please provide both externalId and class'
+    })
+
+    // Remove external from a class's list of externals
     const updatedClass = await Class.findByIdAndUpdate(classId, {
       $pull: {
         externalPersonnel: externalId
@@ -354,6 +477,7 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
       new: true
     })
 
+    // Remove class from an external's list of classes
     const updatedExternal = await External.findByIdAndUpdate(externalId, {
       $pull: {
         classId
@@ -369,15 +493,11 @@ module.exports.removeExternalPersonnelFromClass = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
-}
-
-module.exports.dropDB = function(req, res) {
-  Class.remove({}, (err, num) => {
-    if (err) return res.status(500).send(err)
-    return res.json({
-      removed: num
-    })
-  })
 }
