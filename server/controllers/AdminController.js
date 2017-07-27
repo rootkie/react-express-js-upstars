@@ -151,7 +151,7 @@ module.exports.getPendingUsers = async(req, res, next) => {
         const users = await User.find({
             'status': 'Pending'
         }).select('profile.name roles').sort('profile.name')
-        return res.json({
+        res.json({
             users
         })
     }

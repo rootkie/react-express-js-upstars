@@ -93,7 +93,7 @@ module.exports.editClass = async(req, res, next) => {
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
-    if (err.status) {
+    else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
@@ -446,7 +446,7 @@ module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
         error: err.error
       })
     }
-    if (err.name == 'ValidationError') {
+    else if (err.name == 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
       })

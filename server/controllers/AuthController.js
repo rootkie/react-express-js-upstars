@@ -74,9 +74,9 @@ module.exports.register = async(req, res, next) => {
     })
 
     // Return error if no password provided
-    if (!password) throw ({
+    if (!password || password.length < 6) throw ({
       status: 400,
-      error: 'Please provide a password.'
+      error: 'Please provide a password that is at least 6 characters long.'
     })
 
     // Find the user based on email

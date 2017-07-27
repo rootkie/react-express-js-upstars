@@ -57,7 +57,7 @@ module.exports.addEditAttendance = async(req, res, next) => {
     if (type !== 'Class') hoursInt = 0
 
     let attendance1 = {
-        date: util.formatDate(date),
+        date: date,
         hours: hoursInt,
         class: classId,
         users,
@@ -86,9 +86,9 @@ module.exports.addEditAttendance = async(req, res, next) => {
         error: err.error
       })
     }
-    if (err.name == 'ValidationError') {
+    else if (err.name == 'ValidationError') {
       res.status(400).send('There is something wrong with the client input. That is all we know.')
-    }
+    } 
     else next(err)
   }
 }

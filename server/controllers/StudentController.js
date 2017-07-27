@@ -40,7 +40,7 @@ module.exports.addStudent = async(req, res, next) => {
     if (err.code == 11000) {
       return res.status(400).send('Account already exist. If this is a mistake please contact our system admin.')
     }
-    if (err.status) {
+    else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
@@ -87,10 +87,10 @@ module.exports.editStudentById = async(req, res, next) => {
     if (err.name == 'ValidationError') {
       return res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
     }
-    if (err.code == 11000) {
+    else if (err.code == 11000) {
       return res.status(400).send('You have already signed up an account. If this is a mistake please contact our system admin.')
     }
-    if (err.status) {
+    else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })

@@ -107,7 +107,7 @@ module.exports.editUserParticulars = async(req, res, next) => {
     if (err.name == 'ValidationError') {
       res.status(400).send('There is something wrong with the client input. That is all we know.')
     }
-    if (err.status) {
+    else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
@@ -153,9 +153,9 @@ module.exports.changePassword = async(req, res, next) => {
     } = req.body
 
     // Check userId or passwords are provided
-    if (!userId || !oldPassword || !newPassword) throw ({
+    if (!userId || !oldPassword || !newPassword || newPassword.length < 6) throw ({
       status: 400,
-      error: 'Please provide userId, old password and new password'
+      error: 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'
     })
 
     // Find the user and match his password hash
