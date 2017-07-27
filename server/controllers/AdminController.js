@@ -115,8 +115,8 @@ module.exports.createUser = async(req, res, next) => {
             email,
             password,
             profile,
-            commencementDate,
-            exitDate,
+            commencementDate: util.formatDate(commencementDate),
+            exitDate: util.formatDate(exitDate),
             roles,
             status: 'Accepted'
         })

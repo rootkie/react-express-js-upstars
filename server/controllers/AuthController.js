@@ -93,8 +93,8 @@ module.exports.register = async(req, res, next) => {
       email,
       password,
       profile,
-      commencementDate,
-      exitDate,
+      commencementDate: util.formatDate(commencementDate),
+      exitDate: util.formatDate(exitDate),
       preferredTimeSlot,
       roles: ['Tutor']
     })
