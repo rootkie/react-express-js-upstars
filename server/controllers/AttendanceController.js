@@ -52,7 +52,7 @@ module.exports.addEditAttendance = async(req, res) => {
     if (type !== 'Class') hoursInt = 0
 
     let attendance1 = {
-      date: util.formatDate(date),
+      date,
       hours: hoursInt,
       class: classId,
       users,
@@ -62,7 +62,7 @@ module.exports.addEditAttendance = async(req, res) => {
 
     const newAttendance = await Attendance.findOneAndUpdate({
       class: classId,
-      date: util.formatDate(date)
+      date,
     }, attendance1, {
       upsert: true,
       new: true,
@@ -106,7 +106,7 @@ module.exports.deleteAttendance = async(req, res) => {
 
     const removed = await Attendance.remove({
       class: classId,
-      date: util.formatDate(date)
+      date,
     })
 
     res.json({
