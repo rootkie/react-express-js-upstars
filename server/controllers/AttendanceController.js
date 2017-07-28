@@ -2,7 +2,7 @@ const Attendance = require('../models/attendance')
 let util = require('../util.js')
 let mongoose = require('mongoose')
 
-module.exports.addEditAttendance = async(req, res) => {
+module.exports.addEditAttendance = async(req, res, next) => {
   try {
     // Sample raw request
     /*{
@@ -35,20 +35,25 @@ module.exports.addEditAttendance = async(req, res) => {
       type
     } = req.body
 
-    if (!classId) {
-      return res.status(400).json('ClassId can not be null')
-    }
+    // Check if classId is provided
+    if (!classId) throw ({
+      status: 400,
+      error: 'Please provide a classId'
+    })
 
-    sudo = true
+    sudo = false
       // Check for Admin / SuperAdmin / Mentor. If true, they have sudo rights
-    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
-      sudo = false
+    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
+      sudo = true
     }
+    // Check if the person editing the attendance actually belong to that class unless the user has sudo rights
+    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) throw ({
+      status: 403,
+      error: 'Your client does not have the permissions to access this function.'
+    })
 
-    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) {
-      return res.status(403).send('Operation denied')
-    }
     let hoursInt = parseInt(hours, 10)
+      // If there is no class, everyone will get 0 hours
     if (type !== 'Class') hoursInt = 0
 
     let attendance1 = {
@@ -58,7 +63,7 @@ module.exports.addEditAttendance = async(req, res) => {
       users,
       students,
       type
-    }
+    } // Find attendance based on class and date. If exist, updates; else creates a new one.
 
     const newAttendance = await Attendance.findOneAndUpdate({
       class: classId,
@@ -76,34 +81,42 @@ module.exports.addEditAttendance = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    if (err.name == 'ValidationError') {
-      res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
     }
-    else res.status(500).send('server error')
+    else if (err.name == 'ValidationError') {
+      res.status(400).send('There is something wrong with the client input. That is all we know.')
+    } 
+    else next(err)
   }
 }
 
-module.exports.deleteAttendance = async(req, res) => {
+module.exports.deleteAttendance = async(req, res, next) => {
   try {
     let {
       date,
       classId
     } = req.body
-    if (!classId || !date) {
-      return res.status(400).json('ClassId or date cannot be empty')
-    }
+      // Check if classId and date are provided
+    if (!classId || !date) throw ({
+      status: 400,
+      error: 'Please provide both classId and date'
+    })
 
-    sudo = true
+    sudo = false
       // Check for Admin / SuperAdmin / Mentor. If true, they have sudo rights
-    if (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1 && req.decoded.roles.indexOf('Mentor') == -1) {
-      sudo = false
+    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
+      sudo = true
     }
+    // Prevent any non admin rights users to delete attendance of classes they do not belong to 
+    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) throw ({
+      status: 403,
+      error: 'Your client does not have the permissions to access this function.'
+    })
 
-    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) {
-      return res.status(403).send('Operation denied')
-    }
-
-
+    // Remove it from database
     const removed = await Attendance.remove({
       class: classId,
       date,
@@ -116,12 +129,17 @@ module.exports.deleteAttendance = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
 
-module.exports.getAttendance = async(req, res) => {
+module.exports.getAttendance = async(req, res, next) => {
   try {
     let {
       classId,
@@ -129,7 +147,7 @@ module.exports.getAttendance = async(req, res) => {
       dateEnd
     } = req.params
 
-
+    // Find attendance based on the filters of class, dateStart and dateEnd if provided.
     let attendances = Attendance.find()
       .limit(100)
       .populate('class', ['className'])
@@ -144,8 +162,7 @@ module.exports.getAttendance = async(req, res) => {
     if (dateEnd) {
       attendances = attendances.where('date').lte(util.formatDate(dateEnd))
     }
-    // else the query is empty and every single record from past till now is obtained, similar to a getAll function
-
+    // else the query is empty and every single record from past till now is obtained, similar to a getAll function. Limit to 100 newest.
 
     const foundAttendances = await attendances.exec()
 
@@ -156,27 +173,25 @@ module.exports.getAttendance = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    next(err)
   }
 }
 
-module.exports.getAttendanceByUser = async(req, res) => {
+module.exports.getAttendanceByUser = async(req, res, next) => {
   try {
     let {
       userId,
       classId,
       dateStart,
       dateEnd
-    } = req.params // userId, dateStart and dateEnd is compulsory
+    } = req.params
     let user = {}
 
-    if (!userId || !dateStart || !dateEnd) {
-      return res.status(400).json('Unvalid request. Some fields cannot be null')
-    }
-
-    if (userId !== req.decoded._id && req.decoded.roles.indexOf('Admin') == -1) {
-      return res.status(403).send('Operation denied')
-    }
+    // Prevent users from getting attendance of other users unless they are admin
+    if (userId !== req.decoded._id && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
+      status: 403,
+      error: 'Your client does not have the permissions to access this function.'
+    })
 
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
@@ -245,11 +260,16 @@ module.exports.getAttendanceByUser = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
   }
 }
 
-module.exports.getAttendanceByStudent = async(req, res) => {
+module.exports.getAttendanceByStudent = async(req, res, next) => {
   try {
     let {
       studentId,
@@ -258,9 +278,7 @@ module.exports.getAttendanceByStudent = async(req, res) => {
       dateEnd
     } = req.params
     let student = {}
-    if (!studentId || !dateStart || !dateEnd) {
-      return res.status(400).json('Unvalid request. Some fields cannot be null')
-    }
+
     // Init what factors to search in student later
     student['students.list'] = mongoose.Types.ObjectId(studentId)
     student.date = {
@@ -328,18 +346,17 @@ module.exports.getAttendanceByStudent = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    next(err)
   }
 }
 
-module.exports.getClassAttendanceSummary = async(req, res) => {
+module.exports.getClassAttendanceSummary = async(req, res, next) => {
   try {
     let {
       classId
     } = req.params
-    if (!classId) {
-      return res.status(400).json('ClassId cannot be null')
-    }
+
+    // Start aggregate function
     const foundAttendanceforUser = await Attendance.aggregate()
       .match({
         'class': mongoose.Types.ObjectId(classId)
@@ -382,8 +399,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
         }
       }) // Display only relevant data
 
-    // Works the same for student, refer to Users
-
+    // Bottom is a repeated function for students. Works the same, refer to Users
     const foundAttendanceforStudent = await Attendance.aggregate()
       .match({
         'class': mongoose.Types.ObjectId(classId)
@@ -426,6 +442,7 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
         }
       })
 
+    // Get tutorStudentRatio
     let studentNumber = foundAttendanceforStudent.length
     let tutorNumber = foundAttendanceforUser.length
     let tutorStudentRatio = tutorNumber / studentNumber
@@ -440,6 +457,6 @@ module.exports.getClassAttendanceSummary = async(req, res) => {
   }
   catch (err) {
     console.log(err)
-    res.status(500).send('server error')
+    next(err)
   }
 }

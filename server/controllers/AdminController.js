@@ -1,13 +1,14 @@
 const User = require('../models/user')
 let util = require('../util.js')
 
-module.exports.adminChangePassword = async(req, res) => {
+module.exports.adminChangePassword = async(req, res, next) => {
     try {
         let {
             userId,
             newPassword
         } = req.body
-            // Just in case the front end screws up
+
+        // Find user and replace it with the newPassword before saving
         const user = await User.findById(userId)
         user.password = newPassword
         const pwChanged = await user.save()
@@ -18,11 +19,11 @@ module.exports.adminChangePassword = async(req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(500).send('server error')
+        next(err)
     }
 }
 
-module.exports.changeUserStatusAndPermissions = async(req, res) => {
+module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
     try {
         let {
             userId,
@@ -30,20 +31,21 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
             newRoles
         } = req.body
         let edited = {}
-
+            // Check if these fields exist, if it does it will get updated in the database
         if (newStatus) {
             edited.status = newStatus
         }
         if (newRoles) {
             edited.roles = newRoles
         }
-        console.log(edited)
+        // Update it on the database with validations
         const updatedUser = await User.findByIdAndUpdate(userId, edited, {
-            new: true,
-            runValidators: true,
-        })
-        res.status(200).json({
-            newUserToken: util.generateToken(updatedUser),
+                new: true,
+                runValidators: true,
+            })
+            // Returns token and necessary information
+        return res.status(200).json({
+            user: util.generateToken(updatedUser),
             _id: updatedUser._id,
             email: updatedUser.email,
             roles: updatedUser.roles
@@ -52,13 +54,15 @@ module.exports.changeUserStatusAndPermissions = async(req, res) => {
     catch (err) {
         console.log(err)
         if (err.name == 'ValidationError') {
-            res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
+            res.status(400).send({
+                error: 'There is something wrong with the client input. That is all we know.'
+            })
         }
-        else res.status(500).send('server error')
+        else next(err)
     }
 }
 
-module.exports.createUser = async(req, res) => {
+module.exports.createUser = async(req, res, next) => {
     /* Test input
         {	
         	"email": "test@gmail.com",
@@ -88,41 +92,39 @@ module.exports.createUser = async(req, res) => {
             exitDate,
             roles
         } = req.body
-            // Return error if no email provided
-        if (!email) {
-            return res.status(400).send({
-                error: 'You must enter an email address.'
+            // Check that both email and password are provided 
+        if (!email) throw ({
+            status: 400,
+            error: 'Please provide an email'
+        })
+        if (!password) throw ({
+                status: 400,
+                error: 'Please provide a password'
             })
-        }
-
-        // Return error if no password provided
-        if (!password) {
-            return res.status(400).send({
-                error: 'You must enter a password.'
-            })
-        }
-
+            // Check if the email has already been used
         const existingUser = await User.findOne({
             email
         })
 
-        if (existingUser) return res.status(400).send({
-            error: 'This email is already in use'
-        })
-
+        if (existingUser) throw ({
+                status: 409,
+                error: 'Email already exist.'
+            })
+            // Create new User and save it after validating it.
         const user = new User({
             email,
             password,
             profile,
-            commencementDate,
-            exitDate,
+            commencementDate: util.formatDate(commencementDate),
+            exitDate: util.formatDate(exitDate),
             roles,
             status: 'Accepted'
         })
         const error = await user.validateSync();
-        if (error) {
-            return res.status(400).send('Error Saving: Fill in all required fields accurately')
-        }
+        if (error) throw ({
+            status: 400,
+            error: 'There is something wrong with the client input. That is all we know.'
+        })
         const userObject = await user.save()
 
         newUser = {
@@ -137,26 +139,34 @@ module.exports.createUser = async(req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(500).send(err.message)
+        if (err.status) {
+            res.status(err.status).send({
+                error: err.error
+            })
+        }
+        else next(err)
     }
 }
 
 
-module.exports.getPendingUsers = async(req, res) => {
+module.exports.getPendingUsers = async(req, res, next) => {
     try {
-        const users = await User.find({'status': 'Pending'}).select('profile.name roles').sort('profile.name')
-        return res.json({
+        // Find all users with status as Pending
+        const users = await User.find({
+            'status': 'Pending'
+        }).select('profile.name roles').sort('profile.name')
+        res.json({
             users
         })
     }
     catch (err) {
         console.log(err)
-        res.status(500).send('server error')
+        next(err)
     }
 }
 
 
-module.exports.generateAdminUser = async(req, res) => {
+module.exports.generateAdminUser = async(req, res, next) => {
     try {
         // All compulsory fields: Full test input with validation
         /*{	
@@ -180,39 +190,40 @@ module.exports.generateAdminUser = async(req, res) => {
             profile,
         } = req.body
             // Return error if no email provided
-        if (!email) {
-            return res.status(400).send({
-                error: 'You must enter an email address.'
-            })
-        }
+        if (!email) throw ({
+            status: 400,
+            error: 'Please provide an email'
+        })
 
         // Return error if no password provided
-        if (!password) {
-            return res.status(400).send({
-                error: 'You must enter a password.'
-            })
-        }
+        if (!password) throw ({
+            status: 400,
+            error: 'Please provide a password'
+        })
 
         const existingUser = await User.findOne({
             email
         })
 
-        if (existingUser) return res.status(400).send({
-            error: 'This email is already in use'
+        if (existingUser) throw ({
+            status: 409,
+            error: 'User already exist. Please log in instead.'
         })
 
         const user = new User({
             email,
             password,
             profile,
-            commencementDate: '00000000',
-            exitDate: '00000000',
+            commencementDate: '20170101',
+            exitDate: '20900101',
             roles: ['SuperAdmin']
         })
         const error = await user.validateSync();
-        if (error) {
-            return res.status(400).send('Error Saving: Fill in all required fields accurately')
-        }
+        if (error) throw ({
+            status: 400,
+            error: 'There is something wrong with the client input. That is all we know.'
+        })
+
         const userObject = await user.save()
         res.status(201).json({
             token: util.generateToken(userObject),
@@ -222,6 +233,11 @@ module.exports.generateAdminUser = async(req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(500).send(err.message)
+        if (err.status) {
+            res.status(err.status).send({
+                error: err.error
+            })
+        }
+        else next(err)
     }
 }
