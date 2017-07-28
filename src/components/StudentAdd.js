@@ -3,7 +3,7 @@ import { Form, Message, Button, Modal, Header, Table, Icon } from 'semantic-ui-r
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
-import moment from 'moment'
+// import moment from 'moment'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
@@ -123,7 +123,7 @@ class StudentForm extends Component {
           name: fullname,
           icNumber: studentIC,
           contactNumber: '420',
-          dob: moment(dateOfBirth).format('YYYYMMDD'),
+          dob: dateOfBirth,
           address,
           gender,
           nationality,
