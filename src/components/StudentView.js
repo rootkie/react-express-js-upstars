@@ -1,13 +1,8 @@
 import React, { Component } from 'react'
+import { array, func } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
-
-let sampleStudentData = [
-  {name: 'xiaoMing', age: 12, attendanceRate: '60%', dank: 'yes'},
-  {name: 'xiaoXing', age: 24, attendanceRate: '40%', dank: 'yes'},
-  {name: 'Michael', age: 6, attendanceRate: '90%', dank: 'no'}
-]
 
 const classOptions = [
   { key: 'python420', text: 'Python 420pm', value: 'py420' },
@@ -27,9 +22,12 @@ const studentOptions = [
   { key: 'borhk', text: 'Borhk', value: 'borhk' }
 ]
 class StudentView extends Component {
+  static propTypes = {
+    studentData: array.isRequired,
+    deleteStudent: func.isRequired
+  }
   state = {
     selected: [],
-    studentData: sampleStudentData,
     deleteConfirmationVisibility: false,
 
     searchName: '',
@@ -48,7 +46,7 @@ class StudentView extends Component {
   handleCheckboxChange = (e, { name, checked }) => {
     let { selected } = this.state
     if (checked) {
-      selected.push(name)
+      selected.push(name) // name here is actually IC number, for uniqueness
     } else {
       selected = selected.filter((element) => element !== name)
     }
@@ -59,6 +57,7 @@ class StudentView extends Component {
 
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
+  /*
   removeStudents = (studentsToRemove) => {
     console.log(`removing ${studentsToRemove.join('')}`)
     let { studentData, selected } = this.state
@@ -70,10 +69,13 @@ class StudentView extends Component {
 
     this.setState({studentData, selected})
   }
+  */
 
   handleDelete = () => {
     const { selected } = this.state
-    this.removeStudents(selected)
+    const { deleteStudent, studentData } = this.props
+    const toDeleteArray = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
+    deleteStudent(toDeleteArray)
   }
 
   handleDeleteConfirmation = (option) => () => {
@@ -94,7 +96,8 @@ class StudentView extends Component {
   }
 
   render () {
-    const { selected, searchName, studentData, deleteConfirmationVisibility, moreOptions, classSelector, volunteerSelector, studentSelector } = this.state
+    const { selected, searchName, deleteConfirmationVisibility, moreOptions, classSelector, volunteerSelector, studentSelector } = this.state
+    const { studentData } = this.props
     return (
       <Table compact celled>
         <Table.Header>
@@ -130,21 +133,21 @@ class StudentView extends Component {
             <Table.HeaderCell />
             <Table.HeaderCell>Name</Table.HeaderCell>
             <Table.HeaderCell>Age</Table.HeaderCell>
-            <Table.HeaderCell>Attendance Rate</Table.HeaderCell>
-            <Table.HeaderCell>Dank</Table.HeaderCell>
+            <Table.HeaderCell>IC Number</Table.HeaderCell>
+            <Table.HeaderCell>Gender</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
         <Table.Body>
-          {studentData.map((student, i) => (
+          {studentData.map(({profile}, i) => (
             <Table.Row key={`student-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={student.name} onChange={this.handleCheckboxChange} checked={selected.includes(student.name)} />
+                <Checkbox name={profile.icNumber} onChange={this.handleCheckboxChange} checked={selected.includes(profile.icNumber)} />
               </Table.Cell>
-              <Table.Cell>{student.name}</Table.Cell>
-              <Table.Cell>{student.age}</Table.Cell>
-              <Table.Cell>{student.attendanceRate}</Table.Cell>
-              <Table.Cell>{student.dank}</Table.Cell>
+              <Table.Cell>{profile.name}</Table.Cell>
+              <Table.Cell>{profile.dob}</Table.Cell>
+              <Table.Cell>{profile.icNumber}</Table.Cell>
+              <Table.Cell>{profile.gender === 'F' ? 'female' : 'male'}</Table.Cell>
             </Table.Row>))}
         </Table.Body>
 

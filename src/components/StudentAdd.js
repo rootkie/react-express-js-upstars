@@ -2,10 +2,14 @@ import React, { Component } from 'react'
 import { Form, Message, Button, Modal, Header, Table, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import axios from 'axios'
+import moment from 'moment'
+
+axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
 const genderOptions = [
-  { key: 'm', text: 'Male', value: 'male' },
-  { key: 'f', text: 'Female', value: 'female' }
+  { key: 'm', text: 'Male', value: 'M' },
+  { key: 'f', text: 'Female', value: 'F' }
 ]
 
 const citizenshipOptions = [
@@ -99,20 +103,76 @@ class StudentForm extends Component {
   handleSubmit = e => {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
-    const { firstName, lastName } = this.state
-    console.log(firstName + lastName)
-    // Do some wizardry to format data here
+    const {
+      fullname, firstName, lastName, studentIC, nationality, gender, address, school, classLevel, dateOfBirth,
+      fatherName, fatherIC, fatherCitizenship, fatherNumber, fatherOccupation, fatherMonthlyIncome,
+      motherName, motherIC, motherCitizenship, motherNumber, motherOccupation, motherMonthlyIncome,
+      otherFamilyMembers,
+      fas, fscName, learningSupport, academics,
+      termsDetails,
+      interviewDate, interviewNotes, commencementDate, adminNotes, dateOfExit, reasonForExit
+    } = this.state
 
     // check required fields
     const error = this.checkRequired(['fullname', 'firstName', 'lastName', 'studentIC', 'dateOfBirth', 'nationality', 'gender', 'address', 'terms'])
 
     if (error.length === 0) {
-      console.log('success') // POST request here
-
-      this.setState({...initialState, submitSuccess: true}) // reset form
-      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
+    // Do some wizardry to format data here
+      const newStudent = {
+        profile: {
+          name: fullname,
+          icNumber: studentIC,
+          contactNumber: '420',
+          dob: moment(dateOfBirth).format('YYYYMMDD'),
+          address,
+          gender,
+          nationality,
+          schoolName: 'Marymount JC'
+        }
+        /*,
+        father: {
+          name: fatherName,
+          icNumber: fatherIC,
+          nationality: fatherCitizenship,
+          contactNumber: fatherNumber,
+          email: 'no such field',
+          occupation: fatherOccupation,
+          income: fatherMonthlyIncome
+        },
+        mother: {
+          name: motherName,
+          icNumber: motherIC,
+          nationality: motherCitizenship,
+          contactNumber: motherNumber,
+          email: 'no such field',
+          occupation: motherOccupation,
+          income: motherMonthlyIncome
+        },
+        otherFamily: otherFamilyMembers,
+        misc: {
+          fas,
+          tuition: learningSupport,
+          academicInfo: academics
+        },
+        admin: {
+          adminNotes,
+          interviewDate,
+          interviewNotes,
+          commencementDate,
+          exitDate: dateOfExit,
+          exitReason: reasonForExit
+        }
+        */
+      }
+      console.log(JSON.stringify(newStudent)) // POST request here
+      axios.post('/students', newStudent)
+        .then(() => {
+          this.setState({...initialState, submitSuccess: true})
+          setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+        })
+        .catch(err => console.log(err.message))
     } else {
-      console.log('error occured')
+      console.log('Incomplete Fields')
       this.setState({error})
     }
   }
