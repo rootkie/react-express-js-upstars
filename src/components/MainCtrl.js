@@ -6,7 +6,7 @@ import ClassWrap from './ClassWrap'
 import Home from './Home'
 import PropTypes from 'prop-types'
 import VolunteerWrap from './VolunteerWrap'
-import Attendance from './Attendance'
+import AttendanceWrap from './AttendanceWrap'
 import StudentWrap from './StudentWrap'
 
 const GridStyle = {
@@ -33,7 +33,7 @@ class MainCtrl extends Component {
             {main === 'students' && <StudentWrap op={op} />}
             {main === 'classes' && <ClassWrap op={op} />}
             {main === 'volunteer' && <VolunteerWrap op={op} />}
-            {main === 'attendance' && <Attendance />}
+            {main === 'attendance' && <AttendanceWrap op={op} />}
           </Grid.Column>
         </Grid>
       </Container>
