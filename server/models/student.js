@@ -19,13 +19,8 @@ const StudentSchema = new Schema({
       trim: true
     },
 
-    contactNumber: {
-      type: Number,
-      required: true
-    },
-
     dob: {
-      type: Number,
+      type: Date,
       required: true
     },
 
@@ -45,10 +40,9 @@ const StudentSchema = new Schema({
       required: true
     },
 
-    schoolType: {
+    classLevel: {
       type: String,
-      enum: ['Primary', 'Secondary'],
-      default: 'Primary'
+      required: true
     },
 
     schoolName: {
@@ -124,12 +118,14 @@ const StudentSchema = new Schema({
   misc: {
     fas: [{
       type: String,
-      enum: ['MOE', 'Mendaki', 'Others', 'None']
+      enum: ['MOE', 'Mendaki', 'Others', 'None'],
+      default: ['None']
   }],
 
     tuition: [{
       type: String,
-      enum: ['CDAC', 'Mendaki', 'Private', 'None']
+      enum: ['CDAC', 'Mendaki', 'Private', 'None'],
+      default: ['None']
   }],
 
     academicInfo: [{
