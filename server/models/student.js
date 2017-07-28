@@ -45,10 +45,9 @@ const StudentSchema = new Schema({
       required: true
     },
 
-    schoolType: {
+    classLevel: {
       type: String,
-      enum: ['Primary', 'Secondary'],
-      default: 'Primary'
+      required: true
     },
 
     schoolName: {
