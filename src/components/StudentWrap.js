@@ -56,7 +56,6 @@ class StudentWrap extends Component {
       return (
         <div>
           {op === 'add' && <StudentForm /> }
-          {op === 'edit' && <div>edit</div>}
           {op === 'view' && <StudentView studentData={this.state.studentData} deleteStudent={this.deleteStudent} />}
         </div>
       )
