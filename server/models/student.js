@@ -19,11 +19,6 @@ const StudentSchema = new Schema({
       trim: true
     },
 
-    contactNumber: {
-      type: Number,
-      required: true
-    },
-
     dob: {
       type: Date,
       required: true
@@ -123,12 +118,14 @@ const StudentSchema = new Schema({
   misc: {
     fas: [{
       type: String,
-      enum: ['MOE', 'Mendaki', 'Others', 'None']
+      enum: ['MOE', 'Mendaki', 'Others', 'None'],
+      default: ['None']
   }],
 
     tuition: [{
       type: String,
-      enum: ['CDAC', 'Mendaki', 'Private', 'None']
+      enum: ['CDAC', 'Mendaki', 'Private', 'None'],
+      default: ['None']
   }],
 
     academicInfo: [{
