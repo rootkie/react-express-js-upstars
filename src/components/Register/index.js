@@ -62,8 +62,10 @@ class Register extends Component {
   handlePreferTime = (e, { name, value, checked }) => {
     this.setState({ [name]: checked })
     let preferTime = this.state.preferredTimeSlot.slice()
-    if (preferTime.indexOf(name) === -1) preferTime.push(name)
-    else preferTime.pop(name)
+    let i = preferTime.indexOf(name)
+    if (i === -1) preferTime.push(name)
+    else preferTime.splice(i,1)
+    console.log(preferTime)
     this.setState({ preferredTimeSlot : preferTime })
   }
 
@@ -140,7 +142,7 @@ class Register extends Component {
       return <Redirect to='/home' />
     }
     return (
-      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', height: '100%'}}>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexDirection: 'row'}}>
         <Form onSubmit={this.handleSubmit} style={{ marginRight:'10px', padding: '20px', width: '45%', borderColor: 'darkcyan', borderRadius: '5px', borderStyle: 'solid'}}>
           <Header as='h3' dividing> Volunteer Registration </Header>
           <Form.Input label='Name' placeholder='Surname, Personal name' name='name' value={name} type='username' onChange={this.handleChange} required />
@@ -165,6 +167,11 @@ class Register extends Component {
           <Form.Group widths='equal'>
             <Form.Input label='Mobile number' placeholder='Mobile number' name='handphone' value={handphone} onChange={this.handleChange} required />
             <Form.Input label='Home tel' placeholder='Home tel' name='homephone' value={homephone} onChange={this.handleChange} required />
+          </Form.Group>
+          <Form.Group widths= 'equal'>
+            <Form.Input label='School Name' placeholder='school name' name='schoolName' value={schoolName} onChange={this.handleChange} />
+            <Form.Input label='Level' placeholder='eg. IP4, JC1, HS2' name='schoolLevel' value={schoolLevel} onChange={this.handleChange} />
+            <Form.Input label='Class' placeholder='class' name='schoolClass' value={schoolClass} onChange={this.handleChange} />
           </Form.Group>
 
           <Form.Input label='Email' placeholder='email' name='email' value={email} type='email' onChange={this.handleChange} required />
