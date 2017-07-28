@@ -30,12 +30,10 @@ module.exports.addStudent = async(req, res, next) => {
     })
 
     const successStudentSignup = await newStudent.save()
-    res.json({
-      status: 'success',
-      successStudentSignup
+    res.status(201).json({
+      newStudent: successStudentSignup
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.code == 11000) {
       return res.status(400).send('Account already exist. If this is a mistake please contact our system admin.')
@@ -77,12 +75,10 @@ module.exports.editStudentById = async(req, res, next) => {
       runSettersOnQuery: true
     })
 
-    res.json({
-      status: 'success',
+    res.status(200).json({
       editedStudent
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       return res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
@@ -103,11 +99,10 @@ module.exports.getAll = async(req, res, next) => {
   try {
     // Find all students from database
     const students = await Student.find({})
-    res.json({
-      students: students,
+    return res.status(200).json({
+      students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -119,12 +114,10 @@ module.exports.getStudentById = async(req, res, next) => {
 
     // Find student based on ID and retrieve className
     const student = await Student.findById(studentId).populate('classes', 'className')
-
-    res.json({
+    return res.status(200).json({
       student
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -142,11 +135,11 @@ module.exports.deleteStudent = async(req, res, next) => {
 
     // Find and delete student from database
     const studentDeleted = await Student.findByIdAndRemove(studentId)
-    res.json({
-      studentDeleted
+    if (!studentDeleted) return res.status(404).json({ error: 'student not found' })
+    return res.status(200).json({
+      deleted: studentDeleted.profile
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({

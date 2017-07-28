@@ -42,12 +42,10 @@ module.exports.addClass = async(req, res, next) => {
     })
     const newClassCreated = await newClass.save()
 
-    res.json({
-      status: 'success',
-      class: newClassCreated
+    res.status(201).json({
+      newClass: newClassCreated
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -83,12 +81,10 @@ module.exports.editClass = async(req, res, next) => {
       runValidators: true
     })
 
-    res.json({
-      status: 'success',
-      class: newClass
+    res.status(200).json({
+      editedClass: newClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
@@ -106,11 +102,10 @@ module.exports.getAll = async(req, res, next) => {
   try {
     // Find all classes
     const classes = await Class.find({}).select('-createdAt')
-    res.json({
+    return res.status(200).json({
       classes
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -134,9 +129,10 @@ module.exports.getClassById = async(req, res, next) => {
 
     // Find a class and populate the students, users and external people to get their name
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
-    res.json(class1)
-  }
-  catch (err) {
+    return res.status(200).json({
+      class: class1
+    })
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -159,11 +155,10 @@ module.exports.deleteClass = async(req, res, next) => {
 
     // Remove class from database
     const classDeleted = await Class.findByIdAndRemove(classId)
-    res.json({
+    return res.status(200).json({
       classDeleted
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -213,12 +208,11 @@ module.exports.addStudentsToClass = async(req, res, next) => {
       multi: true
     })
 
-    res.json({
+    return res.status(200).json({
       class: classes,
       students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -265,13 +259,11 @@ module.exports.deleteStudentsFromClass = async(req, res, next) => {
       multi: true
     })
 
-    return res.json({
-      status: 'removed',
+    return res.status(200).json({
       class: classes,
       studentsRemoved: students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -321,12 +313,11 @@ module.exports.addUsersToClass = async(req, res, next) => {
       multi: true
     })
 
-    res.json({
+    return res.status(200).json({
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -373,12 +364,11 @@ module.exports.deleteUsersFromClass = async(req, res, next) => {
       multi: true
     })
 
-    res.json({
+    return res.status(200).json({
       class: classes,
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -434,12 +424,11 @@ module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
     }, {
       new: true
     })
-    res.json({
+    res.status(201).json({
       externalPersonnel,
       updatedClass
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -490,8 +479,7 @@ module.exports.removeExternalPersonnelFromClass = async(req, res, next) => {
       updatedClass,
       updatedExternal
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({

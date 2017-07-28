@@ -5,11 +5,11 @@ module.exports.getAllUsers = async(req, res, next) => {
   try {
     // Retrieve all users in the system
     const users = await User.find({}).select('profile.name').sort('profile.name')
-    res.json({
+    
+    return res.status(200).json({
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -36,11 +36,10 @@ module.exports.getUser = async(req, res, next) => {
 
     // Find user based on ID and retrieve its className
     const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
-    res.json({
+    return res.status(200).json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -98,11 +97,10 @@ module.exports.editUserParticulars = async(req, res, next) => {
       runSettersOnQuery: true
     }).select('-password -updatedAt -createdAt')
 
-    res.json({
-      user
+    return res.status(200).json({
+      editedUser: user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       res.status(400).send('There is something wrong with the client input. That is all we know.')
@@ -129,11 +127,10 @@ module.exports.deleteUser = async(req, res, next) => {
 
     // Delete user from database
     const userDeleted = await User.findByIdAndRemove(userId).select('-password')
-    return res.json({
+    return res.status(200).json({
       userDeleted
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -176,12 +173,11 @@ module.exports.changePassword = async(req, res, next) => {
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
-      res.json({
+      return res.status(200).json({
         status: 'success'
       })
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -192,16 +188,14 @@ module.exports.changePassword = async(req, res, next) => {
   }
 }
 
-
 module.exports.getExternal = async(req, res, next) => {
   try {
     // Find the external and get className
     const user = await External.findById(req.params.id).populate('classId', 'className')
-    res.json({
+    return res.status(200).json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }

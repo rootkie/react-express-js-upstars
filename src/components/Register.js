@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { Form, Button, Modal, Header, Message } from 'semantic-ui-react'
 import axios from 'axios'
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000/api',
+const rootkiddie = axios.create({
+  baseURL: 'https://test.rootkiddie.com/api/',
   headers: {'Content-Type': 'application/json'}
 })
 
@@ -44,19 +44,27 @@ class Register extends Component {
     const error = this.checkRequired(['email', 'password', 'email', 'terms'])
 
     if (error.length === 0) {
-      axiosInstance.post('/simpleRegister', { email, password, username })
+      rootkiddie.post('/simpleRegister', { email, password, username })
       .then((response) => {
         console.log(response)
         this.setState({...initialState, submitSuccess: true}) // reset form
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
       })
       .catch((error) => {
+        console.log(error)
         this.setState({errorMessage: error.response.data.error})
       })
     } else { // incomplete required fields
       console.log('error occured')
       this.setState({error, errorMessage: 'Please Check Required Fields!'})
     }
+  }
+
+  testRequest = e => {
+    e.preventDefault()
+    rootkiddie.get('/students')
+    .then((res) => { console.log(res) })
+    .catch((err) => console.log(err))
   }
 
   render () {
@@ -83,6 +91,7 @@ class Register extends Component {
           </Modal>
         </Form>
         <div>
+          <Button onClick={this.testRequest} positive >Test</Button>
           <Message
             hidden={!submitSuccess}
             success

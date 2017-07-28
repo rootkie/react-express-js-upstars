@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const config = require('./config/constConfig')
 
 module.exports.formatDate = yyyymmdd => {
+  yyyymmdd = yyyymmdd.constructor === String ? yyyymmdd : JSON.stringify(yyyymmdd)
   let year = yyyymmdd.substring(0, 4)
   let month = yyyymmdd.substring(4, 6)
   let day = yyyymmdd.substring(6, 8)

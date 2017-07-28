@@ -13,7 +13,7 @@ module.exports.adminChangePassword = async(req, res, next) => {
         user.password = newPassword
         const pwChanged = await user.save()
 
-        res.json({
+        res.status(200).json({
             user: pwChanged
         })
     }
@@ -44,7 +44,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
                 runValidators: true,
             })
             // Returns token and necessary information
-        res.json({
+        return res.status(200).json({
             user: util.generateToken(updatedUser),
             _id: updatedUser._id,
             email: updatedUser.email,
@@ -126,11 +126,15 @@ module.exports.createUser = async(req, res, next) => {
             error: 'There is something wrong with the client input. That is all we know.'
         })
         const userObject = await user.save()
-        res.json({
-            status: 'success',
+
+        newUser = {
             _id: userObject._id,
             name: userObject.profile.name,
             roles: userObject.roles
+        }
+
+        res.status(201).json({
+            newUser
         })
     }
     catch (err) {
@@ -221,8 +225,7 @@ module.exports.generateAdminUser = async(req, res, next) => {
         })
 
         const userObject = await user.save()
-        res.json({
-            status: 'success',
+        res.status(201).json({
             token: util.generateToken(userObject),
             _id: userObject._id,
             roles: userObject.roles
