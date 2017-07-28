@@ -25,7 +25,7 @@ const StudentSchema = new Schema({
     },
 
     dob: {
-      type: Number,
+      type: Date,
       required: true
     },
 

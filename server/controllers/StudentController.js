@@ -24,10 +24,14 @@ module.exports.addStudent = async(req, res, next) => {
     // Update student based on IC Number and validate it
     const newStudent = new Student(edited)
     const error = await newStudent.validateSync();
-    if (error) throw ({
-      status: 400,
-      error: 'There is something wrong with the client input. That is all we know.'
-    })
+
+    if (error){
+      console.error(error)
+      throw ({
+        status: 400,
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
 
     const successStudentSignup = await newStudent.save()
     res.status(201).json({
