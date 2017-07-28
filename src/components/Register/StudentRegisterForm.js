@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 // import moment from 'moment'
 
-axios.defaults.baseURL = 'http://localhost:3002/api/'
+axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
@@ -32,9 +32,9 @@ const fasOptions = [
 ]
 
 const learningSupportOptions = [
-  {value: 'cdac', text: 'CDAC'},
-  {value: 'mendaki', text: 'Mendaki'},
-  {value: 'private', text: 'Private'}
+  {value: 'CDAC', text: 'CDAC'},
+  {value: 'Mendaki', text: 'Mendaki'},
+  {value: 'Private', text: 'Private'}
 ]
 
 const initialState = {
@@ -68,12 +68,13 @@ const initialState = {
   otherFamilyMembers: [], // object with all the info
   fas: 'Mendaki',
   fscName: '',
-  learningSupport: 'CDAC',
+  learningSupport: [],
 
   /* Terms and conditions */
   terms: false,
   termsDetails: false,
-  error: []
+  error: [],
+  serverError: ''
 }
 
 class StudentForm extends Component {
@@ -94,6 +95,17 @@ class StudentForm extends Component {
   handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
   handleDateChange = (dateType) => (date) => this.setState({[dateType]: date})
+
+  handleLearningSupport = (e, { name, value, checked }) => {
+    this.setState({ [name]: checked })
+    // lsup for learning support
+    let lsup = this.state.learningSupport.slice()
+    let i = lsup.indexOf(name)
+    if (i === -1) lsup.push(name)
+    else lsup.splice(i,1)
+    console.log(lsup)
+    this.setState({ learningSupport : lsup })
+  }
 
   handleSubmit = e => {
     e.preventDefault()
@@ -122,7 +134,8 @@ class StudentForm extends Component {
           address,
           gender,
           nationality,
-          schoolName: 'Marymount JC'
+          schoolName: 'Marymount JC',
+          classLevel
         },
         father: {
           name: fatherName,
@@ -155,7 +168,11 @@ class StudentForm extends Component {
           this.setState({...initialState, submitSuccess: true})
           setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
         })
-        .catch(err => console.log(err.message))
+        .catch( err => {
+          console.log(err.message)
+          this.setState({ serverError : err.response.data })
+          setTimeout(() => { this.setState({serverError: ''}) }, 5000)
+        })
     } else {
       console.log('Incomplete Fields')
       this.setState({error})
@@ -213,11 +230,11 @@ class StudentForm extends Component {
       fas, fscName, learningSupport,
       termsDetails,
       
-      submitSuccess, error
+      submitSuccess, error, serverError
     } = this.state
 
     return (
-      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexDirection: 'row'}}>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
         <Form onSubmit={this.handleSubmit} style={{ marginRight:'10px', padding: '20px', width: '45%', borderColor: 'darkcyan', borderRadius: '5px', borderStyle: 'solid'}}>
           <Header as='h3' dividing>Student Information</Header>
           <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='fullname' value={fullname} onChange={this.handleChange} required />
@@ -322,12 +339,11 @@ class StudentForm extends Component {
             <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='fas' value={fas} onChange={this.handleChange} required />
             {fas === 'fsc' && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='fscName' value={fscName} onChange={this.handleChange} /> }
           </Form.Group>
-          <Form.Input label='Other Learning Support' placeholder='Other Learning Support' name='learningSupport' value={learningSupport} onChange={this.handleChange} required />
           <Form.Group inline>
             <label>Other Learning Support</label>
             {learningSupportOptions.map((option, i) => {
               return (
-                <Form.Checkbox label={option.text} key={`option-${i}`} name={option.value} onChange={this.handleChange} />
+                <Form.Checkbox label={option.text} key={`option-${i}`} name={option.value} onChange={this.handleLearningSupport} />
               )
             })}
           </Form.Group>
@@ -353,6 +369,9 @@ class StudentForm extends Component {
           success
           content='Submitted'
           />
+        
+        <Message hidden={serverError === ''} negative content={serverError} />
+
         <Message
           hidden={error.length === 0}
           negative
