@@ -5,7 +5,7 @@ module.exports.addStudent = async(req, res, next) => {
   try {
     let edited = {}
 
-    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'misc', 'status']
+    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
 
     // If editor has no admin rights, restrict the entering of Admin Field
     if (req.decoded && (req.decoded.roles.indexOf('Admin') != -1 || req.decoded.roles.indexOf('SuperAdmin') != -1)) {
@@ -24,19 +24,26 @@ module.exports.addStudent = async(req, res, next) => {
     // Update student based on IC Number and validate it
     const newStudent = new Student(edited)
     const error = await newStudent.validateSync();
-    if (error) throw ({
-      status: 400,
-      error: 'There is something wrong with the client input. That is all we know.'
-    })
+
+    if (error) {
+      console.error(error)
+      throw ({
+        status: 400,
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
 
     const successStudentSignup = await newStudent.save()
     res.status(201).json({
       newStudent: successStudentSignup
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.code == 11000) {
-      return res.status(400).send('Account already exist. If this is a mistake please contact our system admin.')
+      return res.status(400).send({
+        error: 'Account already exist. If this is a mistake please contact our system admin.'
+      })
     }
     else if (err.status) {
       res.status(err.status).send({
@@ -57,7 +64,7 @@ module.exports.editStudentById = async(req, res, next) => {
 
     let edited = {}
 
-    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'misc', 'status', 'admin']
+    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
 
     // Use a loop to populate edited if field is present according to the `list` array
     for (let checkChanged of list) {
@@ -78,13 +85,18 @@ module.exports.editStudentById = async(req, res, next) => {
     res.status(200).json({
       editedStudent
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      return res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
+      return res.status(400).send({
+        error: 'Our server had issues validating your inputs. Please fill in using proper values'
+      })
     }
     else if (err.code == 11000) {
-      return res.status(400).send('You have already signed up an account. If this is a mistake please contact our system admin.')
+      return res.status(400).send({
+        error: 'You have already signed up an account. If this is a mistake please contact our system admin.'
+      })
     }
     else if (err.status) {
       res.status(err.status).send({
@@ -102,7 +114,8 @@ module.exports.getAll = async(req, res, next) => {
     return res.status(200).json({
       students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     next(err)
   }
@@ -117,7 +130,8 @@ module.exports.getStudentById = async(req, res, next) => {
     return res.status(200).json({
       student
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     next(err)
   }
@@ -135,11 +149,14 @@ module.exports.deleteStudent = async(req, res, next) => {
 
     // Find and delete student from database
     const studentDeleted = await Student.findByIdAndRemove(studentId)
-    if (!studentDeleted) return res.status(404).json({ error: 'student not found' })
+    if (!studentDeleted) return res.status(404).json({
+      error: 'student not found'
+    })
     return res.status(200).json({
       deleted: studentDeleted.profile
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
