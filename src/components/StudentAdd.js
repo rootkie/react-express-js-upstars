@@ -94,7 +94,8 @@ const initialState = {
     private: false
   },
 
-  error: []
+  error: [],
+  serverError: false
 }
 
 class StudentForm extends Component {
@@ -202,6 +203,7 @@ class StudentForm extends Component {
           await editStudent(studentDataToSubmit)
           this.showSuccess()
         } catch (error) {
+          this.setState({serverError: true})
           console.log(error)
         }
       } else { // not in edit mode
@@ -210,7 +212,7 @@ class StudentForm extends Component {
           this.showSuccess()
           this.setState({...initialState})
         } catch (error) {
-          console.log(error)
+          this.setState({serverError: true})
         }
       }
     } else { // incomplete Field
@@ -262,7 +264,7 @@ class StudentForm extends Component {
   render () {
     const {
       profile, father, mother, otherFamily, misc, admin,
-      submitSuccess, tuitionChoices, termsDetails, error
+      submitSuccess, tuitionChoices, termsDetails, error, serverError
     } = this.state
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
@@ -489,6 +491,11 @@ class StudentForm extends Component {
             hidden={!submitSuccess}
             positive
             content='Successfully Submitted'
+          />
+          <Message
+            hidden={!serverError}
+            negative
+            content='Server Error'
           />
           <Form.Button>Submit</Form.Button>
         </Form>
