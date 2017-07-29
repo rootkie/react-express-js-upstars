@@ -120,7 +120,7 @@ class Register extends Component {
       rootkiddie.post('/register', data)
       .then((response) => {
         console.log(response)
-        console.log(response.data.token) // ***should be stored somewhere***
+        localStorage.setItem('token',response.data.token)
         this.setState({...initialState, submitSuccess: true}) // reset form
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
         this.setState({ redirect:true })
