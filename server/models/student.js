@@ -118,15 +118,19 @@ const StudentSchema = new Schema({
   misc: {
     fas: [{
       type: String,
-      enum: ['MOE', 'Mendaki', 'Others', 'None'],
+      enum: ['MOE', 'Mendaki', 'Others', 'Fsc', 'None'],
       default: ['None']
-  }],
+    }],
+
+    fsc:{
+      type: String
+    },
 
     tuition: [{
       type: String,
       enum: ['CDAC', 'Mendaki', 'Private', 'None'],
       default: ['None']
-  }],
+    }],
 
     academicInfo: [{
       _id: false,

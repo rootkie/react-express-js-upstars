@@ -5,7 +5,7 @@ module.exports.addStudent = async(req, res, next) => {
   try {
     let edited = {}
 
-    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'misc', 'status']
+    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
 
     // If editor has no admin rights, restrict the entering of Admin Field
     if (req.decoded && (req.decoded.roles.indexOf('Admin') != -1 || req.decoded.roles.indexOf('SuperAdmin') != -1)) {
@@ -61,7 +61,7 @@ module.exports.editStudentById = async(req, res, next) => {
 
     let edited = {}
 
-    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'misc', 'status', 'admin']
+    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
 
     // Use a loop to populate edited if field is present according to the `list` array
     for (let checkChanged of list) {
