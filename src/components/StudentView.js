@@ -56,6 +56,7 @@ class StudentView extends Component {
     const { deleteStudent, studentData } = this.props
     const toDeleteArray = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
     deleteStudent(toDeleteArray)
+    this.setState({selected: []})
   }
 
   handleDeleteConfirmation = (option) => () => {
@@ -159,7 +160,9 @@ class StudentView extends Component {
               <Confirm
                 open={deleteConfirmationVisibility}
                 header='Deleting the following students:'
-                content={selected.join(', ')}
+                content={selected.map((ic) => (
+                  studentData.filter((student) => (student.profile.icNumber === ic))[0].profile.name
+                )).join(', ')}
                 onCancel={this.handleDeleteConfirmation('cancel')}
                 onConfirm={this.handleDeleteConfirmation('confirm')}
         />
