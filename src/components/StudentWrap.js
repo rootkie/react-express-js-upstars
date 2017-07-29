@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
-import PropTypes from 'prop-types'
+import { string } from 'prop-types'
 import StudentForm from './StudentAdd'
 import StudentView from './StudentView'
 import axios from 'axios'
@@ -27,6 +27,11 @@ class StudentWrap extends Component {
     studentData: [],
     filteredData: false,
     isLoading: true
+  }
+
+  static propTypes = {
+    op: string.isRequired,
+    sid: string
   }
 
   // get data from server
@@ -57,6 +62,10 @@ class StudentWrap extends Component {
       .catch((err) => console.log(err))
   }
 
+  editStudent = () => {
+    // need to transition to studentAdd with id in url for editing
+  }
+
   searchFilter = (criteria) => {
     const { studentData } = this.state
     console.log('passing criteria to filterData', criteria)
@@ -65,7 +74,7 @@ class StudentWrap extends Component {
 
   render () {
     const { isLoading, studentData, filteredData } = this.state
-    const { op } = this.props
+    const { op, sid } = this.props
     if (isLoading) {
       return (
         <div>
@@ -78,15 +87,12 @@ class StudentWrap extends Component {
       return (
         <div>
           {op === 'add' && <StudentForm /> }
+          {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])} /> }
           {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} />}
         </div>
       )
     }
   }
-}
-
-StudentWrap.propTypes = {
-  op: PropTypes.string
 }
 
 export default StudentWrap

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { array, func } from 'prop-types'
+import { array, func, object } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -22,6 +22,11 @@ class StudentView extends Component {
     deleteStudent: func.isRequired,
     searchFilter: func.isRequired
   }
+
+  static contextTypes = {
+    router: object
+  }
+
   state = {
     selected: [],
     deleteConfirmationVisibility: false,
@@ -82,6 +87,13 @@ class StudentView extends Component {
 
       default:
     }
+  }
+
+  handleEditStudent = () => {
+    const { selected } = this.state
+    const { studentData } = this.props
+    const toEditId = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
+    this.context.router.history.push(`/students/edit/${toEditId}`)
   }
 
   handleFilter = (e) => {
@@ -157,6 +169,7 @@ class StudentView extends Component {
               </Button>
               </Link>
               <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
+              <Button size='small' disabled={selected.length !== 1} onClick={this.handleEditStudent}>Edit</Button>
               <Confirm
                 open={deleteConfirmationVisibility}
                 header='Deleting the following students:'
