@@ -26,7 +26,7 @@ const nationalityOptions = [
 ]
 
 const fasOptions = [
-  { key: 'fsc', text: 'Family Service Centre', value: 'Others' },
+  { key: 'fsc', text: 'Family Service Centre', value: 'Fsc' },
   { key: 'moe', text: 'MOE', value: 'MOE' },
   { key: 'mendaki', text: 'Mendaki', value: 'Mendaki' },
   { key: 'none', text: 'None', value: 'None' }
@@ -126,7 +126,7 @@ class StudentForm extends Component {
 
     if (error.length === 0) {
     // Do some wizardry to format data here
-      if(fas === 'fsc') fas = 'fsc ' + fscName
+      
       const newStudent = {
         profile: {
           name: fullname,
@@ -159,6 +159,7 @@ class StudentForm extends Component {
         otherFamily: otherFamilyMembers,
         misc: {
           fas,
+          fsc: fscName,
           tuition: learningSupport,
         },
 
@@ -339,7 +340,7 @@ class StudentForm extends Component {
 
           <Form.Group widths='equal'>
             <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='fas' value={fas} onChange={this.handleChange} required />
-            {fas === 'fsc' && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='fscName' value={fscName} onChange={this.handleChange} /> }
+            {fas === 'Fsc' && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='fscName' value={fscName} onChange={this.handleChange} /> }
           </Form.Group>
           <Form.Group inline>
             <label>Other Learning Support</label>
