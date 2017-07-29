@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import Main from './components/Main'
+import Main from './components/Main/Main'
 import MainCtrl from './components/MainCtrl'
 import Register from './components/Register'
 import 'semantic-ui-css/semantic.min.css'
