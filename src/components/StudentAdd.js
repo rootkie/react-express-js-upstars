@@ -68,9 +68,9 @@ const initialState = {
   otherFamily: [], // each object {name, relationship, age}
 
   misc: {
-    fas: '',
+    fas: [],
     fscName: '',
-    tuition: '',
+    tuition: [],
     academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
   },
 
@@ -173,14 +173,14 @@ class StudentForm extends Component {
   }
 
   showSuccess = () => {
-    this.setState({...initialState, submitSuccess: true})
+    this.setState({submitSuccess: true})
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
-  handleSubmit = e => {
+  handleSubmit = async e => {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
-    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices, showSuccess } = this.state
+    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
     const { edit, editStudent } = this.props
 
     // check required fields
@@ -197,11 +197,20 @@ class StudentForm extends Component {
       studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
 
       if (edit) {
-        editStudent(studentDataToSubmit)
+        try {
+          await editStudent(studentDataToSubmit)
+          this.showSuccess()
+        } catch (error) {
+          console.log(error)
+        }
       } else { // not in edit mode
-        axios.post('/students', studentDataToSubmit)
-        .then(showSuccess)
-        .catch(err => console.log(err))
+        try {
+          await axios.post('/students', studentDataToSubmit)
+          this.showSuccess()
+          this.setState({...initialState})
+        } catch (error) {
+          console.log(error)
+        }
       }
     } else { // incomplete Field
       console.log('Incomplete Fields')
@@ -470,18 +479,18 @@ class StudentForm extends Component {
               <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={this.handleTermsClose} />
             </Modal.Actions>
           </Modal>
+          <Message
+            hidden={error.length === 0}
+            negative
+            content='Please Check Required Fields!'
+          />
+          <Message
+            hidden={!submitSuccess}
+            positive
+            content='Successfully Submitted'
+          />
           <Form.Button>Submit</Form.Button>
         </Form>
-        <Message
-          hidden={!submitSuccess}
-          success
-          content='Submitted'
-          />
-        <Message
-          hidden={error.length === 0}
-          negative
-          content='Please Check Required Fields!'
-          />
       </div>
     )
   }
