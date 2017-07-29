@@ -57,13 +57,13 @@ module.exports.addEditAttendance = async(req, res, next) => {
     if (type !== 'Class') hoursInt = 0
 
     let attendance1 = {
-      date,
-      hours: hoursInt,
-      class: classId,
-      users,
-      students,
-      type
-    } // Find attendance based on class and date. If exist, updates; else creates a new one.
+        date,
+        hours: hoursInt,
+        class: classId,
+        users,
+        students,
+        type
+      } // Find attendance based on class and date. If exist, updates; else creates a new one.
 
     const newAttendance = await Attendance.findOneAndUpdate({
       class: classId,
@@ -87,8 +87,10 @@ module.exports.addEditAttendance = async(req, res, next) => {
       })
     }
     else if (err.name == 'ValidationError') {
-      res.status(400).send('There is something wrong with the client input. That is all we know.')
-    } 
+      res.status(400).send({
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
     else next(err)
   }
 }

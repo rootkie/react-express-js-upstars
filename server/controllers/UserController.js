@@ -5,11 +5,12 @@ module.exports.getAllUsers = async(req, res, next) => {
   try {
     // Retrieve all users in the system
     const users = await User.find({}).select('profile.name').sort('profile.name')
-    
+
     return res.status(200).json({
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -39,7 +40,8 @@ module.exports.getUser = async(req, res, next) => {
     return res.status(200).json({
       user
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -100,10 +102,13 @@ module.exports.editUserParticulars = async(req, res, next) => {
     return res.status(200).json({
       editedUser: user
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
-      res.status(400).send('There is something wrong with the client input. That is all we know.')
+      res.status(400).send({
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
     }
     else if (err.status) {
       res.status(err.status).send({
@@ -130,7 +135,8 @@ module.exports.deleteUser = async(req, res, next) => {
     return res.status(200).json({
       userDeleted
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -177,7 +183,8 @@ module.exports.changePassword = async(req, res, next) => {
         status: 'success'
       })
     }
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -195,7 +202,8 @@ module.exports.getExternal = async(req, res, next) => {
     return res.status(200).json({
       user
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     next(err)
   }
