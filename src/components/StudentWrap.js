@@ -1,21 +1,46 @@
 import React, { Component } from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
-import PropTypes from 'prop-types'
+import { string } from 'prop-types'
 import StudentForm from './StudentAdd'
 import StudentView from './StudentView'
 import axios from 'axios'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
+function filterData (data, criteria) { // criteria = [{field, value}]
+  for (let criterion of criteria) {
+    const { field, value } = criterion // field is profile-age, value = ['M']
+    return data.filter((student) => {
+      if (/-/.test(field)) {
+        const fieldArr = field.split('-') // fieldArr = ['profile', 'age']
+        return value.includes(student[fieldArr[0]][fieldArr[1]])
+      } else {
+        return value.includes(student[field])
+      }
+    }
+    )
+  }
+}
+
 class StudentWrap extends Component {
   state = {
     studentData: [],
+    filteredData: false,
     isLoading: true
+  }
+
+  static propTypes = {
+    op: string.isRequired,
+    sid: string
   }
 
   // get data from server
   constructor (props) {
     super(props)
+    this.getStudents()
+  }
+
+  getStudents = () => {
     axios.get('students')
       .then((response) => {
         this.setState({ studentData: response.data.students, isLoading: false })
@@ -41,9 +66,40 @@ class StudentWrap extends Component {
       .catch((err) => console.log(err))
   }
 
+  editStudent = (studentDataToSubmit) => {
+    const { studentData } = this.state
+    const { sid } = this.props
+    return axios.put('/students', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      ...studentDataToSubmit,
+      studentId: sid
+    })
+      .then(() => {
+        const updatedStudentData = studentData.map((element) => (
+          element._id === sid ? {...studentDataToSubmit, _id: sid} : element
+        ))
+        this.setState({studentData: updatedStudentData})
+      })
+  }
+
+  addStudent = (studentDataToSubmit) => {
+    const { studentData } = this.state
+    return axios.post('/students', studentDataToSubmit)
+      .then((response) => {
+        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
+      })
+  }
+
+  searchFilter = (criteria) => {
+    const { studentData } = this.state
+    this.setState({filteredData: filterData(studentData, criteria)})
+  }
+
   render () {
-    const { isLoading } = this.state
-    const { op } = this.props
+    const { isLoading, studentData, filteredData } = this.state
+    const { op, sid } = this.props
     if (isLoading) {
       return (
         <div>
@@ -55,17 +111,13 @@ class StudentWrap extends Component {
     } else {
       return (
         <div>
-          {op === 'add' && <StudentForm /> }
-          {op === 'edit' && <div>edit</div>}
-          {op === 'view' && <StudentView studentData={this.state.studentData} deleteStudent={this.deleteStudent} />}
+          {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
+          {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
+          {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} />}
         </div>
       )
     }
   }
-}
-
-StudentWrap.propTypes = {
-  op: PropTypes.string
 }
 
 export default StudentWrap
