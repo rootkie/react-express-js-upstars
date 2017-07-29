@@ -12,7 +12,7 @@ const hasRole = require('./routeMiddleware').hasRole
 
 module.exports = app => {
   // Classes
-  app.get('/api/class', hasRole(['Admin', 'SuperAdmin']), classControl.getAll)
+  app.get('/api/class', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), classControl.getAll)
   app.get('/api/class/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), classControl.getClassById)
   app.post('/api/class', hasRole(['SuperAdmin']), classControl.addClass)
   app.put('/api/class', hasRole(['SuperAdmin']), classControl.editClass)
