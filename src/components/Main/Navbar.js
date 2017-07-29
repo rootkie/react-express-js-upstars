@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { Sidebar, Segment, Button, Menu, Image, Icon, Header } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
+import imgIcon from './assets/images/icon.jpg'
 
 const items = [
-  { key: 'Logo', content: <Segment inverted centered><img src="http://upstars.ulupandan.sg/images_web/img.jpg" /></Segment>, name: 'Logo' },
+  { key: 'Logo', content: <Image src={imgIcon} fluid />, name: 'Logo' },
   { key: 'Home', content: 'Home', name: 'Home' },
   { key: 'Students', content: 'Students', name: 'Students' },
   { key: 'Tutors', content: 'Tutors', name: 'Tutors' },

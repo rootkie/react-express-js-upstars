@@ -4,6 +4,7 @@ import { Grid, Container, Image, Divider } from 'semantic-ui-react'
 import Navbar from './Navbar'
 import Home from './Home'
 import { Redirect } from 'react-router'
+import imgHead from './assets/images/head.jpg'
 
 class Main extends Component{
     state = { activePage: 'Home' }
@@ -29,7 +30,7 @@ class Main extends Component{
                     <Navbar changePage={this.changePage} />
                 </Grid.Column>
                 <Grid.Column width={12} stretched>
-                    <Image src='http://upstars.ulupandan.sg/images_web/head.jpg' style={{marginBottom:'20px' }}/>
+                    <Image src={imgHead} fluid style={{marginBottom:'20px' }}/>
                     <Divider hidden />
                         { this.state.activePage === 'Home' && <Home />}
                         {}
