@@ -28,45 +28,47 @@ const nationalityOptions = [
 const fasOptions = [
   { key: 'fsc', text: 'Family Service Centre', value: 'Others' },
   { key: 'moe', text: 'MOE', value: 'MOE' },
-  { key: 'mendaki', text: 'Mendaki', value: 'Mendaki' }
+  { key: 'mendaki', text: 'Mendaki', value: 'Mendaki' },
+  { key: 'none', text: 'None', value: 'None' }
 ]
 
 const learningSupportOptions = [
   {value: 'CDAC', text: 'CDAC'},
   {value: 'Mendaki', text: 'Mendaki'},
-  {value: 'Private', text: 'Private'}
+  {value: 'Private', text: 'Private'},
+  {value: 'None', text: 'None'}
 ]
 
 const initialState = {
   /* Student Information */
-  fullname: 'abcd',
-  firstName: 'abcd', // Family name
-  lastName: 'abcd', // Personal name
-  studentIC: 's12345678z',
+  fullname: '',
+  firstName: '', // Family name
+  lastName: '', // Personal name
+  studentIC: '',
   dateOfBirth: '',
   nationality: '',
   gender: '',
-  address: 'some where singapore', // I don't think we should break the field into such granular sections like name of road, unit number etc
-  school: 'some school name',
-  classLevel: 'P2',
+  address: '', // I don't think we should break the field into such granular sections like name of road, unit number etc
+  school: '',
+  classLevel: '',
 
   /* Family Information */
-  fatherName: 'johnny',
-  fatherIC: 's12345678z',
-  fatherCitizenship: 'Singapore',
-  fatherNumber: '1234567890',
-  fatherEmail: 'easy@email.com',
-  fatherOccupation: 'some job',
-  fatherMonthlyIncome: '100',
-  motherName: 'jane',
-  motherIC: 's12345678z',
-  motherCitizenship: 'Singapore',
-  motherNumber: '1234567890',
-  motherEmail: 'easy@email.com',
-  motherOccupation: 'some job',
-  motherMonthlyIncome: '100',
+  fatherName: '',
+  fatherIC: '',
+  fatherCitizenship: '',
+  fatherNumber: '',
+  fatherEmail: '',
+  fatherOccupation: '',
+  fatherMonthlyIncome: '',
+  motherName: '',
+  motherIC: '',
+  motherCitizenship: '',
+  motherNumber: '',
+  motherEmail: '',
+  motherOccupation: '',
+  motherMonthlyIncome: '',
   otherFamilyMembers: [], // object with all the info
-  fas: 'Mendaki',
+  fas: '',
   fscName: '',
   learningSupport: [],
 
@@ -112,8 +114,8 @@ class StudentForm extends Component {
     /* submit inputs in fields (stored in state) */
     const {
       fullname, firstName, lastName, studentIC, nationality, gender, address, school, classLevel, dateOfBirth,
-      fatherName, fatherIC, fatherCitizenship, fatherNumber, fatherOccupation, fatherMonthlyIncome,
-      motherName, motherIC, motherCitizenship, motherNumber, motherOccupation, motherMonthlyIncome,
+      fatherName, fatherIC, fatherCitizenship, fatherEmail, fatherNumber, fatherOccupation, fatherMonthlyIncome,
+      motherName, motherIC, motherCitizenship, motherEmail, motherNumber, motherOccupation, motherMonthlyIncome,
       otherFamilyMembers,
       fscName, learningSupport,
       termsDetails
@@ -129,12 +131,11 @@ class StudentForm extends Component {
         profile: {
           name: fullname,
           icNumber: studentIC,
-          contactNumber: '420', /* TODO be removed after backend changes */
           dob: dateOfBirth,
           address,
           gender,
           nationality,
-          schoolName: 'Marymount JC',
+          schoolName: school,
           classLevel
         },
         father: {
@@ -142,7 +143,7 @@ class StudentForm extends Component {
           icNumber: fatherIC,
           nationality: fatherCitizenship,
           contactNumber: fatherNumber,
-          email: 'no such field',
+          email: fatherEmail,
           occupation: fatherOccupation,
           income: fatherMonthlyIncome
         },
@@ -151,7 +152,7 @@ class StudentForm extends Component {
           icNumber: motherIC,
           nationality: motherCitizenship,
           contactNumber: motherNumber,
-          email: 'no such field',
+          email: motherEmail,
           occupation: motherOccupation,
           income: motherMonthlyIncome
         },
@@ -224,8 +225,8 @@ class StudentForm extends Component {
   render () {
     const {
       fullname, firstName, lastName, studentIC, nationality, gender, address, school, classLevel, dateOfBirth,
-      fatherName, fatherIC, fatherCitizenship, fatherNumber, fatherOccupation, fatherMonthlyIncome,
-      motherName, motherIC, motherCitizenship, motherNumber, motherOccupation, motherMonthlyIncome,
+      fatherName, fatherIC, fatherCitizenship, fatherEmail, fatherNumber, fatherOccupation, fatherMonthlyIncome,
+      motherName, motherIC, motherCitizenship, motherEmail, motherNumber, motherOccupation, motherMonthlyIncome,
       otherFamilyMembers,
       fas, fscName, learningSupport,
       termsDetails,
@@ -237,6 +238,7 @@ class StudentForm extends Component {
       <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
         <Form onSubmit={this.handleSubmit} style={{ marginRight:'10px', padding: '20px', width: '45%', borderColor: 'darkcyan', borderRadius: '5px', borderStyle: 'solid'}}>
           <Header as='h3' dividing>Student Information</Header>
+          {/* Student profile */}
           <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='fullname' value={fullname} onChange={this.handleChange} required />
           <Form.Group widths='equal'>
             <Form.Input label='Personal name' placeholder='Personal name' name='lastName' value={lastName} onChange={this.handleChange} required />
@@ -265,33 +267,33 @@ class StudentForm extends Component {
           <Header as='h3' dividing>Family Information</Header>
 
           {/* Father's information */}
-          <Form.Input label="Father's name" placeholder='as in IC card' name='fatherName' value={fatherName} onChange={this.handleChange} required />
+          <Form.Input label="Father's name" placeholder='as in IC card' name='fatherName' value={fatherName} onChange={this.handleChange} />
           <Form.Group widths='equal'>
-            <Form.Input label='Identification Card Number' placeholder='IC number' name='fatherIC' value={fatherIC} onChange={this.handleChange} required />
-            <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='fatherCitizenship' value={fatherCitizenship} onChange={this.handleChange} required />
+            <Form.Input label='Identification Card Number' placeholder='IC number' name='fatherIC' value={fatherIC} onChange={this.handleChange} />
+            <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='fatherCitizenship' value={fatherCitizenship} onChange={this.handleChange} />
           </Form.Group>
           <Form.Group widths='equal'>
-            <Form.Input label='Identification Card Number' placeholder='IC number' name='fatherIC' value={fatherIC} onChange={this.handleChange} required />
-            <Form.Input label='Mobile number' placeholder='Mobile number' name='fatherNumber' value={fatherNumber} onChange={this.handleChange} required />
+            <Form.Input label='Email' placeholder='abc@example.com' name='fatherEmail' value={fatherEmail} onChange={this.handleChange} />
+            <Form.Input label='Mobile number' placeholder='Mobile number' name='fatherNumber' value={fatherNumber} onChange={this.handleChange} />
           </Form.Group>
           <Form.Group widths='equal'>
-            <Form.Input label='Occupation' placeholder='Occupation' name='fatherOccupation' value={fatherOccupation} onChange={this.handleChange} required />
-            <Form.Input label='Monthly Income' placeholder='Monthly Income' name='fatherMonthlyIncome' value={fatherMonthlyIncome} onChange={this.handleChange} required />
+            <Form.Input label='Occupation' placeholder='Occupation' name='fatherOccupation' value={fatherOccupation} onChange={this.handleChange} />
+            <Form.Input label='Monthly Income' placeholder='Monthly Income' name='fatherMonthlyIncome' value={fatherMonthlyIncome} onChange={this.handleChange} />
           </Form.Group>
 
           {/* Mother's information */}
-          <Form.Input label="Mother's name" placeholder='as in IC card' name='motherName' value={motherName} onChange={this.handleChange} required />
+          <Form.Input label="Mother's name" placeholder='as in IC card' name='motherName' value={motherName} onChange={this.handleChange} />
           <Form.Group widths='equal'>
-            <Form.Input label='Identification Card Number' placeholder='IC number' name='motherIC' value={motherIC} onChange={this.handleChange} required />
-            <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='motherCitizenship' value={motherCitizenship} onChange={this.handleChange} required />
+            <Form.Input label='Identification Card Number' placeholder='IC number' name='motherIC' value={motherIC} onChange={this.handleChange} />
+            <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='motherCitizenship' value={motherCitizenship} onChange={this.handleChange} />
           </Form.Group>
           <Form.Group widths='equal'>
-            <Form.Input label='Identification Card Number' placeholder='IC number' name='motherIC' value={motherIC} onChange={this.handleChange} required />
-            <Form.Input label='Mobile number' placeholder='Mobile number' name='motherNumber' value={motherNumber} onChange={this.handleChange} required />
+            <Form.Input label='Email' placeholder='abc@example.com' name='motherEmail' value={motherEmail} onChange={this.handleChange} />
+            <Form.Input label='Mobile number' placeholder='Mobile number' name='motherNumber' value={motherNumber} onChange={this.handleChange} />
           </Form.Group>
           <Form.Group widths='equal'>
-            <Form.Input label='Occupation' placeholder='Occupation' name='motherOccupation' value={motherOccupation} onChange={this.handleChange} required />
-            <Form.Input label='Monthly Income' placeholder='Monthly Income' name='motherMonthlyIncome' value={motherMonthlyIncome} onChange={this.handleChange} required />
+            <Form.Input label='Occupation' placeholder='Occupation' name='motherOccupation' value={motherOccupation} onChange={this.handleChange} />
+            <Form.Input label='Monthly Income' placeholder='Monthly Income' name='motherMonthlyIncome' value={motherMonthlyIncome} onChange={this.handleChange} />
           </Form.Group>
 
           {/* adding additional family members */}
