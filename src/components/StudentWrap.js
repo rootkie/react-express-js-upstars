@@ -62,9 +62,17 @@ class StudentWrap extends Component {
       .catch((err) => console.log(err))
   }
 
-  editStudent = () => {
-    // need to transition to studentAdd with id in url for editing
-  }
+  editStudent = (studentDataToSubmit) => (
+    axios.put('/students', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        ...studentDataToSubmit,
+        studentId: this.props.sid
+      }
+    })
+  )
 
   searchFilter = (criteria) => {
     const { studentData } = this.state
@@ -87,7 +95,7 @@ class StudentWrap extends Component {
       return (
         <div>
           {op === 'add' && <StudentForm /> }
-          {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])} /> }
+          {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
           {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} />}
         </div>
       )
