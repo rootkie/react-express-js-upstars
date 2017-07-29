@@ -118,7 +118,7 @@ const StudentSchema = new Schema({
   misc: {
     fas: [{
       type: String,
-      enum: ['MOE', 'Mendaki', 'Others', 'Fsc', 'None'],
+      enum: ['MOE', 'Mendaki', 'Others', 'FSC', 'None'],
       default: ['None']
     }],
 

@@ -26,7 +26,7 @@ const nationalityOptions = [
 ]
 
 const fasOptions = [
-  { key: 'fsc', text: 'Family Service Centre', value: 'Fsc' },
+  { key: 'fsc', text: 'Family Service Centre', value: 'FSC' },
   { key: 'moe', text: 'MOE', value: 'MOE' },
   { key: 'mendaki', text: 'Mendaki', value: 'Mendaki' },
   { key: 'none', text: 'None', value: 'None' }
