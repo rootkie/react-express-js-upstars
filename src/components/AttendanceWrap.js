@@ -5,13 +5,15 @@ import AttendanceClass from './AttendanceClass.js'
 import AttendanceUser from './AttendanceUser.js'
 import AttendanceStudent from './AttendanceStudent.js'
 import AttendanceForm from './AttendanceForm.js'
+import AttendanceSearch from './AttendanceSearch.js'
 import axios from 'axios'
 
 
 const AttendanceWrap = ({ op }) => (
   <div>
     {op === 'add' && <AttendanceForm /> }
-    {op === 'search' && <AttendanceView /> }
+    {op === 'search' && <AttendanceSearch /> }
+    {op === 'view' && <AttendanceView /> }
     {op === 'user' && <AttendanceUser />}
     {op === 'student' && <AttendanceStudent />}
     {op === 'class' && <AttendanceClass />}
