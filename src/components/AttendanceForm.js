@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox } from 'semantic-ui-react'
+import { array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 
 const initialState = {
@@ -16,7 +17,6 @@ const typeOptions = [
   { key: 'Cancelled', text: 'Cancelled', value: 'Cancelled' },
 ]
 
-// Populate this by calling getClasses API in wrap and sending in as props. Then selected class will send an API here to get users and students
 const classNameOptions = [
   { key: 'python2', text: 'Python2', value: '12345' },
   { key: 'machinelearning', text: 'Machine Learning', value: '23456' },
@@ -36,12 +36,17 @@ const users = [
 ]
 
 class AttendanceForm extends Component {
+  static propTypes = {
+    classes: array.isRequired
+  }
   state = {
     ...initialState,
     users,
     students,
     submitSuccess: false
   }
+  
+
 
   checkRequired = (checkArray) => {
     const error = []
@@ -127,10 +132,11 @@ class AttendanceForm extends Component {
       this.setState({error})
     }
   }
+  
 
   render () {
-    const { date, type, className, students, users, error, submitSuccess, hours } = this.state // submitted version are used to display the info sent through POST (not necessary)
-
+    const { date, type, className, students, users, error, submitSuccess, hours } = this.state
+    const { classes } = this.props
     return (
       <div>
         <Form onSubmit={this.handleSubmit}>
