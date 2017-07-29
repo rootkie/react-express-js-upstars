@@ -67,10 +67,8 @@ class StudentWrap extends Component {
       headers: {
         'Content-Type': 'application/json'
       },
-      data: {
-        ...studentDataToSubmit,
-        studentId: this.props.sid
-      }
+      data: studentDataToSubmit,
+      studentId: this.props.sid
     })
   )
 

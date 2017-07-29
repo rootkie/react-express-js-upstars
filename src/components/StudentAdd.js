@@ -354,10 +354,8 @@ class StudentForm extends Component {
             </Table.Footer>
           </Table>
 
-          <Form.Group widths='equal'>
-            <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} required />
-            {fas === 'fsc' && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
-          </Form.Group>
+          <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple required />
+          {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
           <Form.Group inline>
             <label>Other Learning Support</label>
             {tuitionOptions.map((option, i) => {
