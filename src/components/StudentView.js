@@ -51,20 +51,6 @@ class StudentView extends Component {
 
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
-  /*
-  removeStudents = (studentsToRemove) => {
-    console.log(`removing ${studentsToRemove.join('')}`)
-    let { studentData, selected } = this.state
-    studentData = studentData.reduce((curr, next) => (
-      studentsToRemove.includes(next.name) ? curr : curr.concat(next)
-    ), [])
-
-    selected = selected.filter((student) => (!studentsToRemove.includes(student)))
-
-    this.setState({studentData, selected})
-  }
-  */
-
   handleDelete = () => {
     const { selected } = this.state
     const { deleteStudent, studentData } = this.props

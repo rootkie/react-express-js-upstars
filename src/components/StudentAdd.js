@@ -101,7 +101,8 @@ class StudentForm extends Component {
   static propTypes = {
     studentData: object,
     edit: bool,
-    editStudent: func
+    editStudent: func,
+    addStudent: func
   }
 
   filterPropData = (checkArray) => {
@@ -181,7 +182,7 @@ class StudentForm extends Component {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
     const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
-    const { edit, editStudent } = this.props
+    const { edit, editStudent, addStudent } = this.props
 
     // check required fields
     const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
@@ -205,7 +206,7 @@ class StudentForm extends Component {
         }
       } else { // not in edit mode
         try {
-          await axios.post('/students', studentDataToSubmit)
+          await addStudent(studentDataToSubmit)
           this.showSuccess()
           this.setState({...initialState})
         } catch (error) {

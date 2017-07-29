@@ -69,7 +69,7 @@ class StudentWrap extends Component {
   editStudent = (studentDataToSubmit) => {
     const { studentData } = this.state
     const { sid } = this.props
-    axios.put('/students', {
+    return axios.put('/students', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -78,15 +78,22 @@ class StudentWrap extends Component {
     })
       .then(() => {
         const updatedStudentData = studentData.map((element) => (
-          element._id === sid ? studentDataToSubmit : element
+          element._id === sid ? {...studentDataToSubmit, _id: sid} : element
         ))
         this.setState({studentData: updatedStudentData})
       })
   }
 
+  addStudent = (studentDataToSubmit) => {
+    const { studentData } = this.state
+    return axios.post('/students', studentDataToSubmit)
+      .then((response) => {
+        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
+      })
+  }
+
   searchFilter = (criteria) => {
     const { studentData } = this.state
-    console.log('passing criteria to filterData', criteria)
     this.setState({filteredData: filterData(studentData, criteria)})
   }
 
@@ -104,7 +111,7 @@ class StudentWrap extends Component {
     } else {
       return (
         <div>
-          {op === 'add' && <StudentForm /> }
+          {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
           {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
           {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} />}
         </div>
