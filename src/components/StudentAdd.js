@@ -104,11 +104,17 @@ class StudentForm extends Component {
     editStudent: func
   }
 
+  filterPropData = (checkArray) => {
+    const { studentData } = this.props
+    return Object.keys(studentData).reduce((last, curr) => (checkArray.includes(curr) ? {...last, [curr]: studentData[curr]} : last
+  ), {})
+  }
+
   state = this.props.studentData
   ? {
-    ...this.props.studentData,
+    ...this.filterPropData(['profile', 'father', 'mother', 'otherFamily', 'misc', 'admin']),
     profile: {...this.props.studentData.profile, dob: moment(this.props.studentData.profile.dob)
-    },
+    }, // reformat dob to moment object
 
     terms: false,
     termsDetails: false,
@@ -192,11 +198,9 @@ class StudentForm extends Component {
 
       if (edit) {
         editStudent(studentDataToSubmit)
-          .then(() => showSuccess)
-          .catch(err => console.log(err.message))
       } else { // not in edit mode
         axios.post('/students', studentDataToSubmit)
-        .then(() => showSuccess)
+        .then(showSuccess)
         .catch(err => console.log(err))
       }
     } else { // incomplete Field
@@ -225,7 +229,7 @@ class StudentForm extends Component {
           year: '',
           term: '',
           english: '',
-          maths: '',
+          math: '',
           motherTongue: '',
           science: '',
           overall: ''
@@ -424,7 +428,7 @@ class StudentForm extends Component {
                     <Form.Input transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChange('academicInfo')} />
                   </Table.Cell>
                   <Table.Cell>
-                    <Form.Input transparent key={`maths-${i}`} name={`maths-${i}`} value={academicInfo[i].maths} placeholder='Maths' onChange={this.updateRepeatableChange('academicInfo')} />
+                    <Form.Input transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChange('academicInfo')} />
                   </Table.Cell>
                   <Table.Cell>
                     <Form.Input transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChange('academicInfo')} />

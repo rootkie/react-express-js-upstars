@@ -37,6 +37,10 @@ class StudentWrap extends Component {
   // get data from server
   constructor (props) {
     super(props)
+    this.getStudents()
+  }
+
+  getStudents = () => {
     axios.get('students')
       .then((response) => {
         this.setState({ studentData: response.data.students, isLoading: false })
@@ -62,15 +66,23 @@ class StudentWrap extends Component {
       .catch((err) => console.log(err))
   }
 
-  editStudent = (studentDataToSubmit) => (
+  editStudent = (studentDataToSubmit) => {
+    const { studentData } = this.state
+    const { sid } = this.props
     axios.put('/students', {
       headers: {
         'Content-Type': 'application/json'
       },
-      data: studentDataToSubmit,
-      studentId: this.props.sid
+      ...studentDataToSubmit,
+      studentId: sid
     })
-  )
+      .then(() => {
+        const updatedStudentData = studentData.map((element) => (
+          element._id === sid ? studentDataToSubmit : element
+        ))
+        this.setState({studentData: updatedStudentData})
+      })
+  }
 
   searchFilter = (criteria) => {
     const { studentData } = this.state
