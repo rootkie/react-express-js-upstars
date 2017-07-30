@@ -17,7 +17,7 @@ module.exports.addClass = async(req, res, next) => {
     // Check if the class already exist and prevent duplicate creation
     const classExist = await Class.findOne({
       className,
-      dayAndTime
+      startDate
     })
 
     if (classExist) throw ({
@@ -31,7 +31,7 @@ module.exports.addClass = async(req, res, next) => {
       classType,
       venue,
       dayAndTime,
-      startDate: util.formatDate(startDate)
+      startDate
     })
 
     // Validate that all fields are filled in.
@@ -73,7 +73,7 @@ module.exports.editClass = async(req, res, next) => {
         classType,
         venue,
         dayAndTime,
-        startDate: util.formatDate(startDate)
+        startDate
       }
       // Find and update class
     const newClass = await Class.findByIdAndUpdate(classId, class1, {

@@ -20,7 +20,6 @@ const ClassSchema = new Schema({
   },
   dayAndTime: {
     type: String,
-    required: true
   },
   startDate: {
     type: Date,
