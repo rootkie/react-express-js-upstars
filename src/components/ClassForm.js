@@ -2,11 +2,16 @@ import React, { Component } from 'react'
 import { Form, Message } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import moment from 'moment'
+import axios from 'axios'
+
+const req = axios.create({
+  baseURL: 'https://test.rootkiddie.com/api/',
+  headers: {'Content-Type': 'application/json'}
+})
 
 const typeOptions = [
-  { key: 'tuition', text: 'Tuition', value: 'tuition' },
-  { key: 'enrichment', text: 'Enrichment', value: 'enrichment' }
+  { key: 'tuition', text: 'Tuition', value: 'Tuition' },
+  { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
 const initialState = {
@@ -14,17 +19,14 @@ const initialState = {
   type: '',
   venue: '',
   dayAndTime: '',
-  startDate: ''
+  startDate: '',
+  serverErrMessage: '',
+  submitSuccess: false
 }
 
 class ClassForm extends Component {
   state = {
-    ...initialState,
-    submittedName: '',
-    submittedType: '',
-    submittedVenue: '',
-    submittedDayAndTime: '',
-    submittedStartDate: ''
+    ...initialState
   }
 
   checkRequired = (checkArray) => {
@@ -44,21 +46,32 @@ class ClassForm extends Component {
     e.preventDefault()
     const { name, type, venue, dayAndTime, startDate } = this.state
     // check required fields
-    const error = this.checkRequired(['name', 'type', 'venue', 'dayAndTime', 'startDate'])
+    let requiredFields = (type === 'Tuition') ? ['name', 'type', 'venue', 'dayAndTime', 'startDate'] : ['name', 'type', 'venue', 'startDate']
+    const error = this.checkRequired(requiredFields)
 
     if (error.length === 0) {
-      console.log('success')
-      this.setState({ submittedName: name, submittedType: type, submittedVenue: venue, submittedDayAndTime: dayAndTime, submittedStartDate: moment(startDate).format('DDMMYYYY') }) // this is just to display the information, in reality a POST request will be sent here
-
-      this.setState(initialState) // reset form
-    } else {
-      console.log('error occured')
-      this.setState({error})
+      const data = {
+        className: name,
+        classType: type,
+        venue,
+        dayAndTime,
+        startDate
+      }
+      req.post('/class', data)
+        .then((response) => {
+          this.setState({...initialState, submitSuccess: true}) // reset form
+          setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
+        })
+        .catch((error) => {
+          this.setState({serverErrMessage: error.response.data.error}) // display server error message
+        })
+    } else { // this is to show required field errors
+      this.setState({serverErrMessage: 'Please check all required fields are filled in correctly'})
     }
   }
 
   render () {
-    const { name, type, venue, dayAndTime, submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { name, type, venue, dayAndTime, serverErrMessage, submitSuccess } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     return (
       <div>
@@ -66,18 +79,20 @@ class ClassForm extends Component {
           <Form.Input label='Name of Class' placeholder='Name of the class' name='name' value={name} onChange={this.handleChange} required />
           <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='type' value={type} onChange={this.handleChange} required />
           <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-          <Form.Field disabled={type === 'enrichment'} required>
+          <Form.Field required>
             <label>Starting Date</label>
             <DatePicker
               placeholderText='Click to select a date'
               dateFormat='DD/MM/YYYY'
               selected={this.state.startDate}
-              onChange={this.handleDateChange} />
+              onChange={this.handleDateChange} required />
           </Form.Field>
-          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={type === 'enrichment'} required /> {/* may be change to radio */}
+          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={type === 'Enrichment'} required={type === 'Tuition'} />
           <Form.Button>Submit</Form.Button>
         </Form>
-        <Message>{JSON.stringify({ submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate }, null, 2)}</Message>
+        {serverErrMessage.length > 0 && <Message negative>{serverErrMessage}</Message> }
+        {submitSuccess && <Message positive>Class created</Message> }
+
       </div>
     )
   }
