@@ -1,13 +1,16 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Header, Table, Checkbox } from 'semantic-ui-react'
+import { Form, Message, Header, Table, Checkbox, Loader } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import DatePicker from 'react-datepicker'
+import axios from 'axios'
 
 const initialState = {
   date: '',
   className: '',
   type: '',
   hours: '',
+  isLoading: false,
+  classSelection: false,
   error: []
 }
 
@@ -17,11 +20,6 @@ const typeOptions = [
   { key: 'Cancelled', text: 'Cancelled', value: 'Cancelled' },
 ]
 
-const classNameOptions = [
-  { key: 'python2', text: 'Python2', value: '12345' },
-  { key: 'machinelearning', text: 'Machine Learning', value: '23456' },
-  { key: 'itsecurity', text: 'ICT Security', value: '45678' },
-]
 // Populate using students from the class
 const students = [
   { key: 'student1', text: 'Student1', value: '12345', status: '', checked: false },
@@ -45,8 +43,6 @@ class AttendanceForm extends Component {
     students,
     submitSuccess: false
   }
-  
-
 
   checkRequired = (checkArray) => {
     const error = []
@@ -86,6 +82,19 @@ class AttendanceForm extends Component {
   handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
   handleDateChange = (dateType) => (date) => this.setState({[dateType]: date})
+  
+  handleClass = (e, { value }) => {
+    this.setState({ className: value, isLoading: true })
+    axios('class/' + value)
+      .then(response => {
+        console.log(response.data)
+        this.setState({ isLoading: false, classSelection: true })
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({ isLoading: false, error: 'GOT PROBLEM' })
+      });
+  }
   
   handleChangeType = (e, { value }) => {
       this.setState({ type: value })
@@ -135,15 +144,15 @@ class AttendanceForm extends Component {
   
 
   render () {
-    const { date, type, className, students, users, error, submitSuccess, hours } = this.state
-    const { classes } = this.props
+    const { date, type, className, students, users, error, submitSuccess, hours, classSelection, isLoading } = this.state
+    const { classData } = this.props
     return (
       <div>
         <Form onSubmit={this.handleSubmit}>
           <Form.Group widths='equal'>
-            <Form.Select label='Class' placeholder='Name of class' name='className' options={classNameOptions} value={className} onChange={this.handleChange} error={error.includes('className')} required />
-            <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} error={error.includes('type')} required />
-            <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} error={error.includes('hours')} disabled={type !== 'Class'} required={type === 'Class'} />
+            <Form.Select label='Class' placeholder='Name of class' name='className' options={classData} search selection minCharacters='0' value={className} onChange={this.handleClass} error={error.includes('className')} required />
+            <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} error={error.includes('type')} disabled={!classSelection} required />
+            <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} error={error.includes('hours')} disabled={type !== 'Class' || !classSelection} required={type === 'Class'} />
         </Form.Group>
         <Form.Group widths='equal'>
         <Form.Field>
@@ -151,11 +160,13 @@ class AttendanceForm extends Component {
               <DatePicker
                 placeholderText='Click to select a date'
                 dateFormat='YYYY/MM/DD'
+                disabled={!classSelection}
                 selected={date}
                 onChange={this.handleDateChange('date')}
                 isClearable required />
             </Form.Field>
         </Form.Group>
+            <Loader indeterminate active={isLoading}>Loading data</Loader>
           <Header as='h3' dividing>Student Attendance</Header>
                <Table compact celled>
         <Table.Header>
@@ -194,7 +205,7 @@ class AttendanceForm extends Component {
         </Table.Body>
         </Table>
             
-          <Form.Button>Submit</Form.Button>
+          <Form.Button disabled={!classSelection}>Submit</Form.Button>
         </Form>
         <Message
           hidden={!submitSuccess}

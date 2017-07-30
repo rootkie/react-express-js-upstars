@@ -9,8 +9,6 @@ import AttendanceForm from './AttendanceForm.js'
 import AttendanceSearch from './AttendanceSearch.js'
 import axios from 'axios'
 
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-
 class AttendanceWrap extends Component {
   state = {
     classData: [],
@@ -20,10 +18,21 @@ class AttendanceWrap extends Component {
   // get data from server
   constructor (props) {
     super(props)
-    axios.get('class')
-      .then((response) => {
-        this.setState({ classData: response.data.classes, isLoading: false })
-        console.log(this.state.classData)
+    axios({
+        method: 'get',
+        url: '/class',
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
+      }).then((response) => {
+        let classOption =  []
+        for (let [index, options] of response.data.classes.entries()) {
+          classOption[index] = {
+            value: options._id,
+            text: options.className,
+            key: options.className
+          }
+        }
+        this.setState({ classData: classOption, isLoading: false })
+        console.log(classOption)
       })
       .catch((err) => {
         console.log(err)
@@ -44,7 +53,7 @@ class AttendanceWrap extends Component {
     } else {
       return (
         <div>
-          {op === 'add' && <AttendanceForm classes={this.state.classData} /> }
+          {op === 'add' && <AttendanceForm classData={this.state.classData} studentUserData={this.populateStudentsAndUsers} /> }
           {op === 'search' && <AttendanceSearch /> }
           {op === 'view' && <AttendanceView /> }
           {op === 'user' && <AttendanceUser />}
