@@ -20,8 +20,11 @@ const typeOptions = [
   { key: 'Cancelled', text: 'Cancelled', value: 'Cancelled' },
 ]
 
+let students = []
+let users = []
+
 // Populate using students from the class
-const students = [
+/*const students = [
   { key: 'student1', text: 'Student1', value: '12345', status: '', checked: false },
   { key: 'student2', text: 'Student2', value: '23456', status: '', checked: false },
   { key: 'student3', text: 'Student3', value: '45678', status: '', checked: false },
@@ -32,15 +35,15 @@ const users = [
   { key: 'user2', text: 'User2', value: '23456', status: '', checked: false },
   { key: 'user3', text: 'User3', value: '45678', status: '', checked: false },
 ]
-
+*/
 class AttendanceForm extends Component {
   static propTypes = {
     classes: array.isRequired
   }
   state = {
     ...initialState,
-    users,
     students,
+    users,
     submitSuccess: false
   }
 
@@ -55,7 +58,8 @@ class AttendanceForm extends Component {
   
   handleCheckboxChangeForUser = (e, { name, checked }) => {
     let { users } = this.state
-    let pos = users.map(function(usr) { return usr.value }).indexOf(name)
+    console.log(name)
+    let pos = users.map(usr => { return usr.list }).indexOf(name)
     if (checked) {
         users[pos].checked = true
         users[pos].status = 1
@@ -68,7 +72,8 @@ class AttendanceForm extends Component {
   
   handleCheckboxChangeForStudent = (e, { name, checked }) => {
     let { students } = this.state
-    let pos = students.map(function(usr) { return usr.value }).indexOf(name)
+    let pos = students.map(usr => { return usr.list }).indexOf(name)
+    console.log(pos)
     if (checked) {
         students[pos].checked = true
         students[pos].status = 1
@@ -85,10 +90,35 @@ class AttendanceForm extends Component {
   
   handleClass = (e, { value }) => {
     this.setState({ className: value, isLoading: true })
-    axios('class/' + value)
+    axios({
+        method: 'get',
+        url: '/class/' + value,
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
+      })
       .then(response => {
-        console.log(response.data)
-        this.setState({ isLoading: false, classSelection: true })
+        let user = [],
+        student = []
+        
+        for (let [index, studentData] of response.data.class.students.entries()) {
+          student[index] = {
+            list: studentData._id,
+            text: studentData.profile.name,
+            key: studentData.profile.name,
+            checked: false,
+            status: ''
+          }
+        }
+        
+        for (let [index, userData] of response.data.class.users.entries()) {
+          user[index] = {
+            text: userData.profile.name,
+            key: userData.profile.name,
+            list: userData._id,
+            checked: false,
+            status: ''
+          }
+        }
+        this.setState({ isLoading: false, classSelection: true, users: user, students: student })
       })
       .catch(error => {
         console.log(error);
@@ -98,6 +128,7 @@ class AttendanceForm extends Component {
   
   handleChangeType = (e, { value }) => {
       this.setState({ type: value })
+      let { students, users } = this.state
       if (value === 'Class') {
           for (let a = 0; a < students.length; a++) {
               students[a]['status'] = 1
@@ -135,7 +166,26 @@ class AttendanceForm extends Component {
       console.log('submit success')
       /* submits sth to server */
       console.table({ date, className, type, students, users, hours })
-      this.setState({...initialState, submitSuccess: true})
+      axios({
+        method: 'post',
+        url: '/attendance',
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
+        data: {
+          date,
+          classId: className,
+          users,
+          students,
+          hours,
+          type
+        }
+      }).then(response => {
+        console.log(response)
+        this.setState({...initialState, submitSuccess: true})
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({ error: 'GOT PROBLEM SUBMITTING ATTENDANCE' })
+      })
     } else {
       console.log('error occured')
       this.setState({error})
@@ -179,7 +229,7 @@ class AttendanceForm extends Component {
           {students.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.value} onChange={this.handleCheckboxChangeForStudent} checked={options.checked} disabled={type !== 'Class'} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.checked} disabled={type !== 'Class'} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}
@@ -198,7 +248,7 @@ class AttendanceForm extends Component {
           {users.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.value} onChange={this.handleCheckboxChangeForUser} checked={options.checked} disabled={type !== 'Class'} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.checked} disabled={type !== 'Class'} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}

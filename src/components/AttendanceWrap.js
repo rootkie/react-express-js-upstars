@@ -32,7 +32,6 @@ class AttendanceWrap extends Component {
           }
         }
         this.setState({ classData: classOption, isLoading: false })
-        console.log(classOption)
       })
       .catch((err) => {
         console.log(err)
