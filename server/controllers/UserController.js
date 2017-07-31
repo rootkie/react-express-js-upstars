@@ -4,7 +4,7 @@ const External = require('../models/external-personnel')
 module.exports.getAllUsers = async(req, res, next) => {
   try {
     // Retrieve all users in the system
-    const users = await User.find({}).select('profile.name').sort('profile.name')
+    const users = await User.find({}).select('profile roles status').sort('profile.name')
 
     return res.status(200).json({
       users

@@ -2,7 +2,6 @@ const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
 const External = require('../models/external-personnel')
-let util = require('../util.js')
 
 module.exports.addClass = async(req, res, next) => {
   try {
