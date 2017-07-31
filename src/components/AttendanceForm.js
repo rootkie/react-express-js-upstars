@@ -20,12 +20,14 @@ const typeOptions = [
   { key: 'Cancelled', text: 'Cancelled', value: 'Cancelled' },
 ]
 
-let students = []
-let users = []
+// Starting message before the user select class
+let students = [{'text': 'Select class to view sudents'}]
+let users = [{'text': 'Select class to view users'}]
 
 class AttendanceForm extends Component {
+  // Check that classes props is parsed in properly
   static propTypes = {
-    classes: array.isRequired
+    classData: array.isRequired
   }
   state = {
     ...initialState,
@@ -34,6 +36,7 @@ class AttendanceForm extends Component {
     submitSuccess: false
   }
 
+// Function to check that all those that we specified are required
   checkRequired = (checkArray) => {
     const error = []
     for (let i of checkArray) {
@@ -43,6 +46,10 @@ class AttendanceForm extends Component {
     return error
   }
   
+  // As function name suggests, if the checkbox next to use is checked, it will check for true or false
+  // If true, it will find the user among the states using indexOf and change its checked to true and status to 1
+  // `name` is actually the userId. In state, user `list` field contains IDs.
+  // Same goes for Students checkbox
   handleCheckboxChangeForUser = (e, { name, checked }) => {
     let { users } = this.state
     console.log(name)
@@ -75,6 +82,9 @@ class AttendanceForm extends Component {
 
   handleDateChange = (dateType) => (date) => this.setState({[dateType]: date})
   
+  // Special function to GET class based on the one chosen by the user. It sends an API and then loops through the response
+  // to populate the user and student array to put into state. After that it calls classSelection and isLoading false to stop the 
+  // Loading screen while making the other fields non-disabled for users to key it in.
   handleClass = (e, { value }) => {
     this.setState({ className: value, isLoading: true })
     axios({
@@ -143,6 +153,8 @@ class AttendanceForm extends Component {
       }
   }
 
+// Handle submit calls the submit API. It sents the data in exactly the backend wants. Although users and students have 
+// additional fields like `key` and `text`, mongoose does not care and will simply ignore it and only accept those defined and accepted by backend
   handleSubmit = e => {
     e.preventDefault()
     const { date, className, type, students, users, hours  } = this.state
@@ -207,7 +219,7 @@ class AttendanceForm extends Component {
             <Loader indeterminate active={isLoading}>Loading Data</Loader>
         </Dimmer>
           <Header as='h3' dividing>Student Attendance</Header>
-               <Table compact celled>
+        <Table compact celled>
         <Table.Header>
          <Table.Row>
             <Table.HeaderCell>Status</Table.HeaderCell>

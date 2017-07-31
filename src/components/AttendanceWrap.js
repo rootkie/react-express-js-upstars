@@ -52,8 +52,8 @@ class AttendanceWrap extends Component {
     } else {
       return (
         <div>
-          {op === 'add' && <AttendanceForm classData={this.state.classData} studentUserData={this.populateStudentsAndUsers} /> }
-          {op === 'search' && <AttendanceSearch /> }
+          {op === 'add' && <AttendanceForm classData={this.state.classData} /> }
+          {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
           {op === 'view' && <AttendanceView /> }
           {op === 'user' && <AttendanceUser />}
           {op === 'student' && <AttendanceStudent />}

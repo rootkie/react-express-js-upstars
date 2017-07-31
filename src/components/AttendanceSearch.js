@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Message, Loader, Dimmer } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
+import { array } from 'prop-types'
 import moment from 'moment'
+import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
 
 const datePickingStyle = {
@@ -9,42 +11,69 @@ const datePickingStyle = {
   alignItems: 'center'
 }
 
-const classOptions = [
-  { key: 'python420', text: 'Python 420pm', value: 'py420' },
-  { key: 'css', text: 'CSS', value: 'css' },
-  { key: 'englishP5', text: 'English Primary 5', value: 'elp5' }
-]
+let attendances = [{'className': 'Press GO to search for attendances'}]
 
 class AttendanceSearch extends Component {
+  static propTypes = {
+    classData: array.isRequired
+  }
+  
   state = {
     startDate: '',
     endDate: '',
     moreOptions: false,
     classSelector: '',
+    isLoading: false,
+    attendances
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault()
-    const { startDate, endDate } = this.state
-
-    console.log(`getting data from ${moment(startDate).format('DDMMYYYY')} to ${moment(endDate).format('DDMMYYYY')}`)
+    let { startDate, endDate, classSelector } = this.state
+    this.setState({ isLoading: true })
+    if (startDate != '') startDate = moment(startDate).format('[/]YYYYMMDD')
+    if (endDate != '') endDate = moment(endDate).format('[/]YYYYMMDD')
+    if (classSelector.length > 0) classSelector = '/' + classSelector
+    axios({
+      method: 'get',
+        url: '/attendance/class' + classSelector + '/dateStart' + startDate + '/dateEnd' + endDate,
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
+      }).then(response => {
+        let attendances = []
+        for (let [index, attendanceData] of response.data.foundAttendances.entries()) {
+          attendances[index] = {
+            value: attendanceData._id,
+            className: attendanceData.class.className,
+            date: moment(attendanceData.date).format('DD/MM/YYYY'),
+            type: attendanceData.type,
+            hours: attendanceData.hours
+          }
+        }
+        this.setState({ isLoading: false, attendances: attendances })
+      }) 
   }
-
+  
+  getAttendance = (e, { value }) => this.setState({'classSelector': value})
+  
   handleDateChange = (dateType, date) => this.setState({[dateType]: date})
 
-  handleSearchOptions = (e, { name, value }) => this.setState({[name]: value})
-
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
-
+  
+  clear = e => {
+    e.preventDefault()
+    this.setState({startDate: '', endDate: '', classSelector: ''})
+  }
+  
   render () {
-    const { moreOptions, classSelector } = this.state
+    const { moreOptions, classSelector, attendances, isLoading } = this.state
+    const { classData } = this.props
 
     return (
       <Table celled striped>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell colSpan='6'>
-              <Form onSubmit={this.handleSubmit}>
+              <Form>
                 <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
                   <Form.Group inline style={{marginBottom: 0}}>
                     <Form.Field style={datePickingStyle}>
@@ -67,18 +96,21 @@ class AttendanceSearch extends Component {
                         onChange={(date) => this.handleDateChange('endDate', date)}
                         placeholderText='Click to select' />
                     </Form.Field>
-                    <Form.Button>Go</Form.Button>
+                    <Form.Button onClick={this.handleSubmit}>Go</Form.Button>
+                    <Form.Button negative onClick={this.clear}>Clear Selection</Form.Button>
                   </Form.Group>
                   <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                 </div>
                 {moreOptions && <div>
                   <Form.Field style={{paddingTop: '10px'}}>
                     <label>Classes</label>
-                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search multiple selection options={classOptions} onChange={this.handleSearchOptions} />
+                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters='0' options={classData} onChange={this.getAttendance} />
                   </Form.Field>
                 </div>}
-
               </Form>
+              <Dimmer active={isLoading} inverted>
+               <Loader indeterminate active={isLoading}>Loading Data</Loader>
+              </Dimmer>
             </Table.HeaderCell>
           </Table.Row>
           <Table.Row>
@@ -89,30 +121,19 @@ class AttendanceSearch extends Component {
             <Table.HeaderCell>Hours</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
-
+        
+        
         <Table.Body>
-          <Table.Row>
-          <Table.Cell collapsing>
-              1
-         </Table.Cell>
-            <Table.Cell collapsing>
-              Python 2
-         </Table.Cell>
-            <Table.Cell collapsing>2 Feb 2016</Table.Cell>
-            <Table.Cell collapsing>Class</Table.Cell>
-            <Table.Cell collapsing>2 hrs</Table.Cell>
-          </Table.Row>
-          <Table.Row>
-          <Table.Cell collapsing>
-              2
-         </Table.Cell>
-            <Table.Cell collapsing>
-              Python 2
-         </Table.Cell>
-            <Table.Cell collapsing>2 Feb 2016</Table.Cell>
-            <Table.Cell collapsing>PHoliday</Table.Cell>
-            <Table.Cell collapsing>0 hrs</Table.Cell>
-          </Table.Row>
+          {attendances.map((options, i) => (
+            <Table.Row key={`attendance-${i}`}>
+              <Table.Cell collapsing>
+                {i}
+              </Table.Cell>
+              <Table.Cell>{options.className}</Table.Cell>
+              <Table.Cell>{options.date}</Table.Cell>
+              <Table.Cell>{options.type}</Table.Cell>
+              <Table.Cell>{options.hours}</Table.Cell>
+            </Table.Row>))}
         </Table.Body>
       </Table>
     )
