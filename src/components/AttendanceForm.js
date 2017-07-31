@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Header, Table, Checkbox, Loader } from 'semantic-ui-react'
+import { Form, Message, Header, Table, Checkbox, Loader, Dimmer } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import axios from 'axios'
@@ -23,19 +23,6 @@ const typeOptions = [
 let students = []
 let users = []
 
-// Populate using students from the class
-/*const students = [
-  { key: 'student1', text: 'Student1', value: '12345', status: '', checked: false },
-  { key: 'student2', text: 'Student2', value: '23456', status: '', checked: false },
-  { key: 'student3', text: 'Student3', value: '45678', status: '', checked: false },
-]
-// Populate using users from the class
-const users = [
-  { key: 'user1', text: 'User1', value: '12345', status: '', checked: false },
-  { key: 'user2', text: 'User2', value: '23456', status: '', checked: false },
-  { key: 'user3', text: 'User3', value: '45678', status: '', checked: false },
-]
-*/
 class AttendanceForm extends Component {
   static propTypes = {
     classes: array.isRequired
@@ -216,7 +203,9 @@ class AttendanceForm extends Component {
                 isClearable required />
             </Form.Field>
         </Form.Group>
-            <Loader indeterminate active={isLoading}>Loading data</Loader>
+        <Dimmer active={isLoading} inverted>
+            <Loader indeterminate active={isLoading}>Loading Data</Loader>
+        </Dimmer>
           <Header as='h3' dividing>Student Attendance</Header>
                <Table compact celled>
         <Table.Header>
