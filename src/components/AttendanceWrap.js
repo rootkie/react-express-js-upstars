@@ -21,7 +21,7 @@ class AttendanceWrap extends Component {
     axios({
         method: 'get',
         url: '/class',
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
       }).then((response) => {
         let classOption =  []
         for (let [index, options] of response.data.classes.entries()) {
@@ -40,7 +40,7 @@ class AttendanceWrap extends Component {
 
   render () {
     const { isLoading } = this.state
-    const { op } = this.props
+    const { op, sid } = this.props
     if (isLoading) {
       return (
         <div>
@@ -54,7 +54,7 @@ class AttendanceWrap extends Component {
         <div>
           {op === 'add' && <AttendanceForm classData={this.state.classData} /> }
           {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
-          {op === 'view' && <AttendanceView /> }
+          {op === 'view' && <AttendanceView classId={sid} /> }
           {op === 'user' && <AttendanceUser />}
           {op === 'student' && <AttendanceStudent />}
           {op === 'class' && <AttendanceClass />}

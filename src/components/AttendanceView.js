@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox, Modal } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
+import { Link } from 'react-router-dom'
+import axios from 'axios'
 import moment from 'moment'
+
 
 const initialState = {
   date: moment('2017-01-01T00:00:00.000Z'),
@@ -41,6 +44,7 @@ class AttendanceView extends Component {
     edit: false,
     submitSuccess: false
   }
+
 
   checkRequired = (checkArray) => {
     const error = []
@@ -134,10 +138,26 @@ class AttendanceView extends Component {
       this.setState({error})
     }
   }
-
+  
+  // Handles the getAttendance part:
+  constructor (props) {
+    super(props)
+  let classId = props.classId
+  console.log(classId)
+  if (classId) {
+  axios({
+        method: 'get',
+        url: 'attendance/' + classId,
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+      }).then((response) => {
+        console.log(response)
+      })
+  }
+}
+  
+  
   render () {
     const { date, type, className, students, users, error, submitSuccess, hours, edit, buttonName, deleteConfirm } = this.state // submitted version are used to display the info sent through POST (not necessary)
-
     return (
       <div>
         <Form>

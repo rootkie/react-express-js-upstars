@@ -53,7 +53,7 @@ class AttendanceSearch extends Component {
       }) 
   }
   
-  getAttendance = (e, { value }) => this.setState({'classSelector': value})
+  getAttendance = (e, { value }) => this.setState({classSelector: value})
   
   handleDateChange = (dateType, date) => this.setState({[dateType]: date})
 
@@ -127,7 +127,7 @@ class AttendanceSearch extends Component {
           {attendances.map((options, i) => (
             <Table.Row key={`attendance-${i}`}>
               <Table.Cell collapsing>
-                {i}
+                {i + 1}
               </Table.Cell>
               <Table.Cell>{options.className}</Table.Cell>
               <Table.Cell>{options.date}</Table.Cell>

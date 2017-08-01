@@ -13,7 +13,7 @@ const Root = () => (
       <Route exact path='/' component={Main} />
       <Switch>
         <Route path='/register' component={Register} />
-        <Route path='/:main/:op?' component={MainCtrl} />
+        <Route path='/:main/:op?/:sid?' component={MainCtrl} />
       </Switch>
     </div>
   </Router>

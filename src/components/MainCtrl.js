@@ -22,7 +22,7 @@ const MainContentStyle = {
 
 class MainCtrl extends Component {
   render () {
-    const { main, op } = this.props.match.params || ''
+    const { main, op, sid } = this.props.match.params || ''
     return (
       <Container fluid>
         <Topbar tab={main} />
@@ -33,7 +33,7 @@ class MainCtrl extends Component {
             {main === 'students' && <StudentWrap op={op} />}
             {main === 'classes' && <ClassWrap op={op} />}
             {main === 'volunteer' && <VolunteerWrap op={op} />}
-            {main === 'attendance' && <AttendanceWrap op={op} />}
+            {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
           </Grid.Column>
         </Grid>
       </Container>
