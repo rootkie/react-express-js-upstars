@@ -179,6 +179,22 @@ module.exports.getAttendance = async(req, res, next) => {
   }
 }
 
+module.exports.getAttendanceById = async(req, res, next) => {
+  try {
+    let attendanceId = req.params.id
+
+    const attendances = await Attendance.findById(attendanceId).populate('class', ['className'])
+    return res.status(200).json({
+      attendances
+    })
+
+  }
+  catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
 module.exports.getAttendanceByUser = async(req, res, next) => {
   try {
     let {
