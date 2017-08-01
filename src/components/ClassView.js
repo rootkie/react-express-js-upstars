@@ -1,29 +1,24 @@
 import React, {Component} from 'react'
 import { Table, Checkbox, Button, Icon, Link, Dropdown, Confirm } from 'semantic-ui-react'
+import { array, func } from 'prop-types'
 import axios from 'axios'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
 class ClassView extends Component {
-  
-  constructor(props) {
-    super()
+  static proptypes = {
+    classData: array.isRequired,
+    deleteClass: func.isRequired
+  }
+
+  constructor (props) {
+    super(props)
     // This is probably where to get all the necessary data from server api
+    console.log(this.props.classData)
     this.state = {
       selected: [],
       classData: []
     }
-    this.getClasses()
-  }
-
-  getClasses = () => {
-    axios.get('class')
-      .then((response) => {
-        this.setState({ classData: response.data.classes })
-      })
-      .catch((err) => {
-        console.log(err)
-      })
   }
 
   handleCheckBox = (e, { name, checked }) => {
@@ -41,11 +36,15 @@ class ClassView extends Component {
   }
 
   handleDelete = () => {
-    console.log(this.state.selected)
+    const { deleteClass } = this.props
+    // Delete the first choice only. Until multi delete is implemented
+    deleteClass (this.state.selected[0])
+    this.setState({ selected:[] })
   }
 
-  render() {
-    const { classData, selected } = this.state
+  render () {
+    const { selected } = this.state
+    const { classData } = this.props
     return (
       <Table compact celled>
         <Table.Header>
@@ -77,14 +76,13 @@ class ClassView extends Component {
               <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                 <Icon name='group' />New Class
               </Button>
-              <Button size='small' negative>Delete</Button>
-              <Button size='small' onClick={this.handleEdit}>Edit</Button>
+              <Button size='small' negative onClick={this.handleDelete} disabled={ selected.length !== 1 } >Delete</Button>
+              <Button size='small' onClick={this.handleEdit} disabled = { selected.length !== 1 } >Edit</Button>
               <Confirm />
             </Table.HeaderCell>
           </Table.Row>
         </Table.Footer>
 
-        
       </Table>
     )
   }
