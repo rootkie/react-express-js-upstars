@@ -27,14 +27,12 @@ const studentOptions = [
   { key: 'borhk', text: 'Borhk', value: 'borhk' }
 ]
 
-class Attendance extends Component {
+class AttendanceClass extends Component {
   state = {
     startDate: '',
     endDate: '',
     moreOptions: false,
-    classSelector: [],
-    volunteerSelector: [],
-    studentSelector: []
+    classSelector: ''
   }
 
   handleSubmit = (e) => {
@@ -51,7 +49,7 @@ class Attendance extends Component {
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
   render () {
-    const { moreOptions, classSelector, volunteerSelector, studentSelector } = this.state
+    const { moreOptions, classSelector } = this.state
 
     return (
       <Table celled striped>
@@ -89,14 +87,6 @@ class Attendance extends Component {
                   <Form.Field style={{paddingTop: '10px'}}>
                     <label>Classes</label>
                     <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search multiple selection options={classOptions} onChange={this.handleSearchOptions} />
-                  </Form.Field>
-                  <Form.Field>
-                    <label>Volunteers</label>
-                    <Dropdown name='volunteerSelector' value={volunteerSelector} placeholder='Pick Volunteers' search multiple selection options={volunteerOptions} onChange={this.handleSearchOptions} />
-                  </Form.Field>
-                  <Form.Field>
-                    <label>Students</label>
-                    <Dropdown name='studentSelector' value={studentSelector} placeholder='Pick Students' search multiple selection options={studentOptions} onChange={this.handleSearchOptions} />
                   </Form.Field>
                 </div>}
 
@@ -142,4 +132,4 @@ class Attendance extends Component {
   }
 }
 
-export default Attendance
+export default AttendanceClass

@@ -28,7 +28,17 @@ const SideMenu = ({activeItem}) => (
           <Link to='/volunteer/form' className={`item ${activeItem === 'volunteerform' && 'active'}`}>Form</Link>
         </Menu.Menu>
       </Menu.Item>
-      <Link to='/attendance' className={`item ${activeItem === 'attendance' && 'active'}`}>Attendance</Link>
+      <Menu.Item>
+        <Menu.Header>Attendance</Menu.Header>
+        <Menu.Menu>
+          <Link to='/attendance/add' className={`item ${activeItem === 'attendanceadd' && 'active'}`}>add</Link>
+          <Link to='/attendance/view' className={`item ${activeItem === 'attendanceview' && 'active'}`}>view</Link>
+          <Link to='/attendance/search' className={`item ${activeItem === 'attendancesearch' && 'active'}`}>search</Link>
+          <Link to='/attendance/user' className={`item ${activeItem === 'attendanceuser' && 'active'}`}>user</Link>
+          <Link to='/attendance/student' className={`item ${activeItem === 'attendancestudent' && 'active'}`}>student</Link>
+          <Link to='/attendance/class' className={`item ${activeItem === 'attendanceclass' && 'active'}`}>class</Link>
+        </Menu.Menu>
+      </Menu.Item>
     </Menu>
   </Grid.Column>
 )
