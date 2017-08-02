@@ -40,7 +40,7 @@ class AttendanceView extends Component {
   // Handles the getAttendance part:
   constructor (props) {
     super(props)
-    let attendanceId = "59809794a0ed732c52fd5589" // this is just filler for now.
+    let attendanceId = props.attendanceId 
 
     this.state = {
       ...initialState,
@@ -191,10 +191,10 @@ class AttendanceView extends Component {
           classId
         }
       }).then((response) => {
-      console.log(response)
-      this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
-      this.setState({isLoading: false})
-      window.location.replace("https://test.rootkiddie.com/attendance/search")
+        console.log(response)
+        this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
+        this.setState({isLoading: false})
+        window.location.replace("https://test.rootkiddie.com/attendance/search") // This need to be changed with redirect
       })
   }
   
