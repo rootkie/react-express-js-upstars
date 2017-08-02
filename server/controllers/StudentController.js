@@ -142,18 +142,24 @@ module.exports.deleteStudent = async(req, res, next) => {
     studentId
   } = req.body
   try {
-    if (!studentId) throw ({
+    if (!studentId || studentId.indexOf('') !== -1) throw ({
       status: 400,
-      error: 'Please provide a studentId'
+      error: 'Please provide a studentId and ensure input is correct'
     })
 
     // Find and delete student from database
-    const studentDeleted = await Student.findByIdAndRemove(studentId)
+    const studentDeleted = await Student.remove({
+      '_id': {
+        '$in': studentId
+      }
+    })
+    
     if (!studentDeleted) return res.status(404).json({
       error: 'student not found'
     })
     return res.status(200).json({
-      deleted: studentDeleted.profile
+      status: 'success',
+      deleted: studentDeleted
     })
   }
   catch (err) {

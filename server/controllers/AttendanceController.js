@@ -1,31 +1,9 @@
 const Attendance = require('../models/attendance')
-let util = require('../util.js')
 let mongoose = require('mongoose')
+let moment = require('moment')
 
 module.exports.addEditAttendance = async(req, res, next) => {
   try {
-    // Sample raw request
-    /*{
-        "date":"20170104",
-        "hours":2,
-        "classId":"5912f4202a23635d58e7a67e",
-        "users":[{
-        		"list": "5908abfad4d25a79a80a9c53",
-        		"status": 1
-        }, {
-        	"list": "5908ac4bd4d25a79a80a9c54",
-        	"status": 0
-        }],
-        "students":[{
-        		"list": "591062e9edea5d1ce9fef38d",
-        		"status": 1
-        }, {
-        		"list": "591064c77780a11e23d72705",
-        		"status": 1
-        	}],
-        "type": "Class"
-      } */
-
     let {
       date,
       hours,
@@ -74,7 +52,7 @@ module.exports.addEditAttendance = async(req, res, next) => {
       runValidators: true
     })
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       attendance: newAttendance
     })
@@ -98,13 +76,12 @@ module.exports.addEditAttendance = async(req, res, next) => {
 module.exports.deleteAttendance = async(req, res, next) => {
   try {
     let {
-      date,
-      classId
+      attendanceId
     } = req.body
       // Check if classId and date are provided
-    if (!classId || !date) throw ({
+    if (!attendanceId || classId.indexOf('') !== -1) throw ({
       status: 400,
-      error: 'Please provide both classId and date'
+      error: 'Please provide at least 1 attendanceId and ensure input is correct'
     })
 
     sudo = false
@@ -120,11 +97,12 @@ module.exports.deleteAttendance = async(req, res, next) => {
 
     // Remove it from database
     const removed = await Attendance.remove({
-      class: classId,
-      date,
+      '_id': {
+        '$in': attendanceId
+      }
     })
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       removed
     })
@@ -159,16 +137,16 @@ module.exports.getAttendance = async(req, res, next) => {
       attendances = attendances.where('class').equals(classId)
     }
     if (dateStart) {
-      attendances = attendances.where('date').gte(util.formatDate(dateStart))
+      attendances = attendances.where('date').gte(moment(dateStart).format('YYYY-MM-DD'))
     }
     if (dateEnd) {
-      attendances = attendances.where('date').lte(util.formatDate(dateEnd))
+      attendances = attendances.where('date').lte(moment(dateEnd).format('YYYY-MM-DD'))
     }
     // else the query is empty and every single record from past till now is obtained, similar to a getAll function. Limit to 100 newest.
 
     const foundAttendances = await attendances.exec()
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       foundAttendances
     })
@@ -214,8 +192,8 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
     user.date = {
-      $gte: util.formatDate(dateStart),
-      $lte: util.formatDate(dateEnd)
+      $gte: moment(dateStart).format('YYYY-MM-DD'),
+      $lte: moment(dateEnd).format('YYYY-MM-DD')
     }
 
     if (classId) {
@@ -271,7 +249,7 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
         }
       }) // Final command to filter stuff to show
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       attendances,
     })
@@ -300,8 +278,8 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
     // Init what factors to search in student later
     student['students.list'] = mongoose.Types.ObjectId(studentId)
     student.date = {
-      $gte: util.formatDate(dateStart),
-      $lte: util.formatDate(dateEnd)
+      $gte: moment(dateStart).format('YYYY-MM-DD'),
+      $lte: moment(dateEnd).format('YYYY-MM-DD')
     }
 
     if (classId) {
@@ -357,7 +335,7 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
         }
       }) // Final command to filter stuff to show
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       attendances
     })
@@ -466,7 +444,7 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
     let tutorStudentRatio = tutorNumber / studentNumber
 
 
-    res.json({
+    res.status(200).json({
       status: 'success',
       foundAttendanceforUser,
       foundAttendanceforStudent,

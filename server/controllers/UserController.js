@@ -125,14 +125,20 @@ module.exports.deleteUser = async(req, res, next) => {
   } = req.body
   try {
     // Check userId is provided
-    if (!userId) throw ({
+    if (!userId || userId.indexOf('') !== -1) throw ({
       status: 400,
-      error: 'Please provide a userId'
+      error: 'Please provide a userId and ensure input is correct'
     })
 
     // Delete user from database
-    const userDeleted = await User.findByIdAndRemove(userId).select('-password')
+    const userDeleted = await User.remove({
+      '_id': {
+        '$in': userId
+      }
+    })
+    
     return res.status(200).json({
+      status: 'success',
       userDeleted
     })
   }

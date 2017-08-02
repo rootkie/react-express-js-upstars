@@ -44,7 +44,8 @@ module.exports.addClass = async(req, res, next) => {
     res.status(201).json({
       newClass: newClassCreated
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -83,7 +84,8 @@ module.exports.editClass = async(req, res, next) => {
     res.status(200).json({
       editedClass: newClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.name == 'ValidationError') {
       res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
@@ -104,7 +106,8 @@ module.exports.getAll = async(req, res, next) => {
     return res.status(200).json({
       classes
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     next(err)
   }
@@ -131,7 +134,8 @@ module.exports.getClassById = async(req, res, next) => {
     return res.status(200).json({
       class: class1
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -147,17 +151,22 @@ module.exports.deleteClass = async(req, res, next) => {
     classId
   } = req.body
   try {
-    if (!classId) throw ({
+    if (!classId || classId.indexOf('') !== -1) throw ({
       status: 400,
-      error: 'Please provide a classId'
+      error: 'Please provide at least 1 classId and ensure input is correct.'
     })
 
     // Remove class from database
-    const classDeleted = await Class.findByIdAndRemove(classId)
+    const classDeleted = await Class.remove({
+      '_id': {
+        '$in': classId
+      }
+    })
     return res.status(200).json({
       classDeleted
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -211,7 +220,8 @@ module.exports.addStudentsToClass = async(req, res, next) => {
       class: classes,
       students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -262,7 +272,8 @@ module.exports.deleteStudentsFromClass = async(req, res, next) => {
       class: classes,
       studentsRemoved: students
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -316,7 +327,8 @@ module.exports.addUsersToClass = async(req, res, next) => {
       class: classes,
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -367,7 +379,8 @@ module.exports.deleteUsersFromClass = async(req, res, next) => {
       class: classes,
       users
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -427,7 +440,8 @@ module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
       externalPersonnel,
       updatedClass
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
@@ -478,7 +492,8 @@ module.exports.removeExternalPersonnelFromClass = async(req, res, next) => {
       updatedClass,
       updatedExternal
     })
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
