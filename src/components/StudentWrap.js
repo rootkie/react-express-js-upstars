@@ -50,20 +50,12 @@ class StudentWrap extends Component {
       })
   }
 
-  deleteStudent = (studentId) => {
-    axios.delete('/students',
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          studentId
-        }
-      })
+  addStudent = (studentDataToSubmit) => {
+    const { studentData } = this.state
+    return axios.post('/students', studentDataToSubmit)
       .then((response) => {
-        this.setState({studentData: this.state.studentData.filter((student) => !studentId.includes(student._id))})
+        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
       })
-      .catch((err) => console.log(err))
   }
 
   editStudent = (studentDataToSubmit) => {
@@ -84,12 +76,27 @@ class StudentWrap extends Component {
       })
   }
 
-  addStudent = (studentDataToSubmit) => {
-    const { studentData } = this.state
-    return axios.post('/students', studentDataToSubmit)
+  deleteStudent = (studentIds) => {
+    const studentRequestPromises = []
+    for (let studentId of studentIds) {
+      studentRequestPromises.push(
+        axios.delete('/students',
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            data: {
+              studentId
+            }
+          })
+      )
+    }
+
+    axios.all(studentRequestPromises)
       .then((response) => {
-        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
+        this.setState({studentData: this.state.studentData.filter((student) => !studentIds.includes(student._id))})
       })
+      .catch((err) => console.log(err))
   }
 
   searchFilter = (criteria) => {

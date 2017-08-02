@@ -6,7 +6,7 @@ import axios from 'axios'
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
 class ClassView extends Component {
-  static proptypes = {
+  static propTypes = {
     classData: array.isRequired,
     deleteClass: func.isRequired
   }
@@ -37,9 +37,10 @@ class ClassView extends Component {
 
   handleDelete = () => {
     const { deleteClass } = this.props
+    const { selected } = this.state
     // Delete the first choice only. Until multi delete is implemented
-    deleteClass (this.state.selected[0])
-    this.setState({ selected:[] })
+    deleteClass(selected)
+    this.setState({ selected: [] })
   }
 
   render () {
@@ -76,8 +77,8 @@ class ClassView extends Component {
               <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                 <Icon name='group' />New Class
               </Button>
-              <Button size='small' negative onClick={this.handleDelete} disabled={ selected.length !== 1 } >Delete</Button>
-              <Button size='small' onClick={this.handleEdit} disabled = { selected.length !== 1 } >Edit</Button>
+              <Button size='small' negative onClick={this.handleDelete} disabled={selected.length === 0} >Delete</Button>
+              <Button size='small' onClick={this.handleEdit} disabled={selected.length !== 1} >Edit</Button>
               <Confirm />
             </Table.HeaderCell>
           </Table.Row>
