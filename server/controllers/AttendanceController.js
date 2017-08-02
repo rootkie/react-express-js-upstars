@@ -76,12 +76,13 @@ module.exports.addEditAttendance = async(req, res, next) => {
 module.exports.deleteAttendance = async(req, res, next) => {
   try {
     let {
-      attendanceId
+      attendanceId,
+      classId
     } = req.body
       // Check if classId and date are provided
-    if (!attendanceId || attendanceId.indexOf('') !== -1) throw ({
+    if (!attendanceId || attendanceId.indexOf('') !== -1 || !classId) throw ({
       status: 400,
-      error: 'Please provide at least 1 attendanceId and ensure input is correct'
+      error: 'Please provide at least 1 attendanceId, classId and ensure input is correct'
     })
 
     sudo = false
@@ -161,7 +162,9 @@ module.exports.getAttendanceById = async(req, res, next) => {
   try {
     let attendanceId = req.params.id
 
-    const attendances = await Attendance.findById(attendanceId).populate('class', ['className'])
+    const attendances = await Attendance.findById(attendanceId)
+      .populate('class', ['className'])
+      .populate('students.list users.list', 'profile.name')
     return res.status(200).json({
       attendances
     })
