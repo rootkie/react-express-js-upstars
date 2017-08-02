@@ -59,25 +59,19 @@ class ClassWrap extends Component {
   }
 
   deleteClass = (classIds) => {
-    const classRequestPromises = []
-    for (let classId of classIds) {
-      classRequestPromises.push(
-        axios.delete('class', {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          data: {
-            classId
-          } }))
+    let data = {
+      classId:classIds
     }
-
-    axios.all(classRequestPromises)
-      .then((response) => {
-        // instant update with multiple deletes
-        this.setState({classData: this.state.classData.filter((Class) => !classIds.includes(Class._id))})
-      }).catch((error) => {
-        console.log(error)
-      })
+    console.log(data)
+    return axios.delete('/class', {
+      headers: {
+        'Content-Type': 'application/json'
+      },data})
+        .then(() => {
+          this.setState({classData: this.state.classData.filter((Class) => !classIds.includes(Class._id))})
+        }).catch((error) => {
+          console.log(error)
+        })
   }
 
   render () {
