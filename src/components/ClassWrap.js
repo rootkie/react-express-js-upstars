@@ -3,6 +3,7 @@ import { string } from 'prop-types'
 import ClassForm from './ClassForm.js'
 import ClassView from './ClassView.js'
 import axios from 'axios'
+import { filterData } from '../utils'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
@@ -24,7 +25,7 @@ class ClassWrap extends Component {
   getClasses = () => {
     axios.get('class')
       .then((response) => {
-        this.setState({ classData: response.data.classes })
+        this.setState({ classData: response.data.classes, isLoading: false })
       })
       .catch((err) => {
         console.log(err)
@@ -42,7 +43,7 @@ class ClassWrap extends Component {
   editClass = (classDataToSubmit) => {
     const { classData } = this.state
     const { sid } = this.props
-    return axios.put('/students', {
+    return axios.put('/class', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -80,14 +81,15 @@ class ClassWrap extends Component {
   }
 
   render () {
-    const { op } = this.props
-    const { classData } = this.state
+    const { op, sid } = this.props
+    const { classData, isLoading } = this.state
     return (
       <div>
-        {op === 'add' && <ClassForm /> }
-        {op === 'view' && <ClassView classData={classData} deleteClass={this.deleteClass} /> }
+        {op === 'add' && <ClassForm addClass={this.addClass} /> }
+        {op === 'edit' && <ClassForm classData={filterData(this.state.classData, [{field: '_id', value: sid}])[0]} edit editClass={this.editClass} /> }
+        {op === 'view' && <ClassView classData={classData} deleteClass={this.deleteClass} isLoading={isLoading} /> }
       </div>
     )
   }
-}
+  }
 export default ClassWrap

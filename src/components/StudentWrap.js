@@ -1,26 +1,11 @@
 import React, { Component } from 'react'
-import { Dimmer, Loader } from 'semantic-ui-react'
 import { string } from 'prop-types'
-import StudentForm from './StudentAdd'
+import StudentForm from './StudentForm'
 import StudentView from './StudentView'
 import axios from 'axios'
+import { filterData } from '../utils'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-
-function filterData (data, criteria) { // criteria = [{field, value}]
-  for (let criterion of criteria) {
-    const { field, value } = criterion // field is profile-age, value = ['M']
-    return data.filter((student) => {
-      if (/-/.test(field)) {
-        const fieldArr = field.split('-') // fieldArr = ['profile', 'age']
-        return value.includes(student[fieldArr[0]][fieldArr[1]])
-      } else {
-        return value.includes(student[field])
-      }
-    }
-    )
-  }
-}
 
 class StudentWrap extends Component {
   state = {
@@ -105,25 +90,15 @@ class StudentWrap extends Component {
   }
 
   render () {
-    const { isLoading, studentData, filteredData } = this.state
+    const { studentData, filteredData, isLoading } = this.state
     const { op, sid } = this.props
-    if (isLoading) {
-      return (
-        <div>
-          <Dimmer active>
-            <Loader indeterminate>Loading data</Loader>
-          </Dimmer>
-        </div>
-      )
-    } else {
-      return (
-        <div>
-          {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-          {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
-          {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} />}
-        </div>
-      )
-    }
+    return (
+      <div>
+        {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
+        {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
+        {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
+      </div>
+    )
   }
 }
 
