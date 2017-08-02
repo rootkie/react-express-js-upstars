@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Header, Table, Checkbox, Modal } from 'semantic-ui-react'
+import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
@@ -7,12 +7,15 @@ import moment from 'moment'
 
 
 const initialState = {
-  date: moment('2017-01-01T00:00:00.000Z'),
-  className: 'Python2',
-  type: 'Class',
-  hours: 2,
+  date: '',
+  className: '',
+  classId: '',
+  type: '',
+  hours: '',
   edit: false,
   error: [],
+  isLoading: true,
+  empty: true,
   buttonName: 'Edit',
   deleteConfirm: false
 }
@@ -23,18 +26,8 @@ const typeOptions = [
   { key: 'Cancelled', text: 'Cancelled', value: 'Cancelled' },
 ]
 
-// Populate using students from the class
-const students = [
-  { key: 'student1', text: 'Student1', value: '12345', status: '1', checked: true },
-  { key: 'student2', text: 'Student2', value: '23456', status: '0', checked: false },
-  { key: 'student3', text: 'Student3', value: '45678', status: '1', checked: true },
-]
-// Populate using users from the class
-const users = [
-  { key: 'user1', text: 'User1', value: '12345', status: '1', checked: true },
-  { key: 'user2', text: 'User2', value: '23456', status: '1', checked: true },
-  { key: 'user3', text: 'User3', value: '45678', status: '1', checked: true },
-]
+const students = [{text: 'Not found. Please try another search'}]
+const users = [{text: 'Not found. Please try another search'}]
 
 class AttendanceView extends Component {
   state = {
@@ -44,7 +37,6 @@ class AttendanceView extends Component {
     edit: false,
     submitSuccess: false
   }
-
 
   checkRequired = (checkArray) => {
     const error = []
@@ -57,7 +49,7 @@ class AttendanceView extends Component {
   
   handleCheckboxChangeForUser = (e, { name, checked }) => {
     let { users } = this.state
-    let pos = users.map(function(usr) { return usr.value }).indexOf(name)
+    let pos = users.map(function(usr) { return usr.list }).indexOf(name)
     if (checked) {
         users[pos].checked = true
         users[pos].status = 1
@@ -70,7 +62,7 @@ class AttendanceView extends Component {
   
   handleCheckboxChangeForStudent = (e, { name, checked }) => {
     let { students } = this.state
-    let pos = students.map(function(usr) { return usr.value }).indexOf(name)
+    let pos = students.map(function(usr) { return usr.list }).indexOf(name)
     if (checked) {
         students[pos].checked = true
         students[pos].status = 1
@@ -115,7 +107,7 @@ class AttendanceView extends Component {
   handleEdit = e => {
     e.preventDefault()
     if (this.state.edit === false) this.setState({ edit: true, buttonName: 'Save' })
-    else this.setState({ edit: false, buttonName: 'Edit' })
+    else this.handleSubmit(e)
   }
   
   handleDelete = e => {
@@ -125,14 +117,29 @@ class AttendanceView extends Component {
 
   handleSubmit = e => {
     e.preventDefault()
-    const { date, className, type, students, users, hours } = this.state
+    this.setState({isLoading: true})
+    const { date, classId, type, students, users, hours } = this.state
     // check required fields
-    const error = this.checkRequired(['date', 'className', 'type', 'students', 'users'])
+    const error = this.checkRequired(['date', 'classId', 'type', 'students', 'users'])
     if (error.length === 0) {
-      console.log('submit success')
-      /* submits sth to server */
-      console.table({ date, className, type, students, users, hours })
-      this.setState({...initialState, submitSuccess: true})
+      console.table({ date, classId, type, students, users, hours })
+      axios({
+        method: 'post',
+        url: 'attendance',
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        data: {
+          date,
+          classId,
+          users,
+          students,
+          hours,
+          type
+        }
+      }).then((response) => {
+      console.log(response)
+      this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
+      this.setState({isLoading: false})
+      })
     } else {
       console.log('error occured')
       this.setState({error})
@@ -141,9 +148,8 @@ class AttendanceView extends Component {
   
   // Handles the getAttendance part:
   constructor (props) {
-    super(props)
+  super(props)
   let classId = props.classId
-  console.log(classId)
   if (classId) {
   axios({
         method: 'get',
@@ -151,13 +157,46 @@ class AttendanceView extends Component {
         headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
       }).then((response) => {
         console.log(response)
+        if (response.status !== 200 || response.data.attendances == null) this.setState({isLoading: false})
+        else {
+          let data = response.data.attendances
+          for (let [index, userData] of data.users.entries()) {
+            users[index] = {
+              text: userData.list,
+              key: userData.list,
+              list: userData.list,
+              status: userData.status,
+              checked: userData.status === 1 ? true : false
+            }
+          }
+          for (let [index, studentData] of data.students.entries()) {
+            students[index] = {
+              text: studentData.list,
+              key: studentData.list,
+              list: studentData.list,
+              status: studentData.status,
+              checked: studentData.status === 1 ? true : false
+            }
+          }
+          this.setState({
+            isLoading: false, 
+            className: data.class.className,
+            classId: data.class._id,
+            type: data.type,
+            hours: data.hours,
+            date: moment(data.date),
+            users: users,
+            students: students,
+            empty: false
+          })
+        }
       })
   }
 }
   
   
   render () {
-    const { date, type, className, students, users, error, submitSuccess, hours, edit, buttonName, deleteConfirm } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { date, type, className, students, users, error, submitSuccess, hours, edit, buttonName, deleteConfirm, isLoading, empty } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
       <div>
         <Form>
@@ -177,6 +216,9 @@ class AttendanceView extends Component {
                 isClearable />
             </Form.Field>
         </Form.Group>
+         <Dimmer active={isLoading} inverted>
+               <Loader indeterminate active={isLoading}>Loading Data</Loader>
+          </Dimmer>
           <Header as='h3' dividing>Student Attendance</Header>
                <Table compact celled>
         <Table.Header>
@@ -189,7 +231,7 @@ class AttendanceView extends Component {
           {students.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.value} onChange={this.handleCheckboxChangeForStudent} checked={options.checked} disabled={type !== 'Class' || edit === false} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.checked} disabled={type !== 'Class' || edit === false} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}
@@ -208,15 +250,15 @@ class AttendanceView extends Component {
           {users.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.value} onChange={this.handleCheckboxChangeForUser} checked={options.checked} disabled={type !== 'Class' || edit === false} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.checked} disabled={type !== 'Class' || edit === false} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}
         </Table.Body>
         </Table>
         <Form.Group widths='equal'>
-          <Form.Button onClick={this.handleEdit} floated='right'>{buttonName}</Form.Button>
-          <Form.Button negative floated='left' onClick={this.handleDelete}>Delete</Form.Button>
+          <Form.Button onClick={this.handleEdit} floated='right' disabled={empty}>{buttonName}</Form.Button>
+          <Form.Button negative floated='left' onClick={this.handleDelete} disabled={empty}>Delete</Form.Button>
           </Form.Group>
         </Form>
         <Modal
@@ -224,7 +266,7 @@ class AttendanceView extends Component {
             header='Delete Your Account'
             content='Are you sure you want to delete your account'
              actions={[
-                { key: 'no', content: 'No', color: 'red', triggerClose: true },
+                { key: 'no', content: 'No', color: 'red', isLoading: true },
                 { key: 'yes', content: 'Yes', color: 'green', triggerClose: true },
               ]}
         />
