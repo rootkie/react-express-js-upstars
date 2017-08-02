@@ -122,21 +122,23 @@ class AttendanceView extends Component {
   
   delete = e => {
     e.preventDefault()
-    const { classId } = this.props
-    console.log(classId)
-    this.setState({isLoading: true})
-  /*  axios({
+    const { attendanceId } = this.props
+    const { classId } = this.state
+    this.setState({isLoading: true, deleteConfirm: false})
+    axios({
         method: 'delete',
         url: 'attendance',
         headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
         data: {
-          attendanceId: []
+          attendanceId: [attendanceId],
+          classId
         }
       }).then((response) => {
       console.log(response)
       this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
       this.setState({isLoading: false})
-      }) */
+      window.location.replace("https://test.rootkiddie.com/attendance/search")
+      })
   }
   
 
@@ -174,11 +176,11 @@ class AttendanceView extends Component {
   // Handles the getAttendance part:
   constructor (props) {
   super(props)
-  let classId = props.classId
-  if (classId) {
+  let attendanceId = props.attendanceId
+  if (attendanceId) {
   axios({
         method: 'get',
-        url: 'attendance/' + classId,
+        url: 'attendance/' + attendanceId,
         headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
       }).then((response) => {
         console.log(response)
@@ -187,18 +189,18 @@ class AttendanceView extends Component {
           let data = response.data.attendances
           for (let [index, userData] of data.users.entries()) {
             users[index] = {
-              text: userData.list,
-              key: userData.list,
-              list: userData.list,
+              text: userData.list.profile.name,
+              key: userData.list._id,
+              list: userData.list._id,
               status: userData.status,
               checked: userData.status === 1 ? true : false
             }
           }
           for (let [index, studentData] of data.students.entries()) {
             students[index] = {
-              text: studentData.list,
-              key: studentData.list,
-              list: studentData.list,
+              text: studentData.list !== null ? studentData.list.profile.name : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID. CHANGE TO INACTIVE INSTEAD OF DELETE',
+              key: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
+              list: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
               status: studentData.status,
               checked: studentData.status === 1 ? true : false
             }
@@ -286,11 +288,11 @@ class AttendanceView extends Component {
           <Form.Button negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
           </Form.Group>
         </Form>
-        <Modal
-            open={deleteConfirm}
-            header='Delete Attendance'
-            content='Are you sure you want to delete this attendance?'
-        >
+        <Modal open={deleteConfirm} onClose={this.close} basic size='small'>
+          <Header icon='archive' content='Delete Attendance' />
+          <Modal.Content>
+      <p>Are you sure you want to delete?</p>
+    </Modal.Content>
         <Modal.Actions>
       <Button basic color='red' inverted onClick={this.close}>
         <Icon name='remove' /> No

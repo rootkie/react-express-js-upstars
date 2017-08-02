@@ -54,7 +54,7 @@ class AttendanceWrap extends Component {
         <div>
           {op === 'add' && <AttendanceForm classData={this.state.classData} /> }
           {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
-          {op === 'view' && <AttendanceView classId={sid} /> }
+          {op === 'view' && <AttendanceView attendanceId={sid} /> }
           {op === 'user' && <AttendanceUser />}
           {op === 'student' && <AttendanceStudent />}
           {op === 'class' && <AttendanceClass />}
