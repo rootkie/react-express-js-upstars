@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { Table, Checkbox, Button, Icon, Confirm } from 'semantic-ui-react'
 import { array, func } from 'prop-types'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
@@ -86,9 +87,11 @@ class ClassView extends Component {
           <Table.Row>
             <Table.HeaderCell />
             <Table.HeaderCell colSpan='4'>
-              <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
-                <Icon name='group' />New Class
-              </Button>
+              <Link to='/classes/add'>
+                <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
+                  <Icon name='group' />New Class
+                </Button>
+              </Link>
               <Button size='small' negative onClick={this.handleDeleteConfirmation('show')} disabled={selected.length === 0} >Delete</Button>
               <Button size='small' onClick={this.handleEdit} disabled={selected.length !== 1} >Edit</Button>
               <Confirm

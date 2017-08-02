@@ -150,7 +150,7 @@ class StudentView extends Component {
               <Link to='/students/add'>
                 <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                   <Icon name='user' />New Student
-              </Button>
+                </Button>
               </Link>
               <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
               <Button size='small' disabled={selected.length !== 1} onClick={this.handleEditStudent}>Edit</Button>
