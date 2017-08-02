@@ -1,31 +1,47 @@
 import React, { Component } from 'react'
 import { Form, Message } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
+import { object, bool, func } from 'prop-types'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 
 const typeOptions = [
-  { key: 'tuition', text: 'Tuition', value: 'tuition' },
-  { key: 'enrichment', text: 'Enrichment', value: 'enrichment' }
+  { key: 'tuition', text: 'Tuition', value: 'Tuition' },
+  { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
 const initialState = {
-  name: '',
-  type: '',
+  className: '',
+  classType: '',
   venue: '',
   dayAndTime: '',
-  startDate: ''
+  startDate: '',
+  serverErrorMessage: ''
 }
 
 class ClassForm extends Component {
-  state = {
-    ...initialState,
-    submittedName: '',
-    submittedType: '',
-    submittedVenue: '',
-    submittedDayAndTime: '',
-    submittedStartDate: ''
+  static propTypes = {
+    classData: object,
+    edit: bool,
+    editClass: func,
+    addClass: func
   }
+
+  filterPropData = (checkArray) => { // consider moving this up to the wrapper
+    const { classData } = this.props
+    return Object.keys(classData).reduce((last, curr) => (checkArray.includes(curr) ? {...last, [curr]: classData[curr]} : last
+  ), {})
+  }
+
+  state = this.props.classData
+  ? {
+    ...this.filterPropData(['className', 'classType', 'dayAndTime', 'venue']),
+    startDate: moment(this.props.classData.startDate),
+    error: [],
+    submitSuccess: false,
+    serverErrorMessage: ''
+  }
+  : {...initialState, submitSuccess: false}
 
   checkRequired = (checkArray) => {
     const error = []
@@ -40,44 +56,74 @@ class ClassForm extends Component {
 
   handleDateChange = (startDate) => this.setState({startDate})
 
-  handleSubmit = e => {
+  handleSubmit = async e => {
     e.preventDefault()
-    const { name, type, venue, dayAndTime, startDate } = this.state
+    const { className, classType, venue, dayAndTime, startDate } = this.state
+    const { edit, editClass, addClass } = this.props
     // check required fields
-    const error = this.checkRequired(['name', 'type', 'venue', 'dayAndTime', 'startDate'])
+    let requiredFields = (classType === 'Tuition') ? ['className', 'classType', 'venue', 'dayAndTime', 'startDate'] : ['className', 'classType', 'venue', 'startDate']
+    const error = this.checkRequired(requiredFields)
 
     if (error.length === 0) {
-      console.log('success')
-      this.setState({ submittedName: name, submittedType: type, submittedVenue: venue, submittedDayAndTime: dayAndTime, submittedStartDate: moment(startDate).format('DDMMYYYY') }) // this is just to display the information, in reality a POST request will be sent here
+      const data = {
+        className,
+        classType,
+        venue,
+        dayAndTime,
+        startDate
+      }
 
-      this.setState(initialState) // reset form
+      if (edit) {
+        try {
+          await editClass(data)
+          this.showSuccess()
+        } catch (error) {
+          this.setState({serverErrorMessage: error.response.data.error})
+          console.log(error)
+        }
+      } else { // not in edit mode
+        try {
+          await addClass(data)
+          this.showSuccess()
+          this.setState({...initialState})
+        } catch (error) {
+          this.setState({serverErrorMessage: error.response.data.error})
+        }
+      }
     } else {
-      console.log('error occured')
-      this.setState({error})
+      console.log('Incomplete Fields')
+      this.setState({error, serverErrorMessage: 'Please check all required fields are filled in correctly'})
     }
   }
 
+  showSuccess = () => {
+    this.setState({submitSuccess: true})
+    setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+  }
+
   render () {
-    const { name, type, venue, dayAndTime, submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { className, classType, venue, dayAndTime, serverErrorMessage, submitSuccess } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     return (
       <div>
         <Form onSubmit={this.handleSubmit}>
-          <Form.Input label='Name of Class' placeholder='Name of the class' name='name' value={name} onChange={this.handleChange} required />
-          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='type' value={type} onChange={this.handleChange} required />
+          <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
+          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
           <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-          <Form.Field disabled={type === 'enrichment'} required>
+          <Form.Field required>
             <label>Starting Date</label>
             <DatePicker
               placeholderText='Click to select a date'
               dateFormat='DD/MM/YYYY'
               selected={this.state.startDate}
-              onChange={this.handleDateChange} />
+              onChange={this.handleDateChange} required />
           </Form.Field>
-          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={type === 'enrichment'} required /> {/* may be change to radio */}
+          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
+          {serverErrorMessage.length > 0 && <Message negative>{serverErrorMessage}</Message> }
+          {submitSuccess && <Message positive>Class created</Message> }
           <Form.Button>Submit</Form.Button>
         </Form>
-        <Message>{JSON.stringify({ submittedName, submittedType, submittedVenue, submittedDayAndTime, submittedStartDate }, null, 2)}</Message>
+
       </div>
     )
   }

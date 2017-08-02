@@ -35,7 +35,7 @@ class MainCtrl extends Component {
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
             {main === 'students' && <StudentWrap op={op} sid={sid} />}
-            {main === 'classes' && <ClassWrap op={op} />}
+            {main === 'classes' && <ClassWrap op={op} sid={sid} />}
             {main === 'volunteer' && <VolunteerWrap op={op} />}
             {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
           </Grid.Column>

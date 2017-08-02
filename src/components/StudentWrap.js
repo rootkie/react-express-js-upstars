@@ -1,26 +1,11 @@
 import React, { Component } from 'react'
-import { Dimmer, Loader } from 'semantic-ui-react'
 import { string } from 'prop-types'
-import StudentForm from './StudentAdd'
+import StudentForm from './StudentForm'
 import StudentView from './StudentView'
 import axios from 'axios'
+import { filterData } from '../utils'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-
-function filterData (data, criteria) { // criteria = [{field, value}]
-  for (let criterion of criteria) {
-    const { field, value } = criterion // field is profile-age, value = ['M']
-    return data.filter((student) => {
-      if (/-/.test(field)) {
-        const fieldArr = field.split('-') // fieldArr = ['profile', 'age']
-        return value.includes(student[fieldArr[0]][fieldArr[1]])
-      } else {
-        return value.includes(student[field])
-      }
-    }
-    )
-  }
-}
 
 class StudentWrap extends Component {
   state = {
@@ -50,20 +35,12 @@ class StudentWrap extends Component {
       })
   }
 
-  deleteStudent = (studentId) => {
-    axios.delete('/students',
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          studentId
-        }
-      })
+  addStudent = (studentDataToSubmit) => {
+    const { studentData } = this.state
+    return axios.post('/students', studentDataToSubmit)
       .then((response) => {
-        this.setState({studentData: this.state.studentData.filter((student) => !studentId.includes(student._id))})
+        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
       })
-      .catch((err) => console.log(err))
   }
 
   editStudent = (studentDataToSubmit) => {
@@ -84,12 +61,27 @@ class StudentWrap extends Component {
       })
   }
 
-  addStudent = (studentDataToSubmit) => {
-    const { studentData } = this.state
-    return axios.post('/students', studentDataToSubmit)
+  deleteStudent = (studentIds) => {
+    const studentRequestPromises = []
+    for (let studentId of studentIds) {
+      studentRequestPromises.push(
+        axios.delete('/students',
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            data: {
+              studentId
+            }
+          })
+      )
+    }
+
+    axios.all(studentRequestPromises)
       .then((response) => {
-        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
+        this.setState({studentData: this.state.studentData.filter((student) => !studentIds.includes(student._id))})
       })
+      .catch((err) => console.log(err))
   }
 
   searchFilter = (criteria) => {
@@ -98,25 +90,15 @@ class StudentWrap extends Component {
   }
 
   render () {
-    const { isLoading, studentData, filteredData } = this.state
+    const { studentData, filteredData, isLoading } = this.state
     const { op, sid } = this.props
-    if (isLoading) {
-      return (
-        <div>
-          <Dimmer active>
-            <Loader indeterminate>Loading data</Loader>
-          </Dimmer>
-        </div>
-      )
-    } else {
-      return (
-        <div>
-          {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-          {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
-          {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} />}
-        </div>
-      )
-    }
+    return (
+      <div>
+        {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
+        {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
+        {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
+      </div>
+    )
   }
 }
 

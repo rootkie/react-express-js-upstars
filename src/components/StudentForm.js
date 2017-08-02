@@ -4,9 +4,6 @@ import { object, bool, func } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import 'react-datepicker/dist/react-datepicker.css'
-import axios from 'axios'
-
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
