@@ -29,11 +29,16 @@ class AttendanceForm extends Component {
   static propTypes = {
     classData: array.isRequired
   }
-  state = {
-    ...initialState,
-    students,
-    users,
-    submitSuccess: false
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      ...initialState,
+      students,
+      users,
+      submitSuccess: false,
+      token: props.token
+    }
   }
 
 // Function to check that all those that we specified are required
@@ -90,7 +95,7 @@ class AttendanceForm extends Component {
     axios({
         method: 'get',
         url: '/class/' + value,
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        headers: {'x-access-token': this.state.token },
       })
       .then(response => {
         let user = [],
@@ -168,7 +173,7 @@ class AttendanceForm extends Component {
       axios({
         method: 'post',
         url: '/attendance',
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        headers: {'x-access-token': this.state.token },
         data: {
           date,
           classId: className,

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
+import { string } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -30,14 +31,70 @@ const students = [{text: 'Not found. Please try another search'}]
 const users = [{text: 'Not found. Please try another search'}]
 
 class AttendanceView extends Component {
-  state = {
-    ...initialState,
-    users,
-    students,
-    edit: false,
-    submitSuccess: false
-  }
 
+  static propTypes = {
+    token: string.isRequired,
+    attendanceId: string.isRequired
+  }
+  
+  // Handles the getAttendance part:
+  constructor (props) {
+    super(props)
+    let attendanceId = "59809794a0ed732c52fd5589" // this is just filler for now.
+
+    this.state = {
+      ...initialState,
+      users,
+      students,
+      edit: false,
+      submitSuccess: false,
+      token: props.token
+    }
+    
+    if (attendanceId) {
+    axios({
+          method: 'get',
+          url: 'attendance/' + attendanceId,
+          headers: {'x-access-token': this.state.token },
+        }).then((response) => {
+          console.log(response)
+          if (response.status !== 200 || response.data.attendances == null) this.setState({isLoading: false})
+          else {
+            let data = response.data.attendances
+            for (let [index, userData] of data.users.entries()) {
+              users[index] = {
+                text: userData.list.profile.name,
+                key: userData.list._id,
+                list: userData.list._id,
+                status: userData.status,
+                checked: userData.status === 1 ? true : false
+              }
+            }
+            for (let [index, studentData] of data.students.entries()) {
+              students[index] = {
+                text: studentData.list !== null ? studentData.list.profile.name : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID. CHANGE TO INACTIVE INSTEAD OF DELETE',
+                key: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
+                list: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
+                status: studentData.status,
+                checked: studentData.status === 1 ? true : false
+              }
+            }
+            this.setState({
+              isLoading: false, 
+              className: data.class.className,
+              classId: data.class._id,
+              type: data.type,
+              hours: data.hours,
+              date: moment(data.date),
+              users: users,
+              students: students,
+              empty: false
+            })
+          }
+        })
+    }
+  }
+  
   checkRequired = (checkArray) => {
     const error = []
     for (let i of checkArray) {
@@ -128,7 +185,7 @@ class AttendanceView extends Component {
     axios({
         method: 'delete',
         url: 'attendance',
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        headers: {'x-access-token': this.state.token },
         data: {
           attendanceId: [attendanceId],
           classId
@@ -145,7 +202,7 @@ class AttendanceView extends Component {
   handleSubmit = e => {
     e.preventDefault()
     this.setState({isLoading: true})
-    const { date, classId, type, students, users, hours } = this.state
+    const { date, classId, type, students, users, hours, token } = this.state
     // check required fields
     const error = this.checkRequired(['date', 'classId', 'type', 'students', 'users'])
     if (error.length === 0) {
@@ -153,7 +210,7 @@ class AttendanceView extends Component {
       axios({
         method: 'post',
         url: 'attendance',
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        headers: {'x-access-token': token },
         data: {
           date,
           classId,
@@ -163,64 +220,14 @@ class AttendanceView extends Component {
           type
         }
       }).then((response) => {
-      console.log(response)
-      this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
-      this.setState({isLoading: false})
+        console.log(response)
+        this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true, isLoading: false })
       })
     } else {
       console.log('error occured')
       this.setState({error})
     }
   }
-  
-  // Handles the getAttendance part:
-  constructor (props) {
-  super(props)
-  let attendanceId = props.attendanceId
-  if (attendanceId) {
-  axios({
-        method: 'get',
-        url: 'attendance/' + attendanceId,
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
-      }).then((response) => {
-        console.log(response)
-        if (response.status !== 200 || response.data.attendances == null) this.setState({isLoading: false})
-        else {
-          let data = response.data.attendances
-          for (let [index, userData] of data.users.entries()) {
-            users[index] = {
-              text: userData.list.profile.name,
-              key: userData.list._id,
-              list: userData.list._id,
-              status: userData.status,
-              checked: userData.status === 1 ? true : false
-            }
-          }
-          for (let [index, studentData] of data.students.entries()) {
-            students[index] = {
-              text: studentData.list !== null ? studentData.list.profile.name : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID. CHANGE TO INACTIVE INSTEAD OF DELETE',
-              key: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
-              list: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
-              status: studentData.status,
-              checked: studentData.status === 1 ? true : false
-            }
-          }
-          this.setState({
-            isLoading: false, 
-            className: data.class.className,
-            classId: data.class._id,
-            type: data.type,
-            hours: data.hours,
-            date: moment(data.date),
-            users: users,
-            students: students,
-            empty: false
-          })
-        }
-      })
-  }
-}
-  
   
   render () {
     const { date, type, className, students, users, error, submitSuccess, hours, edit, buttonName, deleteConfirm, isLoading, empty } = this.state // submitted version are used to display the info sent through POST (not necessary)
