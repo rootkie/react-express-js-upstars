@@ -37,12 +37,12 @@ class StudentView extends Component {
     ageSelector: []
   }
 
-  handleCheckboxChange = (e, { name, checked }) => {
+  handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually IC number, for uniqueness
     let { selected } = this.state
     if (checked) {
-      selected.push(name) // name here is actually IC number, for uniqueness
+      selected.push(_id)
     } else {
-      selected = selected.filter((element) => element !== name)
+      selected = selected.filter((element) => element !== _id)
     }
     this.setState({selected})
   }
@@ -53,9 +53,8 @@ class StudentView extends Component {
 
   handleDelete = () => {
     const { selected } = this.state
-    const { deleteStudent, studentData } = this.props
-    const toDeleteArray = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
-    deleteStudent(toDeleteArray)
+    const { deleteStudent } = this.props
+    deleteStudent(selected)
     this.setState({selected: []})
   }
 
@@ -67,11 +66,9 @@ class StudentView extends Component {
       case 'confirm':
         this.handleDelete()
         // break omitted
-
       case 'cancel': // eslint-disable-line
         this.setState({deleteConfirmationVisibility: false})
         break
-
       default:
     }
   }

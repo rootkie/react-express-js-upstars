@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { Table, Checkbox, Button, Icon, Link, Dropdown, Confirm } from 'semantic-ui-react'
+import { Table, Checkbox, Button, Icon, Confirm } from 'semantic-ui-react'
 import { array, func } from 'prop-types'
 import axios from 'axios'
 
@@ -11,40 +11,52 @@ class ClassView extends Component {
     deleteClass: func.isRequired
   }
 
-  constructor (props) {
-    super(props)
-    // This is probably where to get all the necessary data from server api
-    console.log(this.props.classData)
-    this.state = {
-      selected: [],
-      classData: []
-    }
+  state = {
+    selected: [],
+    deleteConfirmationVisibility: false
   }
 
-  handleCheckBox = (e, { name, checked }) => {
+  handleCheckBox = (e, { name: _id, checked }) => { // name here is actually class _id
     let { selected } = this.state
     if (checked) {
-      selected.push(name) // name here is actually class _id
+      selected.push(_id)
     } else {
-      selected = selected.filter((element) => element !== name)
+      selected = selected.filter((element) => element !== _id)
     }
     this.setState({selected})
   }
 
   handleEdit = () => {
-    console.log(this.state.selected)
+    const { selected } = this.state
+    const { classData } = this.props
+    const toEditId = classData.filter((aClass) => selected.includes(aClass._id))
+    this.context.router.history.push(`/students/edit/${toEditId}`)
   }
 
   handleDelete = () => {
     const { deleteClass } = this.props
     const { selected } = this.state
-    // Delete the first choice only. Until multi delete is implemented
     deleteClass(selected)
     this.setState({ selected: [] })
   }
 
+  handleDeleteConfirmation = (option) => () => {
+    switch (option) {
+      case 'show':
+        this.setState({deleteConfirmationVisibility: true})
+        break
+      case 'confirm':
+        this.handleDelete()
+        // break omitted
+      case 'cancel': // eslint-disable-line
+        this.setState({deleteConfirmationVisibility: false})
+        break
+      default:
+    }
+  }
+
   render () {
-    const { selected } = this.state
+    const { selected, deleteConfirmationVisibility } = this.state
     const { classData } = this.props
     return (
       <Table compact celled>
@@ -77,9 +89,17 @@ class ClassView extends Component {
               <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                 <Icon name='group' />New Class
               </Button>
-              <Button size='small' negative onClick={this.handleDelete} disabled={selected.length === 0} >Delete</Button>
+              <Button size='small' negative onClick={this.handleDeleteConfirmation('show')} disabled={selected.length === 0} >Delete</Button>
               <Button size='small' onClick={this.handleEdit} disabled={selected.length !== 1} >Edit</Button>
-              <Confirm />
+              <Confirm
+                open={deleteConfirmationVisibility}
+                header='Deleting the following classes:'
+                content={selected.map((id) => (
+                  classData.filter((aClass) => (aClass._id === id))[0].className
+                )).join(', ')}
+                onCancel={this.handleDeleteConfirmation('cancel')}
+                onConfirm={this.handleDeleteConfirmation('confirm')}
+        />
             </Table.HeaderCell>
           </Table.Row>
         </Table.Footer>
