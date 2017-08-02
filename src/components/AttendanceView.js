@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader } from 'semantic-ui-react'
+import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
@@ -110,10 +110,35 @@ class AttendanceView extends Component {
     else this.handleSubmit(e)
   }
   
-  handleDelete = e => {
+  handleDeletePopup = e => {
     e.preventDefault()
     this.setState({deleteConfirm: true})
   }
+  
+  close = e => {
+    e.preventDefault()
+    this.setState({deleteConfirm: false})
+  }
+  
+  delete = e => {
+    e.preventDefault()
+    const { classId } = this.props
+    console.log(classId)
+    this.setState({isLoading: true})
+  /*  axios({
+        method: 'delete',
+        url: 'attendance',
+        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        data: {
+          attendanceId: []
+        }
+      }).then((response) => {
+      console.log(response)
+      this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
+      this.setState({isLoading: false})
+      }) */
+  }
+  
 
   handleSubmit = e => {
     e.preventDefault()
@@ -258,18 +283,23 @@ class AttendanceView extends Component {
         </Table>
         <Form.Group widths='equal'>
           <Form.Button onClick={this.handleEdit} floated='right' disabled={empty}>{buttonName}</Form.Button>
-          <Form.Button negative floated='left' onClick={this.handleDelete} disabled={empty}>Delete</Form.Button>
+          <Form.Button negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
           </Form.Group>
         </Form>
         <Modal
             open={deleteConfirm}
-            header='Delete Your Account'
-            content='Are you sure you want to delete your account'
-             actions={[
-                { key: 'no', content: 'No', color: 'red', isLoading: true },
-                { key: 'yes', content: 'Yes', color: 'green', triggerClose: true },
-              ]}
-        />
+            header='Delete Attendance'
+            content='Are you sure you want to delete this attendance?'
+        >
+        <Modal.Actions>
+      <Button basic color='red' inverted onClick={this.close}>
+        <Icon name='remove' /> No
+      </Button>
+      <Button color='green' inverted onClick={this.delete}>
+        <Icon name='checkmark' /> Yes
+      </Button>
+    </Modal.Actions>
+        </Modal>
         <Message
           hidden={!submitSuccess}
           success
