@@ -11,7 +11,6 @@ const SideMenu = ({activeItem}) => (
         <Menu.Header>Student</Menu.Header>
         <Menu.Menu>
           <Link to='/students/add' className={`item ${activeItem === 'studentsadd' && 'active'}`}>add</Link>
-          <Link to='/students/edit' className={`item ${activeItem === 'studentsedit' && 'active'}`}>edit</Link>
           <Link to='/students/view' className={`item ${activeItem === 'studentsview' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>
@@ -19,7 +18,6 @@ const SideMenu = ({activeItem}) => (
         <Menu.Header>Class</Menu.Header>
         <Menu.Menu>
           <Link to='/classes/add' className={`item ${activeItem === 'classesadd' && 'active'}`}>add</Link>
-          <Link to='/classes/edit' className={`item ${activeItem === 'classesedit' && 'active'}`}>edit</Link>
           <Link to='/classes/view' className={`item ${activeItem === 'classesview' && 'active'}`}>view</Link>
         </Menu.Menu>
       </Menu.Item>

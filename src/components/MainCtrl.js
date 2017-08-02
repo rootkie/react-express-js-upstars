@@ -4,7 +4,7 @@ import Topbar from './Topbar'
 import SideMenu from './SideMenu'
 import ClassWrap from './ClassWrap'
 import Home from './Home'
-import PropTypes from 'prop-types'
+import { object } from 'prop-types'
 import VolunteerWrap from './VolunteerWrap'
 import AttendanceWrap from './AttendanceWrap'
 import StudentWrap from './StudentWrap'
@@ -21,6 +21,10 @@ const MainContentStyle = {
 }
 
 class MainCtrl extends Component {
+  static propTypes = {
+    match: object
+  }
+
   render () {
     const { main, op, sid } = this.props.match.params || ''
     return (
@@ -30,7 +34,7 @@ class MainCtrl extends Component {
           <SideMenu activeItem={main + op || ''} />
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
-            {main === 'students' && <StudentWrap op={op} />}
+            {main === 'students' && <StudentWrap op={op} sid={sid} />}
             {main === 'classes' && <ClassWrap op={op} />}
             {main === 'volunteer' && <VolunteerWrap op={op} />}
             {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
@@ -39,10 +43,6 @@ class MainCtrl extends Component {
       </Container>
     )
   }
-}
-
-MainCtrl.propTypes = {
-  match: PropTypes.object
 }
 
 export default MainCtrl
