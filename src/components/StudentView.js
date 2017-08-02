@@ -54,7 +54,7 @@ class StudentView extends Component {
   handleDelete = () => {
     const { selected } = this.state
     const { deleteStudent } = this.props
-    deleteStudent(selected)
+    selected.length > 0 && deleteStudent(selected)
     this.setState({selected: []})
   }
 
@@ -77,7 +77,9 @@ class StudentView extends Component {
     const { selected } = this.state
     const { studentData } = this.props
     const toEditId = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
-    this.context.router.history.push(`/students/edit/${toEditId}`)
+    if (selected.length === 1) {
+      this.context.router.history.push(`/students/edit/${toEditId}`)
+    }
   }
 
   handleFilter = (e) => {

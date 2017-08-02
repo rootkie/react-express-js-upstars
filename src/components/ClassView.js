@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { Table, Checkbox, Button, Icon, Confirm } from 'semantic-ui-react'
-import { array, func } from 'prop-types'
+import { array, func, object } from 'prop-types'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 
@@ -10,6 +10,10 @@ class ClassView extends Component {
   static propTypes = {
     classData: array.isRequired,
     deleteClass: func.isRequired
+  }
+
+  static contextTypes = {
+    router: object
   }
 
   state = {
@@ -31,13 +35,15 @@ class ClassView extends Component {
     const { selected } = this.state
     const { classData } = this.props
     const toEditId = classData.filter((aClass) => selected.includes(aClass._id))
-    this.context.router.history.push(`/students/edit/${toEditId}`)
+    if (selected.length === 1) {
+      this.context.router.history.push(`/students/edit/${toEditId}`)
+    }
   }
 
   handleDelete = () => {
     const { deleteClass } = this.props
     const { selected } = this.state
-    deleteClass(selected)
+    selected.length > 0 && deleteClass(selected) // check if non empty selected
     this.setState({ selected: [] })
   }
 
