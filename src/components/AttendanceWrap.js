@@ -10,18 +10,18 @@ import AttendanceSearch from './AttendanceSearch.js'
 import axios from 'axios'
 
 class AttendanceWrap extends Component {
-  state = {
-    classData: [],
-    isLoading: true
-  }
-
   // get data from server
   constructor (props) {
     super(props)
+    this.state = {
+      classData: [],
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw',
+      isLoading: true
+    }
     axios({
         method: 'get',
         url: '/class',
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw'},
+        headers: {'x-access-token': this.state.token },
       }).then((response) => {
         let classOption =  []
         for (let [index, options] of response.data.classes.entries()) {
@@ -52,9 +52,9 @@ class AttendanceWrap extends Component {
     } else {
       return (
         <div>
-          {op === 'add' && <AttendanceForm classData={this.state.classData} /> }
+          {op === 'add' && <AttendanceForm classData={this.state.classData} token={this.state.token} /> }
           {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
-          {op === 'view' && <AttendanceView attendanceId={sid} /> }
+          {op === 'view' && <AttendanceView attendanceId={sid} token={this.state.token} /> }
           {op === 'user' && <AttendanceUser />}
           {op === 'student' && <AttendanceStudent />}
           {op === 'class' && <AttendanceClass />}
