@@ -79,7 +79,7 @@ module.exports.deleteAttendance = async(req, res, next) => {
       attendanceId
     } = req.body
       // Check if classId and date are provided
-    if (!attendanceId || classId.indexOf('') !== -1) throw ({
+    if (!attendanceId || attendanceId.indexOf('') !== -1) throw ({
       status: 400,
       error: 'Please provide at least 1 attendanceId and ensure input is correct'
     })
