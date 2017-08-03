@@ -44,12 +44,10 @@ class AttendanceSearch extends Component {
       headers: { 'x-access-token': this.state.token }
     }).then((response) => {
       this.setState({attendances: this.formatAttendances(response.data.foundAttendances)})
-      console.log(this.state.attendances)
     }).catch((error) => {
       console.log(error)
     })
   }
-
 
   handleCheckBox = (e, { name: _id, checked }) => {
     let { selected } = this.state
@@ -66,7 +64,6 @@ class AttendanceSearch extends Component {
     const { selected } = this.state
     if (selected.length === 1) {
       const toEditId = selected[0]
-      console.log(toEditId)
       this.context.router.history.push(`/attendance/view/${toEditId}`)
     }
   }
@@ -93,9 +90,9 @@ class AttendanceSearch extends Component {
     if (endDate != '') endDate = moment(endDate).format('[/]YYYYMMDD')
     if (classSelector.length > 0) classSelector = '/' + classSelector
     axios({
-      method: 'get',
+        method: 'get',
         url: '/attendance/class' + classSelector + '/dateStart' + startDate + '/dateEnd' + endDate,
-        headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
+        headers: { 'x-access-token': this.state.token },
       }).then(response => {
         let attendances = this.formatAttendances(response.data.foundAttendances)
         this.setState({ isLoading: false, attendances })
