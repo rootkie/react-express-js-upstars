@@ -15,6 +15,7 @@ class AttendanceWrap extends Component {
     super(props)
     this.state = {
       classData: [],
+      attendances: [],
       token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNTk0Mjk5LCJleHAiOjE1MDE5NTQyOTl9.brDQ02F1oPCwqflZ7HXsqUCI2Min1ZVW7c1rqMVgyUw',
       isLoading: true
     }
@@ -53,8 +54,8 @@ class AttendanceWrap extends Component {
       return (
         <div>
           {op === 'add' && <AttendanceForm classData={this.state.classData} token={this.state.token} /> }
-          {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
-          {op === 'view' && <AttendanceView attendanceId={sid} token={this.state.token} /> }
+          {op === 'search' && <AttendanceSearch classData={this.state.classData} attendances={this.state.attendances} token={this.state.token} /> }
+          {op === 'view' && sid && <AttendanceView attendanceId={sid} token={this.state.token} /> }
           {op === 'user' && <AttendanceUser />}
           {op === 'student' && <AttendanceStudent />}
           {op === 'class' && <AttendanceClass />}

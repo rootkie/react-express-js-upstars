@@ -32,7 +32,6 @@ const SideMenu = ({activeItem}) => (
         <Menu.Header>Attendance</Menu.Header>
         <Menu.Menu>
           <Link to='/attendance/add' className={`item ${activeItem === 'attendanceadd' && 'active'}`}>add</Link>
-          <Link to='/attendance/view' className={`item ${activeItem === 'attendanceview' && 'active'}`}>view</Link>
           <Link to='/attendance/search' className={`item ${activeItem === 'attendancesearch' && 'active'}`}>search</Link>
           <Link to='/attendance/user' className={`item ${activeItem === 'attendanceuser' && 'active'}`}>user</Link>
           <Link to='/attendance/student' className={`item ${activeItem === 'attendancestudent' && 'active'}`}>student</Link>
