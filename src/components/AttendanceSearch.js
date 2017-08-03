@@ -11,8 +11,6 @@ const datePickingStyle = {
   alignItems: 'center'
 }
 
-let attendances = [{'className': 'Press GO to search for attendances'}]
-
 class AttendanceSearch extends Component {
   static propTypes = {
     classData: array.isRequired
@@ -29,9 +27,29 @@ class AttendanceSearch extends Component {
       moreOptions: false,
       classSelector: '',
       isLoading: false,
-      attendances
+      token: props.token,
+      attendances:[]
     }
   }
+
+  componentDidMount() {
+    // get attendance initial data to be passed to search
+    this.getInitialAttendance()
+  }
+
+  getInitialAttendance () {
+    axios({
+      method: 'get',
+      url: '/attendance/class/dateStart/dateEnd',
+      headers: { 'x-access-token': this.state.token }
+    }).then((response) => {
+      this.setState({attendances: this.formatAttendances(response.data.foundAttendances)})
+      console.log(this.state.attendances)
+    }).catch((error) => {
+      console.log(error)
+    })
+  }
+
 
   handleCheckBox = (e, { name: _id, checked }) => {
     let { selected } = this.state
@@ -53,6 +71,19 @@ class AttendanceSearch extends Component {
     }
   }
 
+  formatAttendances = (rawAttendanceData) => {
+    let attendances = []
+    for (let [index, attendanceData] of rawAttendanceData.entries()) {
+      attendances[index] = {
+        _id: attendanceData._id,
+        className: attendanceData.class.className,
+        date: moment(attendanceData.date).format('DD/MM/YYYY'),
+        type: attendanceData.type,
+        hours: attendanceData.hours
+      }
+    }
+    return attendances
+  }
   
   handleSubmit = e => {
     e.preventDefault()
@@ -66,17 +97,8 @@ class AttendanceSearch extends Component {
         url: '/attendance/class' + classSelector + '/dateStart' + startDate + '/dateEnd' + endDate,
         headers: {'x-access-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxNDA0OTY5LCJleHAiOjE1MDE3NjQ5Njl9.v-94Gcu5u6JTgu0Ij-VU2GJ1Ht6ORb1gBYNOZFmhzow'},
       }).then(response => {
-        let attendances = []
-        for (let [index, attendanceData] of response.data.foundAttendances.entries()) {
-          attendances[index] = {
-            _id: attendanceData._id,
-            className: attendanceData.class.className,
-            date: moment(attendanceData.date).format('DD/MM/YYYY'),
-            type: attendanceData.type,
-            hours: attendanceData.hours
-          }
-        }
-        this.setState({ isLoading: false, attendances: attendances })
+        let attendances = this.formatAttendances(response.data.foundAttendances)
+        this.setState({ isLoading: false, attendances })
       }) 
   }
   
