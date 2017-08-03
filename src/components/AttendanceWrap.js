@@ -53,8 +53,8 @@ class AttendanceWrap extends Component {
       return (
         <div>
           {op === 'add' && <AttendanceForm classData={this.state.classData} token={this.state.token} /> }
-          {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
-          {op === 'view' && <AttendanceView attendanceId={sid} token={this.state.token} /> }
+          {op === 'search' && <AttendanceSearch classData={this.state.classData} token={this.state.token} /> }
+          {op === 'view' && sid && <AttendanceView attendanceId={sid} token={this.state.token} /> }
           {op === 'user' && <AttendanceUser />}
           {op === 'student' && <AttendanceStudent />}
           {op === 'class' && <AttendanceClass />}

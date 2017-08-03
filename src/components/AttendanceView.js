@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
-import { string } from 'prop-types'
+import { string, object } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -36,7 +36,7 @@ class AttendanceView extends Component {
     token: string.isRequired,
     attendanceId: string.isRequired
   }
-  
+
   // Handles the getAttendance part:
   constructor (props) {
     super(props)

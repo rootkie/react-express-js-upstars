@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Message, Loader, Dimmer } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Message, Loader, Dimmer, Checkbox, Button } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { array } from 'prop-types'
+import { array, object } from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -17,20 +17,47 @@ class AttendanceSearch extends Component {
   static propTypes = {
     classData: array.isRequired
   }
-  
-  state = {
-    startDate: '',
-    endDate: '',
-    moreOptions: false,
-    classSelector: '',
-    isLoading: false,
-    attendances
+  static contextTypes = {
+    router: object.isRequired
+  }
+  constructor(props) {
+    super(props);
+    this.state = {
+      startDate: '',
+      endDate: '',
+      selected:[],
+      moreOptions: false,
+      classSelector: '',
+      isLoading: false,
+      attendances
+    }
   }
 
+  handleCheckBox = (e, { name: _id, checked }) => {
+    let { selected } = this.state
+    if (checked) {
+      selected.push(_id)
+    } else {
+      selected = selected.filter((element) => element !== _id)
+    }
+    this.setState({selected})
+  }
+
+  handleEdit = e => {
+    e.preventDefault()
+    const { selected } = this.state
+    if (selected.length === 1) {
+      const toEditId = selected[0]
+      console.log(toEditId)
+      this.context.router.history.push(`/attendance/view/${toEditId}`)
+    }
+  }
+
+  
   handleSubmit = e => {
     e.preventDefault()
     let { startDate, endDate, classSelector } = this.state
-    this.setState({ isLoading: true })
+    this.setState({ isLoading: true, selected:[] }) // reset selected when filtered
     if (startDate != '') startDate = moment(startDate).format('[/]YYYYMMDD')
     if (endDate != '') endDate = moment(endDate).format('[/]YYYYMMDD')
     if (classSelector.length > 0) classSelector = '/' + classSelector
@@ -42,7 +69,7 @@ class AttendanceSearch extends Component {
         let attendances = []
         for (let [index, attendanceData] of response.data.foundAttendances.entries()) {
           attendances[index] = {
-            value: attendanceData._id,
+            _id: attendanceData._id,
             className: attendanceData.class.className,
             date: moment(attendanceData.date).format('DD/MM/YYYY'),
             type: attendanceData.type,
@@ -65,7 +92,7 @@ class AttendanceSearch extends Component {
   }
   
   render () {
-    const { moreOptions, classSelector, attendances, isLoading } = this.state
+    const { moreOptions, classSelector, attendances, isLoading, selected } = this.state
     const { classData } = this.props
 
     return (
@@ -96,8 +123,9 @@ class AttendanceSearch extends Component {
                         onChange={(date) => this.handleDateChange('endDate', date)}
                         placeholderText='Click to select' />
                     </Form.Field>
-                    <Form.Button onClick={this.handleSubmit}>Go</Form.Button>
-                    <Form.Button negative onClick={this.clear}>Clear Selection</Form.Button>
+                    <Form.Button positive onClick={this.handleSubmit}>Go</Form.Button>
+                    <Form.Button color='blue' onClick={this.handleEdit} disabled={selected.length !== 1}> Edit </Form.Button>
+                    <Form.Button negative onClick={this.clear}>Clear</Form.Button>
                   </Form.Group>
                   <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                 </div>
@@ -127,7 +155,7 @@ class AttendanceSearch extends Component {
           {attendances.map((options, i) => (
             <Table.Row key={`attendance-${i}`}>
               <Table.Cell collapsing>
-                {i + 1}
+                <Checkbox name={options._id} onChange={this.handleCheckBox} checked={selected.includes(options._id)} />
               </Table.Cell>
               <Table.Cell>{options.className}</Table.Cell>
               <Table.Cell>{options.date}</Table.Cell>
