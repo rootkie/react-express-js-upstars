@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Message, Loader, Dimmer, Checkbox, Button } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Loader, Dimmer, Checkbox, Button } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { array, object } from 'prop-types'
+import { Link } from 'react-router-dom'
 import moment from 'moment'
 import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -26,7 +27,7 @@ class AttendanceSearch extends Component {
       selected:[],
       moreOptions: false,
       classSelector: '',
-      isLoading: false,
+      isLoading: true,
       token: props.token,
       attendances:[]
     }
@@ -43,7 +44,7 @@ class AttendanceSearch extends Component {
       url: '/attendance/class/dateStart/dateEnd',
       headers: { 'x-access-token': this.state.token }
     }).then((response) => {
-      this.setState({attendances: this.formatAttendances(response.data.foundAttendances)})
+      this.setState({attendances: this.formatAttendances(response.data.foundAttendances), isLoading: false})
     }).catch((error) => {
       console.log(error)
     })
