@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { Link } from 'react-router-dom'
 import { string, object } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
@@ -36,6 +35,9 @@ class AttendanceView extends Component {
     token: string.isRequired,
     attendanceId: string.isRequired
   }
+  static contextTypes = {
+    router: object.isRequired
+  }
 
   // Handles the getAttendance part:
   constructor (props) {
@@ -67,7 +69,6 @@ class AttendanceView extends Component {
                 key: userData.list._id,
                 list: userData.list._id,
                 status: userData.status,
-                checked: userData.status === 1 ? true : false
               }
             }
             for (let [index, studentData] of data.students.entries()) {
@@ -76,7 +77,6 @@ class AttendanceView extends Component {
                 key: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
                 list: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
                 status: studentData.status,
-                checked: studentData.status === 1 ? true : false
               }
             }
             this.setState({
@@ -108,10 +108,10 @@ class AttendanceView extends Component {
     let { users } = this.state
     let pos = users.map(function(usr) { return usr.list }).indexOf(name)
     if (checked) {
-        users[pos].checked = true
+      console.log(checked)
         users[pos].status = 1
     } else {
-        users[pos].checked = false
+      console.log(checked)
         users[pos].status = 0
   }
     this.setState(users)
@@ -121,10 +121,8 @@ class AttendanceView extends Component {
     let { students } = this.state
     let pos = students.map(function(usr) { return usr.list }).indexOf(name)
     if (checked) {
-        students[pos].checked = true
         students[pos].status = 1
     } else {
-        students[pos].checked = false
         students[pos].status = 0
   }
     this.setState(students)
@@ -137,24 +135,20 @@ class AttendanceView extends Component {
       if (value === 'Class') {
           for (let a = 0; a < students.length; a++) {
               students[a]['status'] = 1
-              students[a]['checked'] = true
               this.setState(students)
           }
           for (let b = 0; b < users.length; b++) {
               users[b]['status'] = 1
-              users[b]['checked'] = true
               this.setState(users)
           }
       }
       else {
          for (let a = 0; a < students.length; a++) {
               students[a]['status'] = 0
-              students[a]['checked'] = false
               this.setState(students)
           }
           for (let b = 0; b < users.length; b++) {
               users[b]['status'] = 0
-              users[b]['checked'] = false
               this.setState(users)
           }
           this.setState({ hours: 0 })
@@ -194,7 +188,7 @@ class AttendanceView extends Component {
         console.log(response)
         this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
         this.setState({isLoading: false})
-        window.location.replace("https://test.rootkiddie.com/attendance/search") // This need to be changed with redirect
+        this.context.router.history.push('/attendance/search')
       })
   }
   
@@ -265,7 +259,7 @@ class AttendanceView extends Component {
           {students.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.checked} disabled={type !== 'Class' || edit === false} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1 ? true : false} disabled={type !== 'Class' || edit === false} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}
@@ -284,7 +278,7 @@ class AttendanceView extends Component {
           {users.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.checked} disabled={type !== 'Class' || edit === false} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1 ? true : false} disabled={type !== 'Class' || edit === false} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}

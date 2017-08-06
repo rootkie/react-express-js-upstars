@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Message, Header, Table, Checkbox, Loader, Dimmer } from 'semantic-ui-react'
-import { array } from 'prop-types'
+import { array, object } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import axios from 'axios'
 
@@ -29,9 +29,12 @@ class AttendanceForm extends Component {
   static propTypes = {
     classData: array.isRequired
   }
+  static contextTypes = {
+    router: object.isRequired
+  }
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       ...initialState,
       students,
@@ -60,10 +63,8 @@ class AttendanceForm extends Component {
     console.log(name)
     let pos = users.map(usr => { return usr.list }).indexOf(name)
     if (checked) {
-        users[pos].checked = true
         users[pos].status = 1
     } else {
-        users[pos].checked = false
         users[pos].status = 0
   }
     this.setState(users)
@@ -74,10 +75,8 @@ class AttendanceForm extends Component {
     let pos = students.map(usr => { return usr.list }).indexOf(name)
     console.log(pos)
     if (checked) {
-        students[pos].checked = true
         students[pos].status = 1
     } else {
-        students[pos].checked = false
         students[pos].status = 0
   }
     this.setState(students)
@@ -106,7 +105,6 @@ class AttendanceForm extends Component {
             list: studentData._id,
             text: studentData.profile.name,
             key: studentData.profile.name,
-            checked: false,
             status: ''
           }
         }
@@ -116,7 +114,6 @@ class AttendanceForm extends Component {
             text: userData.profile.name,
             key: userData.profile.name,
             list: userData._id,
-            checked: false,
             status: ''
           }
         }
@@ -134,24 +131,20 @@ class AttendanceForm extends Component {
       if (value === 'Class') {
           for (let a = 0; a < students.length; a++) {
               students[a]['status'] = 1
-              students[a]['checked'] = true
               this.setState(students)
           }
           for (let b = 0; b < users.length; b++) {
               users[b]['status'] = 1
-              users[b]['checked'] = true
               this.setState(users)
           }
       }
       else {
          for (let a = 0; a < students.length; a++) {
               students[a]['status'] = 0
-              students[a]['checked'] = false
               this.setState(students)
           }
           for (let b = 0; b < users.length; b++) {
               users[b]['status'] = 0
-              users[b]['checked'] = false
               this.setState(users)
           }
           this.setState({ hours: 0 })
@@ -185,6 +178,7 @@ class AttendanceForm extends Component {
       }).then(response => {
         console.log(response)
         this.setState({...initialState, submitSuccess: true})
+        this.context.router.history.push(`/attendance/view/${response.data.attendance._id}`)
       })
       .catch(error => {
         console.log(error);
@@ -235,7 +229,7 @@ class AttendanceForm extends Component {
           {students.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.checked} disabled={type !== 'Class'} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1 ? true : false} disabled={type !== 'Class'} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}
@@ -254,7 +248,7 @@ class AttendanceForm extends Component {
           {users.map((options, i) => (
             <Table.Row key={`users-${i}`}>
               <Table.Cell collapsing>
-                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.checked} disabled={type !== 'Class'} />
+                <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1 ? true : false} disabled={type !== 'Class'} />
               </Table.Cell>
               <Table.Cell>{options.text}</Table.Cell>
             </Table.Row>))}
