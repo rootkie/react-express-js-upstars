@@ -20,7 +20,7 @@ class AttendanceSearch extends Component {
     router: object.isRequired
   }
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       startDate: '',
       endDate: '',

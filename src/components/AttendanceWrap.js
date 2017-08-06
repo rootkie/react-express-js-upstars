@@ -16,7 +16,7 @@ class AttendanceWrap extends Component {
     this.state = {
       classData: [],
       attendances: [],
-      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAxODU1OTkzLCJleHAiOjE1MDIyMTU5OTN9.9PPXoSqLdllPIIsMFiKBlaSkA2Wxlvz2g35zKeI5oKw',
+      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAyMDE4Njg1LCJleHAiOjE1MDIzNzg2ODV9.CqsXF5HrArSsesiwfhyqgLX_c4xZpZYYEeLS24czGjk',
       isLoading: true
     }
     axios({
@@ -56,9 +56,9 @@ class AttendanceWrap extends Component {
           {op === 'add' && <AttendanceForm classData={this.state.classData} token={this.state.token} /> }
           {op === 'search' && <AttendanceSearch classData={this.state.classData} attendances={this.state.attendances} token={this.state.token} /> }
           {op === 'view' && sid && <AttendanceView attendanceId={sid} token={this.state.token} /> }
-          {op === 'user' && <AttendanceUser />}
-          {op === 'student' && <AttendanceStudent />}
-          {op === 'class' && <AttendanceClass />}
+          {op === 'user' && <AttendanceUser classData={this.state.classData} token={this.state.token} />}
+          {op === 'student' && <AttendanceStudent classData={this.state.classData} token={this.state.token} />}
+          {op === 'class' && <AttendanceClass classData={this.state.classData} token={this.state.token} />}
         </div>
       )
     }

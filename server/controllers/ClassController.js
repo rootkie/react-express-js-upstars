@@ -124,7 +124,7 @@ module.exports.getClassById = async(req, res, next) => {
     })
 
     // If the user do not belong to that class and not ADMIN / SuperADMIN, API won't get past
-    if (!req.decoded.classes.indexOf(classId) && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
+    if (!req.decoded.classes.indexOf(classId) && (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
       status: 403,
       error: 'Your client does not have the permissions to access this function.'
     })

@@ -187,7 +187,7 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
     let user = {}
 
     // Prevent users from getting attendance of other users unless they are admin
-    if (userId !== req.decoded._id && (req.decoded.roles.indexOf('Admin') == -1 || req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
+    if (userId !== req.decoded._id && (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
       status: 403,
       error: 'Your client does not have the permissions to access this function.'
     })
