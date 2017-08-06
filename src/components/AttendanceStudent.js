@@ -63,11 +63,11 @@ componentDidMount() {
     let student = {}
     for (let [index, attendanceData] of rawStudentData.studentAttendance.entries()) {
       attendances[index] = {
-        className: attendanceData.className,
+        className: attendanceData.className[0],
         date: moment(attendanceData.date).format('DD/MM/YYYY'),
         type: attendanceData.classType,
         hours: attendanceData.duration,
-        classId: attendanceData.classId,
+        classId: attendanceData.classId[0],
         status: attendanceData.status
       }
     }
