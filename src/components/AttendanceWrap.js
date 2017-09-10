@@ -16,7 +16,7 @@ class AttendanceWrap extends Component {
     this.state = {
       classData: [],
       attendances: [],
-      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OTdkOWYyOTQ3Nzg0YTRlYzRlODY3NDkiLCJyb2xlcyI6WyJTdXBlckFkbWluIl0sInN0YXR1cyI6IlBlbmRpbmciLCJjbGFzc2VzIjpbXSwiaWF0IjoxNTAyMDE4Njg1LCJleHAiOjE1MDIzNzg2ODV9.CqsXF5HrArSsesiwfhyqgLX_c4xZpZYYEeLS24czGjk',
+      token: localStorage.token,
       isLoading: true
     }
     axios({

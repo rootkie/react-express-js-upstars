@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Loader, Dimmer, Checkbox, Button } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Loader, Dimmer, Checkbox } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { array, object } from 'prop-types'
-import { Link } from 'react-router-dom'
 import moment from 'moment'
 import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -87,8 +86,8 @@ class AttendanceSearch extends Component {
     e.preventDefault()
     let { startDate, endDate, classSelector } = this.state
     this.setState({ isLoading: true, selected:[] }) // reset selected when filtered
-    if (startDate != '') startDate = moment(startDate).format('[/]YYYYMMDD')
-    if (endDate != '') endDate = moment(endDate).format('[/]YYYYMMDD')
+    if (startDate !== '') startDate = moment(startDate).format('[/]YYYYMMDD')
+    if (endDate !== '') endDate = moment(endDate).format('[/]YYYYMMDD')
     if (classSelector.length > 0) classSelector = '/' + classSelector
     axios({
         method: 'get',

@@ -202,7 +202,7 @@ componentDidMount() {
             <Table.Cell collapsing>{data.date}</Table.Cell>
             <Table.Cell collapsing>{data.classType}</Table.Cell>
             <Table.Cell collapsing>{data.hours}</Table.Cell>
-            <Table.Cell collapsing>{data.status == 1 ? 'Present' : 'Absent'}</Table.Cell>
+            <Table.Cell collapsing>{data.status === 1 ? 'Present' : 'Absent'}</Table.Cell>
           </Table.Row>
         ))}
         </Table.Body>
