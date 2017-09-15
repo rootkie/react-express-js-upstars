@@ -32,13 +32,11 @@ class MainCtrl extends Component {
   }
 
   isLoggedIn = () => {
-    console.log(localStorage.token)
     return axios({
       method: 'get',
       url: '/check',
       headers: {'x-access-token': localStorage.token },
     }).then((response) => {
-      console.log(response)
       this.setState({ isLoggedIn: response.data.auth })
     }).catch((err) => {
       console.log(err)
@@ -56,7 +54,6 @@ class MainCtrl extends Component {
 
   render () {
     const { main, op, sid } = this.props.match.params || ''
-    console.log(this.state.isLoggedIn)
 
     if (!this.state.isLoggedIn) {
       return <Redirect to='/login' />
