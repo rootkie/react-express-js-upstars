@@ -1,6 +1,8 @@
 const User = require('../models/user')
 const util = require('../util.js')
 const generateToken = util.generateToken
+const config = require('../config/constConfig')
+const jwt = require('jsonwebtoken')
 // ============== Start of all the functions ==============
 
 module.exports.login = async(req, res, next) => {
@@ -114,6 +116,32 @@ module.exports.register = async(req, res, next) => {
       roles: userObject.roles,
       name: userObject.profile.name
     })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    }
+    else next(err)
+  }
+}
+
+module.exports.check = async(req, res, next) => {
+  try {
+    let token = req.headers['x-access-token']
+    let result = (auth) => {
+      return res.status(200).json({ auth })
+    }
+    if (!token) return result(false)
+    jwt.verify(token, config.secret, (err, decoded) => {
+      if(err) {
+        return result(false)
+      } else {
+        return result(true)
+      }
+    })
+
   } catch (err) {
     console.log(err)
     if (err.status) {

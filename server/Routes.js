@@ -59,6 +59,7 @@ module.exports = app => {
   app.post('/api/register', authControl.register)
   app.post('/api/simpleRegister', authControl.simpleRegister)
   app.post('/api/login', authControl.login)
+  app.get('/api/check', authControl.check) // This is for frontend to check validity of token.
 
   //Special Treats
   app.post('/api/generateAdminUser', adminControl.generateAdminUser)
