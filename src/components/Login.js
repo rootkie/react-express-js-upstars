@@ -3,11 +3,6 @@ import { Form, Button, Header, Message } from 'semantic-ui-react'
 import axios from 'axios'
 import { Redirect } from 'react-router'
 
-const rootkiddie = axios.create({
-  baseURL: 'https://test.rootkiddie.com/api/',
-  headers: {'Content-Type': 'application/json'}
-})
-
 const initialState = {
   email: '',
   password: '',
@@ -37,9 +32,8 @@ class Login extends Component {
     const error = this.checkRequired(['email', 'password'])
 
     if (error.length === 0) {
-      rootkiddie.post('/login', { email, password })
+      axios.post('/login', { email, password })
       .then((response) => {
-        console.log(response)
         localStorage.setItem('token',response.data.token)
         this.setState({...initialState, submitSuccess: true}) // reset form
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message

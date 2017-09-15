@@ -5,8 +5,6 @@ import ClassView from './ClassView.js'
 import axios from 'axios'
 import { filterData } from '../utils'
 
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-
 class ClassWrap extends Component {
   static propTypes = {
     op: string.isRequired,

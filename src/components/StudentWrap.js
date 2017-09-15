@@ -5,8 +5,6 @@ import StudentView from './StudentView'
 import axios from 'axios'
 import { filterData } from '../utils'
 
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-
 class StudentWrap extends Component {
   state = {
     studentData: [],
