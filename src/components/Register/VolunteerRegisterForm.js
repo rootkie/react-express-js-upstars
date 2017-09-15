@@ -5,11 +5,6 @@ import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import { Redirect } from 'react-router'
 
-const rootkiddie = axios.create({
-  baseURL: 'https://test.rootkiddie.com/api/',
-  headers: {'Content-Type': 'application/json'}
-})
-
 const genderOptions = [
   { key: 'male', text: 'Male', value: 'M' },
   { key: 'female', text: 'Female', value: 'F' }
@@ -117,7 +112,7 @@ class Register extends Component {
         preferredTimeSlot
       }
       console.log(data)
-      rootkiddie.post('/register', data)
+      axios.post('/register', data)
       .then((response) => {
         console.log(response)
         localStorage.setItem('token',response.data.token)

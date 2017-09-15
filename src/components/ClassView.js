@@ -4,8 +4,6 @@ import { array, func, object, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-
 class ClassView extends Component {
   static propTypes = {
     classData: array.isRequired,
