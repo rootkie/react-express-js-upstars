@@ -11,7 +11,7 @@ const Topbar = ({tab}) => (
       <Dropdown item text='Username'>
         <Dropdown.Menu>
           <Dropdown.Item><Link style={{color: 'black'}} to='/settings'>Settings</Link></Dropdown.Item>
-          <Dropdown.Item onClick={() => { localStorage.removeItem('token'); window.location.href="/" }}>Logout</Dropdown.Item>
+          <Dropdown.Item onClick={() => localStorage.removeItem('token')}><Link style={{color: 'black'}} to='/'>Logout</Link></Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     </Menu.Menu>
