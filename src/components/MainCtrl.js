@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
+import { Redirect } from 'react-router'
 import { Container, Grid } from 'semantic-ui-react'
+import axios from 'axios'
 import Topbar from './Topbar'
 import SideMenu from './SideMenu'
 import ClassWrap from './ClassWrap'
@@ -25,8 +27,39 @@ class MainCtrl extends Component {
     match: object
   }
 
+  state = {
+    isLoggedIn: true
+  }
+
+  isLoggedIn = () => {
+    return axios({
+      method: 'get',
+      url: '/check',
+      headers: {'x-access-token': localStorage.token }
+    }).then((response) => {
+      this.setState({ isLoggedIn: response.data.auth })
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
+
+  constructor (props) {
+    super()
+    this.isLoggedIn()
+  }
+
+  componentWillReceiveProps (nextProps) {
+    this.isLoggedIn()
+  }
+
   render () {
     const { main, op, sid } = this.props.match.params || ''
+
+    if (!this.state.isLoggedIn) {
+      console.log('we getting em login errors?')
+      return <Redirect to='/login' />
+    }
+
     return (
       <Container fluid>
         <Topbar tab={main} />

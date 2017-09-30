@@ -34,10 +34,11 @@ class Login extends Component {
     if (error.length === 0) {
       axios.post('/login', { email, password })
       .then((response) => {
-        localStorage.setItem('token',response.data.token)
+        localStorage.setItem('token', response.data.token)
         this.setState({...initialState, submitSuccess: true}) // reset form
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
-        this.setState({ redirect: true }) // redirect to homepage if login successful
+        //  Timeout as hack to prevent setState on unmounted component error
+        setTimeout(() => { this.setState({ redirect: true }) }, 500) // redirect to homepage if login successful
       })
       .catch((error) => {
         console.log(error)
