@@ -15,13 +15,14 @@ class ClassWrap extends Component {
     super(props)
     this.state = {
       classData: [],
-      isLoading: true
+      isLoading: true,
+      headerConfig: {'headers': { 'x-access-token': localStorage.token }}
     }
     this.getClasses()
   }
 
   getClasses = () => {
-    axios.get('class')
+    axios.get('class', this.state.headerConfig)
       .then((response) => {
         this.setState({ classData: response.data.classes, isLoading: false })
       })
@@ -32,7 +33,7 @@ class ClassWrap extends Component {
 
   addClass = (classDataToSubmit) => {
     const { classData } = this.state
-    return axios.post('/class', classDataToSubmit)
+    return axios.post('/class', classDataToSubmit, this.state.headerConfig)
       .then((response) => {
         this.setState({ classData: classData.concat({ ...classDataToSubmit, _id: response.data.newClass._id }) })
       })
@@ -43,7 +44,8 @@ class ClassWrap extends Component {
     const { sid } = this.props
     return axios.put('/class', {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-access-token': localStorage.token
       },
       ...classDataToSubmit,
       classId: sid
@@ -63,7 +65,8 @@ class ClassWrap extends Component {
     console.log(data)
     return axios.delete('/class', {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-access-token': localStorage.token
       },data})
         .then(() => {
           this.setState({classData: this.state.classData.filter((Class) => !classIds.includes(Class._id))})

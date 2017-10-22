@@ -6,12 +6,6 @@ import axios from 'axios'
 import { filterData } from '../../utils'
 
 class StudentWrap extends Component {
-  state = {
-    studentData: [],
-    filteredData: false,
-    isLoading: true
-  }
-
   static propTypes = {
     op: string.isRequired,
     sid: string
@@ -20,11 +14,17 @@ class StudentWrap extends Component {
   // get data from server
   constructor (props) {
     super(props)
+    this.state = {
+      studentData: [],
+      filteredData: false,
+      isLoading: true,
+      headerConfig: {'headers': { 'x-access-token': localStorage.token }}
+    }
     this.getStudents()
   }
 
   getStudents = () => {
-    axios.get('students')
+    axios.get('students', this.state.headerConfig)
       .then((response) => {
         this.setState({ studentData: response.data.students, isLoading: false })
       })
@@ -35,7 +35,7 @@ class StudentWrap extends Component {
 
   addStudent = (studentDataToSubmit) => {
     const { studentData } = this.state
-    return axios.post('/students', studentDataToSubmit)
+    return axios.post('/students', studentDataToSubmit, this.state.headerConfig)
       .then((response) => {
         this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
       })
@@ -46,7 +46,8 @@ class StudentWrap extends Component {
     const { sid } = this.props
     return axios.put('/students', {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-access-token': localStorage.token
       },
       ...studentDataToSubmit,
       studentId: sid
@@ -66,7 +67,8 @@ class StudentWrap extends Component {
         axios.delete('/students',
           {
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'x-access-token': localStorage.token
             },
             data: {
               studentId
