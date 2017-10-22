@@ -3,7 +3,7 @@ import { string } from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
 import axios from 'axios'
-import { filterData } from '../utils'
+import { filterData } from '../../utils'
 
 class StudentWrap extends Component {
   state = {

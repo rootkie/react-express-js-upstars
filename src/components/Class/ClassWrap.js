@@ -3,7 +3,7 @@ import { string } from 'prop-types'
 import ClassForm from './ClassForm.js'
 import ClassView from './ClassView.js'
 import axios from 'axios'
-import { filterData } from '../utils'
+import { filterData } from '../../utils.js'
 
 class ClassWrap extends Component {
   static propTypes = {
