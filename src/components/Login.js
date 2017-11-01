@@ -8,11 +8,29 @@ const initialState = {
   password: '',
   error: [],
   submitSuccess: false,
-  errorMessage: ''
+  errorMessage: '',
+  loadingMessage: ''
 }
 
 class Login extends Component {
   state = {...initialState, redirect: false}
+
+  constructor () {
+    super()
+    this.isLoggedIn()
+  }
+
+  isLoggedIn = () => {
+    return axios({
+      method: 'get',
+      url: '/check',
+      headers: {'x-access-token': localStorage.token }
+    }).then((response) => {
+      this.setState({ redirect: response.data.auth })
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
 
   handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
@@ -32,6 +50,7 @@ class Login extends Component {
     const error = this.checkRequired(['email', 'password'])
 
     if (error.length === 0) {
+      setTimeout( () => { this.setState({ loadingMessage: "Logging in..." }) }, 5000) 
       axios.post('/login', { email, password })
       .then((response) => {
         localStorage.setItem('token', response.data.token)
@@ -51,10 +70,10 @@ class Login extends Component {
   }
 
   render () {
-    const { email, password, error, errorMessage, submitSuccess, redirect } = this.state
+    const { email, password, error, errorMessage, loadingMessage, submitSuccess, redirect } = this.state
 
     if (redirect) {
-      return <Redirect to='/home' />
+      return <Redirect push to='/home' />
     }
 
     return (
@@ -69,6 +88,11 @@ class Login extends Component {
             hidden={error.length === 0 && errorMessage === ''}
             negative
             content={errorMessage}
+          />
+          <Message
+            hidden={loadingMessage === ''}
+            positive
+            content={loadingMessage}
           />
         </div>
       </div>
