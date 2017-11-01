@@ -4,12 +4,12 @@ import { Container, Grid } from 'semantic-ui-react'
 import axios from 'axios'
 import Topbar from './Topbar'
 import SideMenu from './SideMenu'
-import ClassWrap from './ClassWrap'
+import ClassWrap from './Class/ClassWrap'
 import Home from './Home'
 import { object } from 'prop-types'
-import VolunteerWrap from './VolunteerWrap'
-import AttendanceWrap from './AttendanceWrap'
-import StudentWrap from './StudentWrap'
+import VolunteerWrap from './Volunteer/VolunteerWrap'
+import AttendanceWrap from './Attendance/AttendanceWrap'
+import StudentWrap from './Student/StudentWrap'
 
 const GridStyle = {
   paddingTop: '4em',
