@@ -22,3 +22,4 @@ yarn-error.log*
 #IDE stuff
 react-express-upstars.sublime-project
 react-express-upstars.sublime-workspace
+.vscode

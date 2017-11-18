@@ -9,46 +9,44 @@ module.exports.getAllUsers = async(req, res, next) => {
     return res.status(200).json({
       users
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
 module.exports.getUser = async(req, res, next) => {
   try {
     sudo = false
-      // Check for Admin / SuperAdmin / Mentor
+    // Check for Admin / SuperAdmin / Mentor
     if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
       sudo = true
     }
 
     // Check if user has admin rights and is only querying their own particulars
-    if (req.params.id !== req.decoded._id && sudo == false) throw ({
-      status: 403,
-      error: 'Your client does not have the permissions to access this function.'
-    })
+    if (req.params.id !== req.decoded._id && sudo === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // Find user based on ID and retrieve its className
     const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
     return res.status(200).json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -60,22 +58,26 @@ module.exports.editUserParticulars = async(req, res, next) => {
 
     let edited = {}
     sudo = false
-      // Check for Admin / SuperAdmin / Mentor
+    // Check for Admin / SuperAdmin / Mentor
     if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
       sudo = true
     }
 
     // Check userId is provided
-    if (!userId) throw ({
-      status: 400,
-      error: 'Please provide a userId'
-    })
+    if (!userId) {
+      throw ({
+        status: 400,
+        error: 'Please provide a userId'
+      })
+    }
 
     // Only allows user to edit their own particulars unless they are admin
-    if (userId !== req.decoded._id && sudo == false) throw ({
-      status: 403,
-      error: 'Your client does not have the permissions to access this function.'
-    })
+    if (userId !== req.decoded._id && sudo === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // If admin is editing, they can also edit the admin field
     if (sudo) {
@@ -102,20 +104,17 @@ module.exports.editUserParticulars = async(req, res, next) => {
     return res.status(200).json({
       editedUser: user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
-    if (err.name == 'ValidationError') {
+    if (err.name === 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
       })
-    }
-    else if (err.status) {
+    } else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -125,10 +124,12 @@ module.exports.deleteUser = async(req, res, next) => {
   } = req.body
   try {
     // Check userId is provided
-    if (!userId || userId.indexOf('') !== -1) throw ({
-      status: 400,
-      error: 'Please provide a userId and ensure input is correct'
-    })
+    if (!userId || userId.indexOf('') !== -1) {
+      throw ({
+        status: 400,
+        error: 'Please provide a userId and ensure input is correct'
+      })
+    }
 
     // Delete user from database
     const userDeleted = await User.remove({
@@ -136,20 +137,18 @@ module.exports.deleteUser = async(req, res, next) => {
         '$in': userId
       }
     })
-    
+
     return res.status(200).json({
       status: 'success',
       userDeleted
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -162,25 +161,33 @@ module.exports.changePassword = async(req, res, next) => {
     } = req.body
 
     // Check userId or passwords are provided
-    if (!userId || !oldPassword || !newPassword || newPassword.length < 6) throw ({
-      status: 400,
-      error: 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'
-    })
+    if (!userId || !oldPassword || !newPassword || newPassword.length < 6) {
+      throw ({
+        status: 400,
+        error: 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'
+      })
+    }
+    // Prevent people from changing passwords of someone else even if they know his password
+    if (userId !== req.decoded._id) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // Find the user and match his password hash
     const user = await User.findById(userId)
-    const isMatch = await user.comparePasswordPromise(oldPassword)
-    if (!isMatch) throw ({
+    if (!user) throw ({
       status: 401,
-      error: 'Old password does not match. Please try again'
+      error: 'User does not exist!'
     })
-
-    // Prevent people from changing passwords of someone else even if they know his password
-    if (userId !== req.decoded._id) throw ({
-      status: 403,
-      error: 'Your client does not have the permissions to access this function.'
-    })
-
+    const isMatch = await user.comparePasswordPromise(oldPassword)
+    if (!isMatch) {
+      throw ({
+        status: 401,
+        error: 'Old password does not match. Please try again'
+      })
+    }
     // Save the new user password
     user.password = newPassword
     const pwChanged = await user.save()
@@ -189,15 +196,13 @@ module.exports.changePassword = async(req, res, next) => {
         status: 'success'
       })
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -208,8 +213,7 @@ module.exports.getExternal = async(req, res, next) => {
     return res.status(200).json({
       user
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
