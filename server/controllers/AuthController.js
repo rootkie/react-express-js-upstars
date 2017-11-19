@@ -12,32 +12,40 @@ module.exports.login = async(req, res, next) => {
       email
     } = req.body
 
-    if (!email) throw ({
-      status: 400,
-      error: 'Please provide an email address.'
-    })
+    if (!email) {
+      throw ({
+        status: 400,
+        error: 'Please provide an email address.'
+      })
+    }
 
     // Return error if no password provided
-    if (!password) throw ({
-      status: 400,
-      error: 'Please provide a password.'
-    })
+    if (!password) {
+      throw ({
+        status: 400,
+        error: 'Please provide a password.'
+      })
+    }
 
     const user = await User.findOne({
       email
     })
 
     // Checks if user exists
-    if (!user) throw ({
+    if (!user) {
+      throw ({
         status: 401,
         error: 'Wrong email or password'
       })
+    }
       // compare password
     const isMatch = await user.comparePasswordPromise(password)
-    if (!isMatch) throw ({
-      status: 401,
-      error: 'Wrong email or password'
-    })
+    if (!isMatch) {
+      throw ({
+        status: 401,
+        error: 'Wrong email or password'
+      })
+    }
 
     res.json({
       token: generateToken(user),
@@ -46,15 +54,13 @@ module.exports.login = async(req, res, next) => {
       roles: user.roles,
       name: user.profile.name
     })
-
   } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -70,24 +76,30 @@ module.exports.register = async(req, res, next) => {
     } = req.body
 
     // Return error if no email provided
-    if (!email) throw ({
-      status: 400,
-      error: 'Please provide an email address.'
-    })
+    if (!email) {
+      throw ({
+        status: 400,
+        error: 'Please provide an email address.'
+      })
+    }
 
     // Return error if no password provided
-    if (!password || password.length < 6) throw ({
-      status: 400,
-      error: 'Please provide a password that is at least 6 characters long.'
-    })
+    if (!password || password.length < 6) {
+      throw ({
+        status: 400,
+        error: 'Please provide a password that is at least 6 characters long.'
+      })
+    }
 
     // Find the user based on email
     const existingUser = await User.findOne({
       email
     })
-    if (existingUser) throw {
-      status: 409,
-      error: 'Email already exists.'
+    if (existingUser) {
+      throw {
+        status: 409,
+        error: 'Email already exists.'
+      }
     }
 
     // Create a new user after validating
@@ -122,8 +134,7 @@ module.exports.register = async(req, res, next) => {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -135,21 +146,19 @@ module.exports.check = async(req, res, next) => {
     }
     if (!token) return result(false)
     jwt.verify(token, config.secret, (err, decoded) => {
-      if(err) {
+      if (err) {
         return result(false)
       } else {
         return result(true)
       }
     })
-
   } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -162,30 +171,38 @@ module.exports.simpleRegister = async(req, res, next) => {
     } = req.body
 
     // Return error if no email provided
-    if (!email) throw ({
-      status: 400,
-      error: 'Please provide an email address.'
-    })
+    if (!email) {
+      throw ({
+        status: 400,
+        error: 'Please provide an email address.'
+      })
+    }
 
     // Return error if no password provided
-    if (!password) throw ({
-      status: 400,
-      error: 'Please provide a password.'
-    })
+    if (!password) {
+      throw ({
+        status: 400,
+        error: 'Please provide a password.'
+      })
+    }
 
     // Return error if full name not provided
-    if (!username) throw ({
-      status: 400,
-      error: 'Please provide a username.'
-    })
+    if (!username) {
+      throw ({
+        status: 400,
+        error: 'Please provide a username.'
+      })
+    }
 
     const existingUser = await User.findOne({
       email: email
     })
-    if (existingUser) throw ({
-      status: 409,
-      error: 'Email already exists.'
-    })
+    if (existingUser) {
+      throw ({
+        status: 409,
+        error: 'Email already exists.'
+      })
+    }
 
     const user = new User({
       email: email,
@@ -202,14 +219,12 @@ module.exports.simpleRegister = async(req, res, next) => {
       token: generateToken(userObject),
       user: userObject
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }

@@ -28,3 +28,34 @@ module.exports.generateToken = req => {
     expiresIn: '100h'
   })
 }
+
+module.exports.checkRole = req => {
+  const {
+    roles,
+    params,
+    decoded
+  } = req
+  if (params.id !== decoded._id) {
+    for (const list in roles) {
+      if (decoded.roles.indexOf(roles[list]) !== -1) return true
+    }
+    return false
+  } else return true
+
+  // Or simply return true and comment the entire code for testing so it will always work.
+}
+
+module.exports.checkClass = req => {
+  const {
+    roles,
+    params,
+    decoded
+  } = req
+  if (!decoded.classes.indexOf(params)) {
+    for (const list in roles) {
+      if (decoded.roles.indexOf(roles[list]) !== -1) return true
+    }
+    return false
+  } else return true
+  // Or simply return true and comment the entire code for testing so it will always work.
+}

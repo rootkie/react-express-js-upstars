@@ -1,5 +1,6 @@
 const User = require('../models/user')
 const External = require('../models/external-personnel')
+const util = require('../util')
 
 module.exports.getAllUsers = async(req, res, next) => {
   try {
@@ -21,14 +22,13 @@ module.exports.getAllUsers = async(req, res, next) => {
 
 module.exports.getUser = async(req, res, next) => {
   try {
-    sudo = false
-    // Check for Admin / SuperAdmin / Mentor
-    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
-      sudo = true
-    }
-
+    let approved = await util.checkRole({
+      roles: ['Admin', 'SuperAdmin', 'Mentor'],
+      params: req.params,
+      decoded: req.decoded
+    })
     // Check if user has admin rights and is only querying their own particulars
-    if (req.params.id !== req.decoded._id && sudo === false) {
+    if (approved === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
@@ -57,10 +57,17 @@ module.exports.editUserParticulars = async(req, res, next) => {
     } = req.body
 
     let edited = {}
-    sudo = false
-    // Check for Admin / SuperAdmin / Mentor
-    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
-      sudo = true
+    let approved = await util.checkRole({
+      roles: ['Admin', 'SuperAdmin', 'Mentor'],
+      params: req.params,
+      decoded: req.decoded
+    })
+    // Check if user has admin rights and is only querying their own particulars
+    if (approved === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
     }
 
     // Check userId is provided
@@ -71,16 +78,8 @@ module.exports.editUserParticulars = async(req, res, next) => {
       })
     }
 
-    // Only allows user to edit their own particulars unless they are admin
-    if (userId !== req.decoded._id && sudo === false) {
-      throw ({
-        status: 403,
-        error: 'Your client does not have the permissions to access this function.'
-      })
-    }
-
     // If admin is editing, they can also edit the admin field
-    if (sudo) {
+    if (req.decoded.roles.indexOf('Admin') || req.decoded.roles.indexOf('SuperAdmin')) {
       if (req.body.admin) {
         edited['admin'] = req.body.admin
       }

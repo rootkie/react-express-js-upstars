@@ -8,7 +8,7 @@ module.exports.addStudent = async(req, res, next) => {
     const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
 
     // If editor has no admin rights, restrict the entering of Admin Field
-    if (req.decoded && (req.decoded.roles.indexOf('Admin') != -1 && req.decoded.roles.indexOf('SuperAdmin') != -1)) {
+    if (req.decoded && (req.decoded.roles.indexOf('Admin') !== -1 && req.decoded.roles.indexOf('SuperAdmin') !== -1)) {
       if (req.body.admin) {
         edited['admin'] = req.body.admin
       }
@@ -23,7 +23,7 @@ module.exports.addStudent = async(req, res, next) => {
 
     // Update student based on IC Number and validate it
     const newStudent = new Student(edited)
-    const error = await newStudent.validateSync();
+    const error = await newStudent.validateSync()
 
     if (error) {
       console.error(error)
@@ -37,30 +37,29 @@ module.exports.addStudent = async(req, res, next) => {
     res.status(201).json({
       newStudent: successStudentSignup
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.code == 11000) {
       return res.status(400).send({
         error: 'Account already exist. If this is a mistake please contact our system admin.'
       })
-    }
-    else if (err.status) {
+    } else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
 module.exports.editStudentById = async(req, res, next) => {
   try {
     // Check if studentId exists
-    if (!req.body.studentId) throw ({
-      status: 400,
-      error: 'Please provide a studentId'
-    })
+    if (!req.body.studentId) {
+      throw ({
+        status: 400,
+        error: 'Please provide a studentId'
+      })
+    }
 
     let edited = {}
 
@@ -85,25 +84,21 @@ module.exports.editStudentById = async(req, res, next) => {
     res.status(200).json({
       editedStudent
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
-    if (err.name == 'ValidationError') {
+    if (err.name === 'ValidationError') {
       return res.status(400).send({
         error: 'Our server had issues validating your inputs. Please fill in using proper values'
       })
-    }
-    else if (err.code == 11000) {
+    } else if (err.code === 11000) {
       return res.status(400).send({
         error: 'You have already signed up an account. If this is a mistake please contact our system admin.'
       })
-    }
-    else if (err.status) {
+    } else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -114,8 +109,7 @@ module.exports.getAll = async(req, res, next) => {
     return res.status(200).json({
       students
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -130,8 +124,7 @@ module.exports.getStudentById = async(req, res, next) => {
     return res.status(200).json({
       student
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -142,10 +135,12 @@ module.exports.deleteStudent = async(req, res, next) => {
     studentId
   } = req.body
   try {
-    if (!studentId || studentId.indexOf('') !== -1) throw ({
-      status: 400,
-      error: 'Please provide a studentId and ensure input is correct'
-    })
+    if (!studentId || studentId.indexOf('') !== -1) {
+      throw ({
+        status: 400,
+        error: 'Please provide a studentId and ensure input is correct'
+      })
+    }
 
     // Find and delete student from database
     const studentDeleted = await Student.remove({
@@ -153,22 +148,22 @@ module.exports.deleteStudent = async(req, res, next) => {
         '$in': studentId
       }
     })
-    
-    if (!studentDeleted) return res.status(404).json({
-      error: 'student not found'
-    })
+
+    if (!studentDeleted) {
+      return res.status(404).json({
+        error: 'student not found'
+      })
+    }
     return res.status(200).json({
       status: 'success',
       deleted: studentDeleted
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }

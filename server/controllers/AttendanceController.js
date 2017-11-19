@@ -1,6 +1,7 @@
 const Attendance = require('../models/attendance')
 let mongoose = require('mongoose')
 let moment = require('moment')
+let util = require('../util')
 
 module.exports.addEditAttendance = async(req, res, next) => {
   try {
@@ -14,38 +15,42 @@ module.exports.addEditAttendance = async(req, res, next) => {
     } = req.body
 
     // Check if classId is provided
-    if (!classId) throw ({
-      status: 400,
-      error: 'Please provide a classId'
-    })
-
-    sudo = false
-      // Check for Admin / SuperAdmin / Mentor. If true, they have sudo rights
-    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
-      sudo = true
+    if (!classId) {
+      throw ({
+        status: 400,
+        error: 'Please provide a classId'
+      })
     }
-    // Check if the person editing the attendance actually belong to that class unless the user has sudo rights
-    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) throw ({
-      status: 403,
-      error: 'Your client does not have the permissions to access this function.'
+
+    let approved = await util.checkRole({
+      roles: ['Admin', 'SuperAdmin', 'Mentor'],
+      params: req.params,
+      decoded: req.decoded
     })
+    // Check if user has admin rights and is only querying their own particulars
+    if (approved === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     let hoursInt = parseInt(hours, 10)
-      // If there is no class, everyone will get 0 hours
+    // If there is no class, everyone will get 0 hours
     if (type !== 'Class') hoursInt = 0
 
     let attendance1 = {
-        date,
-        hours: hoursInt,
-        class: classId,
-        users,
-        students,
-        type
-      } // Find attendance based on class and date. If exist, updates; else creates a new one.
+      date,
+      hours: hoursInt,
+      class: classId,
+      users,
+      students,
+      type
+    } // Find attendance based on class and date. If exist, updates; else creates a new one.
 
     const newAttendance = await Attendance.findOneAndUpdate({
       class: classId,
-      date,
+      date
     }, attendance1, {
       upsert: true,
       new: true,
@@ -56,20 +61,17 @@ module.exports.addEditAttendance = async(req, res, next) => {
       status: 'success',
       attendance: newAttendance
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else if (err.name == 'ValidationError') {
+    } else if (err.name === 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -79,22 +81,26 @@ module.exports.deleteAttendance = async(req, res, next) => {
       attendanceId,
       classId
     } = req.body
-      // Check if classId and date are provided
-    if (!attendanceId || attendanceId.indexOf('') !== -1 || !classId) throw ({
-      status: 400,
-      error: 'Please provide at least 1 attendanceId, classId and ensure input is correct'
-    })
-
-    sudo = false
-      // Check for Admin / SuperAdmin / Mentor. If true, they have sudo rights
-    if (req.decoded.roles.indexOf('Admin') !== -1 || req.decoded.roles.indexOf('SuperAdmin') !== -1 || req.decoded.roles.indexOf('Mentor') !== -1) {
-      sudo = true
+    // Check if classId and date are provided
+    if (!attendanceId || attendanceId.indexOf('') !== -1 || !classId) {
+      throw ({
+        status: 400,
+        error: 'Please provide at least 1 attendanceId, classId and ensure input is correct'
+      })
     }
-    // Prevent any non admin rights users to delete attendance of classes they do not belong to 
-    if (req.decoded.classes.indexOf(classId) == -1 && sudo == false) throw ({
-      status: 403,
-      error: 'Your client does not have the permissions to access this function.'
+
+    let approved = await util.checkRole({
+      roles: ['Admin', 'SuperAdmin', 'Mentor'],
+      params: req.params,
+      decoded: req.decoded
     })
+    // Check if user has admin rights and is only querying their own particulars
+    if (approved === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // Remove it from database
     const removed = await Attendance.remove({
@@ -107,18 +113,15 @@ module.exports.deleteAttendance = async(req, res, next) => {
       status: 'success',
       removed
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
-
 
 module.exports.getAttendance = async(req, res, next) => {
   try {
@@ -151,8 +154,7 @@ module.exports.getAttendance = async(req, res, next) => {
       status: 'success',
       foundAttendances
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -168,9 +170,7 @@ module.exports.getAttendanceById = async(req, res, next) => {
     return res.status(200).json({
       attendances
     })
-
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -187,10 +187,18 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
     let user = {}
 
     // Prevent users from getting attendance of other users unless they are admin
-    if (userId !== req.decoded._id && (req.decoded.roles.indexOf('Admin') == -1 && req.decoded.roles.indexOf('SuperAdmin') == -1)) throw ({
-      status: 403,
-      error: 'Your client does not have the permissions to access this function.'
+    let approved = await util.checkRole({
+      roles: ['Admin', 'SuperAdmin'],
+      params: req.params,
+      decoded: req.decoded
     })
+    // Check if user has admin rights and is only querying their own particulars
+    if (approved === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
@@ -233,12 +241,12 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
         }, // Stats to show total number of 'Class'(es) held.
         'attended': {
           '$sum': '$users.status'
-        }, // Stats to show total attended 
+        }, // Stats to show total attended
         'totalHours': {
           '$sum': {
             '$cond': [{
-              '$eq': ["$users.status", 1]
-              }, '$hours', 0]
+              '$eq': ['$users.status', 1]
+            }, '$hours', 0]
           }
         } // Stats to show total hours volunteered in the chosen time period. Only counted if one attends the lesson
       })
@@ -254,17 +262,15 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      attendances,
+      attendances
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    else next(err)
+    } else next(err)
   }
 }
 
@@ -319,12 +325,12 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
         }, // Stats to show total number of 'Class'(es) held.
         'attended': {
           '$sum': '$students.status'
-        }, // Stats to show total attended 
+        }, // Stats to show total attended
         'totalHours': {
           '$sum': {
             '$cond': [{
-              '$eq': ["$students.status", 1]
-              }, '$hours', 0]
+              '$eq': ['$students.status', 1]
+            }, '$hours', 0]
           }
         } // Stats to show total hours volunteered in the chosen time period. Only counted if one attends the lesson
       })
@@ -342,8 +348,7 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
       status: 'success',
       attendances
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
@@ -374,7 +379,7 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
         'total': {
           '$sum': {
             '$cond': [{
-              '$eq': ["$type", 'Class']
+              '$eq': ['$type', 'Class']
             }, 1, 0]
           }
         }, // Stats to show total number of 'Class'(es) held.
@@ -417,7 +422,7 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
         'total': {
           '$sum': {
             '$cond': [{
-              '$eq': ["$type", 'Class']
+              '$eq': ['$type', 'Class']
             }, 1, 0]
           }
         },
@@ -446,15 +451,13 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
     let tutorNumber = foundAttendanceforUser.length
     let tutorStudentRatio = tutorNumber / studentNumber
 
-
     res.status(200).json({
       status: 'success',
       foundAttendanceforUser,
       foundAttendanceforStudent,
       tutorStudentRatio
     })
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     next(err)
   }
