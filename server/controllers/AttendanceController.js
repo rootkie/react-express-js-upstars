@@ -22,9 +22,9 @@ module.exports.addEditAttendance = async(req, res, next) => {
       })
     }
 
-    let approved = await util.checkRole({
+    let approved = await util.checkClass({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
-      params: req.params,
+      params: classId,
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
@@ -82,7 +82,7 @@ module.exports.deleteAttendance = async(req, res, next) => {
       classId
     } = req.body
     // Check if classId and date are provided
-    if (!attendanceId || attendanceId.indexOf('') !== -1 || !classId) {
+    if (!attendanceId || !classId) {
       throw ({
         status: 400,
         error: 'Please provide at least 1 attendanceId, classId and ensure input is correct'

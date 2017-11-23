@@ -9,7 +9,6 @@ const hasRole = require('./routeMiddleware').hasRole
 // ==============Serving api======================
 // only takes in x-www-form-urlencoded in req
 
-
 module.exports = app => {
   // Classes
   app.get('/api/class', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), classControl.getAll)
@@ -21,7 +20,7 @@ module.exports = app => {
   // Students
   app.get('/api/students', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getAll)
   app.get('/api/students/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getStudentById)
-  app.post('/api/students', studentControl.addStudent)
+  app.post('/api/students', hasRole(['SuperAdmin']), studentControl.addStudent)
   app.put('/api/students', hasRole(['Mentor', 'Admin', 'SuperAdmin']), studentControl.editStudentById)
   app.delete('/api/students', hasRole(['SuperAdmin']), studentControl.deleteStudent)
   app.post('/api/students/class', hasRole(['Admin', 'SuperAdmin']), classControl.addStudentsToClass)
@@ -61,6 +60,6 @@ module.exports = app => {
   app.post('/api/login', authControl.login)
   app.get('/api/check', authControl.check) // This is for frontend to check validity of token.
 
-  //Special Treats
+  //  Special Treats
   app.post('/api/generateAdminUser', adminControl.generateAdminUser)
 }

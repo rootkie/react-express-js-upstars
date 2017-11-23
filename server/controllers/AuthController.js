@@ -12,18 +12,10 @@ module.exports.login = async(req, res, next) => {
       email
     } = req.body
 
-    if (!email) {
+    if (!email || !password) {
       throw ({
         status: 400,
-        error: 'Please provide an email address.'
-      })
-    }
-
-    // Return error if no password provided
-    if (!password) {
-      throw ({
-        status: 400,
-        error: 'Please provide a password.'
+        error: 'Please provide an email address and password.'
       })
     }
 
@@ -75,19 +67,11 @@ module.exports.register = async(req, res, next) => {
       preferredTimeSlot
     } = req.body
 
-    // Return error if no email provided
-    if (!email) {
+    // Return error if no password or email provided
+    if (!email || !password || password.length < 6) {
       throw ({
         status: 400,
-        error: 'Please provide an email address.'
-      })
-    }
-
-    // Return error if no password provided
-    if (!password || password.length < 6) {
-      throw ({
-        status: 400,
-        error: 'Please provide a password that is at least 6 characters long.'
+        error: 'Please provide an email and password that is also at least 6 characters long.'
       })
     }
 

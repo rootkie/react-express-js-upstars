@@ -60,26 +60,6 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
 }
 
 module.exports.createUser = async(req, res, next) => {
-    /* Test input
-        {
-        	"email": "test@gmail.com",
-        	"password": "password",
-        	"profile": {
-        		"name": "Admin",
-        		"gender": "M",
-        		"dob": 123,
-        		"nationality": "SG",
-        		"nric": "S1102s",
-        		"address": "Blk Scrub",
-        		"postalCode": 122222,
-        		"homephone": 123,
-        		"handphone": 123
-        	},
-        	"commencementDate": 20072017,
-        	"exitDate": 20072057,
-        	"roles": ["SuperVisor", "Mentor"]
-        }
-        */
   try {
     let {
             email,

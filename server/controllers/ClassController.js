@@ -156,7 +156,7 @@ module.exports.deleteClass = async(req, res, next) => {
     classId
   } = req.body
   try {
-    if (!classId || classId.indexOf('') !== -1) {
+    if (!classId) {
       throw ({
         status: 400,
         error: 'Please provide at least 1 classId and ensure input is correct.'
@@ -169,6 +169,11 @@ module.exports.deleteClass = async(req, res, next) => {
         '$in': classId
       }
     })
+    if (classDeleted.result.n === 0) {
+      return res.status(404).json({
+        error: 'Class not found'
+      })
+    }
     return res.status(200).json({
       classDeleted
     })

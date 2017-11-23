@@ -24,7 +24,7 @@ module.exports.getUser = async(req, res, next) => {
   try {
     let approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
-      params: req.params,
+      params: req.params.id,
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
@@ -55,11 +55,18 @@ module.exports.editUserParticulars = async(req, res, next) => {
     let {
       userId
     } = req.body
+     // Check userId is provided
+    if (!userId) {
+      throw ({
+        status: 400,
+        error: 'Please provide a userId'
+      })
+    }
 
     let edited = {}
     let approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
-      params: req.params,
+      params: userId,
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
@@ -70,20 +77,6 @@ module.exports.editUserParticulars = async(req, res, next) => {
       })
     }
 
-    // Check userId is provided
-    if (!userId) {
-      throw ({
-        status: 400,
-        error: 'Please provide a userId'
-      })
-    }
-
-    // If admin is editing, they can also edit the admin field
-    if (req.decoded.roles.indexOf('Admin') || req.decoded.roles.indexOf('SuperAdmin')) {
-      if (req.body.admin) {
-        edited['admin'] = req.body.admin
-      }
-    }
     const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
 
     // Go through list
@@ -123,7 +116,7 @@ module.exports.deleteUser = async(req, res, next) => {
   } = req.body
   try {
     // Check userId is provided
-    if (!userId || userId.indexOf('') !== -1) {
+    if (!userId) {
       throw ({
         status: 400,
         error: 'Please provide a userId and ensure input is correct'
@@ -166,20 +159,15 @@ module.exports.changePassword = async(req, res, next) => {
         error: 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'
       })
     }
-    // Prevent people from changing passwords of someone else even if they know his password
-    if (userId !== req.decoded._id) {
-      throw ({
-        status: 403,
-        error: 'Your client does not have the permissions to access this function.'
-      })
-    }
 
     // Find the user and match his password hash
     const user = await User.findById(userId)
-    if (!user) throw ({
-      status: 401,
-      error: 'User does not exist!'
-    })
+    if (!user) {
+      throw ({
+        status: 400,
+        error: 'User does not exist!'
+      })
+    }
     const isMatch = await user.comparePasswordPromise(oldPassword)
     if (!isMatch) {
       throw ({

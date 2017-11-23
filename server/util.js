@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const jwt = require('jsonwebtoken')
 const config = require('./config/constConfig')
 
@@ -35,7 +35,7 @@ module.exports.checkRole = req => {
     params,
     decoded
   } = req
-  if (params.id !== decoded._id) {
+  if (params !== decoded._id) {
     for (const list in roles) {
       if (decoded.roles.indexOf(roles[list]) !== -1) return true
     }
@@ -51,7 +51,7 @@ module.exports.checkClass = req => {
     params,
     decoded
   } = req
-  if (!decoded.classes.indexOf(params)) {
+  if (decoded.classes.indexOf(params) === -1) {
     for (const list in roles) {
       if (decoded.roles.indexOf(roles[list]) !== -1) return true
     }

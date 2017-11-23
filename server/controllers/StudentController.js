@@ -8,10 +8,8 @@ module.exports.addStudent = async(req, res, next) => {
     const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
 
     // If editor has no admin rights, restrict the entering of Admin Field
-    if (req.decoded && (req.decoded.roles.indexOf('Admin') !== -1 && req.decoded.roles.indexOf('SuperAdmin') !== -1)) {
-      if (req.body.admin) {
-        edited['admin'] = req.body.admin
-      }
+    if (req.body.admin) {
+      edited['admin'] = req.body.admin
     }
 
     // Use a loop to populate edited if field is present
@@ -39,7 +37,7 @@ module.exports.addStudent = async(req, res, next) => {
     })
   } catch (err) {
     console.log(err)
-    if (err.code == 11000) {
+    if (err.code === 11000) {
       return res.status(400).send({
         error: 'Account already exist. If this is a mistake please contact our system admin.'
       })
@@ -135,7 +133,7 @@ module.exports.deleteStudent = async(req, res, next) => {
     studentId
   } = req.body
   try {
-    if (!studentId || studentId.indexOf('') !== -1) {
+    if (!studentId) {
       throw ({
         status: 400,
         error: 'Please provide a studentId and ensure input is correct'
@@ -148,8 +146,7 @@ module.exports.deleteStudent = async(req, res, next) => {
         '$in': studentId
       }
     })
-
-    if (!studentDeleted) {
+    if (studentDeleted.result.n === 0) {
       return res.status(404).json({
         error: 'student not found'
       })
