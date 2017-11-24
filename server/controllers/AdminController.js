@@ -1,6 +1,8 @@
 const User = require('../models/user')
 let util = require('../util.js')
 
+// Every function here is restricted to SA only
+
 module.exports.adminChangePassword = async(req, res, next) => {
   try {
     let {

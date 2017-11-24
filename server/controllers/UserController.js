@@ -2,6 +2,7 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
 
+// Admin / SA
 module.exports.getAllUsers = async(req, res, next) => {
   try {
     // Retrieve all users in the system
@@ -20,6 +21,7 @@ module.exports.getAllUsers = async(req, res, next) => {
   }
 }
 
+// Everyone but restricted to their own class checked using token
 module.exports.getUser = async(req, res, next) => {
   try {
     let approved = await util.checkRole({
@@ -50,6 +52,7 @@ module.exports.getUser = async(req, res, next) => {
   }
 }
 
+// Same logic, everyone can access their own stuff
 module.exports.editUserParticulars = async(req, res, next) => {
   try {
     let {
@@ -110,6 +113,7 @@ module.exports.editUserParticulars = async(req, res, next) => {
   }
 }
 
+// SA
 module.exports.deleteUser = async(req, res, next) => {
   let {
     userId
@@ -144,6 +148,7 @@ module.exports.deleteUser = async(req, res, next) => {
   }
 }
 
+// Change your own password
 module.exports.changePassword = async(req, res, next) => {
   try {
     let {
@@ -193,6 +198,7 @@ module.exports.changePassword = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.getExternal = async(req, res, next) => {
   try {
     // Find the external and get className

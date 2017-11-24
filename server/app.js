@@ -46,8 +46,9 @@ app.use(bodyParser.urlencoded({
   extended: true
 }))
 app.use(bodyParser.json())
-
-app.use(mongoSanitize())
+app.use(mongoSanitize({
+  replaceWith: new String('')
+}))
 
 require('./Routes')(app)
 

@@ -4,6 +4,7 @@ const generateToken = util.generateToken
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 // ============== Start of all the functions ==============
+// Everyone can access without token
 
 module.exports.login = async(req, res, next) => {
   try {

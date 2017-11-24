@@ -1,6 +1,6 @@
 const Student = require('../models/student')
 
-// Add student function works for both admin and usual student sign up
+// Add student function works for SA only. If need ability for students to sign up, please tell me.
 module.exports.addStudent = async(req, res, next) => {
   try {
     let edited = {}
@@ -49,6 +49,7 @@ module.exports.addStudent = async(req, res, next) => {
   }
 }
 
+// Mentor / Admin / SuperAdmin only
 module.exports.editStudentById = async(req, res, next) => {
   try {
     // Check if studentId exists
@@ -100,6 +101,7 @@ module.exports.editStudentById = async(req, res, next) => {
   }
 }
 
+// Everyone
 module.exports.getAll = async(req, res, next) => {
   try {
     // Find all students from database
@@ -112,7 +114,7 @@ module.exports.getAll = async(req, res, next) => {
     next(err)
   }
 }
-
+// Everyone with token
 module.exports.getStudentById = async(req, res, next) => {
   try {
     let studentId = req.params.id
@@ -127,7 +129,7 @@ module.exports.getStudentById = async(req, res, next) => {
     next(err)
   }
 }
-
+// SuperAdmin only
 module.exports.deleteStudent = async(req, res, next) => {
   let {
     studentId

@@ -3,6 +3,7 @@ let mongoose = require('mongoose')
 let moment = require('moment')
 let util = require('../util')
 
+// All attendances are accessible by everyone including tutor. A second round of checking is done within the function as well as the front-end
 module.exports.addEditAttendance = async(req, res, next) => {
   try {
     let {
@@ -21,7 +22,6 @@ module.exports.addEditAttendance = async(req, res, next) => {
         error: 'Please provide a classId'
       })
     }
-
     let approved = await util.checkClass({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
       params: classId,

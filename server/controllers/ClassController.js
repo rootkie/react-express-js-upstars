@@ -3,7 +3,7 @@ const Student = require('../models/student')
 const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
-
+// SuperAdmin
 module.exports.addClass = async(req, res, next) => {
   try {
     let {
@@ -59,6 +59,7 @@ module.exports.addClass = async(req, res, next) => {
   }
 }
 
+// SuperAdmin
 module.exports.editClass = async(req, res, next) => {
   try {
     let {
@@ -99,6 +100,7 @@ module.exports.editClass = async(req, res, next) => {
   }
 }
 
+// Everyone
 module.exports.getAll = async(req, res, next) => {
   try {
     // Find all classes
@@ -112,6 +114,7 @@ module.exports.getAll = async(req, res, next) => {
   }
 }
 
+// Everyone
 module.exports.getClassById = async(req, res, next) => {
   try {
     let classId = req.params.id
@@ -151,6 +154,7 @@ module.exports.getClassById = async(req, res, next) => {
   }
 }
 
+// SuperAdmin
 module.exports.deleteClass = async(req, res, next) => {
   let {
     classId
@@ -187,6 +191,7 @@ module.exports.deleteClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.addStudentsToClass = async(req, res, next) => {
   try {
     let {
@@ -242,6 +247,7 @@ module.exports.addStudentsToClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.deleteStudentsFromClass = async(req, res, next) => {
   try {
     let {
@@ -294,6 +300,7 @@ module.exports.deleteStudentsFromClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.addUsersToClass = async(req, res, next) => {
   try {
     let {
@@ -349,6 +356,7 @@ module.exports.addUsersToClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.deleteUsersFromClass = async(req, res, next) => {
   try {
     let {
@@ -401,6 +409,7 @@ module.exports.deleteUsersFromClass = async(req, res, next) => {
   }
 }
 
+// SA
 module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
   try {
     let {
@@ -466,6 +475,7 @@ module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
   }
 }
 
+// SA
 module.exports.removeExternalPersonnelFromClass = async(req, res, next) => {
   try {
     let {

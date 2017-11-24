@@ -17,8 +17,8 @@ const AttendanceSchema = new Schema({
   },
   class: {
     type: Schema.ObjectId,
-      ref: 'Class',
-      required: true
+    ref: 'Class',
+    required: true
   },
   users: [{
     list: {
@@ -44,6 +44,11 @@ const AttendanceSchema = new Schema({
   type: {
     type: String,
     enum: ['Class', 'PHoliday', 'Cancelled'],
+    required: true
+  },
+  status: {
+    type: String,
+    default: 'Active',
     required: true
   }
 },
