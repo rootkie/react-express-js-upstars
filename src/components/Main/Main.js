@@ -21,11 +21,11 @@ class Main extends Component{
         const { activePage } = this.state
         switch (activePage){
             case 'Login':
-                return <Redirect to='/login' />
+                return <Redirect push to='/login' />
             case 'vRegister':
-                return <Redirect to='/register/volunteer' />
+                return <Redirect push to='/register/volunteer' />
             case 'sRegister':
-                return <Redirect to='/register/student' />
+                return <Redirect push to='/register/student' />
         }
 
         return(
