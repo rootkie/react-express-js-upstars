@@ -143,15 +143,15 @@ class StudentView extends Component {
           </Table.Header>
 
           <Table.Body>
-            {studentData.map(({profile}, i) => (
+            {studentData.map((student, i) => (
               <Table.Row key={`student-${i}`}>
                 <Table.Cell collapsing>
-                  <Checkbox name={profile.icNumber} onChange={this.handleCheckboxChange} checked={selected.includes(profile.icNumber)} />
+                  <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                 </Table.Cell>
-                <Table.Cell>{profile.name}</Table.Cell>
-                <Table.Cell>{moment().diff(profile.dob, 'years')}</Table.Cell>
-                <Table.Cell>{profile.icNumber}</Table.Cell>
-                <Table.Cell>{profile.gender === 'F' ? 'female' : 'male'}</Table.Cell>
+                <Table.Cell>{student.profile.name}</Table.Cell>
+                <Table.Cell>{moment().diff(student.profile.dob, 'years')}</Table.Cell>
+                <Table.Cell>{student.profile.icNumber}</Table.Cell>
+                <Table.Cell>{student.profile.gender === 'F' ? 'female' : 'male'}</Table.Cell>
               </Table.Row>))}
           </Table.Body>
 
@@ -169,8 +169,8 @@ class StudentView extends Component {
                 <Confirm
                   open={deleteConfirmationVisibility}
                   header='Deleting the following students:'
-                  content={selected.map((ic) => (
-                  studentData.filter((student) => (student.profile.icNumber === ic))[0].profile.name
+                  content={selected.map((id) => (
+                  studentData.filter((student) => (student._id === id))[0].profile.name
                 )).join(', ')}
                   onCancel={this.handleDeleteConfirmation('cancel')}
                   onConfirm={this.handleDeleteConfirmation('confirm')}
