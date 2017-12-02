@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const Student = require('../models/student')
 let util = require('../util.js')
 
 // Every function here is restricted to SA only
@@ -6,12 +7,22 @@ let util = require('../util.js')
 module.exports.adminChangePassword = async(req, res, next) => {
   try {
     let {
-            userId,
-            newPassword
-        } = req.body
+      userId,
+      newPassword
+    } = req.body
 
     // Find user and replace it with the newPassword before saving
     const user = await User.findById(userId)
+      .nor([{
+        'status': 'Suspended'
+      }, {
+        'status': 'Deleted'
+      }])
+    if (!user) {
+      return res.status(404).send({
+        error: 'There is an error processing this as the user does not exist'
+      })
+    }
     user.password = newPassword
     const pwChanged = await user.save()
 
@@ -27,24 +38,24 @@ module.exports.adminChangePassword = async(req, res, next) => {
 module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
   try {
     let {
-            userId,
-            newStatus,
-            newRoles
-        } = req.body
+      userId,
+      newStatus,
+      newRoles
+    } = req.body
     let edited = {}
-        // Check if these fields exist, if it does it will get updated in the database
+    // Check if these fields exist, if it does it will get updated in the database
     if (newStatus) {
       edited.status = newStatus
     }
     if (newRoles) {
       edited.roles = newRoles
     }
-        // Update it on the database with validations
+    // Update it on the database with validations
     const updatedUser = await User.findByIdAndUpdate(userId, edited, {
       new: true,
       runValidators: true
     })
-        // Returns token and necessary information
+    // Returns token and necessary information
     return res.status(200).json({
       user: util.generateToken(updatedUser),
       _id: updatedUser._id,
@@ -64,14 +75,14 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
 module.exports.createUser = async(req, res, next) => {
   try {
     let {
-            email,
-            password,
-            profile,
-            commencementDate,
-            exitDate,
-            roles
-        } = req.body
-        // Check that both email and password are provided
+      email,
+      password,
+      profile,
+      commencementDate,
+      exitDate,
+      roles
+    } = req.body
+    // Check that both email and password are provided
     if (!email) {
       throw ({
         status: 400,
@@ -84,7 +95,7 @@ module.exports.createUser = async(req, res, next) => {
         error: 'Please provide a password'
       })
     }
-        // Check if the email has already been used
+    // Check if the email has already been used
     const existingUser = await User.findOne({
       email
     })
@@ -95,7 +106,7 @@ module.exports.createUser = async(req, res, next) => {
         error: 'Email already exist.'
       })
     }
-        // Create new User and save it after validating it.
+    // Create new User and save it after validating it.
     const user = new User({
       email,
       password,
@@ -135,7 +146,7 @@ module.exports.createUser = async(req, res, next) => {
 
 module.exports.getPendingUsers = async(req, res, next) => {
   try {
-        // Find all users with status as Pending
+    // Find all users with status as Pending
     const users = await User.find({
       'status': 'Pending'
     }).select('profile.name roles').sort('profile.name')
@@ -148,30 +159,68 @@ module.exports.getPendingUsers = async(req, res, next) => {
   }
 }
 
+module.exports.getSuspendedPeople = async(req, res, next) => {
+  try {
+    // Find all people with status as Suspended
+    const users = await User.find({
+      'status': 'Suspended'
+    }).select('profile.name roles').sort('profile.name')
+    const students = await Student.find({
+      'status': 'Suspended'
+    }).select('profile.name').sort('profile.name')
+    res.json({
+      users,
+      students
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
+module.exports.getDeletedPeople = async(req, res, next) => {
+  try {
+    // Find all people with status as Suspended
+    const users = await User.find({
+      'status': 'Deleted'
+    }).select('profile.name roles').sort('profile.name')
+    const students = await Student.find({
+      'status': 'Deleted'
+    }).select('profile.name').sort('profile.name')
+    res.json({
+      users,
+      students
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
 module.exports.generateAdminUser = async(req, res, next) => {
   try {
-        // All compulsory fields: Full test input with validation
-        /* {
-        	"email": "test@gmail.com",
-        	"password": "password",
-        	"profile": {
-        		"name": "Admin",
-        		"gender": "M",
-        		"dob": 123,
-        		"nationality": "SG",
-        		"nric": "S1102s",
-        		"address": "Blk Scrub",
-        		"postalCode": 122222,
-        		"homephone": 123,
-        		"handphone": 123,
-        	}
-        } */
+    // All compulsory fields: Full test input with validation
+    /* {
+    	"email": "test@gmail.com",
+    	"password": "password",
+    	"profile": {
+    		"name": "Admin",
+    		"gender": "M",
+    		"dob": 123,
+    		"nationality": "SG",
+    		"nric": "S1102s",
+    		"address": "Blk Scrub",
+    		"postalCode": 122222,
+    		"homephone": 123,
+    		"handphone": 123,
+    	}
+    } */
     let {
-            email,
-            password,
-            profile
-        } = req.body
-        // Return error if no email provided
+      email,
+      password,
+      profile
+    } = req.body
+    // Return error if no email provided
     if (!email) {
       throw ({
         status: 400,
@@ -179,7 +228,7 @@ module.exports.generateAdminUser = async(req, res, next) => {
       })
     }
 
-        // Return error if no password provided
+    // Return error if no password provided
     if (!password) {
       throw ({
         status: 400,
