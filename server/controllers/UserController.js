@@ -6,7 +6,9 @@ const util = require('../util')
 module.exports.getAllUsers = async(req, res, next) => {
   try {
     // Retrieve all users in the system
-    const users = await User.find({}).select('profile roles status').sort('profile.name')
+    const users = await User.find({
+      'status': 'Active'
+    }).select('profile roles status').sort('profile.name')
 
     return res.status(200).json({
       users
@@ -58,7 +60,7 @@ module.exports.editUserParticulars = async(req, res, next) => {
     let {
       userId
     } = req.body
-     // Check userId is provided
+    // Check userId is provided
     if (!userId) {
       throw ({
         status: 400,
@@ -96,6 +98,12 @@ module.exports.editUserParticulars = async(req, res, next) => {
       runSettersOnQuery: true
     }).select('-password -updatedAt -createdAt')
 
+    if (!user) {
+      throw ({
+        status: 404,
+        error: 'The user you requested to edit does not exist.'
+      })
+    }
     return res.status(200).json({
       editedUser: user
     })
@@ -128,12 +136,26 @@ module.exports.deleteUser = async(req, res, next) => {
     }
 
     // Delete user from database
-    const userDeleted = await User.remove({
+    // Find a user whose status is not previously deleted to change it to delete (Note: $ne == not equals)
+    const userDeleted = await User.update({
       '_id': {
         '$in': userId
+      },
+      status: {
+        '$ne': 'Deleted'
       }
-    })
+    }, {
+      status: 'Deleted'
+    }, {
+      multi: true
+    }).select('profile.name')
 
+    if (userDeleted.n === 0) {
+      throw ({
+        status: 404,
+        error: 'The user you requested to delete does not exist.'
+      })
+    }
     return res.status(200).json({
       status: 'success',
       userDeleted
@@ -199,6 +221,7 @@ module.exports.changePassword = async(req, res, next) => {
 }
 
 // Admin / SA
+// Note that external is the only party we conduct a permanent delete
 module.exports.getExternal = async(req, res, next) => {
   try {
     // Find the external and get className

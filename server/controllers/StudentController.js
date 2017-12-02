@@ -73,12 +73,17 @@ module.exports.editStudentById = async(req, res, next) => {
 
     // Update student based on studentId
     const editedStudent = await Student.findByIdAndUpdate(req.body.studentId, edited, {
-      upsert: true,
       new: true,
       setDefaultsOnInsert: true,
       runValidators: true,
       runSettersOnQuery: true
     })
+    if (!editedStudent) {
+      throw ({
+        status: 404,
+        error: 'The student you requested to edit does not exist.'
+      })
+    }
 
     res.status(200).json({
       editedStudent
@@ -105,7 +110,9 @@ module.exports.editStudentById = async(req, res, next) => {
 module.exports.getAll = async(req, res, next) => {
   try {
     // Find all students from database
-    const students = await Student.find({})
+    const students = await Student.find({
+      status: 'Active'
+    })
     return res.status(200).json({
       students
     })
@@ -143,14 +150,22 @@ module.exports.deleteStudent = async(req, res, next) => {
     }
 
     // Find and delete student from database
-    const studentDeleted = await Student.remove({
+    const studentDeleted = await Student.update({
       '_id': {
         '$in': studentId
+      },
+      status: {
+        '$ne': 'Deleted'
       }
+    }, {
+      status: 'Deleted'
+    }, {
+      multi: true
     })
-    if (studentDeleted.result.n === 0) {
-      return res.status(404).json({
-        error: 'student not found'
+    if (studentDeleted.n === 0) {
+      throw ({
+        status: 404,
+        error: 'The student you requested to delete does not exist.'
       })
     }
     return res.status(200).json({

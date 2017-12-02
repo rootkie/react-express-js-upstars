@@ -19,7 +19,8 @@ module.exports.adminChangePassword = async(req, res, next) => {
         'status': 'Deleted'
       }])
     if (!user) {
-      return res.status(404).send({
+      throw ({
+        status: 404,
         error: 'There is an error processing this as the user does not exist'
       })
     }
@@ -31,7 +32,11 @@ module.exports.adminChangePassword = async(req, res, next) => {
     })
   } catch (err) {
     console.log(err)
-    next(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
   }
 }
 
@@ -55,6 +60,12 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
       new: true,
       runValidators: true
     })
+    if (!updatedUser) {
+      throw ({
+        status: 404,
+        error: 'User does not exist'
+      })
+    }
     // Returns token and necessary information
     return res.status(200).json({
       user: util.generateToken(updatedUser),
@@ -67,6 +78,11 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
     if (err.name === 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
+    else if (err.status) {
+      res.status(err.status).send({
+        error: err.error
       })
     } else next(err)
   }
