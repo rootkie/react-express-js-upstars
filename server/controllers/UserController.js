@@ -121,7 +121,7 @@ module.exports.editUserParticulars = async(req, res, next) => {
   }
 }
 
-// SA
+// Everyone
 module.exports.deleteUser = async(req, res, next) => {
   let {
     userId
@@ -134,20 +134,28 @@ module.exports.deleteUser = async(req, res, next) => {
         error: 'Please provide a userId and ensure input is correct'
       })
     }
+    let approved = await util.checkRole({
+      roles: ['SuperAdmin'],
+      params: userId,
+      decoded: req.decoded
+    })
+    // Check if user has admin rights and is only querying their own particulars
+    if (approved === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // Delete user from database
     // Find a user whose status is not previously deleted to change it to delete (Note: $ne == not equals)
     const userDeleted = await User.update({
-      '_id': {
-        '$in': userId
-      },
+      '_id': userId,
       status: {
         '$ne': 'Deleted'
       }
     }, {
       status: 'Deleted'
-    }, {
-      multi: true
     }).select('profile.name')
 
     if (userDeleted.n === 0) {

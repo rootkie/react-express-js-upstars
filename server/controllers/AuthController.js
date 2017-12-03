@@ -21,22 +21,31 @@ module.exports.login = async(req, res, next) => {
     }
 
     const user = await User.findOne({
-      email
+      email,
+      status: {
+        $ne: 'Deleted'
+      }
     })
 
     // Checks if user exists
     if (!user) {
       throw ({
-        status: 401,
-        error: 'Wrong email or password'
+        status: 404,
+        error: 'Wrong email. Please sign up for an account here'
       })
     }
-      // compare password
+    // compare password
     const isMatch = await user.comparePasswordPromise(password)
     if (!isMatch) {
       throw ({
         status: 401,
         error: 'Wrong email or password'
+      })
+    }
+    if (user.status === 'Suspended') {
+      throw ({
+        status: 403,
+        error: 'Your account has been suspended, please contact the administrator for follow up actions'
       })
     }
 
@@ -80,14 +89,29 @@ module.exports.register = async(req, res, next) => {
     const existingUser = await User.findOne({
       email
     })
-    if (existingUser) {
+    // 3 cases:
+    // case 1: Email exists and user is legitimate
+    if (existingUser && existingUser.status !== 'Deleted' && existingUser.status !== 'Suspended') {
       throw {
         status: 409,
         error: 'Email already exists.'
       }
     }
+    // case 2: user has a bad record and is suspended
+    if (existingUser && existingUser.status === 'Suspended') {
+      throw {
+        status: 403,
+        error: 'Your account has been suspended. Please contact the administrator for follow up actions'
+      }
+    }
+    // case 3: user is deleted by admin or by oneself
+    // If user choose to create a new account after deleting, the old records preserved will be permanently deleted and
+    // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
+    if (existingUser && existingUser.status === 'Deleted') {
+      await User.findByIdAndRemove(existingUser._id)
+    }
 
-    // Create a new user after validating
+    // Create a new user after validating and making sure everything is right
     const user = new User({
       email,
       password,
@@ -127,7 +151,9 @@ module.exports.check = async(req, res, next) => {
   try {
     let token = req.headers['x-access-token']
     let result = (auth) => {
-      return res.status(200).json({ auth })
+      return res.status(200).json({
+        auth
+      })
     }
     if (!token) return result(false)
     jwt.verify(token, config.secret, (err, decoded) => {
@@ -196,7 +222,9 @@ module.exports.simpleRegister = async(req, res, next) => {
       },
       password: password
     })
-    const userObject = await user.save({validateBeforeSave: false})
+    const userObject = await user.save({
+      validateBeforeSave: false
+    })
     delete userObject.password // this is a temporary hack.
     console.log(userObject)
     res.json({

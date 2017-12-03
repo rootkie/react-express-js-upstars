@@ -165,7 +165,7 @@ module.exports.getPendingUsers = async(req, res, next) => {
     // Find all users with status as Pending
     const users = await User.find({
       'status': 'Pending'
-    }).select('profile.name roles').sort('profile.name')
+    }).select('profile.name roles email').sort('profile.name')
     res.json({
       users
     })
@@ -180,7 +180,7 @@ module.exports.getSuspendedPeople = async(req, res, next) => {
     // Find all people with status as Suspended
     const users = await User.find({
       'status': 'Suspended'
-    }).select('profile.name roles').sort('profile.name')
+    }).select('profile.name roles email').sort('profile.name')
     const students = await Student.find({
       'status': 'Suspended'
     }).select('profile.name').sort('profile.name')
@@ -199,7 +199,8 @@ module.exports.getDeletedPeople = async(req, res, next) => {
     // Find all people with status as Suspended
     const users = await User.find({
       'status': 'Deleted'
-    }).select('profile.name roles').sort('profile.name')
+    }).select('profile.name roles email').sort('profile.name')
+    // Find students who are deleted
     const students = await Student.find({
       'status': 'Deleted'
     }).select('profile.name').sort('profile.name')
@@ -284,6 +285,54 @@ module.exports.generateAdminUser = async(req, res, next) => {
       token: util.generateToken(userObject),
       _id: userObject._id,
       roles: userObject.roles
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
+module.exports.multipleUserDelete = async(req, res, next) => {
+  let {
+    userId
+  } = req.body
+  try {
+    // Check userId is provided
+    if (!userId) {
+      throw ({
+        status: 400,
+        error: 'Please provide a userId and ensure input is correct'
+      })
+    }
+
+    // Delete user from database
+    // Find a user whose status is not previously deleted to change it to delete (Note: $ne == not equals)
+    const userDeleted = await User.update({
+      '_id': {
+        '$in': userId
+      },
+      status: {
+        '$ne': 'Deleted'
+      }
+    }, {
+      status: 'Deleted'
+    }, {
+      multi: true
+    }).select('profile.name')
+
+    if (userDeleted.n === 0) {
+      throw ({
+        status: 404,
+        error: 'The user you requested to delete does not exist.'
+      })
+    }
+    return res.status(200).json({
+      status: 'success',
+      userDeleted
     })
   } catch (err) {
     console.log(err)
