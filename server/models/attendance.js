@@ -45,11 +45,6 @@ const AttendanceSchema = new Schema({
     type: String,
     enum: ['Class', 'PHoliday', 'Cancelled'],
     required: true
-  },
-  status: {
-    type: String,
-    default: 'Active',
-    required: true
   }
 },
   {
