@@ -41,6 +41,12 @@ module.exports.getUser = async(req, res, next) => {
 
     // Find user based on ID and retrieve its className
     const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
+    if (!user) {
+      throw ({
+        status: 404,
+        error: 'User does not exist. Please try again'
+      })
+    }
     return res.status(200).json({
       user
     })

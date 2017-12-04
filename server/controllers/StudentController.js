@@ -128,12 +128,22 @@ module.exports.getStudentById = async(req, res, next) => {
 
     // Find student based on ID and retrieve className
     const student = await Student.findById(studentId).populate('classes', 'className')
+    if (!student) {
+      throw ({
+        status: 404,
+        error: 'Student does not exist. Please try again'
+      })
+    }
     return res.status(200).json({
       student
     })
   } catch (err) {
     console.log(err)
-    next(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
   }
 }
 // SuperAdmin only
