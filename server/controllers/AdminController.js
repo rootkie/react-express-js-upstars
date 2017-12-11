@@ -1,5 +1,6 @@
 const User = require('../models/user')
 const Student = require('../models/student')
+const Class = require('../models/class')
 let util = require('../util.js')
 
 // Every function here is restricted to SA only
@@ -48,6 +49,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
       newRoles
     } = req.body
     let edited = {}
+    let editedClass = null
     // Check if these fields exist, if it does it will get updated in the database
     if (newStatus) {
       edited.status = newStatus
@@ -66,12 +68,44 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
         error: 'User does not exist'
       })
     }
+    // Add the user back to the previous classes if admin restores Suspended or Deleted Account.
+    // Else, the user would be deleted from the respective classes if they are suspended or deleted.
+    if (updatedUser.status === 'Active' && updatedUser.classes) {
+      editedClass = await Class.update({
+        _id: {
+          $in: updatedUser.classes
+        }
+      }, {
+        $addToSet: {
+          users: updatedUser._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    } else if (updatedUser.classes) {
+      editedClass = await Class.update({
+        _id: {
+          $in: updatedUser.classes
+        }
+      }, {
+        $pull: {
+          users: updatedUser._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
+
     // Returns token and necessary information
     return res.status(200).json({
       user: util.generateToken(updatedUser),
       _id: updatedUser._id,
       email: updatedUser.email,
-      roles: updatedUser.roles
+      roles: updatedUser.roles,
+      status: updatedUser.status,
+      editedClass
     })
   } catch (err) {
     console.log(err)
@@ -79,8 +113,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
       })
-    }
-    else if (err.status) {
+    } else if (err.status) {
       res.status(err.status).send({
         error: err.error
       })

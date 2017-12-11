@@ -1,6 +1,7 @@
 const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
+const Class = require('../models/class')
 
 // Admin / SA
 module.exports.getAllUsers = async(req, res, next) => {
@@ -132,6 +133,7 @@ module.exports.deleteUser = async(req, res, next) => {
   let {
     userId
   } = req.body
+  let editedClass = null
   try {
     // Check userId is provided
     if (!userId) {
@@ -155,24 +157,39 @@ module.exports.deleteUser = async(req, res, next) => {
 
     // Delete user from database
     // Find a user whose status is not previously deleted to change it to delete (Note: $ne == not equals)
-    const userDeleted = await User.update({
+    const userDeleted = await User.findOneAndUpdate({
       '_id': userId,
       status: {
         '$ne': 'Deleted'
       }
     }, {
       status: 'Deleted'
-    }).select('profile.name')
-
-    if (userDeleted.n === 0) {
+    }).select('profile.name classes')
+    if (!userDeleted) {
       throw ({
         status: 404,
         error: 'The user you requested to delete does not exist.'
       })
     }
+    // If the user is in any classes, delete the user from the class so that the population would not fail
+    if (userDeleted.classes) {
+      editedClass = await Class.update({
+        _id: {
+          $in: userDeleted.classes
+        }
+      }, {
+        $pull: {
+          users: userDeleted._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
     return res.status(200).json({
       status: 'success',
-      userDeleted
+      userDeleted,
+      editedClass
     })
   } catch (err) {
     console.log(err)
