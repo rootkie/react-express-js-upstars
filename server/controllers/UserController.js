@@ -41,7 +41,7 @@ module.exports.getUser = async(req, res, next) => {
     }
 
     // Find user based on ID and retrieve its className
-    const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
+    const user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt')
     if (!user) {
       throw ({
         status: 404,

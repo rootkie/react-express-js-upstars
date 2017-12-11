@@ -192,12 +192,19 @@ module.exports.deleteClass = async(req, res, next) => {
     }
 
     // Remove class from database
-    const classDeleted = await Class.remove({
+    const classDeleted = await Class.update({
       '_id': {
         '$in': classId
+      },
+      'status': {
+        '$ne': 'Stopped'
       }
+    }, {
+      'status': 'Stopped'
+    }, {
+      multi: true
     })
-    if (classDeleted.result.n === 0) {
+    if (classDeleted.n === 0) {
       return res.status(404).json({
         error: 'Class not found'
       })

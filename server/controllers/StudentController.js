@@ -156,7 +156,7 @@ module.exports.getStudentById = async(req, res, next) => {
     let studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className')
+    const student = await Student.findById(studentId).populate('classes', 'className status')
     if (!student) {
       throw ({
         status: 404,
