@@ -1,5 +1,5 @@
 const Student = require('../models/student')
-
+const Class = require('../models/class')
 // Add student function works for SA only. If need ability for students to sign up, please tell me.
 module.exports.addStudent = async(req, res, next) => {
   try {
@@ -84,7 +84,36 @@ module.exports.editStudentById = async(req, res, next) => {
         error: 'The student you requested to edit does not exist.'
       })
     }
-
+    // Repopulate the classes if the status of the student is changed back to Active
+    if (editedStudent.status === 'Active' && editedStudent.classes) {
+      await Class.update({
+        _id: {
+          $in: editedStudent.classes
+        }
+      }, {
+        $addToSet: {
+          students: editedStudent._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
+    // If status if changed to anything other than Active, we will delete their IDs from the classes instead
+    else if (editedStudent.classes) {
+      await Class.update({
+        _id: {
+          $in: editedStudent.classes
+        }
+      }, {
+        $pull: {
+          students: editedStudent._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
     res.status(200).json({
       editedStudent
     })
@@ -177,6 +206,25 @@ module.exports.deleteStudent = async(req, res, next) => {
         status: 404,
         error: 'The student you requested to delete does not exist.'
       })
+    } else {
+      for (let number = 0; number < studentId.length; number++) {
+        let studentDetails = await Student.findById(studentId[number], 'classes')
+        console.log(studentDetails)
+        if (studentDetails.classes) {
+          await Class.update({
+            _id: {
+              $in: studentDetails.classes
+            }
+          }, {
+            $pull: {
+              students: studentDetails._id
+            }
+          }, {
+            new: true,
+            multi: true
+          })
+        }
+      }
     }
     return res.status(200).json({
       status: 'success',

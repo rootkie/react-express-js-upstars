@@ -171,7 +171,8 @@ module.exports.deleteUser = async(req, res, next) => {
         error: 'The user you requested to delete does not exist.'
       })
     }
-    // If the user is in any classes, delete the user from the class so that the population would not fail
+    // If the user is in any classes, delete the user from the class so that the population would not fail. Upon restoring of their status (if necessary)
+    // their classes would be re populated.
     if (userDeleted.classes) {
       editedClass = await Class.update({
         _id: {

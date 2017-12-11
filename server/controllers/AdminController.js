@@ -355,13 +355,33 @@ module.exports.multipleUserDelete = async(req, res, next) => {
       status: 'Deleted'
     }, {
       multi: true
-    }).select('profile.name')
-
+    })
+    // If theres actually someone deleted, loop through and delete the userId from the respective classes so that the population of the class would
+    // go well. Once the status of the user is changed back to Active, the classes of the user would be automatically restored. Even if the user
+    // is really deleted and a new account is created, the system would not crash.
     if (userDeleted.n === 0) {
       throw ({
         status: 404,
         error: 'The user you requested to delete does not exist.'
       })
+    } else {
+      for (let number = 0; number < userId.length; number++) {
+        let userDetails = await User.findById(userId[number], 'classes')
+        if (userDetails.classes) {
+          await Class.update({
+            _id: {
+              $in: userDetails.classes
+            }
+          }, {
+            $pull: {
+              users: userDetails._id
+            }
+          }, {
+            new: true,
+            multi: true
+          })
+        }
+      }
     }
     return res.status(200).json({
       status: 'success',
