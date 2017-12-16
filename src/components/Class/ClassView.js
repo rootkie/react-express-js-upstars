@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import { Table, Checkbox, Button, Icon, Confirm, Dimmer, Loader } from 'semantic-ui-react'
 import { array, func, object, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
 
 class ClassView extends Component {
   static propTypes = {
