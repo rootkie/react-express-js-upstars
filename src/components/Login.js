@@ -38,12 +38,14 @@ class Login extends Component {
     e.preventDefault()
     const { email, password } = this.state
 
+    // Set the message and attempts to log in
     this.setState({ message: 'Logging in...' })
     axios.post('/login', { email, password })
       .then(response => {
         window.localStorage.setItem('token', response.data.token)
         this.setState({ redirect: true })
       })
+      // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
         console.log(error)
         this.setState({message: error.response.data.error})

@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { string } from 'prop-types'
 import ClassForm from './ClassForm.js'
 import ClassView from './ClassView.js'
+import ClassEdit from './ClassEdit.js'
 import axios from 'axios'
-import { filterData } from '../../utils.js'
 
 // Declare variables that originate from the URI
 class ClassWrap extends Component {
@@ -16,40 +16,26 @@ class ClassWrap extends Component {
     super(props)
     this.state = {
       classData: [],
-      students: [],
-      users: [],
-      isLoading: true,
-      headerConfig: {'headers': { 'x-access-token': window.localStorage.token }}
+      isLoading: true
     }
     this.getClasses()
   }
-// API Call to GET all classes and their respective students and users information
+// API Call to GET all classes and their respective students and users information. Exposed to every single role.
   getClasses = () => {
-    axios.get('class', this.state.headerConfig)
-      .then((response) => {
+    axios.get('class')
+      .then(response => {
         this.setState({ classData: response.data.classes, isLoading: false })
       })
       .catch((err) => {
         console.log(err)
       })
-      // API call to GET all students
-    axios.get('students', this.state.headerConfig)
-        .then(response => {
-          this.setState({ students: response.data.students })
-          console.log(response)
-        })
-        // API Call to GET all users
-    axios.get('users', this.state.headerConfig)
-        .then(response => {
-          this.setState({ users: response.data.users })
-          console.log(response)
-        })
   }
+
 // functions that are called from props in Class dependent js
   addClass = (classDataToSubmit) => {
     const { classData } = this.state
-    return axios.post('/class', classDataToSubmit, this.state.headerConfig)
-      .then((response) => {
+    return axios.post('/class', classDataToSubmit)
+      .then(response => {
         this.setState({ classData: classData.concat({ ...classDataToSubmit, _id: response.data.newClass._id }) })
       })
   }
@@ -58,10 +44,6 @@ class ClassWrap extends Component {
     const { classData } = this.state
     const { sid } = this.props
     return axios.put('/class', {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': window.localStorage.token
-      },
       ...classDataToSubmit,
       classId: sid
     })
@@ -79,10 +61,6 @@ class ClassWrap extends Component {
     }
     console.log(data)
     return axios.delete('/class', {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': window.localStorage.token
-      },
       data})
         .then(() => {
           this.setState({classData: this.state.classData.filter((Class) => !classIds.includes(Class._id))})
@@ -95,14 +73,27 @@ class ClassWrap extends Component {
 
   }
 
+  getOneClass = () => {
+    let classId = this.props.sid
+    this.setState({ isLoading: true })
+    axios.get('class/' + classId, this.state.headerConfig)
+    .then(response => {
+      this.setState({ classData: response.data.class, isLoading: false })
+      console.log(response.data.class)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+  }
+
   // Various routes that would render different components
   render () {
-    const { op, sid } = this.props
+    const { op } = this.props
     const { classData, isLoading } = this.state
     return (
       <div>
         {op === 'add' && <ClassForm addClass={this.addClass} /> }
-        {op === 'edit' && <ClassForm classData={filterData(this.state.classData, [{field: '_id', value: sid}])[0]} edit editClass={this.editClass} /> }
+        {op === 'edit' && <ClassEdit classData={this.getOneClass} editClass={this.editClass} /> }
         {op === 'view' && <ClassView classData={classData} deleteClass={this.deleteClass} isLoading={isLoading} /> }
       </div>
     )
