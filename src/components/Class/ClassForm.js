@@ -11,7 +11,7 @@ const typeOptions = [
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
-// Initial State, everything is empty. Will fill it up next. 
+// Initial State, everything is empty. Will fill it up next.
 // StartDate is set to default today.
 const initialState = {
   className: '',
@@ -48,6 +48,10 @@ class ClassForm extends Component {
       dayAndTime,
       startDate
     }
+    if (classType === 'Enrichment') {
+      data.dayAndTime = 'nil'
+    }
+
     try {
       await addClass(data)
       // Reset the form back to the initial state.

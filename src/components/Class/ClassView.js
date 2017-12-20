@@ -1,8 +1,9 @@
 import React, {Component} from 'react'
 import { Table, Checkbox, Button, Icon, Confirm, Dimmer, Loader } from 'semantic-ui-react'
-import { array, func, object, bool } from 'prop-types'
+import { array, func, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
 
+// Check the type of props are in the correct forms
 class ClassView extends Component {
   static propTypes = {
     classData: array.isRequired,
@@ -10,31 +11,20 @@ class ClassView extends Component {
     isLoading: bool
   }
 
-  static contextTypes = {
-    router: object
-  }
-
   state = {
     selected: [],
     deleteConfirmationVisibility: false
   }
 
+  // Either push or filter that array classID off the deletion list
   handleCheckBox = (e, { name: _id, checked }) => { // name here is actually class _id
     let { selected } = this.state
     if (checked) {
       selected.push(_id)
     } else {
-      selected = selected.filter((element) => element !== _id)
+      selected = selected.filter(element => element !== _id)
     }
     this.setState({selected})
-  }
-
-  handleEdit = () => {
-    const { selected } = this.state
-    if (selected.length === 1) {
-      const toEditId = selected[0]
-      this.context.router.history.push(`/classes/edit/${toEditId}`)
-    }
   }
 
   handleDelete = () => {
@@ -89,7 +79,9 @@ class ClassView extends Component {
                 <Table.Cell collapsing>
                   <Checkbox name={Class._id} onChange={this.handleCheckBox} checked={selected.includes(Class._id)} />
                 </Table.Cell>
-                <Table.Cell>{Class.className}</Table.Cell>
+                <Table.Cell>
+                  <Link to={'id/' + Class._id}>{Class.className}</Link>
+                </Table.Cell>
                 <Table.Cell>{Class.classType}</Table.Cell>
                 <Table.Cell>{Class.dayAndTime}</Table.Cell>
                 <Table.Cell>{Class.venue}</Table.Cell>
@@ -104,8 +96,7 @@ class ClassView extends Component {
                     <Icon name='group' />New Class
                 </Button>
                 </Link>
-                <Button size='small' negative onClick={this.handleDeleteConfirmation('show')} disabled={selected.length === 0} >Delete</Button>
-                <Button size='small' onClick={this.handleEdit} disabled={selected.length !== 1} >Edit</Button>
+                <Button size='small' negative onClick={this.handleDeleteConfirmation('show')} disabled={selected.length === 0}>Delete</Button>
                 <Confirm
                   open={deleteConfirmationVisibility}
                   header='Deleting the following classes:'

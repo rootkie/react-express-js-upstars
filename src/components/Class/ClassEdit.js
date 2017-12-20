@@ -1,20 +1,8 @@
-/*// API call to GET all students
-axios.get('students', this.state.headerConfig)
-.then(response => {
-  this.setState({ students: response.data.students })
-  console.log(response)
-})
-// API Call to GET all users
-axios.get('users', this.state.headerConfig)
-.then(response => {
-  this.setState({ users: response.data.users })
-  console.log(response)
-})*/
-
 import React, { Component } from 'react'
-import { Form, Message, Header, Table, Checkbox, Button, Icon, Dropdown } from 'semantic-ui-react'
+import { Form, Message, Header, Table, Checkbox, Button, Icon, Dropdown, Dimmer, Loader } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { object, bool, func } from 'prop-types'
+import { func, string } from 'prop-types'
+import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 
@@ -36,98 +24,99 @@ const usersOptions = [
 
 // Initial State, everything is empty. Will fill it up next
 const initialState = {
-  className: '',
-  classType: '',
-  venue: '',
-  dayAndTime: '',
-  startDate: '',
+  oneClassData: [],
+  studentsValue: '',
+  usersValue: '',
+  studentSelected: [],
+  userSelected: [],
+  isLoading: false,
   serverErrorMessage: ''
 }
-
+/*
+axios.get('students', this.state.headerConfig)
+.then(response => {
+  this.setState({ students: response.data.students })
+  console.log(response)
+})
+// API Call to GET all users
+axios.get('users', this.state.headerConfig)
+.then(response => {
+  this.setState({ users: response.data.users })
+  console.log(response)
+})
+*/
 // Import the functions declared in ClassWrap here as props to be called - for cleaner code
+// Temp: id is the classID placed in the URI
 class ClassEdit extends Component {
   static propTypes = {
-    classData: object,
-    students: object,
-    users: object,
-    edit: bool,
     editClass: func,
-    addClass: func
+    id: string
   }
 
-  // Remove any empty arrays or missing ones I guess.
-  filterPropData = (checkArray) => { // consider moving this up to the wrapper
-    const { classData } = this.props
-    return Object.keys(classData).reduce((last, curr) => (checkArray.includes(curr) ? {...last, [curr]: classData[curr]} : last
-  ), {})
+  constructor (props) {
+    super(props)
+    this.state = { ...initialState }
   }
 
-  // If classData is present, populate the states to show else just use the initial empty state.
-  state = this.props.classData
-  ? {
-    ...this.filterPropData(['className', 'classType', 'dayAndTime', 'venue']),
-    startDate: moment(this.props.classData.startDate),
-    error: [],
-    stateOptions: [],
-    users: this.props.users,
-    students: this.props.students,
-    submitSuccess: false,
-    serverErrorMessage: ''
+  componentWillMount () {
+    this.getClass(this.props.id)
   }
-  : {...initialState, submitSuccess: false}
-  checkRequired = (checkArray) => {
-    const error = []
-    for (let i of checkArray) {
-      const item = this.state[i]
-      if (!item || item === '') error.push(i)
-    }
-    return error
+
+  getClass = (classId) => {
+    this.setState({ isLoading: true })
+    axios.get('class/' + classId)
+    .then(response => {
+      this.setState({ oneClassData: response.data.class, isLoading: false })
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 
   handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
 
-  handleDateChange = (startDate) => this.setState({startDate})
+  handleDateChange = (startDate) => {
+    let oneClassData = this.state.oneClassData
+    oneClassData.startDate = startDate
+    this.setState({oneClassData})
+  }
 
   // Calling functions when the submit button is clicked
   handleSubmit = async e => {
     e.preventDefault()
-    const { className, classType, venue, dayAndTime, startDate } = this.state
+    const { oneClassData } = this.state
     const { edit, editClass, addClass } = this.props
     // check required fields
-    let requiredFields = (classType === 'Tuition') ? ['className', 'classType', 'venue', 'dayAndTime', 'startDate'] : ['className', 'classType', 'venue', 'startDate']
-    const error = this.checkRequired(requiredFields)
 
-    if (error.length === 0) {
-      const data = {
-        className,
-        classType,
-        venue,
-        dayAndTime,
-        startDate
+    /*
+    if (edit) {
+      try {
+        await editClass(data)
+        this.showSuccess()
+      } catch (error) {
+        this.setState({serverErrorMessage: error.response.data.error})
+        console.log(error)
       }
-      // If there is no error and is in edit mode
-      if (edit) {
-        try {
-          await editClass(data)
-          this.showSuccess()
-        } catch (error) {
-          this.setState({serverErrorMessage: error.response.data.error})
-          console.log(error)
-        }
-      } else { // not in edit mode
-        try {
-          await addClass(data)
-          this.showSuccess()
-          this.setState({...initialState})
-        } catch (error) {
-          this.setState({serverErrorMessage: error.response.data.error})
-        }
+    } else { // not in edit mode
+      try {
+        await addClass(data)
+        this.showSuccess()
+        this.setState({...initialState})
+      } catch (error) {
+        this.setState({serverErrorMessage: error.response.data.error})
       }
-      // From here, this handles then there are errors.
-    } else {
-      console.log('Incomplete Fields')
-      this.setState({error, serverErrorMessage: 'Please check all required fields are filled in correctly'})
     }
+    */
+  }
+
+  handleCheckBox = (e, { name: _id, checked }) => { // name here is actually _id
+    let { studentSelected } = this.state
+    if (checked) {
+      studentSelected.push(_id)
+    } else {
+      studentSelected = studentSelected.filter(element => element !== _id)
+    }
+    this.setState({studentSelected})
   }
 
   showSuccess = () => {
@@ -136,66 +125,110 @@ class ClassEdit extends Component {
   }
 
   render () {
-    const { className, classType, venue, dayAndTime, serverErrorMessage, submitSuccess, studentsValue, students, users } = this.state // submitted version are used to display the info sent through POST (not necessary)
-    const { edit } = this.props
-    return (
-      <div>
-        <Header as='h3' dividing>Class information</Header>
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
-          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
-          <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-          <Form.Field required>
-            <label>Starting Date</label>
-            <DatePicker
-              placeholderText='Click to select a date'
-              dateFormat='DD/MM/YYYY'
-              selected={this.state.startDate}
-              onChange={this.handleDateChange} required />
-          </Form.Field>
-          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
-          <Form.Button>Submit</Form.Button>
-          { edit === true &&
-          <div>
-            <Header as='h3' dividing>Students</Header>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>Action</Table.HeaderCell>
-                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Footer fullWidth>
-                <Table.Row>
-                  <Table.HeaderCell />
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' negative icon labelPosition='left' primary size='small'>
-                      <Icon name='user delete' /> Delete Student(s)
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-            <Dropdown value={studentsValue} placeholder='Add Students' fluid multiple search selection options={studentsOptions} onChange={this.handleChange} />
-            <br />
-            <Button positive fluid>Add Students</Button>
+    const { serverErrorMessage, submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    if (isLoading) {
+      return (
+        <div>
+          <Dimmer active>
+            <Loader indeterminate>Loading data</Loader>
+          </Dimmer>
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          <Header as='h3' dividing>Class information</Header>
+          <Form onSubmit={this.handleSubmit}>
+            <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly required />
+            <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} readOnly required />
+            <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly required />
+            <Form.Field>
+              <label>Starting Date</label>
+              <DatePicker
+                placeholderText='Click to select a date'
+                dateFormat='DD/MM/YYYY'
+                selected={moment(oneClassData.startDate)}
+                onChange={this.handleDateChange} required readOnly />
+            </Form.Field>
+            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly />
+            {/* Will work on the roles management that only people who own this class or are Admin could use the front-end edit function */}
+            <Form.Button>Edit</Form.Button>
 
-            <Header as='h3' dividing>Users</Header>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>Action</Table.HeaderCell>
-                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-            </Table>
-          </div>
-        }
-          {serverErrorMessage.length > 0 && <Message negative>{serverErrorMessage}</Message> }
-          {submitSuccess && <Message positive>Class created</Message> }
-        </Form>
-      </div>
-    )
+            <div>
+              <Header as='h3' dividing>Students</Header>
+              <Table compact celled>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>Action</Table.HeaderCell>
+                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+
+                <Table.Body>
+                  {oneClassData.students.map((Student, i) => (
+                    <Table.Row key={`student-${i}`}>
+                      <Table.Cell collapsing>
+                        <Checkbox name={Student._id} />
+                      </Table.Cell>
+                      <Table.Cell>{Student.profile.name}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+
+                <Table.Footer fullWidth>
+                  <Table.Row>
+                    <Table.HeaderCell />
+                    <Table.HeaderCell colSpan='4'>
+                      <Button floated='right' negative icon labelPosition='left' primary size='small'>
+                        <Icon name='user delete' /> Delete Student(s)
+                    </Button>
+                    </Table.HeaderCell>
+                  </Table.Row>
+                </Table.Footer>
+              </Table>
+              <Dropdown value={studentsValue} placeholder='Add Students' fluid multiple search selection options={studentsOptions} onChange={this.handleChange} />
+              <br />
+              <Button positive fluid>Add Students</Button>
+
+              <Header as='h3' dividing>Users</Header>
+              <Table compact celled>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>Action</Table.HeaderCell>
+                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {oneClassData.users.map((User, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell collapsing>
+                        <Checkbox name={User._id} />
+                      </Table.Cell>
+                      <Table.Cell>{User.profile.name}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+
+                <Table.Footer fullWidth>
+                  <Table.Row>
+                    <Table.HeaderCell />
+                    <Table.HeaderCell colSpan='4'>
+                      <Button floated='right' negative icon labelPosition='left' primary size='small'>
+                        <Icon name='user delete' /> Delete User(s)
+                    </Button>
+                    </Table.HeaderCell>
+                  </Table.Row>
+                </Table.Footer>
+              </Table>
+
+              <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection options={usersOptions} onChange={this.handleChange} />
+              <br />
+              <Button positive fluid>Add Users</Button>
+            </div>
+            {serverErrorMessage.length > 0 && <Message negative>{serverErrorMessage}</Message> }
+            {submitSuccess && <Message positive>Class Updated</Message> }
+          </Form>
+        </div>
+      )
+    }
   }
 }
 

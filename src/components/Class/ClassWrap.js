@@ -16,6 +16,7 @@ class ClassWrap extends Component {
     super(props)
     this.state = {
       classData: [],
+      oneClassData: [],
       isLoading: true
     }
     this.getClasses()
@@ -36,6 +37,9 @@ class ClassWrap extends Component {
     const { classData } = this.state
     return axios.post('/class', classDataToSubmit)
       .then(response => {
+      // Maybe do a redirect here
+
+      // Adds the new class to the array of classes so that when you click view you can see it immediately.
         this.setState({ classData: classData.concat({ ...classDataToSubmit, _id: response.data.newClass._id }) })
       })
   }
@@ -48,6 +52,7 @@ class ClassWrap extends Component {
       classId: sid
     })
       .then(() => {
+        // Loop through and if that array contains the same _id as the request id (sid), change it and leaving the rest the same.
         const updatedClassData = classData.map((element) => (
           element._id === sid ? {...classDataToSubmit, _id: sid} : element
         ))
@@ -60,6 +65,7 @@ class ClassWrap extends Component {
       classId: classIds
     }
     console.log(data)
+    // After the deletion API is successful, remove these items from the front-end
     return axios.delete('/class', {
       data})
         .then(() => {
@@ -73,27 +79,14 @@ class ClassWrap extends Component {
 
   }
 
-  getOneClass = () => {
-    let classId = this.props.sid
-    this.setState({ isLoading: true })
-    axios.get('class/' + classId, this.state.headerConfig)
-    .then(response => {
-      this.setState({ classData: response.data.class, isLoading: false })
-      console.log(response.data.class)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
-  }
-
   // Various routes that would render different components
   render () {
-    const { op } = this.props
+    const { op, sid } = this.props
     const { classData, isLoading } = this.state
     return (
       <div>
         {op === 'add' && <ClassForm addClass={this.addClass} /> }
-        {op === 'edit' && <ClassEdit classData={this.getOneClass} editClass={this.editClass} /> }
+        {op === 'id' && <ClassEdit editClass={this.editClass} id={sid} /> }
         {op === 'view' && <ClassView classData={classData} deleteClass={this.deleteClass} isLoading={isLoading} /> }
       </div>
     )
