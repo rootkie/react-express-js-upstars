@@ -155,7 +155,7 @@ class AttendanceForm extends Component {
 // additional fields like `key` and `text`, mongoose does not care and will simply ignore it and only accept those defined and accepted by backend
   handleSubmit = e => {
     e.preventDefault()
-    const { date, className, type, students, users, hours  } = this.state
+    const { date, className, type, students, users, hours } = this.state
     // check required fields
     const error = this.checkRequired(['date', 'className', 'type', 'students', 'users'])
 

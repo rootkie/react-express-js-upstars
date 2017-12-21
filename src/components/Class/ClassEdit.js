@@ -12,39 +12,24 @@ const typeOptions = [
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
-const studentsOptions = [
-  { key: 'test1', text: 'test1', value: 'test1' },
-  { key: 'test2', text: 'test2', value: 'test2' }
-]
-
-const usersOptions = [
-  { key: 'testtest1', text: 'Male', value: 'Male' },
-  { key: 'testtest2', text: 'Female', value: 'testtest1' }
+const statusOptions = [
+  { key: 'Active', text: 'Active', value: 'Active' },
+  { key: 'Stopped', text: 'Stopped', value: 'Stopped' }
 ]
 
 // Initial State, everything is empty. Will fill it up next
 const initialState = {
   oneClassData: [],
-  studentsValue: '',
-  usersValue: '',
+  studentsValue: [],
+  usersValue: [],
   studentSelected: [],
   userSelected: [],
   isLoading: false,
-  serverErrorMessage: ''
+  edit: false,
+  serverErrorMessage: '',
+  ButtonContent: 'Edit Class Information'
 }
-/*
-axios.get('students', this.state.headerConfig)
-.then(response => {
-  this.setState({ students: response.data.students })
-  console.log(response)
-})
-// API Call to GET all users
-axios.get('users', this.state.headerConfig)
-.then(response => {
-  this.setState({ users: response.data.users })
-  console.log(response)
-})
-*/
+
 // Import the functions declared in ClassWrap here as props to be called - for cleaner code
 // Temp: id is the classID placed in the URI
 class ClassEdit extends Component {
@@ -60,6 +45,7 @@ class ClassEdit extends Component {
 
   componentWillMount () {
     this.getClass(this.props.id)
+    this.getStudentsAndUsers()
   }
 
   getClass = (classId) => {
@@ -73,40 +59,79 @@ class ClassEdit extends Component {
     })
   }
 
-  handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
+  getStudentsAndUsers = () => {
+    // Get the people as a temp solution for adding them
+    axios.get('students')
+      .then(response => {
+        let students = []
+        for (let [index, studentList] of response.data.students.entries()) {
+          students[index] = {
+            key: studentList.profile.name,
+            text: studentList.profile.name,
+            value: studentList.profile.name,
+            id: studentList._id
+          }
+        }
+        this.setState({ students })
+        console.log(students)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+// API Call to GET all users
+    axios.get('users')
+      .then(response => {
+        let users = []
+        for (let [index, userList] of response.data.users.entries()) {
+          users[index] = {
+            key: userList.profile.name,
+            text: userList.profile.name,
+            value: userList.profile.name,
+            id: userList._id
+          }
+        }
+        this.setState({ users })
+        console.log(users)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  handleChange = (e, { name, value }) => {
+    let { oneClassData } = this.state
+    // let newClassData = Object.assign({}, oneClassData)
+    oneClassData[name] = value
+    this.setState({ oneClassData })
+  }
 
   handleDateChange = (startDate) => {
     let oneClassData = this.state.oneClassData
     oneClassData.startDate = startDate
-    this.setState({oneClassData})
+    this.setState({ oneClassData })
   }
 
   // Calling functions when the submit button is clicked
   handleSubmit = async e => {
     e.preventDefault()
-    const { oneClassData } = this.state
-    const { edit, editClass, addClass } = this.props
-    // check required fields
-
-    /*
-    if (edit) {
+    const { oneClassData, edit } = this.state
+    const { editClass } = this.props
+    if (!edit) {
+      this.setState({ edit: true, isLoading: true, ButtonContent: 'Save edits' })
+      setTimeout(() => { this.setState({isLoading: false}) }, 1500)
+    } else {
+      if (oneClassData.classType === 'Enrichment') {
+        oneClassData.dayAndTime = 'nil'
+      }
       try {
-        await editClass(data)
+        await editClass(oneClassData)
         this.showSuccess()
+        this.setState({edit: false, ButtonContent: 'Edit Class Information'})
       } catch (error) {
         this.setState({serverErrorMessage: error.response.data.error})
         console.log(error)
       }
-    } else { // not in edit mode
-      try {
-        await addClass(data)
-        this.showSuccess()
-        this.setState({...initialState})
-      } catch (error) {
-        this.setState({serverErrorMessage: error.response.data.error})
-      }
     }
-    */
   }
 
   handleCheckBox = (e, { name: _id, checked }) => { // name here is actually _id
@@ -124,8 +149,16 @@ class ClassEdit extends Component {
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
+  addUser = async e => {
+    e.preventDefault()
+  }
+
+  addStudent = async e => {
+    e.preventDefault()
+  }
+
   render () {
-    const { serverErrorMessage, submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected, students, users, edit, ButtonContent } = this.state // submitted version are used to display the info sent through POST (not necessary)
     if (isLoading) {
       return (
         <div>
@@ -138,94 +171,97 @@ class ClassEdit extends Component {
       return (
         <div>
           <Header as='h3' dividing>Class information</Header>
-          <Form onSubmit={this.handleSubmit}>
-            <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly required />
-            <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} readOnly required />
-            <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly required />
+          <Form>
+            <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly={!edit} required />
+            <Form.Group widths='equal'>
+              <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} readOnly={!edit} required />
+              <Form.Select label='Type' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} readOnly={!edit} required />
+            </Form.Group>
+            <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly={!edit} required />
             <Form.Field>
               <label>Starting Date</label>
               <DatePicker
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
                 selected={moment(oneClassData.startDate)}
-                onChange={this.handleDateChange} required readOnly />
+                onChange={this.handleDateChange}
+                required readOnly={!edit} />
             </Form.Field>
-            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly />
+            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly={!edit} required={oneClassData.classType === 'Tuition'} disabled={oneClassData.classType !== 'Tuition'} />
             {/* Will work on the roles management that only people who own this class or are Admin could use the front-end edit function */}
-            <Form.Button>Edit</Form.Button>
-
-            <div>
-              <Header as='h3' dividing>Students</Header>
-              <Table compact celled>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell width='1'>Action</Table.HeaderCell>
-                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-
-                <Table.Body>
-                  {oneClassData.students.map((Student, i) => (
-                    <Table.Row key={`student-${i}`}>
-                      <Table.Cell collapsing>
-                        <Checkbox name={Student._id} />
-                      </Table.Cell>
-                      <Table.Cell>{Student.profile.name}</Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
-
-                <Table.Footer fullWidth>
-                  <Table.Row>
-                    <Table.HeaderCell />
-                    <Table.HeaderCell colSpan='4'>
-                      <Button floated='right' negative icon labelPosition='left' primary size='small'>
-                        <Icon name='user delete' /> Delete Student(s)
-                    </Button>
-                    </Table.HeaderCell>
-                  </Table.Row>
-                </Table.Footer>
-              </Table>
-              <Dropdown value={studentsValue} placeholder='Add Students' fluid multiple search selection options={studentsOptions} onChange={this.handleChange} />
-              <br />
-              <Button positive fluid>Add Students</Button>
-
-              <Header as='h3' dividing>Users</Header>
-              <Table compact celled>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell width='1'>Action</Table.HeaderCell>
-                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {oneClassData.users.map((User, i) => (
-                    <Table.Row key={`user-${i}`}>
-                      <Table.Cell collapsing>
-                        <Checkbox name={User._id} />
-                      </Table.Cell>
-                      <Table.Cell>{User.profile.name}</Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
-
-                <Table.Footer fullWidth>
-                  <Table.Row>
-                    <Table.HeaderCell />
-                    <Table.HeaderCell colSpan='4'>
-                      <Button floated='right' negative icon labelPosition='left' primary size='small'>
-                        <Icon name='user delete' /> Delete User(s)
-                    </Button>
-                    </Table.HeaderCell>
-                  </Table.Row>
-                </Table.Footer>
-              </Table>
-
-              <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection options={usersOptions} onChange={this.handleChange} />
-              <br />
-              <Button positive fluid>Add Users</Button>
-            </div>
-            {serverErrorMessage.length > 0 && <Message negative>{serverErrorMessage}</Message> }
+            <Form.Button onClick={this.handleSubmit} content={ButtonContent} />
             {submitSuccess && <Message positive>Class Updated</Message> }
+            <br />
           </Form>
+          <div>
+            <Header as='h3' dividing>Students</Header>
+            <Table compact celled>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell width='1'>Action</Table.HeaderCell>
+                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+
+              <Table.Body>
+                {oneClassData.students.map((Student, i) => (
+                  <Table.Row key={`student-${i}`}>
+                    <Table.Cell collapsing>
+                      <Checkbox name={Student._id} />
+                    </Table.Cell>
+                    <Table.Cell>{Student.profile.name}</Table.Cell>
+                  </Table.Row>))}
+              </Table.Body>
+
+              <Table.Footer fullWidth>
+                <Table.Row>
+                  <Table.HeaderCell />
+                  <Table.HeaderCell colSpan='4'>
+                    <Button floated='right' negative icon labelPosition='left' primary size='small'>
+                      <Icon name='user delete' /> Delete Student(s)
+                    </Button>
+                  </Table.HeaderCell>
+                </Table.Row>
+              </Table.Footer>
+            </Table>
+            <Dropdown placeholder='Add Students' fluid multiple search selection options={students} name='studentsValue' value={studentsValue} onChange={this.handleChange} />
+            <br />
+            <Button positive fluid onClick={this.addStudent}>Add Students</Button>
+
+            <Header as='h3' dividing>Users</Header>
+            <Table compact celled>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell width='1'>Action</Table.HeaderCell>
+                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {oneClassData.users.map((User, i) => (
+                  <Table.Row key={`user-${i}`}>
+                    <Table.Cell collapsing>
+                      <Checkbox name={User._id} />
+                    </Table.Cell>
+                    <Table.Cell>{User.profile.name}</Table.Cell>
+                  </Table.Row>))}
+              </Table.Body>
+
+              <Table.Footer fullWidth>
+                <Table.Row>
+                  <Table.HeaderCell />
+                  <Table.HeaderCell colSpan='4'>
+                    <Button floated='right' negative icon labelPosition='left' primary size='small'>
+                      <Icon name='user delete' /> Delete User(s)
+                    </Button>
+                  </Table.HeaderCell>
+                </Table.Row>
+              </Table.Footer>
+            </Table>
+
+            <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection name='usersValue' options={users} onChange={this.handleChange} />
+            <br />
+            <Button positive fluid onClick={this.addUser}>Add Users</Button>
+          </div>
         </div>
       )
     }
