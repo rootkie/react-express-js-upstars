@@ -11,6 +11,10 @@ const typeOptions = [
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
+const statusOptions = [
+  { key: 'Active', text: 'Active', value: 'Active' },
+  { key: 'Stopped', text: 'Stopped', value: 'Stopped' }
+]
 // Initial State, everything is empty. Will fill it up next.
 // StartDate is set to default today.
 const initialState = {
@@ -18,6 +22,7 @@ const initialState = {
   classType: '',
   venue: '',
   dayAndTime: '',
+  status: '',
   startDate: moment(),
   submitSuccess: false
 }
@@ -38,7 +43,7 @@ class ClassForm extends Component {
   // Calling functions when the submit button is clicked
   handleSubmit = async e => {
     e.preventDefault()
-    const { className, classType, venue, dayAndTime, startDate } = this.state
+    const { className, classType, venue, dayAndTime, startDate, status } = this.state
     const { addClass } = this.props
 
     const data = {
@@ -46,7 +51,8 @@ class ClassForm extends Component {
       classType,
       venue,
       dayAndTime,
-      startDate
+      startDate,
+      status
     }
     if (classType === 'Enrichment') {
       data.dayAndTime = 'nil'
@@ -74,13 +80,16 @@ class ClassForm extends Component {
   }
 
   render () {
-    const { className, classType, venue, dayAndTime, submitSuccess } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { className, classType, venue, dayAndTime, submitSuccess, status } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
       <div>
         <Header as='h3' dividing>Class information</Header>
         <Form onSubmit={this.handleSubmit}>
           <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
-          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
+          <Form.Group widths='equal'>
+            <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
+            <Form.Select label='Type' options={statusOptions} placeholder='Status' name='status' value={status} onChange={this.handleChange} required />
+          </Form.Group>
           <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
           <Form.Field required>
             <label>Starting Date</label>

@@ -12,12 +12,18 @@ const typeOptions = [
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
+// 2 options available for the choosing of class status
 const statusOptions = [
   { key: 'Active', text: 'Active', value: 'Active' },
   { key: 'Stopped', text: 'Stopped', value: 'Stopped' }
 ]
 
 // Initial State, everything is empty. Will fill it up next
+// This guide roughly shows the usage of these states:
+// 1. oneClassData: the huge array of the entire class DATA
+// 2. students / users Value: The array of ids that are to be added to the class
+// 3. students / users Selected: The array of ids that are checked, prepared to be deleted.
+// 4. Edit Mode is switched off. This determines the look of the page. Once the roles are finished, we can limit the edit function to only Admins
 const initialState = {
   oneClassData: [],
   studentsValue: [],
@@ -26,7 +32,6 @@ const initialState = {
   userSelected: [],
   isLoading: false,
   edit: false,
-  serverErrorMessage: '',
   ButtonContent: 'Edit Class Information'
 }
 
@@ -42,10 +47,9 @@ class ClassEdit extends Component {
     super(props)
     this.state = { ...initialState }
   }
-
+// Before the component mounts, call the getClass function to retrieve everything about the class.
   componentWillMount () {
     this.getClass(this.props.id)
-    this.getStudentsAndUsers()
   }
 
   getClass = (classId) => {
@@ -59,8 +63,9 @@ class ClassEdit extends Component {
     })
   }
 
+  // Called only when the user clicks edit (Preparing for various roles)
   getStudentsAndUsers = () => {
-    // Get the people as a temp solution for adding them
+    // Get the people as a temp solution for adding them. Could implement real time search later.
     axios.get('students')
       .then(response => {
         let students = []
@@ -77,7 +82,6 @@ class ClassEdit extends Component {
       .catch(err => {
         console.log(err)
       })
-// API Call to GET all users
     axios.get('users')
       .then(response => {
         let users = []
@@ -96,20 +100,25 @@ class ClassEdit extends Component {
       })
   }
 
+  // This is called for usual change handling that concerns the change to the main class array oneClassData
   handleChange = (e, { name, value }) => {
     let { oneClassData } = this.state
     oneClassData[name] = value
     this.setState({ oneClassData })
   }
 
+  // This is to handle change for the special dropdown used to choose people to add to class.
   handleInputChange = (e, { name, value }) => {
     this.setState({ [name]: value })
   }
 
+  // Date handling. Only if in edit mode, the dates would actually change. Else it's readOnly.
   handleDateChange = (startDate) => {
-    let oneClassData = this.state.oneClassData
-    oneClassData.startDate = startDate
-    this.setState({ oneClassData })
+    if (this.state.edit) {
+      let oneClassData = this.state.oneClassData
+      oneClassData.startDate = startDate
+      this.setState({ oneClassData })
+    }
   }
 
   // Calling functions when the submit button is clicked
@@ -117,14 +126,17 @@ class ClassEdit extends Component {
     e.preventDefault()
     const { oneClassData, edit } = this.state
     const { editClass } = this.props
+    // Change mode to edit, re-render the page, masked using isLoading. 2 seconds shd be sufficient to getAll users and students
     if (!edit) {
+      this.getStudentsAndUsers()
       this.setState({ edit: true, isLoading: true, ButtonContent: 'Save edits' })
-      setTimeout(() => { this.setState({isLoading: false}) }, 1000)
+      setTimeout(() => { this.setState({isLoading: false}) }, 2000)
     } else {
       if (oneClassData.classType === 'Enrichment') {
         oneClassData.dayAndTime = 'nil'
       }
       try {
+        // Calls the edit function and if successful change the button and page back to its original form.
         await editClass(oneClassData)
         this.showSuccess()
         this.setState({edit: false, ButtonContent: 'Edit Class Information'})
@@ -135,7 +147,8 @@ class ClassEdit extends Component {
     }
   }
 
-  handleCheckBox = (e, { name: _id, checked }) => { // name here is actually _id
+  // 2 different checkBox handlers because we need to edit for both students and users
+  handleCheckBoxForStudent = (e, { name: _id, checked }) => { // name here is actually _id
     let { studentSelected } = this.state
     if (checked) {
       studentSelected.push(_id)
@@ -145,11 +158,23 @@ class ClassEdit extends Component {
     this.setState({studentSelected})
   }
 
+  handleCheckBoxForUser = (e, { name: _id, checked }) => { // name here is actually _id
+    let { userSelected } = this.state
+    if (checked) {
+      userSelected.push(_id)
+    } else {
+      userSelected = userSelected.filter(element => element !== _id)
+    }
+    this.setState({userSelected})
+  }
+
   showSuccess = () => {
     this.setState({submitSuccess: true})
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
+  // API to add user to Class. After adding, the getClass function will call to reinit the state so that the info is accurate
+  // The backend ignores any dupicates so even if you try adding the same person twice it doesnt matter.
   addUser = async e => {
     e.preventDefault()
     axios.post('users/class', {
@@ -181,17 +206,52 @@ class ClassEdit extends Component {
       console.log(err)
     })
   }
-
+// Same for delete user in that the getClass function will call again to reinit the state. This is the easiest way to do it other than to refresh
+// the page. Any manual coding would be tough.
   deleteUser = async e => {
     e.preventDefault()
+    axios.delete('users/class', {
+      data: {
+        classId: this.props.id,
+        userIds: this.state.userSelected
+      }
+    })
+    .then(response => {
+      this.getClass(this.props.id)
+      this.setState({ isLoading: false, submitSuccess: true, userSelected: [] })
+      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    console.log(this.state.userSelected)
   }
 
-  deleteUser = async e => {
-    e.preventDefault()
+  deleteStudent = async e => {
+    axios.delete('students/class', {
+      data: {
+        classId: this.props.id,
+        studentIds: this.state.studentSelected
+      }
+    })
+    .then(response => {
+      this.getClass(this.props.id)
+      this.setState({ isLoading: false, submitSuccess: true, studentSelected: [] })
+      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 
   render () {
+    // Repeated:
+    // 1. oneClassData: the huge array of the entire class DATA
+    // 2. students / users Value: The array of ids that are to be added to the class
+    // 3. students / users Selected: The array of ids that are checked, prepared to be deleted.
+    // 4. Edit Mode is switched off. This determines the look of the page. Once the roles are finished, we can limit the edit function to only Admins
     const { submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected, students, users, edit, ButtonContent } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    // Renders if isLoading is true
     if (isLoading) {
       return (
         <div>
@@ -226,6 +286,7 @@ class ClassEdit extends Component {
             {submitSuccess && <Message positive>Class Updated</Message> }
             <br />
           </Form>
+          {/* This only renders if edit is true. You can see the delete buttons, the dropdown to input students or users for adding */}
           {edit &&
           <div>
             <Header as='h3' dividing>Students</Header>
@@ -241,7 +302,7 @@ class ClassEdit extends Component {
                 {oneClassData.students.map((Student, i) => (
                   <Table.Row key={`student-${i}`}>
                     <Table.Cell collapsing>
-                      <Checkbox name={Student._id} />
+                      <Checkbox name={Student._id} onChange={this.handleCheckBoxForStudent} checked={studentSelected.includes(Student._id)} />
                     </Table.Cell>
                     <Table.Cell>{Student.profile.name}</Table.Cell>
                   </Table.Row>))}
@@ -274,7 +335,7 @@ class ClassEdit extends Component {
                 {oneClassData.users.map((User, i) => (
                   <Table.Row key={`user-${i}`}>
                     <Table.Cell collapsing>
-                      <Checkbox name={User._id} />
+                      <Checkbox name={User._id} onChange={this.handleCheckBoxForUser} checked={userSelected.includes(User._id)} />
                     </Table.Cell>
                     <Table.Cell>{User.profile.name}</Table.Cell>
                   </Table.Row>))}
@@ -297,6 +358,7 @@ class ClassEdit extends Component {
             <Button positive fluid onClick={this.addUser}>Add Users</Button>
           </div>
           }
+          {/* The non-edit mode (view only) offers a light version that is clean to view */}
           {!edit &&
           <div>
             <Header as='h3' dividing>Students</Header>

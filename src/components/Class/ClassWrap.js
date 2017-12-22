@@ -44,6 +44,7 @@ class ClassWrap extends Component {
       })
   }
 
+  // Called from ClassEdit during submit to PUT the necessary info into the DB
   editClass = (classDataToSubmit) => {
     const { classData } = this.state
     const { sid } = this.props
@@ -53,6 +54,7 @@ class ClassWrap extends Component {
     })
       .then(() => {
         // Loop through and if that array contains the same _id as the request id (sid), change it and leaving the rest the same.
+        // This allows the ClassName edited and shown on the overview page to update instantly.
         const updatedClassData = classData.map((element) => (
           element._id === sid ? {...classDataToSubmit, _id: sid} : element
         ))
@@ -73,10 +75,6 @@ class ClassWrap extends Component {
         }).catch((error) => {
           console.log(error)
         })
-  }
-
-  addStudent = () => {
-
   }
 
   // Various routes that would render different components
