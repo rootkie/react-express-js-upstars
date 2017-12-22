@@ -68,8 +68,7 @@ class ClassEdit extends Component {
           students[index] = {
             key: studentList.profile.name,
             text: studentList.profile.name,
-            value: studentList.profile.name,
-            id: studentList._id
+            value: studentList._id
           }
         }
         this.setState({ students })
@@ -86,8 +85,7 @@ class ClassEdit extends Component {
           users[index] = {
             key: userList.profile.name,
             text: userList.profile.name,
-            value: userList.profile.name,
-            id: userList._id
+            value: userList._id
           }
         }
         this.setState({ users })
@@ -100,9 +98,12 @@ class ClassEdit extends Component {
 
   handleChange = (e, { name, value }) => {
     let { oneClassData } = this.state
-    // let newClassData = Object.assign({}, oneClassData)
     oneClassData[name] = value
     this.setState({ oneClassData })
+  }
+
+  handleInputChange = (e, { name, value }) => {
+    this.setState({ [name]: value })
   }
 
   handleDateChange = (startDate) => {
@@ -118,7 +119,7 @@ class ClassEdit extends Component {
     const { editClass } = this.props
     if (!edit) {
       this.setState({ edit: true, isLoading: true, ButtonContent: 'Save edits' })
-      setTimeout(() => { this.setState({isLoading: false}) }, 1500)
+      setTimeout(() => { this.setState({isLoading: false}) }, 1000)
     } else {
       if (oneClassData.classType === 'Enrichment') {
         oneClassData.dayAndTime = 'nil'
@@ -151,9 +152,41 @@ class ClassEdit extends Component {
 
   addUser = async e => {
     e.preventDefault()
+    axios.post('users/class', {
+      classId: this.props.id,
+      userIds: this.state.usersValue
+    })
+    .then(response => {
+      this.getClass(this.props.id)
+      this.setState({ isLoading: false, submitSuccess: true, usersValue: [] })
+      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 
   addStudent = async e => {
+    e.preventDefault()
+    axios.post('students/class', {
+      classId: this.props.id,
+      studentIds: this.state.studentsValue
+    })
+    .then(response => {
+      this.getClass(this.props.id)
+      this.setState({ isLoading: false, submitSuccess: true, studentsValue: [] })
+      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
+
+  deleteUser = async e => {
+    e.preventDefault()
+  }
+
+  deleteUser = async e => {
     e.preventDefault()
   }
 
@@ -193,6 +226,7 @@ class ClassEdit extends Component {
             {submitSuccess && <Message positive>Class Updated</Message> }
             <br />
           </Form>
+          {edit &&
           <div>
             <Header as='h3' dividing>Students</Header>
             <Table compact celled>
@@ -217,14 +251,14 @@ class ClassEdit extends Component {
                 <Table.Row>
                   <Table.HeaderCell />
                   <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' negative icon labelPosition='left' primary size='small'>
+                    <Button floated='right' negative icon labelPosition='left' primary size='small' onClick={this.deleteStudent}>
                       <Icon name='user delete' /> Delete Student(s)
                     </Button>
                   </Table.HeaderCell>
                 </Table.Row>
               </Table.Footer>
             </Table>
-            <Dropdown placeholder='Add Students' fluid multiple search selection options={students} name='studentsValue' value={studentsValue} onChange={this.handleChange} />
+            <Dropdown placeholder='Add Students' fluid multiple search selection options={students} name='studentsValue' value={studentsValue} onChange={this.handleInputChange} />
             <br />
             <Button positive fluid onClick={this.addStudent}>Add Students</Button>
 
@@ -250,7 +284,7 @@ class ClassEdit extends Component {
                 <Table.Row>
                   <Table.HeaderCell />
                   <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' negative icon labelPosition='left' primary size='small'>
+                    <Button floated='right' negative icon labelPosition='left' primary size='small' onClick={this.deleteUser}>
                       <Icon name='user delete' /> Delete User(s)
                     </Button>
                   </Table.HeaderCell>
@@ -258,10 +292,48 @@ class ClassEdit extends Component {
               </Table.Footer>
             </Table>
 
-            <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection name='usersValue' options={users} onChange={this.handleChange} />
+            <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection name='usersValue' options={users} onChange={this.handleInputChange} />
             <br />
             <Button positive fluid onClick={this.addUser}>Add Users</Button>
           </div>
+          }
+          {!edit &&
+          <div>
+            <Header as='h3' dividing>Students</Header>
+            <Table compact celled>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell width='1'>No.</Table.HeaderCell>
+                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+
+              <Table.Body>
+                {oneClassData.students.map((Student, i) => (
+                  <Table.Row key={`student-${i}`}>
+                    <Table.Cell>{i + 1}</Table.Cell>
+                    <Table.Cell>{Student.profile.name}</Table.Cell>
+                  </Table.Row>))}
+              </Table.Body>
+            </Table>
+
+            <Header as='h3' dividing>Users</Header>
+            <Table compact celled>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell width='1'>No.</Table.HeaderCell>
+                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {oneClassData.users.map((User, i) => (
+                  <Table.Row key={`user-${i}`}>
+                    <Table.Cell>{i + 1}</Table.Cell>
+                    <Table.Cell>{User.profile.name}</Table.Cell>
+                  </Table.Row>))}
+              </Table.Body>
+            </Table>
+          </div>}
         </div>
       )
     }
