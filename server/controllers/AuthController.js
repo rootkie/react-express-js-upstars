@@ -20,6 +20,7 @@ module.exports.login = async(req, res, next) => {
       })
     }
 
+    // Search for any users whose accounts are not yet deleted
     const user = await User.findOne({
       email,
       status: {
@@ -105,10 +106,13 @@ module.exports.register = async(req, res, next) => {
       }
     }
     // case 3: user is deleted by admin or by oneself
-    // If user choose to create a new account after deleting, the old records preserved will be permanently deleted and
+    // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
     // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
+    // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
     if (existingUser && existingUser.status === 'Deleted') {
-      await User.findByIdAndRemove(existingUser._id)
+      existingUser.email = 'deleted' + existingUser._id + '@upstars.com'
+      existingUser.password = existingUser._id
+      await existingUser.save()
     }
 
     // Create a new user after validating and making sure everything is right
