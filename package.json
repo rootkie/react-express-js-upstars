@@ -22,7 +22,7 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.1.1",
     "semantic-ui-css": "^2.2.10",
-    "semantic-ui-react": "^0.68.4",
+    "semantic-ui-react": "^0.77.1",
     "simplebar": "^2.4.1"
   },
   "devDependencies": {

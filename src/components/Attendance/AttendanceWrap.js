@@ -10,21 +10,19 @@ import AttendanceSearch from './AttendanceSearch.js'
 import axios from 'axios'
 
 class AttendanceWrap extends Component {
-  // get data from server
+  // get data from server. Declare the states.
   constructor (props) {
     super(props)
     this.state = {
       classData: [],
       attendances: [],
-      token: localStorage.token,
+      token: window.localStorage.token,
       isLoading: true
     }
-    axios({
-        method: 'get',
-        url: '/class',
-        headers: {'x-access-token': this.state.token },
-      }).then((response) => {
-        let classOption =  []
+    // Temp Solution. Would prefer to only GET classes the user belongs in.
+    axios.get('/class')
+      .then((response) => {
+        let classOption = []
         for (let [index, options] of response.data.classes.entries()) {
           classOption[index] = {
             value: options._id,
@@ -66,7 +64,8 @@ class AttendanceWrap extends Component {
 }
 
 AttendanceWrap.propTypes = {
-  op: PropTypes.string
+  op: PropTypes.string,
+  sid: PropTypes.string
 }
 
 export default AttendanceWrap

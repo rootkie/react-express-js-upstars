@@ -3,6 +3,7 @@ import { Form, Message, Header } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { func } from 'prop-types'
 import moment from 'moment'
+import { Link } from 'react-router-dom'
 import 'react-datepicker/dist/react-datepicker.css'
 
 // Init typeOptions to be used in dropdown for TYPE of class
@@ -11,18 +12,14 @@ const typeOptions = [
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
-const statusOptions = [
-  { key: 'Active', text: 'Active', value: 'Active' },
-  { key: 'Stopped', text: 'Stopped', value: 'Stopped' }
-]
 // Initial State, everything is empty. Will fill it up next.
 // StartDate is set to default today.
 const initialState = {
   className: '',
-  classType: '',
+  classType: 'Tuition',
   venue: '',
   dayAndTime: '',
-  status: '',
+  classId: '',
   startDate: moment(),
   submitSuccess: false
 }
@@ -43,7 +40,7 @@ class ClassForm extends Component {
   // Calling functions when the submit button is clicked
   handleSubmit = async e => {
     e.preventDefault()
-    const { className, classType, venue, dayAndTime, startDate, status } = this.state
+    const { className, classType, venue, dayAndTime, startDate } = this.state
     const { addClass } = this.props
 
     const data = {
@@ -51,28 +48,28 @@ class ClassForm extends Component {
       classType,
       venue,
       dayAndTime,
-      startDate,
-      status
+      startDate
     }
     if (classType === 'Enrichment') {
       data.dayAndTime = 'nil'
     }
 
     try {
-      await addClass(data)
-      // Reset the form back to the initial state.
-      this.setState({...initialState})
+      let classData = await addClass(data)
+      console.log(classData)
+      // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
+      this.setState({...initialState, classId: classData.data.newClass._id})
       this.showSuccess()
     } catch (error) {
       this.setState({serverErrorMessage: error.response.data.error})
     }
   }
 
-  // Function called to show the success message for 3 seconds (UX component)
+  // Function called to show the success message for 5 seconds (UX component)
   // There's still a 'x' button to close the message
   showSuccess = () => {
     this.setState({submitSuccess: true})
-    setTimeout(() => { this.setState({submitSuccess: false}) }, 3000)
+    setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
   closeMessage = () => {
@@ -80,16 +77,14 @@ class ClassForm extends Component {
   }
 
   render () {
-    const { className, classType, venue, dayAndTime, submitSuccess, status } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { className, classType, venue, dayAndTime, submitSuccess, classId } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
       <div>
+        {submitSuccess && <Message positive onDismiss={this.closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message> }
         <Header as='h3' dividing>Class information</Header>
         <Form onSubmit={this.handleSubmit}>
           <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
-          <Form.Group widths='equal'>
-            <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
-            <Form.Select label='Type' options={statusOptions} placeholder='Status' name='status' value={status} onChange={this.handleChange} required />
-          </Form.Group>
+          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
           <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
           <Form.Field required>
             <label>Starting Date</label>
@@ -102,7 +97,6 @@ class ClassForm extends Component {
           </Form.Field>
           <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
           <Form.Button>Submit</Form.Button>
-          {submitSuccess && <Message positive onDismiss={this.closeMessage}>Class created</Message> }
         </Form>
       </div>
     )

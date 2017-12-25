@@ -37,10 +37,12 @@ class ClassWrap extends Component {
     const { classData } = this.state
     return axios.post('/class', classDataToSubmit)
       .then(response => {
-      // Maybe do a redirect here
-
       // Adds the new class to the array of classes so that when you click view you can see it immediately.
         this.setState({ classData: classData.concat({ ...classDataToSubmit, _id: response.data.newClass._id }) })
+        return response
+      })
+      .catch(err => {
+        console.log(err)
       })
   }
 

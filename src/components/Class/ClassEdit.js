@@ -264,11 +264,11 @@ class ClassEdit extends Component {
       return (
         <div>
           <Header as='h3' dividing>Class information</Header>
-          <Form>
+          <Form onSubmit={this.handleSubmit}>
             <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly={!edit} required />
             <Form.Group widths='equal'>
               <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} readOnly={!edit} required />
-              <Form.Select label='Type' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} readOnly={!edit} required />
+              <Form.Select label='Status' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} readOnly={!edit} required />
             </Form.Group>
             <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly={!edit} required />
             <Form.Field>
@@ -280,9 +280,9 @@ class ClassEdit extends Component {
                 onChange={this.handleDateChange}
                 required readOnly={!edit} />
             </Form.Field>
-            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly={!edit} required={oneClassData.classType === 'Tuition'} disabled={oneClassData.classType !== 'Tuition'} />
+            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly={!edit} required={oneClassData.classType === 'Tuition'} disabled={oneClassData.classType === 'Enrichment'} />
             {/* Will work on the roles management that only people who own this class or are Admin could use the front-end edit function */}
-            <Form.Button onClick={this.handleSubmit} content={ButtonContent} />
+            <Form.Button content={ButtonContent} type='submit' value='Submit' />
             {submitSuccess && <Message positive>Class Updated</Message> }
             <br />
           </Form>
