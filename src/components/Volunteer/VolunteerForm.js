@@ -555,8 +555,8 @@ class VolunteerForm extends Component {
             <Table.Body>
               {competences.map((year, i) => (
                 <Table.Row key={i}>
-                  <Table.Cell>
-                    <Form.Select style={{ zIndex: 99999 }} options={competencesOptions} placeholder='Competences' name={`field-${i}`} value={competences[i].field} onChange={this.handleRepeatableSelectChange('competences', 'field', i)} />
+                  <Table.Cell style={{ overflow: 'visible' }}>
+                    <Form.Select options={competencesOptions} placeholder='Competences' name={`field-${i}`} value={competences[i].field} onChange={this.handleRepeatableSelectChange('competences', 'field', i)} />
                   </Table.Cell>
                   <Table.Cell>
                     <Form.Input transparent key={`details-${i}`} name={`details-${i}`} value={competences[i].details} placeholder='Specific Details' onChange={this.updateRepeatableChange('competences')} />

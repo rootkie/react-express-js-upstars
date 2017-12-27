@@ -218,6 +218,7 @@ class AttendanceView extends Component {
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.Field required>
+              {/* This date is perposely not editable, if dates are to be changed, please delete and create a new one! */}
               <label>Date of class</label>
               <DatePicker
                 placeholderText='Click to select a date'
