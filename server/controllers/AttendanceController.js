@@ -140,8 +140,9 @@ module.exports.getAttendance = async(req, res, next) => {
     if (classId) {
       attendances = attendances.where('class').equals(classId)
     }
+    // Added the utc option to make the date earlier so comparison is valid
     if (dateStart) {
-      attendances = attendances.where('date').gte(new Date(moment(dateStart).format('YYYY-MM-DD')))
+      attendances = attendances.where('date').gte(new Date(moment(dateStart).utc().format('YYYY-MM-DD')))
     }
     if (dateEnd) {
       attendances = attendances.where('date').lte(new Date(moment(dateEnd).format('YYYY-MM-DD')))
@@ -203,7 +204,7 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
     user.date = {
-      $gte: new Date(moment(dateStart).format('YYYY-MM-DD')),
+      $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
 
@@ -287,7 +288,7 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
     // Init what factors to search in student later
     student['students.list'] = mongoose.Types.ObjectId(studentId)
     student.date = {
-      $gte: new Date(moment(dateStart).format('YYYY-MM-DD')),
+      $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
 
@@ -460,5 +461,17 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
   } catch (err) {
     console.log(err)
     next(err)
+  }
+}
+
+module.exports.getAllClassAttendanceSummary = async(req, res, next) => {
+  try {
+    let {
+      id
+    } = req.params
+    console.log(new Date(moment(id).utc().format('YYYY-MM-DD')))
+    res.status(200).json({})
+  } catch (err) {
+    console.log(err)
   }
 }
