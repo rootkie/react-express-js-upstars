@@ -134,7 +134,7 @@ module.exports.getAttendance = async(req, res, next) => {
 
     // Find attendance based on the filters of class, dateStart and dateEnd if provided.
     let attendances = Attendance.find()
-      .limit(100)
+      .limit(150)
       .populate('class', ['className'])
       .sort('class.className -date')
 
@@ -208,6 +208,7 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
       $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
+    user.type = 'Class'
 
     if (classId) {
       user.class = mongoose.Types.ObjectId(classId)
@@ -215,6 +216,10 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
 
     const attendances = await Attendance.aggregate()
       .match(user)
+      .project({
+        'updatedAt': 0,
+        'createdAt': 0
+      })
       .unwind('users') // Break the array of users into individual slots
       .match({
         'users.list': mongoose.Types.ObjectId(userId)
@@ -292,13 +297,17 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
       $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
-
+    student.type = 'Class'
     if (classId) {
       student.class = mongoose.Types.ObjectId(classId)
     }
 
     const attendances = await Attendance.aggregate()
       .match(student)
+      .project({
+        'updatedAt': 0,
+        'createdAt': 0
+      })
       .unwind('students') // Break the array of students into individual slots
       .match({
         'students.list': mongoose.Types.ObjectId(studentId)
@@ -324,7 +333,7 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
         },
         'total': {
           '$sum': 1
-        }, // Stats to show total number of 'Class'(es) held.
+        }, // Stats to show total number of 'Class'(es) held that are not public holiday or cancelled.
         'attended': {
           '$sum': '$students.status'
         }, // Stats to show total attended
