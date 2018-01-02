@@ -1,4 +1,5 @@
 const Attendance = require('../models/attendance')
+const Class = require('../models/class')
 let mongoose = require('mongoose')
 let moment = require('moment')
 let util = require('../util')
@@ -451,7 +452,10 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
     let studentNumber = foundAttendanceforStudent.length
     let tutorNumber = foundAttendanceforUser.length
     let tutorStudentRatio = tutorNumber / studentNumber
-
+    // Check if they are actually a number or is acually finate. This is because 2 / 0 = NaN. 0 / 0 = Infinity
+    if (isNaN(tutorStudentRatio) || !isFinite(tutorStudentRatio)) {
+      tutorStudentRatio = 0
+    }
     res.status(200).json({
       status: 'success',
       foundAttendanceforUser,
@@ -466,12 +470,107 @@ module.exports.getClassAttendanceSummary = async(req, res, next) => {
 
 module.exports.getAllClassAttendanceSummary = async(req, res, next) => {
   try {
-    let {
-      id
-    } = req.params
-    console.log(new Date(moment(id).utc().format('YYYY-MM-DD')))
-    res.status(200).json({})
+    const studentsPart = await Attendance.aggregate()
+    // Only classes that are not having the status of PHol or Cancelled are counted.
+    .match({
+      'type': 'Class'
+    })
+    // In this case, we only leave the students and class fields so that the unwind process can take place faster especially with
+    // a large database of 200+ people. Since the unwind process has a max limit of 100MB of RAM unless otherwise.
+    .project({
+      'students': 1,
+      'class': 1
+    })
+    // The unwind process simply splits the document and duplicates it for each studentID
+    .unwind('students')
+    // Group the different attendance of different students by class, while calculating the number of students involved and their respective
+    // attendance status. This allows for the percentage to be calculated.
+    .group({
+      '_id': '$class',
+      'total': {
+        '$sum': 1
+      },
+      'attended': {
+        '$sum': '$students.status'
+      }
+    })
+    // Filter results to show only the classID and the percentage of students in THAT class
+    .project({
+      'percentage': {
+        '$divide': ['$attended', '$total']
+      }
+    })
+
+    // The users part follows a similar logic.
+    const usersPart = await Attendance.aggregate()
+    .match({
+      'type': 'Class'
+    })
+    .project({
+      'users': 1,
+      'class': 1
+    })
+    .unwind('users')
+    .group({
+      '_id': '$class',
+      'total': {
+        '$sum': 1
+      },
+      'attended': {
+        '$sum': '$users.status'
+      }
+    })
+    .project({
+      'percentage': {
+        '$divide': ['$attended', '$total']
+      }
+    })
+
+    // Calls another API to get all classes that are currently Active and filter the output to only relevant ones.
+    let activeClasses = await Class.find({
+      'status': 'Active'
+    }).select('className classType dayAndTime students users')
+
+    // This process generates the JSON in the way the most ideal for displaying on the front-end.
+    // The classes array is mapped, using the classID, search for the ID from the previously created students (studentsPart) and users (usersPart) array.
+    let editedActiveClass = await activeClasses.map((classInfo) => {
+      let details = {}
+      // This simply means findIndex(function(x) { return x === classInfo._id }) but we use .equals() since we are comparing an object instead of string.
+      let userPos = usersPart.findIndex(info => info._id.equals(classInfo._id))
+      let studentPos = studentsPart.findIndex(info => info._id.equals(classInfo._id))
+      // STRatio is simply student-tutor ratio.
+      let STRatio = classInfo.students.length / classInfo.users.length
+      if (isNaN(STRatio) || !isFinite(STRatio)) {
+        STRatio = 0
+      }
+      // Configure the necessary details.
+      details = {
+        userNumber: classInfo.users.length,
+        studentNumber: classInfo.students.length,
+        className: classInfo.className,
+        dayAndTime: classInfo.dayAndTime,
+        id: classInfo._id,
+        STRatio
+      }
+      // Check whether the ID from the class actually has attendance compiled previously and pair them up to get the attendance percentage.
+      if (userPos !== -1) {
+        details.usersPercentage = usersPart[userPos].percentage
+      } else {
+        details.usersPercentage = 0
+      }
+      if (studentPos !== -1) {
+        details.studentsPercentage = studentsPart[studentPos].percentage
+      } else {
+        details.studentsPercentage = 0
+      }
+      return details
+    })
+
+    res.status(200).json({
+      editedActiveClass
+    })
   } catch (err) {
     console.log(err)
+    next(err)
   }
 }

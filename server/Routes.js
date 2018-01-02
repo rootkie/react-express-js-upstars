@@ -48,7 +48,7 @@ module.exports = app => {
   app.get('/api/attendance/user/:userId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceByUser)
   app.get('/api/attendance/student/:studentId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceByStudent)
   app.get('/api/attendance/:classId/summary', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getClassAttendanceSummary) // Very VERBOSE
-  app.get('/api/attendance/summary/:id', hasRole(['Admin', 'SuperAdmin']), attendanceControl.getAllClassAttendanceSummary)
+  app.get('/api/attendance/summary/all', hasRole(['Admin', 'SuperAdmin']), attendanceControl.getAllClassAttendanceSummary)
 
   // Admin controls under user
   app.get('/api/admin/pendingUsers', hasRole(['SuperAdmin']), adminControl.getPendingUsers)
