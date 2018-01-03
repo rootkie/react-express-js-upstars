@@ -3,6 +3,7 @@ const util = require('../util.js')
 const generateToken = util.generateToken
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 // ============== Start of all the functions ==============
 // Everyone can access without token
 
@@ -12,7 +13,6 @@ module.exports.login = async(req, res, next) => {
       password,
       email
     } = req.body
-
     if (!email || !password) {
       throw ({
         status: 400,
@@ -109,9 +109,11 @@ module.exports.register = async(req, res, next) => {
     // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
     // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
     // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
+    // Using the native crypto package, we generate true random strings to add to email and password so they are really gone.
     if (existingUser && existingUser.status === 'Deleted') {
-      existingUser.email = 'deleted' + existingUser._id + '@upstars.com'
-      existingUser.password = existingUser._id
+      existingUser.email = crypto.randomBytes(4).toString('hex') + 'deleted' + existingUser._id + '@upstars.com'
+      existingUser.password = existingUser._id + crypto.randomBytes(5).toString('hex')
+      existingUser.status = 'PermaDeleted'
       await existingUser.save()
     }
 

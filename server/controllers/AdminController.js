@@ -15,7 +15,7 @@ module.exports.adminChangePassword = async(req, res, next) => {
     // Find user and replace it with the newPassword before saving
     const user = await User.findById(userId)
       .nor([{
-        'status': 'Suspended'
+        'status': 'PermaDeleted'
       }, {
         'status': 'Deleted'
       }])

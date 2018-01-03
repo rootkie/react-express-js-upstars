@@ -218,7 +218,8 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
       .match(user)
       .project({
         'updatedAt': 0,
-        'createdAt': 0
+        'createdAt': 0,
+        'students': 0
       })
       .unwind('users') // Break the array of users into individual slots
       .match({
@@ -306,7 +307,8 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
       .match(student)
       .project({
         'updatedAt': 0,
-        'createdAt': 0
+        'createdAt': 0,
+        'users': 0
       })
       .unwind('students') // Break the array of students into individual slots
       .match({
