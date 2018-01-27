@@ -1,11 +1,15 @@
 const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
+const Class = require('../models/class')
 
+// Admin / SA
 module.exports.getAllUsers = async(req, res, next) => {
   try {
     // Retrieve all users in the system
-    const users = await User.find({}).select('profile roles status').sort('profile.name')
+    const users = await User.find({
+      'status': 'Active'
+    }).select('profile roles status').sort('profile.name')
 
     return res.status(200).json({
       users
@@ -20,6 +24,7 @@ module.exports.getAllUsers = async(req, res, next) => {
   }
 }
 
+// Everyone but restricted to their own class checked using token
 module.exports.getUser = async(req, res, next) => {
   try {
     let approved = await util.checkRole({
@@ -36,7 +41,13 @@ module.exports.getUser = async(req, res, next) => {
     }
 
     // Find user based on ID and retrieve its className
-    const user = await User.findById(req.params.id).populate('classes', 'className').select('-password -updatedAt -createdAt')
+    const user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt')
+    if (!user) {
+      throw ({
+        status: 404,
+        error: 'User does not exist. Please try again'
+      })
+    }
     return res.status(200).json({
       user
     })
@@ -50,12 +61,13 @@ module.exports.getUser = async(req, res, next) => {
   }
 }
 
+// Same logic, everyone can access their own stuff
 module.exports.editUserParticulars = async(req, res, next) => {
   try {
     let {
       userId
     } = req.body
-     // Check userId is provided
+    // Check userId is provided
     if (!userId) {
       throw ({
         status: 400,
@@ -93,6 +105,12 @@ module.exports.editUserParticulars = async(req, res, next) => {
       runSettersOnQuery: true
     }).select('-password -updatedAt -createdAt')
 
+    if (!user) {
+      throw ({
+        status: 404,
+        error: 'The user you requested to edit does not exist.'
+      })
+    }
     return res.status(200).json({
       editedUser: user
     })
@@ -110,10 +128,12 @@ module.exports.editUserParticulars = async(req, res, next) => {
   }
 }
 
+// Everyone
 module.exports.deleteUser = async(req, res, next) => {
   let {
     userId
   } = req.body
+  let editedClass = null
   try {
     // Check userId is provided
     if (!userId) {
@@ -122,17 +142,55 @@ module.exports.deleteUser = async(req, res, next) => {
         error: 'Please provide a userId and ensure input is correct'
       })
     }
+    let approved = await util.checkRole({
+      roles: ['SuperAdmin'],
+      params: userId,
+      decoded: req.decoded
+    })
+    // Check if user has admin rights and is only querying their own particulars
+    if (approved === false) {
+      throw ({
+        status: 403,
+        error: 'Your client does not have the permissions to access this function.'
+      })
+    }
 
     // Delete user from database
-    const userDeleted = await User.remove({
-      '_id': {
-        '$in': userId
+    // Find a user whose status is not previously deleted to change it to delete (Note: $ne == not equals)
+    const userDeleted = await User.findOneAndUpdate({
+      '_id': userId,
+      status: {
+        '$ne': 'Deleted'
       }
-    })
-
+    }, {
+      status: 'Deleted'
+    }).select('profile.name classes')
+    if (!userDeleted) {
+      throw ({
+        status: 404,
+        error: 'The user you requested to delete does not exist.'
+      })
+    }
+    // If the user is in any classes, delete the user from the class so that the population would not fail. Upon restoring of their status (if necessary)
+    // their classes would be re populated.
+    if (userDeleted.classes) {
+      editedClass = await Class.update({
+        _id: {
+          $in: userDeleted.classes
+        }
+      }, {
+        $pull: {
+          users: userDeleted._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
     return res.status(200).json({
       status: 'success',
-      userDeleted
+      userDeleted,
+      editedClass
     })
   } catch (err) {
     console.log(err)
@@ -144,6 +202,7 @@ module.exports.deleteUser = async(req, res, next) => {
   }
 }
 
+// Change your own password
 module.exports.changePassword = async(req, res, next) => {
   try {
     let {
@@ -193,6 +252,8 @@ module.exports.changePassword = async(req, res, next) => {
   }
 }
 
+// Admin / SA
+// Note that external is the only party we conduct a permanent delete
 module.exports.getExternal = async(req, res, next) => {
   try {
     // Find the external and get className

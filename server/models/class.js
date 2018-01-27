@@ -11,7 +11,7 @@ const ClassSchema = new Schema({
   },
   classType: {
     type: String,
-    enum: ['Tuition','Enrichment'],
+    enum: ['Tuition', 'Enrichment'],
     required: true
   },
   venue: {
@@ -19,7 +19,7 @@ const ClassSchema = new Schema({
     required: true
   },
   dayAndTime: {
-    type: String,
+    type: String
   },
   startDate: {
     type: Date,
@@ -37,7 +37,12 @@ const ClassSchema = new Schema({
   externalPersonnel: [{
     type: Schema.ObjectId,
     ref: 'External'
-  }]
+  }],
+  status: {
+    type: String,
+    default: 'Active',
+    required: true
+  }
 
 }, {
   timestamps: true,

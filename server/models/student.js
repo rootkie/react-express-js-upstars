@@ -32,7 +32,7 @@ const StudentSchema = new Schema({
     gender: {
       type: String,
       required: true,
-      enum: ['M', 'F'],
+      enum: ['M', 'F']
     },
 
     nationality: {
@@ -114,7 +114,7 @@ const StudentSchema = new Schema({
       type: Number
     }
   }],
-  
+
   misc: {
     fas: [{
       type: String,
@@ -122,7 +122,7 @@ const StudentSchema = new Schema({
       default: ['None']
     }],
 
-    fsc:{
+    fsc: {
       type: String
     },
 
@@ -163,7 +163,6 @@ const StudentSchema = new Schema({
     ref: 'Class'
   }],
 
-
   admin: {
     interviewDate: {
       type: Date
@@ -187,7 +186,8 @@ const StudentSchema = new Schema({
 
   status: {
     type: String,
-    default: 'Active'
+    default: 'Active',
+    required: true
   }
 
 }, {

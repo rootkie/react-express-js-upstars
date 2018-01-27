@@ -1,6 +1,6 @@
 const Student = require('../models/student')
-
-// Add student function works for both admin and usual student sign up
+const Class = require('../models/class')
+// Add student function works for SA only. If need ability for students to sign up, please tell me.
 module.exports.addStudent = async(req, res, next) => {
   try {
     let edited = {}
@@ -49,6 +49,7 @@ module.exports.addStudent = async(req, res, next) => {
   }
 }
 
+// Mentor / Admin / SuperAdmin only
 module.exports.editStudentById = async(req, res, next) => {
   try {
     // Check if studentId exists
@@ -72,13 +73,47 @@ module.exports.editStudentById = async(req, res, next) => {
 
     // Update student based on studentId
     const editedStudent = await Student.findByIdAndUpdate(req.body.studentId, edited, {
-      upsert: true,
       new: true,
       setDefaultsOnInsert: true,
       runValidators: true,
       runSettersOnQuery: true
     })
-
+    if (!editedStudent) {
+      throw ({
+        status: 404,
+        error: 'The student you requested to edit does not exist.'
+      })
+    }
+    // Repopulate the classes if the status of the student is changed back to Active
+    if (editedStudent.status === 'Active' && editedStudent.classes) {
+      await Class.update({
+        _id: {
+          $in: editedStudent.classes
+        }
+      }, {
+        $addToSet: {
+          students: editedStudent._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
+    // If status if changed to anything other than Active, we will delete their IDs from the classes instead
+    else if (editedStudent.classes) {
+      await Class.update({
+        _id: {
+          $in: editedStudent.classes
+        }
+      }, {
+        $pull: {
+          students: editedStudent._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    }
     res.status(200).json({
       editedStudent
     })
@@ -100,10 +135,13 @@ module.exports.editStudentById = async(req, res, next) => {
   }
 }
 
+// Everyone
 module.exports.getAll = async(req, res, next) => {
   try {
     // Find all students from database
-    const students = await Student.find({})
+    const students = await Student.find({
+      status: 'Active'
+    })
     return res.status(200).json({
       students
     })
@@ -112,22 +150,32 @@ module.exports.getAll = async(req, res, next) => {
     next(err)
   }
 }
-
+// Everyone with token
 module.exports.getStudentById = async(req, res, next) => {
   try {
     let studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className')
+    const student = await Student.findById(studentId).populate('classes', 'className status')
+    if (!student) {
+      throw ({
+        status: 404,
+        error: 'Student does not exist. Please try again'
+      })
+    }
     return res.status(200).json({
       student
     })
   } catch (err) {
     console.log(err)
-    next(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
   }
 }
-
+// SuperAdmin only
 module.exports.deleteStudent = async(req, res, next) => {
   let {
     studentId
@@ -141,15 +189,42 @@ module.exports.deleteStudent = async(req, res, next) => {
     }
 
     // Find and delete student from database
-    const studentDeleted = await Student.remove({
+    const studentDeleted = await Student.update({
       '_id': {
         '$in': studentId
+      },
+      status: {
+        '$ne': 'Deleted'
       }
+    }, {
+      status: 'Deleted'
+    }, {
+      multi: true
     })
-    if (studentDeleted.result.n === 0) {
-      return res.status(404).json({
-        error: 'student not found'
+    if (studentDeleted.n === 0) {
+      throw ({
+        status: 404,
+        error: 'The student you requested to delete does not exist.'
       })
+    } else {
+      for (let number = 0; number < studentId.length; number++) {
+        let studentDetails = await Student.findById(studentId[number], 'classes')
+        console.log(studentDetails)
+        if (studentDetails.classes) {
+          await Class.update({
+            _id: {
+              $in: studentDetails.classes
+            }
+          }, {
+            $pull: {
+              students: studentDetails._id
+            }
+          }, {
+            new: true,
+            multi: true
+          })
+        }
+      }
     }
     return res.status(200).json({
       status: 'success',

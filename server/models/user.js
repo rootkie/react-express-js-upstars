@@ -76,7 +76,7 @@ const UserSchema = new Schema({
 
     schoolClass: {
       type: String
-    },
+    }
   },
 
   father: {
@@ -138,7 +138,7 @@ const UserSchema = new Schema({
       courseAndObjective: {
         type: String
       }
-      }],
+    }],
 
     achievements: [{
       _id: false,
@@ -207,10 +207,10 @@ const UserSchema = new Schema({
     competence: [{
       _id: false,
       languages: [{
-        type: String,
+        type: String
       }],
       subjects: [{
-        type: String,
+        type: String
       }],
       interests: [{
         type: String
@@ -278,6 +278,10 @@ const UserSchema = new Schema({
 
   resetPasswordExpires: {
     type: Date
+  },
+
+  refreshToken: {
+    type: String
   }
 
 }, {
@@ -287,7 +291,7 @@ const UserSchema = new Schema({
 
 // Pre-save of user to database, hash password if password is modified or new
 // Coz of lexical this, didn't use =>
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   const user = this
   const SALT_FACTOR = 5
 
@@ -304,7 +308,7 @@ UserSchema.pre('save', function(next) {
   })
 })
 
-UserSchema.methods.comparePassword = function(candidatePassword, cb) {
+UserSchema.methods.comparePassword = function (candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     if (err) {
       return cb(err)
@@ -314,7 +318,7 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   })
 }
 
-UserSchema.methods.comparePasswordPromise = function(candidatePassword) { // Coz of lexical this
+UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Coz of lexical this
   return new Promise((resolve, reject) => {
     bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
       if (err) {

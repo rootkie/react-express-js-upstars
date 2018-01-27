@@ -30,7 +30,7 @@ module.exports = app => {
   app.get('/api/users', hasRole(['Admin', 'SuperAdmin']), userControl.getAllUsers)
   app.get('/api/users/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.getUser)
   app.post('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.editUserParticulars)
-  app.delete('/api/users', hasRole(['SuperAdmin']), userControl.deleteUser)
+  app.delete('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.deleteUser) //  Personal account deletion
   app.post('/api/users/changePassword', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.changePassword)
   app.post('/api/users/class', hasRole(['Admin', 'SuperAdmin']), classControl.addUsersToClass)
   app.delete('/api/users/class', hasRole(['Admin', 'SuperAdmin']), classControl.deleteUsersFromClass)
@@ -48,12 +48,16 @@ module.exports = app => {
   app.get('/api/attendance/user/:userId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceByUser)
   app.get('/api/attendance/student/:studentId/:dateStart-:dateEnd/:classId?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceByStudent)
   app.get('/api/attendance/:classId/summary', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getClassAttendanceSummary) // Very VERBOSE
+  app.get('/api/attendance/summary/all', hasRole(['Admin', 'SuperAdmin']), attendanceControl.getAllClassAttendanceSummary)
 
   // Admin controls under user
   app.get('/api/admin/pendingUsers', hasRole(['SuperAdmin']), adminControl.getPendingUsers)
+  app.get('/api/admin/suspended', hasRole(['SuperAdmin']), adminControl.getSuspendedPeople)
+  app.get('/api/admin/deleted', hasRole(['SuperAdmin']), adminControl.getDeletedPeople)
   app.post('/api/admin/user', hasRole(['SuperAdmin']), adminControl.createUser)
   app.post('/api/admin/changePassword', hasRole(['SuperAdmin']), adminControl.adminChangePassword)
   app.post('/api/admin/userStatusPermissions', hasRole(['SuperAdmin']), adminControl.changeUserStatusAndPermissions)
+  app.delete('/api/admin/user', hasRole(['SuperAdmin']), adminControl.multipleUserDelete) //  Admin Mass deletion
 
   app.post('/api/register', authControl.register)
   app.post('/api/simpleRegister', authControl.simpleRegister)

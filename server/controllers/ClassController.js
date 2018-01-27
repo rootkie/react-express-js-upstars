@@ -3,7 +3,7 @@ const Student = require('../models/student')
 const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
-
+// SuperAdmin
 module.exports.addClass = async(req, res, next) => {
   try {
     let {
@@ -59,6 +59,7 @@ module.exports.addClass = async(req, res, next) => {
   }
 }
 
+// SuperAdmin
 module.exports.editClass = async(req, res, next) => {
   try {
     let {
@@ -67,7 +68,8 @@ module.exports.editClass = async(req, res, next) => {
       classType,
       venue,
       dayAndTime,
-      startDate
+      startDate,
+      status
     } = req.body
 
     // Create a class instance
@@ -76,13 +78,22 @@ module.exports.editClass = async(req, res, next) => {
       classType,
       venue,
       dayAndTime,
-      startDate
+      startDate,
+      status
     }
-      // Find and update class
+    // Find and update class
     const newClass = await Class.findByIdAndUpdate(classId, class1, {
       new: true,
       runValidators: true
     })
+
+    // Check that class actually exist
+    if (!newClass) {
+      throw ({
+        status: 404,
+        error: 'Class not found. Please try again later'
+      })
+    }
 
     res.status(200).json({
       editedClass: newClass
@@ -99,12 +110,20 @@ module.exports.editClass = async(req, res, next) => {
   }
 }
 
+// Everyone
+// The special thing about classes is they can be either stopped or active.
 module.exports.getAll = async(req, res, next) => {
   try {
     // Find all classes
-    const classes = await Class.find({}).select('-createdAt')
+    const activeClasses = await Class.find({
+      'status': 'Active'
+    }).select('-createdAt')
+    const stoppedClasses = await Class.find({
+      'status': 'Stopped'
+    }).select('-createdAt')
     return res.status(200).json({
-      classes
+      activeClasses,
+      stoppedClasses
     })
   } catch (err) {
     console.log(err)
@@ -112,6 +131,7 @@ module.exports.getAll = async(req, res, next) => {
   }
 }
 
+// Everyone
 module.exports.getClassById = async(req, res, next) => {
   try {
     let classId = req.params.id
@@ -138,6 +158,13 @@ module.exports.getClassById = async(req, res, next) => {
 
     // Find a class and populate the students, users and external people to get their name
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
+    // If class does not exist, throw an error
+    if (!class1) {
+      throw ({
+        status: 404,
+        error: 'This class does not exist'
+      })
+    }
     return res.status(200).json({
       class: class1
     })
@@ -151,6 +178,7 @@ module.exports.getClassById = async(req, res, next) => {
   }
 }
 
+// SuperAdmin
 module.exports.deleteClass = async(req, res, next) => {
   let {
     classId
@@ -164,12 +192,19 @@ module.exports.deleteClass = async(req, res, next) => {
     }
 
     // Remove class from database
-    const classDeleted = await Class.remove({
+    const classDeleted = await Class.update({
       '_id': {
         '$in': classId
+      },
+      'status': {
+        '$ne': 'Stopped'
       }
+    }, {
+      'status': 'Stopped'
+    }, {
+      multi: true
     })
-    if (classDeleted.result.n === 0) {
+    if (classDeleted.n === 0) {
       return res.status(404).json({
         error: 'Class not found'
       })
@@ -187,6 +222,7 @@ module.exports.deleteClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.addStudentsToClass = async(req, res, next) => {
   try {
     let {
@@ -242,6 +278,7 @@ module.exports.addStudentsToClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.deleteStudentsFromClass = async(req, res, next) => {
   try {
     let {
@@ -294,6 +331,7 @@ module.exports.deleteStudentsFromClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.addUsersToClass = async(req, res, next) => {
   try {
     let {
@@ -349,6 +387,7 @@ module.exports.addUsersToClass = async(req, res, next) => {
   }
 }
 
+// Admin / SA
 module.exports.deleteUsersFromClass = async(req, res, next) => {
   try {
     let {
@@ -401,6 +440,7 @@ module.exports.deleteUsersFromClass = async(req, res, next) => {
   }
 }
 
+// SA
 module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
   try {
     let {
@@ -466,6 +506,7 @@ module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
   }
 }
 
+// SA
 module.exports.removeExternalPersonnelFromClass = async(req, res, next) => {
   try {
     let {

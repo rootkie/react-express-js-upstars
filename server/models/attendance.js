@@ -17,8 +17,8 @@ const AttendanceSchema = new Schema({
   },
   class: {
     type: Schema.ObjectId,
-      ref: 'Class',
-      required: true
+    ref: 'Class',
+    required: true
   },
   users: [{
     list: {
