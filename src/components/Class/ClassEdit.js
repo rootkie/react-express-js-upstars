@@ -102,9 +102,11 @@ class ClassEdit extends Component {
 
   // This is called for usual change handling that concerns the change to the main class array oneClassData
   handleChange = (e, { name, value }) => {
-    let { oneClassData } = this.state
-    oneClassData[name] = value
-    this.setState({ oneClassData })
+    if (this.state.edit) {
+      let { oneClassData } = this.state
+      oneClassData[name] = value
+      this.setState({ oneClassData })
+    }
   }
 
   // This is to handle change for the special dropdown used to choose people to add to class.
@@ -141,7 +143,7 @@ class ClassEdit extends Component {
         this.showSuccess()
         this.setState({edit: false, ButtonContent: 'Edit Class Information'})
       } catch (error) {
-        this.setState({serverErrorMessage: error.response.data.error})
+        // this.setState({serverErrorMessage: error.response.data.error})
         console.log(error)
       }
     }
@@ -267,8 +269,8 @@ class ClassEdit extends Component {
           <Form onSubmit={this.handleSubmit}>
             <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly={!edit} required />
             <Form.Group widths='equal'>
-              <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} readOnly={!edit} required />
-              <Form.Select label='Status' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} readOnly={!edit} required />
+              <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} required />
+              <Form.Select label='Status' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} required />
             </Form.Group>
             <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly={!edit} required />
             <Form.Field>

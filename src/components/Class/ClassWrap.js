@@ -11,7 +11,7 @@ class ClassWrap extends Component {
     op: string.isRequired,
     sid: string
   }
-// First init of state
+// First init of state.
   constructor (props) {
     super(props)
     this.state = {
@@ -25,7 +25,9 @@ class ClassWrap extends Component {
   getClasses = () => {
     axios.get('class')
       .then(response => {
-        this.setState({ classData: response.data.classes, isLoading: false })
+        let allClass = response.data.activeClasses.concat(response.data.stoppedClasses)
+        console.log(allClass)
+        this.setState({ classData: allClass, isLoading: false })
       })
       .catch((err) => {
         console.log(err)
@@ -37,7 +39,7 @@ class ClassWrap extends Component {
     const { classData } = this.state
     return axios.post('/class', classDataToSubmit)
       .then(response => {
-      // Adds the new class to the array of classes so that when you click view you can see it immediately.
+      // Adds the new class to the array of ACTIVE classes so that when you click view you can see it immediately.
         this.setState({ classData: classData.concat({ ...classDataToSubmit, _id: response.data.newClass._id }) })
         return response
       })
@@ -64,7 +66,7 @@ class ClassWrap extends Component {
       })
   }
 
-  deleteClass = (classIds) => {
+  stopClass = (classIds) => {
     let data = {
       classId: classIds
     }
@@ -73,7 +75,7 @@ class ClassWrap extends Component {
     return axios.delete('/class', {
       data})
         .then(() => {
-          this.setState({classData: this.state.classData.filter((Class) => !classIds.includes(Class._id))})
+          this.getClasses()
         }).catch((error) => {
           console.log(error)
         })
@@ -87,7 +89,7 @@ class ClassWrap extends Component {
       <div>
         {op === 'add' && <ClassForm addClass={this.addClass} /> }
         {op === 'id' && <ClassEdit editClass={this.editClass} id={sid} /> }
-        {op === 'view' && <ClassView classData={classData} deleteClass={this.deleteClass} isLoading={isLoading} /> }
+        {op === 'view' && <ClassView classData={classData} stopClass={this.stopClass} isLoading={isLoading} /> }
       </div>
     )
   }

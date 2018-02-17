@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { Table, Checkbox, Button, Icon, Confirm, Dimmer, Loader } from 'semantic-ui-react'
+import { Table, Checkbox, Button, Icon, Confirm, Dimmer, Loader, Header } from 'semantic-ui-react'
 import { array, func, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
 
@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 class ClassView extends Component {
   static propTypes = {
     classData: array.isRequired,
-    deleteClass: func.isRequired,
+    stopClass: func,
     isLoading: bool
   }
 
@@ -19,6 +19,7 @@ class ClassView extends Component {
   // Either push or filter that array classID off the deletion list
   handleCheckBox = (e, { name: _id, checked }) => { // name here is actually class _id
     let { selected } = this.state
+    console.log(selected)
     if (checked) {
       selected.push(_id)
     } else {
@@ -27,20 +28,20 @@ class ClassView extends Component {
     this.setState({selected})
   }
 
-  handleDelete = () => {
-    const { deleteClass } = this.props
+  handleStop = () => {
+    const { stopClass } = this.props
     const { selected } = this.state
-    selected.length > 0 && deleteClass(selected) // check if non empty selected
+    selected.length > 0 && stopClass(selected) // check if non empty selected
     this.setState({ selected: [] })
   }
 
-  handleDeleteConfirmation = (option) => () => {
+  handleStoppingConfirmation = (option) => () => {
     switch (option) {
       case 'show':
         this.setState({deleteConfirmationVisibility: true})
         break
       case 'confirm':
-        this.handleDelete()
+        this.handleStop()
         // break omitted
       case 'cancel': // eslint-disable-line
         this.setState({deleteConfirmationVisibility: false})
@@ -62,55 +63,60 @@ class ClassView extends Component {
       )
     } else {
       return (
-        <Table compact celled>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell />
-              <Table.HeaderCell>Class Name</Table.HeaderCell>
-              <Table.HeaderCell>classType</Table.HeaderCell>
-              <Table.HeaderCell>Day and Time</Table.HeaderCell>
-              <Table.HeaderCell>venue</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
+        <div>
+          <Header as='h3' dividing>Overview of all classes</Header>
+          <Table compact celled>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell />
+                <Table.HeaderCell>Class Name</Table.HeaderCell>
+                <Table.HeaderCell>ClassType</Table.HeaderCell>
+                <Table.HeaderCell>Day and Time</Table.HeaderCell>
+                <Table.HeaderCell>Venue</Table.HeaderCell>
+                <Table.HeaderCell>Status</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
 
-          <Table.Body>
-            {classData.map((Class, i) => (
-              <Table.Row key={`class-${i}`}>
-                <Table.Cell collapsing>
-                  <Checkbox name={Class._id} onChange={this.handleCheckBox} checked={selected.includes(Class._id)} />
-                </Table.Cell>
-                <Table.Cell>
-                  <Link to={'id/' + Class._id}>{Class.className}</Link>
-                </Table.Cell>
-                <Table.Cell>{Class.classType}</Table.Cell>
-                <Table.Cell>{Class.dayAndTime}</Table.Cell>
-                <Table.Cell>{Class.venue}</Table.Cell>
-              </Table.Row>))}
-          </Table.Body>
-          <Table.Footer fullWidth>
-            <Table.Row>
-              <Table.HeaderCell />
-              <Table.HeaderCell colSpan='4'>
-                <Link to='/classes/add'>
-                  <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
-                    <Icon name='group' />New Class
+            <Table.Body>
+              {classData.map((Class, i) => (
+                <Table.Row key={`class-${i}`}>
+                  <Table.Cell collapsing>
+                    <Checkbox name={Class._id} onChange={this.handleCheckBox} checked={selected.includes(Class._id)} />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Link to={'id/' + Class._id}>{Class.className}</Link>
+                  </Table.Cell>
+                  <Table.Cell>{Class.classType}</Table.Cell>
+                  <Table.Cell>{Class.dayAndTime}</Table.Cell>
+                  <Table.Cell>{Class.venue}</Table.Cell>
+                  <Table.Cell>{Class.status}</Table.Cell>
+                </Table.Row>))}
+            </Table.Body>
+            <Table.Footer fullWidth>
+              <Table.Row>
+                <Table.HeaderCell />
+                <Table.HeaderCell colSpan='5'>
+                  <Link to='/classes/add'>
+                    <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
+                      <Icon name='group' />New Class
                 </Button>
-                </Link>
-                <Button size='small' negative onClick={this.handleDeleteConfirmation('show')} disabled={selected.length === 0}>Delete</Button>
-                <Confirm
-                  open={deleteConfirmationVisibility}
-                  header='Deleting the following classes:'
-                  content={selected.map((id) => (
+                  </Link>
+                  <Button size='small' negative onClick={this.handleStoppingConfirmation('show')} disabled={selected.length === 0}>Stop</Button>
+                  <Confirm
+                    open={deleteConfirmationVisibility}
+                    header='Stopping the following classes:'
+                    content={selected.map((id) => (
                   classData.filter((aClass) => (aClass._id === id))[0].className
                 )).join(', ')}
-                  onCancel={this.handleDeleteConfirmation('cancel')}
-                  onConfirm={this.handleDeleteConfirmation('confirm')}
+                    onCancel={this.handleStoppingConfirmation('cancel')}
+                    onConfirm={this.handleStoppingConfirmation('confirm')}
         />
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Footer>
+                </Table.HeaderCell>
+              </Table.Row>
+            </Table.Footer>
 
-        </Table>
+          </Table>
+        </div>
       )
     }
   }
