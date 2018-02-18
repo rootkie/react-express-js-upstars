@@ -34,7 +34,7 @@ class AttendanceStudent extends Component {
   static propTypes = {
     classData: array.isRequired
   }
-// Everything here is similar to AttendanceUser
+  // Everything here is similar to AttendanceUser
   constructor (props) {
     super(props)
     this.state = {
@@ -62,7 +62,7 @@ class AttendanceStudent extends Component {
         console.log(response)
         for (let [index, studentData] of response.data.students.entries()) {
           studentOptions[index] = {
-            key: studentData.profile.name,
+            key: studentData._id,
             text: studentData.profile.name,
             value: studentData._id
           }
@@ -109,14 +109,14 @@ class AttendanceStudent extends Component {
       startDate = moment(startDate).format('[/]YYYYMMDD')
       endDate = moment(endDate).format('[-]YYYYMMDD')
       axios.get('attendance/student/' + studentSelector + startDate + endDate + '/' + classSelector)
-      .then(response => {
+        .then(response => {
         // If there are any records, else a default text is shown to inform the user.
-        if (response.data.attendances.length > 0) {
-          this.setState({attendanceFormattedData: this.formatStudentAttendance(response.data.attendances[0]), isLoading: false})
-        } else this.setState({isLoading: false, attendanceData: noResultsStudent})
-      }).catch(error => {
-        console.log(error)
-      })
+          if (response.data.attendances.length > 0) {
+            this.setState({attendanceFormattedData: this.formatStudentAttendance(response.data.attendances[0]), isLoading: false})
+          } else this.setState({isLoading: false, attendanceData: noResultsStudent})
+        }).catch(error => {
+          console.log(error)
+        })
     }
   }
 
@@ -187,7 +187,7 @@ class AttendanceStudent extends Component {
           hidden={error.length === 0}
           negative
           content={error}
-          />
+        />
         <Header as='h3' dividing>Student Statistics</Header>
         <Table compact celled>
           <Table.Header>
@@ -228,7 +228,7 @@ class AttendanceStudent extends Component {
                 <Table.Cell collapsing>{data.hours}</Table.Cell>
                 <Table.Cell collapsing>{data.status === 1 ? 'Present' : 'Absent'}</Table.Cell>
               </Table.Row>
-        ))}
+            ))}
           </Table.Body>
         </Table>
       </div>

@@ -28,18 +28,18 @@ const studentOptions = [
 ]
 
 class AttendanceClass extends Component {
-  state = {
-    startDate: '',
-    endDate: '',
-    moreOptions: false,
-    classSelector: ''
+  constructor (props) {
+    super(props)
+    this.state = {
+      startDate: '',
+      endDate: '',
+      moreOptions: false,
+      classSelector: ''
+    }
   }
 
   handleSubmit = (e) => {
     e.preventDefault()
-    const { startDate, endDate } = this.state
-
-    console.log(`getting data from ${moment(startDate).format('DDMMYYYY')} to ${moment(endDate).format('DDMMYYYY')}`)
   }
 
   handleDateChange = (dateType, date) => this.setState({[dateType]: date})
@@ -63,9 +63,8 @@ class AttendanceClass extends Component {
                       <label>Starting Date</label>
                       <DatePicker
                         selected={this.state.startDate}
-                        selectsStart
-                        startDate={this.state.startDate}
-                        endDate={this.state.endDate}
+                        dateFormat='DD/MM/YYYY'
+                        maxDate={this.state.endDate}
                         onChange={(date) => this.handleDateChange('startDate', date)}
                         placeholderText='Click to select' />
                     </Form.Field>
@@ -73,9 +72,8 @@ class AttendanceClass extends Component {
                       <label>Ending Date</label>
                       <DatePicker
                         selected={this.state.endDate}
-                        selectsEnd
-                        startDate={this.state.startDate}
-                        endDate={this.state.endDate}
+                        dateFormat='DD/MM/YYYY'
+                        minDate={this.state.startDate}
                         onChange={(date) => this.handleDateChange('endDate', date)}
                         placeholderText='Click to select' />
                     </Form.Field>
@@ -105,7 +103,7 @@ class AttendanceClass extends Component {
           <Table.Row>
             <Table.Cell collapsing>
               John Doe
-         </Table.Cell>
+            </Table.Cell>
             <Table.Cell collapsing>2 Feb 2016</Table.Cell>
             <Table.Cell collapsing textAlign='right'>69/100</Table.Cell>
             <Table.Cell collapsing textAlign='right'>69%</Table.Cell>
@@ -113,7 +111,7 @@ class AttendanceClass extends Component {
           <Table.Row>
             <Table.Cell collapsing>
               John Doe
-         </Table.Cell>
+            </Table.Cell>
             <Table.Cell collapsing>2 Feb 2016</Table.Cell>
             <Table.Cell collapsing textAlign='right'>69/100</Table.Cell>
             <Table.Cell collapsing textAlign='right'>69%</Table.Cell>
@@ -121,7 +119,7 @@ class AttendanceClass extends Component {
           <Table.Row negative>
             <Table.Cell collapsing>
               Ruide
-         </Table.Cell>
+            </Table.Cell>
             <Table.Cell collapsing>4 Feb 2016</Table.Cell>
             <Table.Cell collapsing textAlign='right'>23/100</Table.Cell>
             <Table.Cell collapsing textAlign='right'>23%</Table.Cell>

@@ -135,8 +135,8 @@ class AttendanceForm extends Component {
     }
   }
 
-// Handle submit calls the submit API. It sents the data in exactly the backend wants. Although users and students have
-// additional fields like `key` and `text`, mongoose does not care and will simply ignore it and only accept those defined and accepted by backend
+  // Handle submit calls the submit API. It sents the data in exactly the backend wants. Although users and students have
+  // additional fields like `key` and `text`, mongoose does not care and will simply ignore it and only accept those defined and accepted by backend
   handleSubmit = e => {
     e.preventDefault()
     const { date, className, type, students, users, hours } = this.state
@@ -152,10 +152,10 @@ class AttendanceForm extends Component {
         hours,
         type
       }).then(response => {
-        console.log(response)
-        this.setState({...initialState, submitSuccess: true})
-        this.context.router.history.push(`/attendance/view/${response.data.attendance._id}`)
-      })
+      console.log(response)
+      this.setState({...initialState, submitSuccess: true})
+      this.context.router.history.push(`/attendance/view/${response.data.attendance._id}`)
+    })
       .catch(error => {
         console.log(error)
         this.setState({ error: 'GOT PROBLEM SUBMITTING ATTENDANCE' })
@@ -232,7 +232,7 @@ class AttendanceForm extends Component {
           hidden={error.length === 0}
           negative
           content='Please Check Required Fields!'
-          />
+        />
       </div>
     )
   }

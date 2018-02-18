@@ -22,7 +22,7 @@ class AttendanceWrap extends Component {
     axios.get('/class')
       .then((response) => {
         let classOption = []
-        for (let [index, options] of response.data.classes.entries()) {
+        for (let [index, options] of response.data.activeClasses.entries()) {
           classOption[index] = {
             value: options._id,
             text: options.className,
@@ -61,7 +61,7 @@ class AttendanceWrap extends Component {
           {op === 'view' && sid && <AttendanceView attendanceId={sid} /> }
           {op === 'user' && <AttendanceUser classData={this.state.classData} />}
           {op === 'student' && <AttendanceStudent classData={this.state.classData} />}
-          {op === 'class' && <AttendanceClass classData={this.state.classData} token={this.state.token} />}
+          {op === 'class' && <AttendanceClass classData={this.state.classData} />}
         </div>
       )
     }

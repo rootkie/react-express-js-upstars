@@ -27,8 +27,8 @@ const typeOptions = [
 ]
 
 // Before the details are loaded, default values that if no attendance records are found using that ID.
-const students = [{text: 'Not found. Please try another search'}]
-const users = [{text: 'Not found. Please try another search'}]
+let students = [{text: 'Not found. Please try another search'}]
+let users = [{text: 'Not found. Please try another search'}]
 
 class AttendanceView extends Component {
   static propTypes = {
@@ -58,24 +58,29 @@ class AttendanceView extends Component {
           // Currently, if you use a random ID string that returns nothing, it simply displays nothing and warns the user that attendance cannot be found
           if (response.data.attendances !== null) {
             let data = response.data.attendances
-            for (let [index, userData] of data.users.entries()) {
-              users[index] = {
-                text: userData.list.profile.name,
-                key: userData.list._id,
-                list: userData.list._id,
-                status: userData.status
+            if (data.users.length !== 0) {
+              for (let [index, userData] of data.users.entries()) {
+                users[index] = {
+                  text: userData.list.profile.name,
+                  key: userData.list._id,
+                  list: userData.list._id,
+                  status: userData.status
+                }
               }
-            }
-            // Temp fix. This issue would be resolved after the new updates on delete
-            for (let [index, studentData] of data.students.entries()) {
-              students[index] = {
-                text: studentData.list !== null ? studentData.list.profile.name : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID. CHANGE TO INACTIVE INSTEAD OF DELETE',
-                key: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
-                list: studentData.list !== null ? studentData.list._id : 'DELETED. PLEASE DONT ATTEMPT TO EDIT SINCE THERE IS NO ID',
-                status: studentData.status
+            } else users = []
+            console.log(users)
+            if (data.students.length !== 0) {
+              for (let [index, studentData] of data.students.entries()) {
+                students[index] = {
+                  text: studentData.list.profile.name,
+                  key: studentData.list._id,
+                  list: studentData.list._id,
+                  status: studentData.status
+                }
               }
-            }
+            } else students = []
             // Populate the names and stuff. Students and Users are arrays populated previously in the for...of statements.
+            // The variable empty is also set to false so that the fields are editable
             this.setState({
               isLoading: false,
               className: data.class.className,
@@ -83,10 +88,11 @@ class AttendanceView extends Component {
               type: data.type,
               hours: data.hours,
               date: moment(data.date),
-              users: users,
-              students: students,
+              users,
+              students,
               empty: false
             })
+            // Else just remove the loading screen and show the default values
           } else this.setState({ isLoading: false })
         })
         .catch(err => {
@@ -127,7 +133,7 @@ class AttendanceView extends Component {
     // Only editable if in edit mode.
     if (this.state.edit === true) {
       this.setState({ type: value })
-    // If the classType is changed to class, by default everyone will be ticked as present. Easier to mark and submit attendance.
+      // If the classType is changed to class, by default everyone will be ticked as present. Easier to mark and submit attendance.
       if (value === 'Class') {
         for (let a = 0; a < students.length; a++) {
           students[a]['status'] = 1
@@ -280,17 +286,17 @@ class AttendanceView extends Component {
           <Modal.Actions>
             <Button basic color='red' inverted onClick={this.close}>
               <Icon name='remove' /> No
-      </Button>
+            </Button>
             <Button color='green' inverted onClick={this.delete}>
               <Icon name='checkmark' /> Yes
-      </Button>
+            </Button>
           </Modal.Actions>
         </Modal>
         <Message
           hidden={!submitSuccess}
           success
           content='Submitted'
-          />
+        />
       </div>
     )
   }

@@ -42,8 +42,8 @@ class AttendanceUser extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: '',
-      endDate: '',
+      startDate: null,
+      endDate: null,
       moreOptions: false,
       isLoading: true,
       userOptions: [],
@@ -68,11 +68,12 @@ class AttendanceUser extends Component {
         // Sort the old array into a new one in the correct key and value.
         for (let [index, userData] of response.data.users.entries()) {
           userOptions[index] = {
-            key: userData.profile.name,
+            key: userData._id,
             text: userData.profile.name,
             value: userData._id
           }
         }
+        console.log(userOptions)
         this.setState({userOptions, isLoading: false})
       }).catch(error => {
         console.log(error)
@@ -117,17 +118,17 @@ class AttendanceUser extends Component {
     } else {
     // Adds a slash in front of the 8 digit to suit the API URI call
       startDate = moment(startDate).format('[/]YYYYMMDD')
-    // Adds a dash between the 2 dates
+      // Adds a dash between the 2 dates
       endDate = moment(endDate).format('[-]YYYYMMDD')
       axios.get('attendance/user/' + userSelector + startDate + endDate + '/' + classSelector)
-      .then(response => {
-        if (response.data.attendances.length > 0) this.setState({attendanceFormattedData: this.formatUserAttendance(response.data.attendances[0]), isLoading: false})
-        else {
-          this.setState({isLoading: false, attendanceFormattedData: noResultsUser})
-        }
-      }).catch(error => {
-        console.log(error)
-      })
+        .then(response => {
+          if (response.data.attendances.length > 0) this.setState({attendanceFormattedData: this.formatUserAttendance(response.data.attendances[0]), isLoading: false})
+          else {
+            this.setState({isLoading: false, attendanceFormattedData: noResultsUser})
+          }
+        }).catch(error => {
+          console.log(error)
+        })
     }
   }
   handleDateChange = (dateType, date) => this.setState({[dateType]: date})
@@ -197,7 +198,7 @@ class AttendanceUser extends Component {
           hidden={error.length === 0}
           negative
           content={error}
-          />
+        />
 
         <Header as='h3' dividing>User Statistics</Header>
         <Table compact celled>
@@ -239,7 +240,7 @@ class AttendanceUser extends Component {
                 <Table.Cell collapsing>{data.hours}</Table.Cell>
                 <Table.Cell collapsing>{data.status === 1 ? 'Present' : 'Absent'}</Table.Cell>
               </Table.Row>
-        ))}
+            ))}
           </Table.Body>
         </Table>
       </div>
