@@ -11,7 +11,7 @@ class ClassWrap extends Component {
     op: string.isRequired,
     sid: string
   }
-// First init of state.
+  // First init of state.
   constructor (props) {
     super(props)
     this.state = {
@@ -21,7 +21,7 @@ class ClassWrap extends Component {
     }
     this.getClasses()
   }
-// API Call to GET all classes and their respective students and users information. Exposed to every single role.
+  // API Call to GET all classes and their respective students and users information. Exposed to every single role.
   getClasses = () => {
     axios.get('class')
       .then(response => {
@@ -34,7 +34,7 @@ class ClassWrap extends Component {
       })
   }
 
-// functions that are called from props in Class dependent js
+  // functions that are called from props in Class dependent js
   addClass = (classDataToSubmit) => {
     const { classData } = this.state
     return axios.post('/class', classDataToSubmit)
@@ -74,11 +74,11 @@ class ClassWrap extends Component {
     // After the deletion API is successful, remove these items from the front-end
     return axios.delete('/class', {
       data})
-        .then(() => {
-          this.getClasses()
-        }).catch((error) => {
-          console.log(error)
-        })
+      .then(() => {
+        this.getClasses()
+      }).catch((error) => {
+        console.log(error)
+      })
   }
 
   // Various routes that would render different components
@@ -93,5 +93,5 @@ class ClassWrap extends Component {
       </div>
     )
   }
-  }
+}
 export default ClassWrap

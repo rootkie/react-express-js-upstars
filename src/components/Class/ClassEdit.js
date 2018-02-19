@@ -47,7 +47,7 @@ class ClassEdit extends Component {
     super(props)
     this.state = { ...initialState }
   }
-// Before the component mounts, call the getClass function to retrieve everything about the class.
+  // Before the component mounts, call the getClass function to retrieve everything about the class.
   componentWillMount () {
     this.getClass(this.props.id)
   }
@@ -55,12 +55,12 @@ class ClassEdit extends Component {
   getClass = (classId) => {
     this.setState({ isLoading: true })
     axios.get('class/' + classId)
-    .then(response => {
-      this.setState({ oneClassData: response.data.class, isLoading: false })
-    })
-    .catch(err => {
-      console.log(err)
-    })
+      .then(response => {
+        this.setState({ oneClassData: response.data.class, isLoading: false })
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   // Called only when the user clicks edit (Preparing for various roles)
@@ -183,14 +183,14 @@ class ClassEdit extends Component {
       classId: this.props.id,
       userIds: this.state.usersValue
     })
-    .then(response => {
-      this.getClass(this.props.id)
-      this.setState({ isLoading: false, submitSuccess: true, usersValue: [] })
-      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
-    })
-    .catch(err => {
-      console.log(err)
-    })
+      .then(response => {
+        this.getClass(this.props.id)
+        this.setState({ isLoading: false, submitSuccess: true, usersValue: [] })
+        setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   addStudent = async e => {
@@ -199,17 +199,17 @@ class ClassEdit extends Component {
       classId: this.props.id,
       studentIds: this.state.studentsValue
     })
-    .then(response => {
-      this.getClass(this.props.id)
-      this.setState({ isLoading: false, submitSuccess: true, studentsValue: [] })
-      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
-    })
-    .catch(err => {
-      console.log(err)
-    })
+      .then(response => {
+        this.getClass(this.props.id)
+        this.setState({ isLoading: false, submitSuccess: true, studentsValue: [] })
+        setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
-// Same for delete user in that the getClass function will call again to reinit the state. This is the easiest way to do it other than to refresh
-// the page. Any manual coding would be tough.
+  // Same for delete user in that the getClass function will call again to reinit the state. This is the easiest way to do it other than to refresh
+  // the page. Any manual coding would be tough.
   deleteUser = async e => {
     e.preventDefault()
     axios.delete('users/class', {
@@ -218,14 +218,14 @@ class ClassEdit extends Component {
         userIds: this.state.userSelected
       }
     })
-    .then(response => {
-      this.getClass(this.props.id)
-      this.setState({ isLoading: false, submitSuccess: true, userSelected: [] })
-      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
-    })
-    .catch(err => {
-      console.log(err)
-    })
+      .then(response => {
+        this.getClass(this.props.id)
+        this.setState({ isLoading: false, submitSuccess: true, userSelected: [] })
+        setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+      })
+      .catch(err => {
+        console.log(err)
+      })
     console.log(this.state.userSelected)
   }
 
@@ -236,14 +236,14 @@ class ClassEdit extends Component {
         studentIds: this.state.studentSelected
       }
     })
-    .then(response => {
-      this.getClass(this.props.id)
-      this.setState({ isLoading: false, submitSuccess: true, studentSelected: [] })
-      setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
-    })
-    .catch(err => {
-      console.log(err)
-    })
+      .then(response => {
+        this.getClass(this.props.id)
+        this.setState({ isLoading: false, submitSuccess: true, studentSelected: [] })
+        setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   render () {

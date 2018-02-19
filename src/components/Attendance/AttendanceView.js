@@ -53,10 +53,11 @@ class AttendanceView extends Component {
     if (attendanceId) {
       axios.get('attendance/' + attendanceId)
         .then(response => {
-          console.log(response)
           // More comprehensive error management will be done later.
           // Currently, if you use a random ID string that returns nothing, it simply displays nothing and warns the user that attendance cannot be found
           if (response.data.attendances !== null) {
+            let users = []
+            let students = []
             let data = response.data.attendances
             if (data.users.length !== 0) {
               for (let [index, userData] of data.users.entries()) {
@@ -67,7 +68,7 @@ class AttendanceView extends Component {
                   status: userData.status
                 }
               }
-            } else users = []
+            }
             console.log(users)
             if (data.students.length !== 0) {
               for (let [index, studentData] of data.students.entries()) {
@@ -78,7 +79,7 @@ class AttendanceView extends Component {
                   status: studentData.status
                 }
               }
-            } else students = []
+            }
             // Populate the names and stuff. Students and Users are arrays populated previously in the for...of statements.
             // The variable empty is also set to false so that the fields are editable
             this.setState({
@@ -212,10 +213,15 @@ class AttendanceView extends Component {
     })
   }
 
+  dismiss = () => {
+    this.setState({ submitSuccess: false })
+  }
+
   render () {
     const { date, type, className, students, users, submitSuccess, hours, edit, buttonName, deleteConfirm, isLoading, empty } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
       <div>
+        {submitSuccess && <Message success onDismiss={this.dismiss}>Submitted</Message> }
         <Form onSubmit={this.handleEdit}>
           <Form.Group widths='equal'>
             <Form.Input label='Class' placeholder='Name of class' name='className' value={className} onChange={this.handleChange} readOnly required />
@@ -275,8 +281,8 @@ class AttendanceView extends Component {
             </Table.Body>
           </Table>
           <Form.Button fluid floated='left' disabled={empty} value='submit' type='submit'>{buttonName}</Form.Button>
+          <Form.Button fluid negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
         </Form>
-        <Form.Button fluid negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
         <Modal open={deleteConfirm} onClose={this.close} basic size='small'>
           <Header icon='archive' content='Delete Attendance' />
           {/* Just to make sure the user truly wants to delete the attendance since it is permanent. */}
@@ -292,11 +298,6 @@ class AttendanceView extends Component {
             </Button>
           </Modal.Actions>
         </Modal>
-        <Message
-          hidden={!submitSuccess}
-          success
-          content='Submitted'
-        />
       </div>
     )
   }

@@ -7,6 +7,7 @@ import AttendanceUser from './AttendanceUser.js'
 import AttendanceStudent from './AttendanceStudent.js'
 import AttendanceForm from './AttendanceForm.js'
 import AttendanceSearch from './AttendanceSearch.js'
+import AttendanceSummary from './AttendanceSummary.js'
 import axios from 'axios'
 
 class AttendanceWrap extends Component {
@@ -62,6 +63,7 @@ class AttendanceWrap extends Component {
           {op === 'user' && <AttendanceUser classData={this.state.classData} />}
           {op === 'student' && <AttendanceStudent classData={this.state.classData} />}
           {op === 'class' && <AttendanceClass classData={this.state.classData} />}
+          {op === 'summary' && <AttendanceSummary />}
         </div>
       )
     }

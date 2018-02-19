@@ -99,18 +99,18 @@ class ClassView extends Component {
                   <Link to='/classes/add'>
                     <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                       <Icon name='group' />New Class
-                </Button>
+                    </Button>
                   </Link>
                   <Button size='small' negative onClick={this.handleStoppingConfirmation('show')} disabled={selected.length === 0}>Stop</Button>
                   <Confirm
                     open={deleteConfirmationVisibility}
                     header='Stopping the following classes:'
                     content={selected.map((id) => (
-                  classData.filter((aClass) => (aClass._id === id))[0].className
-                )).join(', ')}
+                      classData.filter((aClass) => (aClass._id === id))[0].className
+                    )).join(', ')}
                     onCancel={this.handleStoppingConfirmation('cancel')}
                     onConfirm={this.handleStoppingConfirmation('confirm')}
-        />
+                  />
                 </Table.HeaderCell>
               </Table.Row>
             </Table.Footer>
