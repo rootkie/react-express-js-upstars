@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Table, Header, Icon, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
 class AttendanceSummary extends Component {
   constructor (props) {
@@ -44,7 +45,7 @@ class AttendanceSummary extends Component {
           <Table.Body>
             {summaryData.map((options, index) => (
               <Table.Row key={`class-${index}`}>
-                <Table.Cell collapsing>{options.className}</Table.Cell>
+                <Table.Cell collapsing><Link to={'/classes/id/' + options.id}>{options.className}</Link></Table.Cell>
                 <Table.Cell collapsing>{options.studentNumber}</Table.Cell>
                 <Table.Cell collapsing>{options.studentsPercentage * 100}%</Table.Cell>
                 <Table.Cell collapsing>{options.userNumber}</Table.Cell>
