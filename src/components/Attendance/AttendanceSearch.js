@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Loader, Dimmer, Checkbox } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Loader, Dimmer } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { array, object } from 'prop-types'
+import { array } from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 import 'react-datepicker/dist/react-datepicker.css'
 
 const datePickingStyle = {
@@ -15,61 +16,36 @@ class AttendanceSearch extends Component {
   static propTypes = {
     classData: array.isRequired
   }
-  static contextTypes = {
-    router: object.isRequired
-  }
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       startDate: '',
       endDate: '',
-      selected:[],
       moreOptions: false,
       classSelector: '',
       isLoading: true,
-      token: props.token,
-      attendances:[]
+      attendances: []
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     // get attendance initial data to be passed to search
     this.getInitialAttendance()
   }
 
+  // Get the data and populate the state so that the front-end can display.
   getInitialAttendance () {
-    axios({
-      method: 'get',
-      url: '/attendance/class/dateStart/dateEnd',
-      headers: { 'x-access-token': this.state.token }
-    }).then((response) => {
-      this.setState({attendances: this.formatAttendances(response.data.foundAttendances), isLoading: false})
-    }).catch((error) => {
-      console.log(error)
-    })
-  }
-
-  handleCheckBox = (e, { name: _id, checked }) => {
-    let { selected } = this.state
-    if (checked) {
-      selected.push(_id)
-    } else {
-      selected = selected.filter((element) => element !== _id)
-    }
-    this.setState({selected})
-  }
-
-  handleEdit = e => {
-    e.preventDefault()
-    const { selected } = this.state
-    if (selected.length === 1) {
-      const toEditId = selected[0]
-      this.context.router.history.push(`/attendance/view/${toEditId}`)
-    }
+    axios.get('/attendance/class/dateStart/dateEnd')
+      .then(response => {
+        this.setState({attendances: this.formatAttendances(response.data.foundAttendances), isLoading: false})
+      }).catch(error => {
+        console.log(error)
+      })
   }
 
   formatAttendances = (rawAttendanceData) => {
     let attendances = []
+    // Refactor the information for easier display.
     for (let [index, attendanceData] of rawAttendanceData.entries()) {
       attendances[index] = {
         _id: attendanceData._id,
@@ -81,37 +57,43 @@ class AttendanceSearch extends Component {
     }
     return attendances
   }
-  
-  handleSubmit = e => {
+
+  handleSearch = e => {
     e.preventDefault()
     let { startDate, endDate, classSelector } = this.state
-    this.setState({ isLoading: true, selected:[] }) // reset selected when filtered
-    if (startDate !== '') startDate = moment(startDate).format('[/]YYYYMMDD')
+    this.setState({ isLoading: true }) // reset selected when filtered
+
+    // Special formating to fit the API Call. Explained below: /attendance/class/:classId?/dateStart/:dateStart?/dateEnd/:dateEnd?
+    // Case 1: startDate is not given, optional field ':dateStart?' will be empty and backend ignores this search requirement
+    // Case 2: endDate is not given, similarly, endDate is optional
+    // Case 3: class is not given. '?' in the API means the field is optional.
+    // So an API like '/attendance/class/dateStart/dateEnd/' will simply return every single attendance records of every class.
+    if (startDate !== '') startDate = moment(startDate).format('[/]YYYYMMDD') //  From the moments docs, [] allows additional characters
     if (endDate !== '') endDate = moment(endDate).format('[/]YYYYMMDD')
     if (classSelector.length > 0) classSelector = '/' + classSelector
-    axios({
-        method: 'get',
-        url: '/attendance/class' + classSelector + '/dateStart' + startDate + '/dateEnd' + endDate,
-        headers: { 'x-access-token': this.state.token },
-      }).then(response => {
+
+    // Get new data based on the search filters and populate attendance
+    axios.get('/attendance/class' + classSelector + '/dateStart' + startDate + '/dateEnd' + endDate)
+      .then(response => {
         let attendances = this.formatAttendances(response.data.foundAttendances)
         this.setState({ isLoading: false, attendances })
-      }) 
+      })
   }
-  
+
+  // Used to add a class as an additional filter
   getAttendance = (e, { value }) => this.setState({classSelector: value})
-  
+
   handleDateChange = (dateType, date) => this.setState({[dateType]: date})
 
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
-  
+
   clear = e => {
     e.preventDefault()
     this.setState({startDate: '', endDate: '', classSelector: ''})
   }
-  
+
   render () {
-    const { moreOptions, classSelector, attendances, isLoading, selected } = this.state
+    const { moreOptions, classSelector, attendances, isLoading } = this.state
     const { classData } = this.props
 
     return (
@@ -125,26 +107,23 @@ class AttendanceSearch extends Component {
                     <Form.Field style={datePickingStyle}>
                       <label>Starting Date</label>
                       <DatePicker
+                        dateFormat='DD/MM/YYYY'
                         selected={this.state.startDate}
-                        selectsStart
-                        startDate={this.state.startDate}
-                        endDate={this.state.endDate}
+                        maxDate={this.state.endDate}
                         onChange={(date) => this.handleDateChange('startDate', date)}
                         placeholderText='Click to select' />
                     </Form.Field>
                     <Form.Field style={datePickingStyle}>
                       <label>Ending Date</label>
                       <DatePicker
+                        dateFormat='DD/MM/YYYY'
                         selected={this.state.endDate}
-                        selectsEnd
-                        startDate={this.state.startDate}
-                        endDate={this.state.endDate}
+                        minDate={this.state.startDate}
                         onChange={(date) => this.handleDateChange('endDate', date)}
                         placeholderText='Click to select' />
                     </Form.Field>
-                    <Form.Button positive onClick={this.handleSubmit}>Go</Form.Button>
-                    <Form.Button color='blue' onClick={this.handleEdit} disabled={selected.length !== 1}> Edit </Form.Button>
-                    <Form.Button negative onClick={this.clear}>Clear</Form.Button>
+                    <Form.Button positive onClick={this.handleSearch}>Search attendance records</Form.Button>
+                    <Form.Button negative onClick={this.clear}>Clear all fields</Form.Button>
                   </Form.Group>
                   <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                 </div>
@@ -156,7 +135,7 @@ class AttendanceSearch extends Component {
                 </div>}
               </Form>
               <Dimmer active={isLoading} inverted>
-               <Loader indeterminate active={isLoading}>Loading Data</Loader>
+                <Loader indeterminate active={isLoading}>Loading Data</Loader>
               </Dimmer>
             </Table.HeaderCell>
           </Table.Row>
@@ -168,15 +147,12 @@ class AttendanceSearch extends Component {
             <Table.HeaderCell>Hours</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
-        
-        
+
         <Table.Body>
           {attendances.map((options, i) => (
             <Table.Row key={`attendance-${i}`}>
-              <Table.Cell collapsing>
-                <Checkbox name={options._id} onChange={this.handleCheckBox} checked={selected.includes(options._id)} />
-              </Table.Cell>
-              <Table.Cell>{options.className}</Table.Cell>
+              <Table.Cell collapsing>{i + 1}</Table.Cell>
+              <Table.Cell><Link to={'/attendance/view/' + options._id}>{options.className}</Link></Table.Cell>
               <Table.Cell>{options.date}</Table.Cell>
               <Table.Cell>{options.type}</Table.Cell>
               <Table.Cell>{options.hours}</Table.Cell>

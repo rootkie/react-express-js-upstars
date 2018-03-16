@@ -3,9 +3,8 @@ const Student = require('../models/student')
 const Class = require('../models/class')
 let util = require('../util.js')
 
+module.exports.adminChangePassword = async (req, res, next) => {
 // Every function here is restricted to SA only
-
-module.exports.adminChangePassword = async(req, res, next) => {
   try {
     let {
       userId,
@@ -41,7 +40,7 @@ module.exports.adminChangePassword = async(req, res, next) => {
   }
 }
 
-module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
+module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
   try {
     let {
       userId,
@@ -121,7 +120,7 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
   }
 }
 
-module.exports.createUser = async(req, res, next) => {
+module.exports.createUser = async (req, res, next) => {
   try {
     let {
       email,
@@ -193,7 +192,7 @@ module.exports.createUser = async(req, res, next) => {
   }
 }
 
-module.exports.getPendingUsers = async(req, res, next) => {
+module.exports.getPendingUsers = async (req, res, next) => {
   try {
     // Find all users with status as Pending
     const users = await User.find({

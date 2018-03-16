@@ -11,6 +11,10 @@ import VolunteerWrap from './Volunteer/VolunteerWrap'
 import AttendanceWrap from './Attendance/AttendanceWrap'
 import StudentWrap from './Student/StudentWrap'
 
+axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
+axios.defaults.headers.common['x-access-token'] = window.localStorage.token
+axios.defaults.headers.post['Content-Type'] = 'application/json'
+
 const GridStyle = {
   paddingTop: '4em',
   height: '100vh',
@@ -35,7 +39,7 @@ class MainCtrl extends Component {
     return axios({
       method: 'get',
       url: '/check',
-      headers: {'x-access-token': localStorage.token }
+      headers: { 'x-access-token': window.localStorage.token }
     }).then((response) => {
       this.setState({ isLoggedIn: response.data.auth })
     }).catch((err) => {

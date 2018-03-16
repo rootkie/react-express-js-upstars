@@ -1,7 +1,7 @@
 const Student = require('../models/student')
 const Class = require('../models/class')
 // Add student function works for SA only. If need ability for students to sign up, please tell me.
-module.exports.addStudent = async(req, res, next) => {
+module.exports.addStudent = async (req, res, next) => {
   try {
     let edited = {}
 
@@ -50,7 +50,7 @@ module.exports.addStudent = async(req, res, next) => {
 }
 
 // Mentor / Admin / SuperAdmin only
-module.exports.editStudentById = async(req, res, next) => {
+module.exports.editStudentById = async (req, res, next) => {
   try {
     // Check if studentId exists
     if (!req.body.studentId) {
@@ -136,7 +136,7 @@ module.exports.editStudentById = async(req, res, next) => {
 }
 
 // Everyone
-module.exports.getAll = async(req, res, next) => {
+module.exports.getAll = async (req, res, next) => {
   try {
     // Find all students from database
     const students = await Student.find({
@@ -151,7 +151,7 @@ module.exports.getAll = async(req, res, next) => {
   }
 }
 // Everyone with token
-module.exports.getStudentById = async(req, res, next) => {
+module.exports.getStudentById = async (req, res, next) => {
   try {
     let studentId = req.params.id
 
@@ -176,7 +176,7 @@ module.exports.getStudentById = async(req, res, next) => {
   }
 }
 // SuperAdmin only
-module.exports.deleteStudent = async(req, res, next) => {
+module.exports.deleteStudent = async (req, res, next) => {
   let {
     studentId
   } = req.body

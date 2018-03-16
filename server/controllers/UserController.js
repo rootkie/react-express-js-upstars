@@ -4,7 +4,7 @@ const util = require('../util')
 const Class = require('../models/class')
 
 // Admin / SA
-module.exports.getAllUsers = async(req, res, next) => {
+module.exports.getAllUsers = async (req, res, next) => {
   try {
     // Retrieve all users in the system
     const users = await User.find({
@@ -62,7 +62,7 @@ module.exports.getUser = async(req, res, next) => {
 }
 
 // Same logic, everyone can access their own stuff
-module.exports.editUserParticulars = async(req, res, next) => {
+module.exports.editUserParticulars = async (req, res, next) => {
   try {
     let {
       userId
@@ -129,7 +129,7 @@ module.exports.editUserParticulars = async(req, res, next) => {
 }
 
 // Everyone
-module.exports.deleteUser = async(req, res, next) => {
+module.exports.deleteUser = async (req, res, next) => {
   let {
     userId
   } = req.body
@@ -203,7 +203,7 @@ module.exports.deleteUser = async(req, res, next) => {
 }
 
 // Change your own password
-module.exports.changePassword = async(req, res, next) => {
+module.exports.changePassword = async (req, res, next) => {
   try {
     let {
       userId,
@@ -254,7 +254,7 @@ module.exports.changePassword = async(req, res, next) => {
 
 // Admin / SA
 // Note that external is the only party we conduct a permanent delete
-module.exports.getExternal = async(req, res, next) => {
+module.exports.getExternal = async (req, res, next) => {
   try {
     // Find the external and get className
     const user = await External.findById(req.params.id).populate('classId', 'className')

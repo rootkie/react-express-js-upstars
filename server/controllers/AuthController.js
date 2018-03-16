@@ -7,7 +7,7 @@ const crypto = require('crypto')
 // ============== Start of all the functions ==============
 // Everyone can access without token
 
-module.exports.login = async(req, res, next) => {
+module.exports.login = async (req, res, next) => {
   try {
     let {
       password,
@@ -67,7 +67,7 @@ module.exports.login = async(req, res, next) => {
   }
 }
 
-module.exports.register = async(req, res, next) => {
+module.exports.register = async (req, res, next) => {
   try {
     let {
       email,
@@ -153,7 +153,7 @@ module.exports.register = async(req, res, next) => {
   }
 }
 
-module.exports.check = async(req, res, next) => {
+module.exports.check = async (req, res, next) => {
   try {
     let token = req.headers['x-access-token']
     let result = (auth) => {
@@ -179,7 +179,7 @@ module.exports.check = async(req, res, next) => {
   }
 }
 
-module.exports.simpleRegister = async(req, res, next) => {
+module.exports.simpleRegister = async (req, res, next) => {
   try {
     let {
       email,

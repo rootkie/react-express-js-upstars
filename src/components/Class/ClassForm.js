@@ -1,111 +1,87 @@
 import React, { Component } from 'react'
-import { Form, Message } from 'semantic-ui-react'
+import { Form, Message, Header } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { object, bool, func } from 'prop-types'
-import 'react-datepicker/dist/react-datepicker.css'
+import { func } from 'prop-types'
 import moment from 'moment'
+import { Link } from 'react-router-dom'
+import 'react-datepicker/dist/react-datepicker.css'
 
+// Init typeOptions to be used in dropdown for TYPE of class
 const typeOptions = [
   { key: 'tuition', text: 'Tuition', value: 'Tuition' },
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
+// Initial State, everything is empty. Will fill it up next.
+// StartDate is set to default today.
 const initialState = {
   className: '',
-  classType: '',
+  classType: 'Tuition',
   venue: '',
   dayAndTime: '',
-  startDate: '',
-  serverErrorMessage: ''
+  classId: '',
+  startDate: moment(),
+  submitSuccess: false
 }
 
+// Import the functions declared in ClassWrap here as props to be called - for cleaner code
 class ClassForm extends Component {
   static propTypes = {
-    classData: object,
-    edit: bool,
-    editClass: func,
     addClass: func
   }
 
-  filterPropData = (checkArray) => { // consider moving this up to the wrapper
-    const { classData } = this.props
-    return Object.keys(classData).reduce((last, curr) => (checkArray.includes(curr) ? {...last, [curr]: classData[curr]} : last
-  ), {})
-  }
+  // Init the state
+  state = {...initialState}
 
-  state = this.props.classData
-  ? {
-    ...this.filterPropData(['className', 'classType', 'dayAndTime', 'venue']),
-    startDate: moment(this.props.classData.startDate),
-    error: [],
-    submitSuccess: false,
-    serverErrorMessage: ''
-  }
-  : {...initialState, submitSuccess: false}
-
-  checkRequired = (checkArray) => {
-    const error = []
-    for (let i of checkArray) {
-      const item = this.state[i]
-      if (!item || item === '') error.push(i)
-    }
-    return error
-  }
-
-  handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
+  handleChange = (e, { name, value }) => this.setState({ [name]: value })
 
   handleDateChange = (startDate) => this.setState({startDate})
 
+  // Calling functions when the submit button is clicked
   handleSubmit = async e => {
     e.preventDefault()
     const { className, classType, venue, dayAndTime, startDate } = this.state
-    const { edit, editClass, addClass } = this.props
-    // check required fields
-    let requiredFields = (classType === 'Tuition') ? ['className', 'classType', 'venue', 'dayAndTime', 'startDate'] : ['className', 'classType', 'venue', 'startDate']
-    const error = this.checkRequired(requiredFields)
+    const { addClass } = this.props
 
-    if (error.length === 0) {
-      const data = {
-        className,
-        classType,
-        venue,
-        dayAndTime,
-        startDate
-      }
+    const data = {
+      className,
+      classType,
+      venue,
+      dayAndTime,
+      startDate
+    }
+    if (classType === 'Enrichment') {
+      data.dayAndTime = 'nil'
+    }
 
-      if (edit) {
-        try {
-          await editClass(data)
-          this.showSuccess()
-        } catch (error) {
-          this.setState({serverErrorMessage: error.response.data.error})
-          console.log(error)
-        }
-      } else { // not in edit mode
-        try {
-          await addClass(data)
-          this.showSuccess()
-          this.setState({...initialState})
-        } catch (error) {
-          this.setState({serverErrorMessage: error.response.data.error})
-        }
-      }
-    } else {
-      console.log('Incomplete Fields')
-      this.setState({error, serverErrorMessage: 'Please check all required fields are filled in correctly'})
+    try {
+      let classData = await addClass(data)
+      console.log(classData)
+      // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
+      this.setState({...initialState, classId: classData.data.newClass._id})
+      this.showSuccess()
+    } catch (error) {
+      this.setState({serverErrorMessage: error.response.data.error})
     }
   }
 
+  // Function called to show the success message for 5 seconds (UX component)
+  // There's still a 'x' button to close the message
   showSuccess = () => {
     this.setState({submitSuccess: true})
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
-  render () {
-    const { className, classType, venue, dayAndTime, serverErrorMessage, submitSuccess } = this.state // submitted version are used to display the info sent through POST (not necessary)
+  closeMessage = () => {
+    this.setState({submitSuccess: false})
+  }
 
+  render () {
+    const { className, classType, venue, dayAndTime, submitSuccess, classId } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
       <div>
+        {submitSuccess && <Message positive onDismiss={this.closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message> }
+        <Header as='h3' dividing>Class information</Header>
         <Form onSubmit={this.handleSubmit}>
           <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
           <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
@@ -113,17 +89,15 @@ class ClassForm extends Component {
           <Form.Field required>
             <label>Starting Date</label>
             <DatePicker
-              placeholderText='Click to select a date'
+              inline
+              fixedHeight
               dateFormat='DD/MM/YYYY'
               selected={this.state.startDate}
               onChange={this.handleDateChange} required />
           </Form.Field>
           <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
-          {serverErrorMessage.length > 0 && <Message negative>{serverErrorMessage}</Message> }
-          {submitSuccess && <Message positive>Class created</Message> }
           <Form.Button>Submit</Form.Button>
         </Form>
-
       </div>
     )
   }

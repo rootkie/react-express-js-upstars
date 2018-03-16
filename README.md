@@ -6,7 +6,7 @@ This system is built using express.js as an API provider. The APIs are consumed 
 
 ## Documentation
 ### Getting Started
-1. Install Node v7.x.x
+1. Install Node v8.9.x
 2. `npm install`
 3. [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
 

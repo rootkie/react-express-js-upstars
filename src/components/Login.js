@@ -1,100 +1,110 @@
 import React, { Component } from 'react'
-import { Form, Button, Header, Message } from 'semantic-ui-react'
+import { Form, Button, Header, Message, Image, Segment, Grid } from 'semantic-ui-react'
 import axios from 'axios'
-import { Redirect } from 'react-router'
+import { Link, Redirect } from 'react-router-dom'
 
 const initialState = {
   email: '',
   password: '',
-  error: [],
-  submitSuccess: false,
-  errorMessage: '',
-  loadingMessage: ''
+  message: ''
 }
 
 class Login extends Component {
   state = {...initialState, redirect: false}
 
+  // Before the page starts to render
   constructor () {
     super()
     this.isLoggedIn()
   }
 
+  // Call the API to check the validity of the token if any. The token is sent as the header to check and would be undefined if user
+  // has yet to log in. Will implement the refresh token scheme later after the main functions of the software is done.
   isLoggedIn = () => {
     return axios({
       method: 'get',
       url: '/check',
-      headers: {'x-access-token': localStorage.token }
-    }).then((response) => {
+      headers: { 'x-access-token': window.localStorage.token }
+    }).then(response => {
       this.setState({ redirect: response.data.auth })
     }).catch((err) => {
       console.log(err)
     })
   }
 
-  handleChange = (e, { name, value, checked }) => this.setState({ [name]: value || checked })
-
-  checkRequired = (checkArray) => {
-    const error = []
-    for (let i of checkArray) {
-      const item = this.state[i]
-      if (!item || item === '') error.push(i)
-    }
-    return error
-  }
+  handleChange = (e, { name, value }) => this.setState({ [name]: value })
 
   handleSubmit = e => {
     e.preventDefault()
     const { email, password } = this.state
-    // check required fields
-    const error = this.checkRequired(['email', 'password'])
 
-    if (error.length === 0) {
-      setTimeout( () => { this.setState({ loadingMessage: "Logging in..." }) }, 5000) 
-      axios.post('/login', { email, password })
-      .then((response) => {
-        localStorage.setItem('token', response.data.token)
-        this.setState({...initialState, submitSuccess: true}) // reset form
-        setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
-        //  Timeout as hack to prevent setState on unmounted component error
-        setTimeout(() => { this.setState({ redirect: true }) }, 500) // redirect to homepage if login successful
+    // Set the message and attempts to log in
+    this.setState({ message: 'Logging in...' })
+    axios.post('/login', { email, password })
+      .then(response => {
+        window.localStorage.setItem('token', response.data.token)
+        this.setState({ redirect: true })
       })
-      .catch((error) => {
+      // Errors are catched. Axios defaults all errors to http codes !== 2xx
+      .catch(error => {
         console.log(error)
-        this.setState({errorMessage: error.response.data.error})
+        this.setState({message: error.response.data.error})
       })
-    } else { // incomplete required fields
-      console.log('error occured')
-      this.setState({error, errorMessage: 'Please Check Required Fields!'})
-    }
   }
 
   render () {
-    const { email, password, error, errorMessage, loadingMessage, submitSuccess, redirect } = this.state
+    const { email, password, message, redirect } = this.state
 
     if (redirect) {
-      return <Redirect push to='/home' />
+      return <Redirect to='/home' />
     }
 
     return (
-      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%'}}>
-        <Form onSubmit={this.handleSubmit} style={{padding: '20px', borderColor: 'darkcyan', borderRadius: '5px', borderStyle: 'solid'}}>
-          <Form.Input label='Email' placeholder='email' name='email' value={email} type='email' onChange={this.handleChange} required />
-          <Form.Input label='Password' placeholder='password' name='password' value={password} type='password' onChange={this.handleChange} required />
-          <Button type='submit' positive >Login</Button>
-        </Form>
-        <div>
-          <Message
-            hidden={error.length === 0 && errorMessage === ''}
-            negative
-            content={errorMessage}
+      <div className='login-form'>
+        <style>{`
+          body > div,
+          body > div > div,
+          body > div > div > div.login-form {
+            height: 100%;
+          }
+    `}</style>
+        <Grid
+          textAlign='center'
+          style={{ height: '100%' }}
+          verticalAlign='middle'>
+          <Grid.Column style={{ maxWidth: 550 }}>
+            <Image size='big' fluid centered src={require('./logo.png')} />
+            <Header as='h2' color='teal' textAlign='center'>
+              Log-in to your account
+                </Header>
+            <Form size='large' onSubmit={this.handleSubmit}>
+              <Segment stacked>
+                <Form.Input
+                  fluid
+                  icon='user'
+                  iconPosition='left'
+                  placeholder='E-mail address'
+                  name='email' value={email} type='email' onChange={this.handleChange} required />
+                <Form.Input
+                  fluid
+                  icon='lock'
+                  iconPosition='left'
+                  placeholder='Password'
+                  type='password' name='password' value={password} onChange={this.handleChange} required />
+
+                <Button color='teal' fluid size='large' type='submit'>Login</Button>
+                <Message
+                  hidden={message === ''}
+                  negative
+                  content={message}
           />
-          <Message
-            hidden={loadingMessage === ''}
-            positive
-            content={loadingMessage}
-          />
-        </div>
+              </Segment>
+            </Form>
+            <Message>
+          New to us? <Link to='/register/volunteer'>Sign Up</Link>
+            </Message>
+          </Grid.Column>
+        </Grid>
       </div>
     )
   }
