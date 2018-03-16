@@ -35,6 +35,8 @@ module.exports.checkRole = req => {
     params,
     decoded
   } = req
+  // If the token _id does not corrosponds to the user involved
+  // Check if he has a role associated to perform administrative functions
   if (params !== decoded._id) {
     for (const list in roles) {
       if (decoded.roles.indexOf(roles[list]) !== -1) return true
