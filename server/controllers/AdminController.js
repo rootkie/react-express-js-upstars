@@ -1,12 +1,12 @@
 const User = require('../models/user')
 let util = require('../util.js')
 
-module.exports.adminChangePassword = async(req, res, next) => {
+module.exports.adminChangePassword = async (req, res, next) => {
   try {
     let {
-            userId,
-            newPassword
-        } = req.body
+      userId,
+      newPassword
+    } = req.body
 
     // Find user and replace it with the newPassword before saving
     const user = await User.findById(userId)
@@ -22,27 +22,27 @@ module.exports.adminChangePassword = async(req, res, next) => {
   }
 }
 
-module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
+module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
   try {
     let {
-            userId,
-            newStatus,
-            newRoles
-        } = req.body
+      userId,
+      newStatus,
+      newRoles
+    } = req.body
     let edited = {}
-        // Check if these fields exist, if it does it will get updated in the database
+    // Check if these fields exist, if it does it will get updated in the database
     if (newStatus) {
       edited.status = newStatus
     }
     if (newRoles) {
       edited.roles = newRoles
     }
-        // Update it on the database with validations
+    // Update it on the database with validations
     const updatedUser = await User.findByIdAndUpdate(userId, edited, {
       new: true,
       runValidators: true
     })
-        // Returns token and necessary information
+    // Returns token and necessary information
     return res.status(200).json({
       user: util.generateToken(updatedUser),
       _id: updatedUser._id,
@@ -59,17 +59,17 @@ module.exports.changeUserStatusAndPermissions = async(req, res, next) => {
   }
 }
 
-module.exports.createUser = async(req, res, next) => {
+module.exports.createUser = async (req, res, next) => {
   try {
     let {
-            email,
-            password,
-            profile,
-            commencementDate,
-            exitDate,
-            roles
-        } = req.body
-        // Check that both email and password are provided
+      email,
+      password,
+      profile,
+      commencementDate,
+      exitDate,
+      roles
+    } = req.body
+    // Check that both email and password are provided
     if (!email) {
       throw ({
         status: 400,
@@ -82,7 +82,7 @@ module.exports.createUser = async(req, res, next) => {
         error: 'Please provide a password'
       })
     }
-        // Check if the email has already been used
+    // Check if the email has already been used
     const existingUser = await User.findOne({
       email
     })
@@ -93,7 +93,7 @@ module.exports.createUser = async(req, res, next) => {
         error: 'Email already exist.'
       })
     }
-        // Create new User and save it after validating it.
+    // Create new User and save it after validating it.
     const user = new User({
       email,
       password,
@@ -131,9 +131,9 @@ module.exports.createUser = async(req, res, next) => {
   }
 }
 
-module.exports.getPendingUsers = async(req, res, next) => {
+module.exports.getPendingUsers = async (req, res, next) => {
   try {
-        // Find all users with status as Pending
+    // Find all users with status as Pending
     const users = await User.find({
       'status': 'Pending'
     }).select('profile.name roles').sort('profile.name')
@@ -146,10 +146,10 @@ module.exports.getPendingUsers = async(req, res, next) => {
   }
 }
 
-module.exports.generateAdminUser = async(req, res, next) => {
+module.exports.generateAdminUser = async (req, res, next) => {
   try {
-        // All compulsory fields: Full test input with validation
-        /* {
+    // All compulsory fields: Full test input with validation
+    /* {
         	"email": "test@gmail.com",
         	"password": "password",
         	"profile": {
@@ -165,11 +165,11 @@ module.exports.generateAdminUser = async(req, res, next) => {
         	}
         } */
     let {
-            email,
-            password,
-            profile
-        } = req.body
-        // Return error if no email provided
+      email,
+      password,
+      profile
+    } = req.body
+    // Return error if no email provided
     if (!email) {
       throw ({
         status: 400,
@@ -177,7 +177,7 @@ module.exports.generateAdminUser = async(req, res, next) => {
       })
     }
 
-        // Return error if no password provided
+    // Return error if no password provided
     if (!password) {
       throw ({
         status: 400,

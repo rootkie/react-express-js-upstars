@@ -4,7 +4,7 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
 
-module.exports.addClass = async(req, res, next) => {
+module.exports.addClass = async (req, res, next) => {
   try {
     let {
       className,
@@ -59,7 +59,7 @@ module.exports.addClass = async(req, res, next) => {
   }
 }
 
-module.exports.editClass = async(req, res, next) => {
+module.exports.editClass = async (req, res, next) => {
   try {
     let {
       classId,
@@ -78,7 +78,7 @@ module.exports.editClass = async(req, res, next) => {
       dayAndTime,
       startDate
     }
-      // Find and update class
+    // Find and update class
     const newClass = await Class.findByIdAndUpdate(classId, class1, {
       new: true,
       runValidators: true
@@ -99,7 +99,7 @@ module.exports.editClass = async(req, res, next) => {
   }
 }
 
-module.exports.getAll = async(req, res, next) => {
+module.exports.getAll = async (req, res, next) => {
   try {
     // Find all classes
     const classes = await Class.find({}).select('-createdAt')
@@ -112,7 +112,7 @@ module.exports.getAll = async(req, res, next) => {
   }
 }
 
-module.exports.getClassById = async(req, res, next) => {
+module.exports.getClassById = async (req, res, next) => {
   try {
     let classId = req.params.id
 
@@ -151,7 +151,7 @@ module.exports.getClassById = async(req, res, next) => {
   }
 }
 
-module.exports.deleteClass = async(req, res, next) => {
+module.exports.deleteClass = async (req, res, next) => {
   let {
     classId
   } = req.body
@@ -187,7 +187,7 @@ module.exports.deleteClass = async(req, res, next) => {
   }
 }
 
-module.exports.addStudentsToClass = async(req, res, next) => {
+module.exports.addStudentsToClass = async (req, res, next) => {
   try {
     let {
       classId,
@@ -242,7 +242,7 @@ module.exports.addStudentsToClass = async(req, res, next) => {
   }
 }
 
-module.exports.deleteStudentsFromClass = async(req, res, next) => {
+module.exports.deleteStudentsFromClass = async (req, res, next) => {
   try {
     let {
       classId,
@@ -294,7 +294,7 @@ module.exports.deleteStudentsFromClass = async(req, res, next) => {
   }
 }
 
-module.exports.addUsersToClass = async(req, res, next) => {
+module.exports.addUsersToClass = async (req, res, next) => {
   try {
     let {
       classId,
@@ -349,7 +349,7 @@ module.exports.addUsersToClass = async(req, res, next) => {
   }
 }
 
-module.exports.deleteUsersFromClass = async(req, res, next) => {
+module.exports.deleteUsersFromClass = async (req, res, next) => {
   try {
     let {
       classId,
@@ -401,7 +401,7 @@ module.exports.deleteUsersFromClass = async(req, res, next) => {
   }
 }
 
-module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
+module.exports.assignExternalPersonnelToClass = async (req, res, next) => {
   try {
     let {
       classId,
@@ -466,7 +466,7 @@ module.exports.assignExternalPersonnelToClass = async(req, res, next) => {
   }
 }
 
-module.exports.removeExternalPersonnelFromClass = async(req, res, next) => {
+module.exports.removeExternalPersonnelFromClass = async (req, res, next) => {
   try {
     let {
       classId,

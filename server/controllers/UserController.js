@@ -2,7 +2,7 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
 
-module.exports.getAllUsers = async(req, res, next) => {
+module.exports.getAllUsers = async (req, res, next) => {
   try {
     // Retrieve all users in the system
     const users = await User.find({}).select('profile roles status').sort('profile.name')
@@ -20,7 +20,7 @@ module.exports.getAllUsers = async(req, res, next) => {
   }
 }
 
-module.exports.getUser = async(req, res, next) => {
+module.exports.getUser = async (req, res, next) => {
   try {
     let approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
@@ -50,12 +50,12 @@ module.exports.getUser = async(req, res, next) => {
   }
 }
 
-module.exports.editUserParticulars = async(req, res, next) => {
+module.exports.editUserParticulars = async (req, res, next) => {
   try {
     let {
       userId
     } = req.body
-     // Check userId is provided
+    // Check userId is provided
     if (!userId) {
       throw ({
         status: 400,
@@ -110,7 +110,7 @@ module.exports.editUserParticulars = async(req, res, next) => {
   }
 }
 
-module.exports.deleteUser = async(req, res, next) => {
+module.exports.deleteUser = async (req, res, next) => {
   let {
     userId
   } = req.body
@@ -144,7 +144,7 @@ module.exports.deleteUser = async(req, res, next) => {
   }
 }
 
-module.exports.changePassword = async(req, res, next) => {
+module.exports.changePassword = async (req, res, next) => {
   try {
     let {
       userId,
@@ -193,7 +193,7 @@ module.exports.changePassword = async(req, res, next) => {
   }
 }
 
-module.exports.getExternal = async(req, res, next) => {
+module.exports.getExternal = async (req, res, next) => {
   try {
     // Find the external and get className
     const user = await External.findById(req.params.id).populate('classId', 'className')

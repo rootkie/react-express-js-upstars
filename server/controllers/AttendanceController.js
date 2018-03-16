@@ -3,7 +3,7 @@ let mongoose = require('mongoose')
 let moment = require('moment')
 let util = require('../util')
 
-module.exports.addEditAttendance = async(req, res, next) => {
+module.exports.addEditAttendance = async (req, res, next) => {
   try {
     let {
       date,
@@ -75,7 +75,7 @@ module.exports.addEditAttendance = async(req, res, next) => {
   }
 }
 
-module.exports.deleteAttendance = async(req, res, next) => {
+module.exports.deleteAttendance = async (req, res, next) => {
   try {
     let {
       attendanceId,
@@ -123,7 +123,7 @@ module.exports.deleteAttendance = async(req, res, next) => {
   }
 }
 
-module.exports.getAttendance = async(req, res, next) => {
+module.exports.getAttendance = async (req, res, next) => {
   try {
     let {
       classId,
@@ -160,7 +160,7 @@ module.exports.getAttendance = async(req, res, next) => {
   }
 }
 
-module.exports.getAttendanceById = async(req, res, next) => {
+module.exports.getAttendanceById = async (req, res, next) => {
   try {
     let attendanceId = req.params.id
 
@@ -176,7 +176,7 @@ module.exports.getAttendanceById = async(req, res, next) => {
   }
 }
 
-module.exports.getAttendanceByUser = async(req, res, next) => {
+module.exports.getAttendanceByUser = async (req, res, next) => {
   try {
     let {
       userId,
@@ -274,7 +274,7 @@ module.exports.getAttendanceByUser = async(req, res, next) => {
   }
 }
 
-module.exports.getAttendanceByStudent = async(req, res, next) => {
+module.exports.getAttendanceByStudent = async (req, res, next) => {
   try {
     let {
       studentId,
@@ -354,7 +354,7 @@ module.exports.getAttendanceByStudent = async(req, res, next) => {
   }
 }
 
-module.exports.getClassAttendanceSummary = async(req, res, next) => {
+module.exports.getClassAttendanceSummary = async (req, res, next) => {
   try {
     let {
       classId

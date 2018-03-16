@@ -1,4 +1,5 @@
 module.exports = {
   secret: 'topsecret',
-  database: 'mongodb://localhost:27017/test'
+  database: 'mongodb://localhost:27017/test',
+  debug: true
 }

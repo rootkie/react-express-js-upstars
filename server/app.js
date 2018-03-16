@@ -11,9 +11,9 @@ const config = require('./config/constConfig')
 
 // Setup logger
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
-  // Serve static assets
+// Serve static assets
 app.use(express.static(path.resolve(__dirname, '..', 'build')))
-  // Enable Cross Origin Resource Sharing
+// Enable Cross Origin Resource Sharing
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
@@ -26,7 +26,7 @@ app.use(function (req, res, next) {
 // Connecting to database
 mongoose.Promise = global.Promise
 mongoose.connect(config.database)
-  /* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
+/* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
   mongoose.openUri(config.database, {
   useMongoClient: true,
   ssl: true

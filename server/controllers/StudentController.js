@@ -1,7 +1,7 @@
 const Student = require('../models/student')
 
 // Add student function works for both admin and usual student sign up
-module.exports.addStudent = async(req, res, next) => {
+module.exports.addStudent = async (req, res, next) => {
   try {
     let edited = {}
 
@@ -49,7 +49,7 @@ module.exports.addStudent = async(req, res, next) => {
   }
 }
 
-module.exports.editStudentById = async(req, res, next) => {
+module.exports.editStudentById = async (req, res, next) => {
   try {
     // Check if studentId exists
     if (!req.body.studentId) {
@@ -100,7 +100,7 @@ module.exports.editStudentById = async(req, res, next) => {
   }
 }
 
-module.exports.getAll = async(req, res, next) => {
+module.exports.getAll = async (req, res, next) => {
   try {
     // Find all students from database
     const students = await Student.find({})
@@ -113,7 +113,7 @@ module.exports.getAll = async(req, res, next) => {
   }
 }
 
-module.exports.getStudentById = async(req, res, next) => {
+module.exports.getStudentById = async (req, res, next) => {
   try {
     let studentId = req.params.id
 
@@ -128,7 +128,7 @@ module.exports.getStudentById = async(req, res, next) => {
   }
 }
 
-module.exports.deleteStudent = async(req, res, next) => {
+module.exports.deleteStudent = async (req, res, next) => {
   let {
     studentId
   } = req.body

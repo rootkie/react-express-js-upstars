@@ -5,7 +5,7 @@ const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 // ============== Start of all the functions ==============
 
-module.exports.login = async(req, res, next) => {
+module.exports.login = async (req, res, next) => {
   try {
     let {
       password,
@@ -30,7 +30,7 @@ module.exports.login = async(req, res, next) => {
         error: 'Wrong email or password'
       })
     }
-      // compare password
+    // compare password
     const isMatch = await user.comparePasswordPromise(password)
     if (!isMatch) {
       throw ({
@@ -56,7 +56,7 @@ module.exports.login = async(req, res, next) => {
   }
 }
 
-module.exports.register = async(req, res, next) => {
+module.exports.register = async (req, res, next) => {
   try {
     let {
       email,
@@ -122,7 +122,7 @@ module.exports.register = async(req, res, next) => {
   }
 }
 
-module.exports.check = async(req, res, next) => {
+module.exports.check = async (req, res, next) => {
   try {
     let token = req.headers['x-access-token']
     let result = (auth) => {
@@ -146,7 +146,7 @@ module.exports.check = async(req, res, next) => {
   }
 }
 
-module.exports.simpleRegister = async(req, res, next) => {
+module.exports.simpleRegister = async (req, res, next) => {
   try {
     let {
       email,
