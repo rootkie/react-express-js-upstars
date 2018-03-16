@@ -205,7 +205,7 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
     user.date = {
-      $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
+      $gte: new Date(moment(dateStart).format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
 
@@ -215,11 +215,6 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
 
     const attendances = await Attendance.aggregate()
       .match(user)
-      .project({
-        'updatedAt': 0,
-        'createdAt': 0,
-        'students': 0
-      })
       .unwind('users') // Break the array of users into individual slots
       .match({
         'users.list': mongoose.Types.ObjectId(userId)
@@ -244,11 +239,7 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
           }
         },
         'total': {
-          '$sum': {
-            '$cond': [{
-              '$eq': ['$type', 'Class']
-            }, 1, 0]
-          }
+          '$sum': 1
         }, // Stats to show total number of 'Class'(es) held.
         'attended': {
           '$sum': '$users.status'
@@ -298,20 +289,16 @@ module.exports.getAttendanceByStudent = async (req, res, next) => {
     // Init what factors to search in student later
     student['students.list'] = mongoose.Types.ObjectId(studentId)
     student.date = {
-      $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
+      $gte: new Date(moment(dateStart).format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
+
     if (classId) {
       student.class = mongoose.Types.ObjectId(classId)
     }
 
     const attendances = await Attendance.aggregate()
       .match(student)
-      .project({
-        'updatedAt': 0,
-        'createdAt': 0,
-        'users': 0
-      })
       .unwind('students') // Break the array of students into individual slots
       .match({
         'students.list': mongoose.Types.ObjectId(studentId)
@@ -336,12 +323,8 @@ module.exports.getAttendanceByStudent = async (req, res, next) => {
           }
         },
         'total': {
-          '$sum': {
-            '$cond': [{
-              '$eq': ['$type', 'Class']
-            }, 1, 0]
-          }
-        }, // Stats to show total number of 'Class'(es) held that are not public holiday or cancelled.
+          '$sum': 1
+        }, // Stats to show total number of 'Class'(es) held.
         'attended': {
           '$sum': '$students.status'
         }, // Stats to show total attended
@@ -541,7 +524,7 @@ module.exports.getClassAttendanceSummary = async (req, res, next) => {
   }
 }
 
-module.exports.getAllClassAttendanceSummary = async(req, res, next) => {
+module.exports.getAllClassAttendanceSummary = async (req, res, next) => {
   try {
     const studentsPart = await Attendance.aggregate()
       // Only classes that are not having the status of PHol or Cancelled are counted.

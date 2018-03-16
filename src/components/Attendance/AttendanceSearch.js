@@ -47,6 +47,7 @@ class AttendanceSearch extends Component {
     let attendances = []
     // Refactor the information for easier display.
     for (let [index, attendanceData] of rawAttendanceData.entries()) {
+      console.log(attendanceData.class === null)
       attendances[index] = {
         _id: attendanceData._id,
         className: attendanceData.class.className,
