@@ -130,7 +130,7 @@ class AttendanceSearch extends Component {
                 {moreOptions && <div>
                   <Form.Field style={{paddingTop: '10px'}}>
                     <label>Classes</label>
-                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters='0' options={classData} onChange={this.getAttendance} />
+                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.getAttendance} />
                   </Form.Field>
                 </div>}
               </Form>

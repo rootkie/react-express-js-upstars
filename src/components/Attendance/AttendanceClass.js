@@ -1,14 +1,8 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Header } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Header, Menu } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
-
-const classOptions = [
-  { key: 'python420', text: 'Python 420pm', value: 'py420' },
-  { key: 'css', text: 'CSS', value: 'css' },
-  { key: 'englishP5', text: 'English Primary 5', value: 'elp5' }
-]
 
 class AttendanceClass extends Component {
   static propTypes = {
@@ -17,27 +11,32 @@ class AttendanceClass extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: '',
-      endDate: '',
-      moreOptions: false,
-      classSelector: ''
+      classSelector: '',
+      fullClassSummary: {
+        'studentNumber': 0,
+        'tutorNumber': 0,
+        'studentTutorRatio': 0,
+        'attendanceDates': []
+      }
     }
   }
 
   handleSubmit = (e) => {
+    axios.get(`/attendance/${this.state.classSelector}/summary`)
+      .then(response => {
+        console.log(response)
+        this.setState({fullClassSummary: response.data})
+      })
     e.preventDefault()
   }
 
   // Real-time API call to search for the data.
   handleSearchOptions = (e, { name, value }) => {
     this.setState({[name]: value})
-
   }
 
-  toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
-
   render () {
-    const { classSelector } = this.state
+    const { classSelector, fullClassSummary } = this.state
     const { classData } = this.props
 
     return (
@@ -49,9 +48,9 @@ class AttendanceClass extends Component {
                 <Form onSubmit={this.handleSubmit}>
                   <Form.Field required>
                     <label>Class</label>
-                    <Dropdown name='classSelector' value={classSelector} placeholder='Select a class to view the report' search fluid selection minCharacters='0' options={classOptions} onChange={this.handleSearchOptions} />
+                    <Dropdown name='classSelector' value={classSelector} placeholder='Select a class to view the report' search fluid selection minCharacters={0} options={classData} onChange={this.handleSearchOptions} />
                   </Form.Field>
-                  <Form.Button positive fluid>Retrieve class attendance summary</Form.Button>
+                  <Form.Button positive fluid disabled={!classSelector}>Retrieve class attendance summary</Form.Button>
                 </Form>
               </Table.HeaderCell>
             </Table.Row>
@@ -73,13 +72,45 @@ class AttendanceClass extends Component {
 
           <Table.Body>
             <Table.Row>
-              <Table.Cell collapsing>
-              John Doe
-              </Table.Cell>
-              <Table.Cell collapsing>2 Feb 2016</Table.Cell>
-              <Table.Cell collapsing>69/100</Table.Cell>
+              <Table.Cell collapsing>{fullClassSummary.studentNumber}</Table.Cell>
+              <Table.Cell collapsing>{fullClassSummary.tutorNumber}</Table.Cell>
+              <Table.Cell collapsing>{fullClassSummary.studentTutorRatio}</Table.Cell>
             </Table.Row>
           </Table.Body>
+        </Table>
+        <Header>
+          <Icon name='line graph' />
+          <Header.Content>
+            Full Attendance Records
+          </Header.Content>
+        </Header>
+        <Table celled striped>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Student Name</Table.HeaderCell>
+              {fullClassSummary.attendanceDates.map((date, index) => (
+                <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
+              ))}
+            </Table.Row>
+          </Table.Header>
+          <Table.Footer>
+            <Table.Row>
+              <Table.HeaderCell colSpan='3'>
+                <Menu floated='right' pagination>
+                  <Menu.Item as='a' icon>
+                    <Icon name='chevron left' />
+                  </Menu.Item>
+                  <Menu.Item as='a'>1</Menu.Item>
+                  <Menu.Item as='a'>2</Menu.Item>
+                  <Menu.Item as='a'>3</Menu.Item>
+                  <Menu.Item as='a'>4</Menu.Item>
+                  <Menu.Item as='a' icon>
+                    <Icon name='chevron right' />
+                  </Menu.Item>
+                </Menu>
+              </Table.HeaderCell>
+            </Table.Row>
+          </Table.Footer>
         </Table>
       </div>
     )

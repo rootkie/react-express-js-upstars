@@ -169,7 +169,7 @@ class AttendanceForm extends Component {
       <div>
         <Form onSubmit={this.handleSubmit}>
           <Form.Group widths='equal'>
-            <Form.Select label='Class' placeholder='Name of class' name='className' options={classData} search selection minCharacters='0' value={className} onChange={this.handleClass} required />
+            <Form.Select label='Class' placeholder='Name of class' name='className' options={classData} search selection minCharacters={0} value={className} onChange={this.handleClass} required />
             <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} disabled={!classSelection} required />
             <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} disabled={type !== 'Class' || !classSelection} required={type === 'Class'} />
           </Form.Group>
