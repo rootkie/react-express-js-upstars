@@ -43,6 +43,7 @@ class Login extends Component {
     axios.post('/login', { email, password })
       .then(response => {
         window.localStorage.setItem('token', response.data.token)
+        axios.defaults.headers.common['x-access-token'] = window.localStorage.token
         this.setState({ redirect: true })
       })
       // Errors are catched. Axios defaults all errors to http codes !== 2xx
@@ -76,7 +77,7 @@ class Login extends Component {
             <Image size='big' fluid centered src={require('./logo.png')} />
             <Header as='h2' color='teal' textAlign='center'>
               Log-in to your account
-                </Header>
+            </Header>
             <Form size='large' onSubmit={this.handleSubmit}>
               <Segment stacked>
                 <Form.Input
@@ -97,7 +98,7 @@ class Login extends Component {
                   hidden={message === ''}
                   negative
                   content={message}
-          />
+                />
               </Segment>
             </Form>
             <Message>

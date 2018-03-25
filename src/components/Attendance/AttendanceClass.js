@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { Table, Form, Dropdown, Icon, Header } from 'semantic-ui-react'
+import { array } from 'prop-types'
 import moment from 'moment'
+import axios from 'axios'
 
 const classOptions = [
   { key: 'python420', text: 'Python 420pm', value: 'py420' },
@@ -9,6 +11,9 @@ const classOptions = [
 ]
 
 class AttendanceClass extends Component {
+  static propTypes = {
+    classData: array.isRequired
+  }
   constructor (props) {
     super(props)
     this.state = {
@@ -23,14 +28,17 @@ class AttendanceClass extends Component {
     e.preventDefault()
   }
 
-  handleDateChange = (dateType, date) => this.setState({[dateType]: date})
+  // Real-time API call to search for the data.
+  handleSearchOptions = (e, { name, value }) => {
+    this.setState({[name]: value})
 
-  handleSearchOptions = (e, { name, value }) => this.setState({[name]: value})
+  }
 
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
   render () {
     const { classSelector } = this.state
+    const { classData } = this.props
 
     return (
       <div>

@@ -36,15 +36,12 @@ class MainCtrl extends Component {
   }
 
   isLoggedIn = () => {
-    return axios({
-      method: 'get',
-      url: '/check',
-      headers: { 'x-access-token': window.localStorage.token }
-    }).then((response) => {
-      this.setState({ isLoggedIn: response.data.auth })
-    }).catch((err) => {
-      console.log(err)
-    })
+    return axios.get('/check')
+      .then(response => {
+        this.setState({ isLoggedIn: response.data.auth })
+      }).catch((err) => {
+        console.log(err)
+      })
   }
 
   constructor (props) {
