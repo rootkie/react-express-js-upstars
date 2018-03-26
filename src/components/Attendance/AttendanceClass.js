@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Header, Menu } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Header, Menu, Pagination } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
@@ -15,19 +15,20 @@ class AttendanceClass extends Component {
       fullClassSummary: {
         'studentNumber': 0,
         'tutorNumber': 0,
-        'studentTutorRatio': 0,
-        'attendanceDates': []
-      }
+        'studentTutorRatio': 0
+      },
+      totalPages: 1
     }
   }
 
   handleSubmit = (e) => {
+    e.preventDefault()
     axios.get(`/attendance/${this.state.classSelector}/summary`)
       .then(response => {
         console.log(response)
-        this.setState({fullClassSummary: response.data})
+        let pagesRequired = Math.ceil(response.data.attendanceDates.length / 8)
+        this.setState({fullClassSummary: response.data, totalPages: pagesRequired})
       })
-    e.preventDefault()
   }
 
   // Real-time API call to search for the data.
@@ -36,7 +37,7 @@ class AttendanceClass extends Component {
   }
 
   render () {
-    const { classSelector, fullClassSummary } = this.state
+    const { classSelector, fullClassSummary, totalPages } = this.state
     const { classData } = this.props
 
     return (
@@ -84,30 +85,29 @@ class AttendanceClass extends Component {
             Full Attendance Records
           </Header.Content>
         </Header>
-        <Table celled striped>
+        <Table celled striped columns={10}>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>Student Name</Table.HeaderCell>
-              {fullClassSummary.attendanceDates.map((date, index) => (
+              {fullClassSummary.status === 'success' && fullClassSummary.attendanceDates.map((date, index) => (
                 <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
               ))}
             </Table.Row>
           </Table.Header>
+          <Table.Body>
+            {fullClassSummary.status === 'success' && fullClassSummary.compiledUserAttendance.map((attendance, index) => (
+              <Table.Row key={`attendance-${index}`}>
+                <Table.Cell>{attendance.userName[0]}</Table.Cell>
+                {attendance.details.map((individualStatus, index) => (
+                  <Table.Cell>{individualStatus}</Table.Cell>
+                ))}
+              </Table.Row>
+            ))}
+          </Table.Body>
           <Table.Footer>
             <Table.Row>
-              <Table.HeaderCell colSpan='3'>
-                <Menu floated='right' pagination>
-                  <Menu.Item as='a' icon>
-                    <Icon name='chevron left' />
-                  </Menu.Item>
-                  <Menu.Item as='a'>1</Menu.Item>
-                  <Menu.Item as='a'>2</Menu.Item>
-                  <Menu.Item as='a'>3</Menu.Item>
-                  <Menu.Item as='a'>4</Menu.Item>
-                  <Menu.Item as='a' icon>
-                    <Icon name='chevron right' />
-                  </Menu.Item>
-                </Menu>
+              <Table.HeaderCell colSpan='10'>
+                <Pagination defaultActivePage={1} totalPages={totalPages} floated='right' disabled={!fullClassSummary.status} />
               </Table.HeaderCell>
             </Table.Row>
           </Table.Footer>
