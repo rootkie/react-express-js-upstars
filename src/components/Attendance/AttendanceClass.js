@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Header, Menu, Pagination } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Header, Pagination } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
@@ -17,7 +17,10 @@ class AttendanceClass extends Component {
         'tutorNumber': 0,
         'studentTutorRatio': 0
       },
-      totalPages: 1
+      totalPages: 1,
+      activePage: 1,
+      studentAttendance: [],
+      tutorAttendance: []
     }
   }
 
@@ -25,11 +28,26 @@ class AttendanceClass extends Component {
     e.preventDefault()
     axios.get(`/attendance/${this.state.classSelector}/summary`)
       .then(response => {
-        console.log(response)
         let pagesRequired = Math.ceil(response.data.attendanceDates.length / 8)
-        this.setState({fullClassSummary: response.data, totalPages: pagesRequired})
+        let fullClassSummary = this.dataParsing(response.data)
+        this.setState({fullClassSummary, totalPages: pagesRequired})
       })
   }
+
+  dataParsing = (attendanceData) => {
+    let fullClassSummary = attendanceData
+    console.log(attendanceData)
+    const indexOfLast = this.state.activePage * 8
+    const indexOfFirst = indexOfLast - 8
+    fullClassSummary.compiledUserAttendance = fullClassSummary.compiledUserAttendance.map((user, index) => {
+      return {
+        details: user.details.slice(indexOfFirst, indexOfLast)
+      }
+    })
+    console.log(fullClassSummary)
+    return fullClassSummary
+  }
+  handlePaginationChange = (e, { activePage }) => this.setState({ activePage })
 
   // Real-time API call to search for the data.
   handleSearchOptions = (e, { name, value }) => {
@@ -85,10 +103,10 @@ class AttendanceClass extends Component {
             Full Attendance Records
           </Header.Content>
         </Header>
-        <Table celled striped columns={10}>
+        <Table celled striped columns={9}>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>Student Name</Table.HeaderCell>
+              <Table.HeaderCell>Tutor Name</Table.HeaderCell>
               {fullClassSummary.status === 'success' && fullClassSummary.attendanceDates.map((date, index) => (
                 <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
               ))}
@@ -106,8 +124,8 @@ class AttendanceClass extends Component {
           </Table.Body>
           <Table.Footer>
             <Table.Row>
-              <Table.HeaderCell colSpan='10'>
-                <Pagination defaultActivePage={1} totalPages={totalPages} floated='right' disabled={!fullClassSummary.status} />
+              <Table.HeaderCell colSpan='9'>
+                <Pagination defaultActivePage={1} totalPages={totalPages} floated='right' onPageChange={this.handlePaginationChange} />
               </Table.HeaderCell>
             </Table.Row>
           </Table.Footer>
