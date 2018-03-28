@@ -12,7 +12,7 @@ class AttendanceClass extends Component {
     super(props)
     this.state = {
       classSelector: '',
-      fullClassSummary: {
+      basicStats: {
         'studentNumber': 0,
         'tutorNumber': 0,
         'studentTutorRatio': 0
@@ -28,25 +28,33 @@ class AttendanceClass extends Component {
     e.preventDefault()
     axios.get(`/attendance/${this.state.classSelector}/summary`)
       .then(response => {
+        console.log(response)
         let pagesRequired = Math.ceil(response.data.attendanceDates.length / 8)
-        let fullClassSummary = this.dataParsing(response.data)
-        this.setState({fullClassSummary, totalPages: pagesRequired})
+        let rawClassData = response.data
+        const indexOfLast = this.state.activePage * 8
+        const indexOfFirst = indexOfLast - 8
+        let attendanceDates = rawClassData.attendanceDates.slice(indexOfFirst, indexOfLast)
+        let basicStats = {
+          studentNumber: rawClassData.studentNumber,
+          tutorNumber: rawClassData.tutorNumber,
+          studentTutorRatio: rawClassData.studentTutorRatio,
+          status: rawClassData.status,
+          attendanceDates
+        }
+        let studentAttendance = rawClassData.compiledStudentAttendance.map((user, index) => {
+          return {
+            details: user.details.slice(indexOfFirst, indexOfLast),
+            attended: user.attended,
+            percentage: user.percentage,
+            studentName: user.studentName[0],
+            studentID: user.studentID,
+            total: user.total
+          }
+        })
+        this.setState({basicStats, totalPages: pagesRequired, studentAttendance})
       })
   }
 
-  dataParsing = (attendanceData) => {
-    let fullClassSummary = attendanceData
-    console.log(attendanceData)
-    const indexOfLast = this.state.activePage * 8
-    const indexOfFirst = indexOfLast - 8
-    fullClassSummary.compiledUserAttendance = fullClassSummary.compiledUserAttendance.map((user, index) => {
-      return {
-        details: user.details.slice(indexOfFirst, indexOfLast)
-      }
-    })
-    console.log(fullClassSummary)
-    return fullClassSummary
-  }
   handlePaginationChange = (e, { activePage }) => this.setState({ activePage })
 
   // Real-time API call to search for the data.
@@ -55,7 +63,7 @@ class AttendanceClass extends Component {
   }
 
   render () {
-    const { classSelector, fullClassSummary, totalPages } = this.state
+    const { classSelector, basicStats, totalPages, studentAttendance } = this.state
     const { classData } = this.props
 
     return (
@@ -91,9 +99,9 @@ class AttendanceClass extends Component {
 
           <Table.Body>
             <Table.Row>
-              <Table.Cell collapsing>{fullClassSummary.studentNumber}</Table.Cell>
-              <Table.Cell collapsing>{fullClassSummary.tutorNumber}</Table.Cell>
-              <Table.Cell collapsing>{fullClassSummary.studentTutorRatio}</Table.Cell>
+              <Table.Cell collapsing>{basicStats.studentNumber}</Table.Cell>
+              <Table.Cell collapsing>{basicStats.tutorNumber}</Table.Cell>
+              <Table.Cell collapsing>{basicStats.studentTutorRatio}</Table.Cell>
             </Table.Row>
           </Table.Body>
         </Table>
@@ -103,19 +111,25 @@ class AttendanceClass extends Component {
             Full Attendance Records
           </Header.Content>
         </Header>
-        <Table celled striped columns={9}>
+        <Table celled striped columns={12}>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>Tutor Name</Table.HeaderCell>
-              {fullClassSummary.status === 'success' && fullClassSummary.attendanceDates.map((date, index) => (
+              <Table.HeaderCell>Total Class</Table.HeaderCell>
+              <Table.HeaderCell>No. attendeed</Table.HeaderCell>
+              <Table.HeaderCell>Percentage</Table.HeaderCell>
+              {basicStats.status === 'success' && basicStats.attendanceDates.map((date, index) => (
                 <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
               ))}
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {fullClassSummary.status === 'success' && fullClassSummary.compiledUserAttendance.map((attendance, index) => (
+            {basicStats.status === 'success' && studentAttendance.map((attendance, index) => (
               <Table.Row key={`attendance-${index}`}>
-                <Table.Cell>{attendance.userName[0]}</Table.Cell>
+                <Table.Cell>{attendance.studentName}</Table.Cell>
+                <Table.Cell>{attendance.total}</Table.Cell>
+                <Table.Cell>{attendance.attended}</Table.Cell>
+                <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
                 {attendance.details.map((individualStatus, index) => (
                   <Table.Cell>{individualStatus}</Table.Cell>
                 ))}
@@ -124,7 +138,7 @@ class AttendanceClass extends Component {
           </Table.Body>
           <Table.Footer>
             <Table.Row>
-              <Table.HeaderCell colSpan='9'>
+              <Table.HeaderCell colSpan='12'>
                 <Pagination defaultActivePage={1} totalPages={totalPages} floated='right' onPageChange={this.handlePaginationChange} />
               </Table.HeaderCell>
             </Table.Row>
