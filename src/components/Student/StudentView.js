@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { array, func, object, bool } from 'prop-types'
+import { array, func, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -10,10 +10,16 @@ const genderOptions = [
   { key: 'F', text: 'Female', value: 'F' }
 ]
 
+// From primary 1 to secondary 4
 const ageOptions = [
+  { key: '7', text: '7', value: '7' },
+  { key: '8', text: '8', value: '8' },
+  { key: '9', text: '9', value: '9' },
   { key: '10', text: '10', value: '10' },
   { key: '11', text: '11', value: '11' },
-  { key: '12', text: '12', value: '12' }
+  { key: '12', text: '12', value: '12' },
+  { key: '13', text: '13', value: '13' },
+  { key: '14', text: '14', value: '14' }
 ]
 
 class StudentView extends Component {
@@ -24,21 +30,16 @@ class StudentView extends Component {
     isLoading: bool
   }
 
-  static contextTypes = {
-    router: object
-  }
-
   state = {
     selected: [],
     deleteConfirmationVisibility: false,
-
     searchName: '',
     moreOptions: false,
     genderSelector: [],
     ageSelector: []
   }
 
-  handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually IC number, for uniqueness
+  handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually the ID of the student
     let { selected } = this.state
     if (checked) {
       selected.push(_id)
@@ -74,15 +75,6 @@ class StudentView extends Component {
     }
   }
 
-  handleEditStudent = () => {
-    const { selected } = this.state
-    const { studentData } = this.props
-    const toEditId = studentData.filter((student) => selected.includes(student.profile.icNumber)).map(student => student._id)
-    if (selected.length === 1) {
-      this.context.router.history.push(`/students/edit/${toEditId}`)
-    }
-  }
-
   handleFilter = (e) => {
     e.preventDefault()
     const { searchFilter } = this.props
@@ -92,6 +84,11 @@ class StudentView extends Component {
     ageSelector.length > 0 && options.push({field: 'profile-age', value: ageSelector})
     genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
     searchFilter(options)
+  }
+
+  clearAll = e => {
+    e.preventDefault()
+    this.setState({ genderSelector: [], ageSelector: [], searchName: '' })
   }
 
   render () {
@@ -111,22 +108,23 @@ class StudentView extends Component {
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell colSpan='5'>
-                <Form onSubmit={this.handleFilter}>
+                <Form>
                   <div style={{display: 'flex', justifyContent: 'space-between'}}>
                     <Form.Group inline style={{marginBottom: 0}}>
-                      <Form.Input label='Search by name' placeholder='Student Name' name='searchName' value={searchName} onChange={this.handleChange} />
-                      <Form.Button>Go</Form.Button>
+                      <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
+                      <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
+                      <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
                     </Form.Group>
                     <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                   </div>
                   {moreOptions && <div>
                     <Form.Field style={{paddingTop: '10px'}}>
                       <label>Filter by Gender</label>
-                      <Dropdown name='genderSelector' value={genderSelector} placeholder='Pick Classes' search multiple selection options={genderOptions} onChange={this.handleChange} />
+                      <Dropdown name='genderSelector' value={genderSelector} placeholder='Male or Female' multiple selection options={genderOptions} onChange={this.handleChange} />
                     </Form.Field>
                     <Form.Field>
                       <label>Filter by Age</label>
-                      <Dropdown name='ageSelector' value={ageSelector} placeholder='Pick Volunteers' search multiple selection options={ageOptions} onChange={this.handleChange} />
+                      <Dropdown name='ageSelector' value={ageSelector} placeholder='Select age range' search multiple selection options={ageOptions} onChange={this.handleChange} />
                     </Form.Field>
                   </div>}
 
@@ -148,7 +146,7 @@ class StudentView extends Component {
                 <Table.Cell collapsing>
                   <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                 </Table.Cell>
-                <Table.Cell>{student.profile.name}</Table.Cell>
+                <Table.Cell><Link to={`/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
                 <Table.Cell>{moment().diff(student.profile.dob, 'years')}</Table.Cell>
                 <Table.Cell>{student.profile.icNumber}</Table.Cell>
                 <Table.Cell>{student.profile.gender === 'F' ? 'female' : 'male'}</Table.Cell>
@@ -162,20 +160,18 @@ class StudentView extends Component {
                 <Link to='/students/add'>
                   <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                     <Icon name='user' />New Student
-                </Button>
+                  </Button>
                 </Link>
                 <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
-                <Button size='small' disabled={selected.length !== 1} onClick={this.handleEditStudent}>Edit</Button>
                 <Confirm
                   open={deleteConfirmationVisibility}
                   header='Deleting the following students:'
                   content={selected.map((id) => (
-                  studentData.filter((student) => (student._id === id))[0].profile.name
-                )).join(', ')}
+                    studentData.filter((student) => (student._id === id))[0].profile.name
+                  )).join(', ')}
                   onCancel={this.handleDeleteConfirmation('cancel')}
                   onConfirm={this.handleDeleteConfirmation('confirm')}
-        />
-
+                />
               </Table.HeaderCell>
             </Table.Row>
           </Table.Footer>

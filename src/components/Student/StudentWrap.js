@@ -17,8 +17,7 @@ class StudentWrap extends Component {
     this.state = {
       studentData: [],
       filteredData: false,
-      isLoading: true,
-      headerConfig: {'headers': { 'x-access-token': localStorage.token }}
+      isLoading: true
     }
     this.getStudents()
   }
@@ -35,8 +34,8 @@ class StudentWrap extends Component {
 
   addStudent = (studentDataToSubmit) => {
     const { studentData } = this.state
-    return axios.post('/students', studentDataToSubmit, this.state.headerConfig)
-      .then((response) => {
+    return axios.post('/students', studentDataToSubmit)
+      .then(response => {
         this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
       })
   }
@@ -45,10 +44,6 @@ class StudentWrap extends Component {
     const { studentData } = this.state
     const { sid } = this.props
     return axios.put('/students', {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': localStorage.token
-      },
       ...studentDataToSubmit,
       studentId: sid
     })
@@ -60,16 +55,12 @@ class StudentWrap extends Component {
       })
   }
 
-  deleteStudent = (studentIds) => {
+  deleteStudent = studentIds => {
     const studentRequestPromises = []
     for (let studentId of studentIds) {
       studentRequestPromises.push(
         axios.delete('/students',
           {
-            headers: {
-              'Content-Type': 'application/json',
-              'x-access-token': localStorage.token
-            },
             data: {
               studentId
             }
@@ -95,7 +86,7 @@ class StudentWrap extends Component {
     return (
       <div>
         {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-        {op === 'edit' && <StudentForm studentData={filterData(this.state.studentData, [{field: '_id', value: sid}])[0]} edit editStudent={this.editStudent} /> }
+        {op === 'edit' }
         {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
       </div>
     )
