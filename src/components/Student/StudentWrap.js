@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { string } from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
+import StudentEdit from './studentEdit'
 import axios from 'axios'
 import { filterData } from '../../utils'
 
@@ -23,20 +24,19 @@ class StudentWrap extends Component {
   }
 
   getStudents = () => {
-    axios.get('students', this.state.headerConfig)
-      .then((response) => {
+    axios.get('students')
+      .then(response => {
         this.setState({ studentData: response.data.students, isLoading: false })
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err)
       })
   }
 
   addStudent = (studentDataToSubmit) => {
-    const { studentData } = this.state
     return axios.post('/students', studentDataToSubmit)
       .then(response => {
-        this.setState({ studentData: studentData.concat({ ...studentDataToSubmit, _id: response.data.newStudent._id }) })
+        this.getStudents()
       })
   }
 
@@ -55,26 +55,22 @@ class StudentWrap extends Component {
       })
   }
 
-  deleteStudent = studentIds => {
-    const studentRequestPromises = []
-    for (let studentId of studentIds) {
-      studentRequestPromises.push(
-        axios.delete('/students',
-          {
-            data: {
-              studentId
-            }
-          })
-      )
-    }
-
-    axios.all(studentRequestPromises)
+  // Calls getStudent to refresh the state
+  deleteStudent = studentId => {
+    axios.delete('/students',
+      {
+        data: {
+          studentId
+        }
+      })
       .then((response) => {
-        this.setState({studentData: this.state.studentData.filter((student) => !studentIds.includes(student._id))})
+        this.getStudents()
       })
       .catch((err) => console.log(err))
   }
 
+  // filteredData could be different from the studentData
+  // studentData is everything untouched which filtered changes. The front-end will display the filtered data as a priority to studentData
   searchFilter = (criteria) => {
     const { studentData } = this.state
     this.setState({filteredData: filterData(studentData, criteria)})
@@ -86,7 +82,7 @@ class StudentWrap extends Component {
     return (
       <div>
         {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-        {op === 'edit' }
+        {op === 'edit' && <StudentEdit id={sid} />}
         {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
       </div>
     )
