@@ -51,19 +51,82 @@ const tuitionOptions = [
   {value: 'Private', text: 'Private'}
 ]
 
+const initialState = {
+  /* Student Information */
+  profile: {
+    name: '',
+    icNumber: '',
+    dob: '',
+    address: '',
+    gender: '',
+    nationality: '',
+    classLevel: '',
+    schoolName: ''
+  },
+
+  /* Family Information */
+  father: {
+    name: '',
+    icNumber: '',
+    nationality: '',
+    contactNumber: '',
+    email: '',
+    occupation: '',
+    income: ''
+  },
+
+  mother: {
+    name: '',
+    icNumber: '',
+    nationality: '',
+    contactNumber: '',
+    email: '',
+    occupation: '',
+    income: ''
+  },
+
+  otherFamily: [], // each object {name, relationship, age}
+
+  misc: {
+    fas: [],
+    fscName: '',
+    tuition: [],
+    academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
+  },
+
+  /* Official use */
+  admin: {
+    interviewDate: '',
+    interviewNotes: '',
+    commencementDate: '',
+    adminNotes: '',
+    exitDate: '',
+    exitReason: ''
+  },
+
+  tuitionChoices: {
+    Cdac: false,
+    Mendaki: false,
+    Private: false
+  }
+}
+
 class StudentEdit extends Component {
   static propTypes = {
     editStudent: func,
     id: string
   }
 
-  state = {
-    isLoading: false,
-    error: [],
-    serverError: false,
-    activeItem: 'Personal Info',
-    submitSuccess: false,
-    studentData: []
+  constructor (props) {
+    super(props)
+    this.state = {
+      isLoading: true,
+      error: [],
+      serverError: false,
+      activeItem: 'Personal Info',
+      submitSuccess: false,
+      ...initialState
+    }
   }
 
   // Before the component mounts, call the getStudent function to retrieve everything about the student
@@ -72,23 +135,24 @@ class StudentEdit extends Component {
   }
 
   getStudent = (studentId) => {
-    this.setState({ isLoading: true })
     axios.get(`students/${studentId}`)
       .then(response => {
-        let studentData = this.filterStudentData(['profile', 'father', 'mother', 'otherFamily', 'misc', 'admin'], response.data.student)
+        let studentData = response.data.student
         this.setState({
-          studentData,
+          profile: studentData.profile,
+          father: studentData.father,
+          mother: studentData.mother,
+          admin: studentData.admin,
+          misc: studentData.misc,
+          otherFamily: studentData.otherFamily,
           tuitionChoices: {
             CDAC: studentData.misc.tuition.includes('CDAC'),
             Mendaki: studentData.misc.tuition.includes('Mendaki'),
             Private: studentData.misc.tuition.includes('Private')
-          } })
+          },
+          isLoading: false
+        })
       })
-  }
-
-  filterStudentData = (checkArray, studentData) => {
-    return Object.keys(studentData).reduce((last, curr) => (checkArray.includes(curr) ? {...last, [curr]: studentData[curr]} : last
-    ), {})
   }
 
   checkRequired = (checkArray) => {
@@ -140,7 +204,7 @@ class StudentEdit extends Component {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
     const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
-    const { addStudent } = this.props
+    const { editStudent } = this.props
 
     // check required fields
     const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
@@ -159,7 +223,7 @@ class StudentEdit extends Component {
       studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
 
       try {
-        await addStudent(studentDataToSubmit)
+        await editStudent(studentDataToSubmit)
         this.showSuccess()
         // Clear everything to show an empty page. Might change it though.
       } catch (error) {
@@ -170,14 +234,6 @@ class StudentEdit extends Component {
       this.setState({error})
     }
   }
-
-  handleTermsOpen = (e) => {
-    if (this.state.terms === false) this.setState({termsDetails: true})
-  }
-
-  handleTermsClose = (e) => this.setState({termsDetails: false})
-
-  handleTermsDisagree = e => this.setState({terms: false, termsDetails: false})
 
   // For the filling in of those fields where user can add / delete accordingly.This functions add / delete a whole row
   // The 2 fields are to be handled separately because they exists in a different state, academicInfo is nested within misc
@@ -233,11 +289,7 @@ class StudentEdit extends Component {
   }
 
   render () {
-    const { terms, isLoading, studentData,
-      submitSuccess, tuitionChoices, termsDetails, error, serverError, activeItem
-    } = this.state
-
-    const { profile, father, mother, otherFamily, misc, admin } = studentData
+    const { isLoading, profile, father, mother, otherFamily, misc, admin, submitSuccess, tuitionChoices, error, serverError, activeItem } = this.state
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
@@ -271,7 +323,7 @@ class StudentEdit extends Component {
                   dateFormat='DD/MM/YYYY'
                   showYearDropdown
                   maxDate={moment()}
-                  selected={dob}
+                  selected={moment(dob)}
                   onChange={this.handleDateChange('profile-dob')}
                   required />
               </Form.Field>
@@ -298,7 +350,7 @@ class StudentEdit extends Component {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {academicInfo.map((year, i) => (
+                { academicInfo.map((year, i) => (
                   <Table.Row key={i}>
                     <Table.Cell>
                       <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
@@ -322,7 +374,7 @@ class StudentEdit extends Component {
                       <Form.Input transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
                     </Table.Cell>
                   </Table.Row>
-                ))}
+                )) }
               </Table.Body>
               <Table.Footer>
                 <Table.Row>
@@ -461,31 +513,6 @@ class StudentEdit extends Component {
           </Segment>
           }
 
-          {/* terms and conditions */}
-          <Form.Checkbox label={<label onClick={this.handleTermsOpen}>I agree to the Terms and Conditions</label>} name='terms' required onChange={this.handleChange} checked={terms} />
-          <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen'>
-            <Modal.Header>Terms and conditions</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <Header>Welcome to Ulu Pandan STARS</Header>
-                <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
-                   By signing up as a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
-                <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
-                   or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
-                <p>2. Students are expected to care about their learning outcomes and behaviour, attend the tuition sessions punctually and regularly. In the event that the student will be absent from tuition, or unable to make it on time,
-                 he/she should inform fellow tutors or relevant personnel(s) in advance. The programme organizer reserves the right to request the Student to leave the programme in the event that he/she exhibits inappropriate behaviour(s). </p>
-                <p>3. Students are required to achieve a minimum of 80% attendance within the period of tuition.</p>
-                <p>4. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
-                <p>5. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
-                <Header>Terms and Conditions</Header>
-                <p>Last modified: June 1, 2017</p>
-              </Modal.Description>
-            </Modal.Content>
-            <Modal.Actions>
-              <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={this.handleTermsDisagree} />
-              <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={this.handleTermsClose} />
-            </Modal.Actions>
-          </Modal>
           <Message
             hidden={error.length === 0}
             negative
