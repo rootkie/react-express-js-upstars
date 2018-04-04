@@ -37,21 +37,18 @@ class StudentWrap extends Component {
     return axios.post('/students', studentDataToSubmit)
       .then(response => {
         this.getStudents()
+        return response.data.newStudent
       })
   }
 
   editStudent = (studentDataToSubmit) => {
-    const { studentData } = this.state
     const { sid } = this.props
     return axios.put('/students', {
       ...studentDataToSubmit,
       studentId: sid
     })
-      .then(() => {
-        const updatedStudentData = studentData.map((element) => (
-          element._id === sid ? {...studentDataToSubmit, _id: sid} : element
-        ))
-        this.setState({studentData: updatedStudentData})
+      .then(response => {
+        this.getStudents()
       })
   }
 
@@ -82,7 +79,7 @@ class StudentWrap extends Component {
     return (
       <div>
         {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-        {op === 'edit' && <StudentEdit id={sid} />}
+        {op === 'edit' && <StudentEdit id={sid} editStudent={this.editStudent} />}
         {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
       </div>
     )

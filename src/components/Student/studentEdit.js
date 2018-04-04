@@ -1,27 +1,5 @@
-/* filterPropData = (checkArray) => {
-  const { studentData } = this.props
-  return Object.keys(studentData).reduce((last, curr) => (checkArray.includes(curr) ? {...last, [curr]: studentData[curr]} : last
-  ), {})
-}
-
-state = this.props.studentData ? {
-  ...this.filterPropData(['profile', 'father', 'mother', 'otherFamily', 'misc', 'admin']),
-  profile: {...this.props.studentData.profile, dob: moment(this.props.studentData.profile.dob)
-  }, // reformat dob to moment object
-
-  terms: false,
-  termsDetails: false,
-  tuitionChoices: {
-    CDAC: this.props.studentData.misc.tuition.includes('CDAC') || false,
-    Mendaki: this.props.studentData.misc.tuition.includes('Mendaki') || false,
-    Private: this.props.studentData.misc.tuition.includes('Private') || false
-  },
-  submitSuccess: false,
-  error: []
-} */
-
 import React, { Component } from 'react'
-import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment, Dimmer, Loader } from 'semantic-ui-react'
+import { Form, Message, Button, Table, Icon, Menu, Segment, Dimmer, Loader } from 'semantic-ui-react'
 import { func, string } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
@@ -31,6 +9,13 @@ import 'react-datepicker/dist/react-datepicker.css'
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
   { key: 'f', text: 'Female', value: 'F' }
+]
+
+const statusOptions = [
+  { key: 'active', text: 'Active', value: 'Active' },
+  { key: 'stopped', text: 'Stopped', value: 'Stopped' },
+  { key: 'deleted', text: 'Deleted', value: 'Deleted' },
+  { key: 'suspended', text: 'Suspended', value: 'Suspended' }
 ]
 
 const citizenshipOptions = [
@@ -104,6 +89,8 @@ const initialState = {
     exitReason: ''
   },
 
+  status: '',
+
   tuitionChoices: {
     Cdac: false,
     Mendaki: false,
@@ -125,11 +112,15 @@ class StudentEdit extends Component {
       serverError: false,
       activeItem: 'Personal Info',
       submitSuccess: false,
+      edit: false,
+      buttonContent: 'Toggle Edit Mode',
       ...initialState
     }
   }
 
   // Before the component mounts, call the getStudent function to retrieve everything about the student
+  // But since reacts runs it async, it is likely the API call is only completed after the rendering starts, thus the initial state declares them to
+  // be blank fields, users will however be unable to see because of the loading screen.
   componentWillMount () {
     this.getStudent(this.props.id)
   }
@@ -145,6 +136,7 @@ class StudentEdit extends Component {
           admin: studentData.admin,
           misc: studentData.misc,
           otherFamily: studentData.otherFamily,
+          status: studentData.status,
           tuitionChoices: {
             CDAC: studentData.misc.tuition.includes('CDAC'),
             Mendaki: studentData.misc.tuition.includes('Mendaki'),
@@ -168,70 +160,81 @@ class StudentEdit extends Component {
   }
 
   handleChange = (e, { name, value, checked }) => {
-    const nameArr = name.split('-') // ['father', 'name']
-    const parentProp = nameArr[0]
-    const childProp = nameArr[1]
-    if (childProp) {
-      this.setState({
-        [parentProp]: {
-          ...this.state[parentProp],
-          [childProp]: value || checked
-        }
-      })
-    } else {
-      this.setState({ [parentProp]: value || checked })
+    let { edit } = this.state
+    if (edit) {
+      const nameArr = name.split('-') // ['father', 'name']
+      const parentProp = nameArr[0]
+      const childProp = nameArr[1]
+      if (childProp) {
+        this.setState({
+          [parentProp]: {
+            ...this.state[parentProp],
+            [childProp]: value || checked
+          }
+        })
+      } else {
+        this.setState({ [parentProp]: value || checked })
+      }
     }
   }
 
   handleDateChange = (dateType) => (date) => {
-    const dateTypeArr = dateType.split('-')
-    const parentProp = dateTypeArr[0]
-    const childProp = dateTypeArr[1]
-    this.setState({
-      [parentProp]: {
-        ...this.state[parentProp],
-        [childProp]: date
-      }
-    })
+    let { edit } = this.state
+    if (edit) {
+      const dateTypeArr = dateType.split('-')
+      const parentProp = dateTypeArr[0]
+      const childProp = dateTypeArr[1]
+      this.setState({
+        [parentProp]: {
+          ...this.state[parentProp],
+          [childProp]: date
+        }
+      })
+    }
   }
 
   showSuccess = () => {
-    this.setState({submitSuccess: true})
+    this.setState({submitSuccess: true, isLoading: false, buttonContent: 'Toggle Edit Mode'})
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
   handleSubmit = async e => {
     e.preventDefault()
+    this.setState({ isLoading: true })
     /* submit inputs in fields (stored in state) */
-    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
+    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices, edit, status } = this.state
     const { editStudent } = this.props
-
+    if (!edit) {
+      this.setState({ edit: true, isLoading: false, buttonContent: 'Save Edits' })
+    } else {
     // check required fields
-    const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
+      const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address'])
 
-    if (error.length === 0) {
-    // Do some wizardry to format data here
-      let studentDataToSubmit = {
-        profile, father, mother, otherFamily, misc, admin
-      }
-      // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
-      // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
-      // else if that option is not checked (false), the list will remain the same (nothing added)
-      const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
-      ), [])
+      if (error.length === 0) {
+        // Do some wizardry to format data here
+        let studentDataToSubmit = {
+          profile, father, mother, otherFamily, misc, admin, status
+        }
+        // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
+        // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
+        // else if that option is not checked (false), the list will remain the same (nothing added)
+        const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
+        ), [])
 
-      studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
+        studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
 
-      try {
-        await editStudent(studentDataToSubmit)
-        this.showSuccess()
+        try {
+          await editStudent(studentDataToSubmit)
+          this.showSuccess()
         // Clear everything to show an empty page. Might change it though.
-      } catch (error) {
-        this.setState({serverError: true})
+        } catch (error) {
+          console.log(error)
+          this.setState({serverError: true})
+        }
+      } else { // incomplete Field
+        console.log('Incomplete Fields')
+        this.setState({error})
       }
-    } else { // incomplete Field
-      console.log('Incomplete Fields')
-      this.setState({error})
     }
   }
 
@@ -239,57 +242,72 @@ class StudentEdit extends Component {
   // The 2 fields are to be handled separately because they exists in a different state, academicInfo is nested within misc
   handleRepeatable = (option, field) => (e) => {
     e.preventDefault()
-    if (option === 'inc') {
-      if (field === 'otherFamily') {
-        const updatingArray = this.state.otherFamily
-        updatingArray.push({
-          name: '',
-          relationship: '',
-          age: ''
-        })
-        this.setState({otherFamily: updatingArray})
-      } else if (field === 'academicInfo') {
-        const updatingArray = this.state.misc.academicInfo
-        updatingArray.push({
-          year: '',
-          term: '',
-          english: '',
-          math: '',
-          motherTongue: '',
-          science: '',
-          overall: ''
-        })
-        let misc = {...this.state.misc}
-        misc.academicInfo = updatingArray
-        this.setState({misc})
-      }
-    } else if (option === 'dec') { // remove last item
-      if (field === 'otherFamily') this.setState({otherFamily: this.state.otherFamily.slice(0, this.state.otherFamily.length - 1)})
-      else if (field === 'academicInfo') {
-        let misc = {...this.state.misc}
-        misc.academicInfo = misc.academicInfo.slice(0, misc.academicInfo.length - 1)
-        this.setState({misc})
+    let {edit} = this.state
+    if (edit) {
+      if (option === 'inc') {
+        if (field === 'otherFamily') {
+          const updatingArray = this.state.otherFamily
+          updatingArray.push({
+            name: '',
+            relationship: '',
+            age: ''
+          })
+          this.setState({otherFamily: updatingArray})
+        } else if (field === 'academicInfo') {
+          const updatingArray = this.state.misc.academicInfo
+          updatingArray.push({
+            year: '',
+            term: '',
+            english: '',
+            math: '',
+            motherTongue: '',
+            science: '',
+            overall: ''
+          })
+          let misc = {...this.state.misc}
+          misc.academicInfo = updatingArray
+          this.setState({misc})
+        }
+      } else if (option === 'dec') { // remove last item
+        if (field === 'otherFamily') this.setState({otherFamily: this.state.otherFamily.slice(0, this.state.otherFamily.length - 1)})
+        else if (field === 'academicInfo') {
+          let misc = {...this.state.misc}
+          misc.academicInfo = misc.academicInfo.slice(0, misc.academicInfo.length - 1)
+          this.setState({misc})
+        }
       }
     }
   }
 
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+  handleItemClick = (e, { name }) => {
+    if (this.state.edit) {
+      this.setState({ activeItem: name })
+    }
+  }
+
+  handleMenuClick = (e, { name }) => this.setState({ activeItem: name })
 
   // This is for handling the individual fields within the repeatables
   updateRepeatableChange = (index, property) => (e, {value}) => {
-    const otherFamily = this.state.otherFamily
-    otherFamily[index][property] = value
-    this.setState({otherFamily})
+    let {edit} = this.state
+    if (edit) {
+      const otherFamily = this.state.otherFamily
+      otherFamily[index][property] = value
+      this.setState({otherFamily})
+    }
   }
 
   updateRepeatableChangeForAcademic = (index, property) => (e, {value}) => {
-    let misc = {...this.state.misc}
-    misc.academicInfo[index][property] = value
-    this.setState({misc})
+    let {edit} = this.state
+    if (edit) {
+      let misc = {...this.state.misc}
+      misc.academicInfo[index][property] = value
+      this.setState({misc})
+    }
   }
 
   render () {
-    const { isLoading, profile, father, mother, otherFamily, misc, admin, submitSuccess, tuitionChoices, error, serverError, activeItem } = this.state
+    const { isLoading, profile, father, mother, otherFamily, misc, admin, status, submitSuccess, tuitionChoices, error, serverError, activeItem, buttonContent } = this.state
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
@@ -303,9 +321,9 @@ class StudentEdit extends Component {
           <Loader indeterminate active={isLoading}>Loading Data</Loader>
         </Dimmer>
         <Menu attached='top' tabular widths={3} inverted>
-          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'teal'} />
-          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'} />
-          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'green'} />
+          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleMenuClick} color={'teal'} />
+          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleMenuClick} color={'blue'} />
+          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleMenuClick} color={'green'} />
         </Menu>
         {/* The form only renders part of the form accordingly to the tab selected
         Most of the fields have names of '(parent)-(child)'. This is such that they can be separated easily by the hyphen
@@ -478,12 +496,13 @@ class StudentEdit extends Component {
           }
           { activeItem === 'For office use' &&
           <Segment attached='bottom'>
+            <Form.Select label='Status' options={statusOptions} placeholder='change status of student' name='status' value={status} onChange={this.handleChange} />
             <Form.Field error={error.includes('interviewDate')}>
               <label>Interview date</label>
               <DatePicker
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
-                selected={interviewDate}
+                selected={moment(interviewDate)}
                 onChange={this.handleDateChange('admin-interviewDate')}
                 isClearable />
             </Form.Field>
@@ -494,7 +513,7 @@ class StudentEdit extends Component {
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
                 minDate={interviewDate}
-                selected={commencementDate}
+                selected={moment(commencementDate)}
                 onChange={this.handleDateChange('admin-commencementDate')}
                 isClearable />
             </Form.Field>
@@ -505,7 +524,7 @@ class StudentEdit extends Component {
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
                 minDate={commencementDate}
-                selected={exitDate}
+                selected={moment(exitDate)}
                 onChange={this.handleDateChange('admin-exitDate')}
                 isClearable />
             </Form.Field>
@@ -521,14 +540,14 @@ class StudentEdit extends Component {
           <Message
             hidden={!submitSuccess}
             positive
-            content='Successfully Submitted'
+            content='Successfully Submitted and saved'
           />
           <Message
             hidden={!serverError}
             negative
             content='Server Error'
           />
-          <Form.Button type='submit'>Submit</Form.Button>
+          <Form.Button type='submit'>{buttonContent}</Form.Button>
         </Form>
       </div>
     )

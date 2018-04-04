@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment } from 'semantic-ui-react'
-import { func } from 'prop-types'
+import { func, object } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -46,20 +46,20 @@ const initialState = {
     name: '',
     icNumber: '',
     nationality: '',
-    contactNumber: '',
+    contactNumber: undefined,
     email: '',
     occupation: '',
-    income: ''
+    income: undefined
   },
 
   mother: {
     name: '',
     icNumber: '',
     nationality: '',
-    contactNumber: '',
+    contactNumber: undefined,
     email: '',
     occupation: '',
-    income: ''
+    income: undefined
   },
 
   otherFamily: [], // each object {name, relationship, age}
@@ -73,11 +73,11 @@ const initialState = {
 
   /* Official use */
   admin: {
-    interviewDate: '',
+    interviewDate: undefined,
     interviewNotes: '',
-    commencementDate: '',
+    commencementDate: undefined,
     adminNotes: '',
-    exitDate: '',
+    exitDate: undefined,
     exitReason: ''
   },
 
@@ -101,7 +101,11 @@ class StudentForm extends Component {
     addStudent: func
   }
 
-  state = { ...initialState, submitSuccess: false }
+  static contextTypes = {
+    router: object.isRequired
+  }
+
+  state = { ...initialState }
 
   checkRequired = (checkArray) => {
     const error = []
@@ -143,9 +147,8 @@ class StudentForm extends Component {
     })
   }
 
-  showSuccess = () => {
-    this.setState({submitSuccess: true})
-    setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
+  showSuccess = (studentId) => {
+    this.context.router.history.push(`/students/edit/${studentId}`)
   }
 
   handleSubmit = async e => {
@@ -171,10 +174,9 @@ class StudentForm extends Component {
       studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
 
       try {
-        await addStudent(studentDataToSubmit)
-        this.showSuccess()
-        // Clear everything to show an empty page. Might change it though.
-        this.setState({...initialState})
+        let submittedData = await addStudent(studentDataToSubmit)
+        // Populate the field so that the user can click the button to proceed to the page.
+        this.showSuccess(submittedData._id)
       } catch (error) {
         this.setState({serverError: true})
       }
@@ -202,19 +204,19 @@ class StudentForm extends Component {
         updatingArray.push({
           name: '',
           relationship: '',
-          age: ''
+          age: undefined
         })
         this.setState({otherFamily: updatingArray})
       } else if (field === 'academicInfo') {
         const updatingArray = this.state.misc.academicInfo
         updatingArray.push({
-          year: '',
-          term: '',
-          english: '',
-          math: '',
-          motherTongue: '',
-          science: '',
-          overall: ''
+          year: undefined,
+          term: undefined,
+          english: undefined,
+          math: undefined,
+          motherTongue: undefined,
+          science: undefined,
+          overall: undefined
         })
         let misc = {...this.state.misc}
         misc.academicInfo = updatingArray
@@ -247,8 +249,7 @@ class StudentForm extends Component {
 
   render () {
     const {
-      profile, father, mother, otherFamily, misc, admin, terms,
-      submitSuccess, tuitionChoices, termsDetails, error, serverError, activeItem
+      profile, father, mother, otherFamily, misc, admin, terms, tuitionChoices, termsDetails, error, serverError, activeItem
     } = this.state
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
@@ -310,25 +311,25 @@ class StudentForm extends Component {
                 {academicInfo.map((year, i) => (
                   <Table.Row key={i}>
                     <Table.Cell>
-                      <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
+                      <Form.Input type='number' transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={this.updateRepeatableChangeForAcademic(i, 'term')} />
+                      <Form.Input type='number' transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={this.updateRepeatableChangeForAcademic(i, 'term')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChangeForAcademic(i, 'english')} />
+                      <Form.Input type='number' transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChangeForAcademic(i, 'english')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChangeForAcademic(i, 'math')} />
+                      <Form.Input type='number' transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChangeForAcademic(i, 'math')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChangeForAcademic(i, 'motherTongue')} />
+                      <Form.Input type='number' transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChangeForAcademic(i, 'motherTongue')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={this.updateRepeatableChangeForAcademic(i, 'science')} />
+                      <Form.Input type='number' transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={this.updateRepeatableChangeForAcademic(i, 'science')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
+                      <Form.Input type='number' transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -358,11 +359,11 @@ class StudentForm extends Component {
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Email' placeholder='email' type='email' name='father-email' value={father.email} onChange={this.handleChange} />
-              <Form.Input label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
+              <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Occupation' placeholder='Occupation' name='father-occupation' value={father.occupation} onChange={this.handleChange} />
-              <Form.Input label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
+              <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
             </Form.Group>
 
             {/* Mother's information */}
@@ -373,11 +374,11 @@ class StudentForm extends Component {
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Email' placeholder='email' type='email' name='mother-email' value={mother.email} onChange={this.handleChange} />
-              <Form.Input label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
+              <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Occupation' placeholder='Occupation' name='mother-occupation' value={mother.occupation} onChange={this.handleChange} />
-              <Form.Input label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
+              <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
             </Form.Group>
 
             {/* adding additional family members */}
@@ -402,7 +403,7 @@ class StudentForm extends Component {
                       <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamily[i].relationship} placeholder='Relationship' onChange={this.updateRepeatableChange(i, 'relationship')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={this.updateRepeatableChange(i, 'age')} />
+                      <Form.Input type='number' transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={this.updateRepeatableChange(i, 'age')} />
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -501,16 +502,11 @@ class StudentForm extends Component {
             content='Please Check Required Fields!'
           />
           <Message
-            hidden={!submitSuccess}
-            positive
-            content='Successfully Submitted'
-          />
-          <Message
             hidden={!serverError}
             negative
             content='Server Error'
           />
-          <Form.Button type='submit'>Submit</Form.Button>
+          <Form.Button type='submit'>Add student</Form.Button>
         </Form>
       </div>
     )
