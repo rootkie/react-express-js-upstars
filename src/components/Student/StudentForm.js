@@ -33,7 +33,7 @@ const initialState = {
   profile: {
     name: '',
     icNumber: '',
-    dob: '',
+    dob: null,
     address: '',
     gender: '',
     nationality: '',

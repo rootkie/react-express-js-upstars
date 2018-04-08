@@ -7,7 +7,7 @@ import moment from 'moment'
 
 // Initially, edit state is false.
 const initialState = {
-  date: '',
+  date: null,
   className: '',
   classId: '',
   type: '',

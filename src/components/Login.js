@@ -74,7 +74,7 @@ class Login extends Component {
           style={{ height: '100%' }}
           verticalAlign='middle'>
           <Grid.Column style={{ maxWidth: 550 }}>
-            <Image size='big' fluid centered src={require('./logo.png')} />
+            <Image size='big' centered src={require('./logo.png')} />
             <Header as='h2' color='teal' textAlign='center'>
               Log-in to your account
             </Header>

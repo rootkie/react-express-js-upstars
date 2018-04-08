@@ -129,6 +129,10 @@ class StudentEdit extends Component {
     axios.get(`students/${studentId}`)
       .then(response => {
         let studentData = response.data.student
+        studentData.profile.dob = moment(studentData.profile.dob)
+        if (studentData.admin.commencementDate) studentData.admin.commencementDate = moment(studentData.admin.commencementDate)
+        if (studentData.admin.interviewDate) studentData.admin.interviewDate = moment(studentData.admin.interviewDate)
+        if (studentData.admin.exitDate) studentData.admin.exitDate = moment(studentData.admin.exitDate)
         this.setState({
           profile: studentData.profile,
           father: studentData.father,
@@ -341,7 +345,7 @@ class StudentEdit extends Component {
                   dateFormat='DD/MM/YYYY'
                   showYearDropdown
                   maxDate={moment()}
-                  selected={moment(dob)}
+                  selected={dob}
                   onChange={this.handleDateChange('profile-dob')}
                   required />
               </Form.Field>
@@ -502,7 +506,7 @@ class StudentEdit extends Component {
               <DatePicker
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
-                selected={moment(interviewDate)}
+                selected={interviewDate}
                 onChange={this.handleDateChange('admin-interviewDate')}
                 isClearable />
             </Form.Field>
@@ -513,7 +517,7 @@ class StudentEdit extends Component {
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
                 minDate={interviewDate}
-                selected={moment(commencementDate)}
+                selected={commencementDate}
                 onChange={this.handleDateChange('admin-commencementDate')}
                 isClearable />
             </Form.Field>
@@ -524,7 +528,7 @@ class StudentEdit extends Component {
                 placeholderText='Click to select a date'
                 dateFormat='DD/MM/YYYY'
                 minDate={commencementDate}
-                selected={moment(exitDate)}
+                selected={exitDate}
                 onChange={this.handleDateChange('admin-exitDate')}
                 isClearable />
             </Form.Field>

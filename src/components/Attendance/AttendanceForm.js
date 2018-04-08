@@ -6,7 +6,7 @@ import axios from 'axios'
 
 // Note: classSelection is a bool that tracks if any class is provided by the user.
 const initialState = {
-  date: '',
+  date: null,
   className: '',
   type: 'Class',
   hours: '',

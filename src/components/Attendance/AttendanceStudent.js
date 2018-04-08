@@ -38,8 +38,8 @@ class AttendanceStudent extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: '',
-      endDate: '',
+      startDate: null,
+      endDate: null,
       moreOptions: false,
       isLoading: true,
       studentOptions: [],

@@ -163,7 +163,7 @@ class AttendanceClass extends Component {
         </Header>
         {/* 11 columns (5 for basic data and 6 for attendance records per page) */}
         {/* 6 sets is tested on computer resolutions of min 1280 x 720 to be able to see everything */}
-        <Table celled striped columns={11}>
+        <Table celled striped columns={11} fixed>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>Name</Table.HeaderCell>
