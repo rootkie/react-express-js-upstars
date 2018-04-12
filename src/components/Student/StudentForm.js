@@ -4,6 +4,9 @@ import { func, object } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import 'react-datepicker/dist/react-datepicker.css'
+import ReCAPTCHA from 'react-google-recaptcha'
+
+let captcha
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
@@ -93,7 +96,8 @@ const initialState = {
 
   error: [],
   serverError: false,
-  activeItem: 'Personal Info'
+  activeItem: 'Personal Info',
+  captchaCode: ''
 }
 
 class StudentForm extends Component {
@@ -187,6 +191,7 @@ class StudentForm extends Component {
   }
 
   handleTermsOpen = (e) => {
+    captcha.execute()
     if (this.state.terms === false) this.setState({termsDetails: true})
   }
 
@@ -245,6 +250,11 @@ class StudentForm extends Component {
     let misc = {...this.state.misc}
     misc.academicInfo[index][property] = value
     this.setState({misc})
+  }
+
+  // Specially added for captcha validation by Google
+  captchaChange = value => {
+    this.setState({ captchaCode: value })
   }
 
   render () {
@@ -479,14 +489,14 @@ class StudentForm extends Component {
               <Modal.Description>
                 <Header>Welcome to Ulu Pandan STARS</Header>
                 <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
-                   By signing up as a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
+                   By signing up for a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
                 <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
                    or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
-                <p>2. Students are expected to care about their learning outcomes and behaviour, attend the tuition sessions punctually and regularly. In the event that the student will be absent from tuition, or unable to make it on time,
-                 he/she should inform fellow tutors or relevant personnel(s) in advance. The programme organizer reserves the right to request the Student to leave the programme in the event that he/she exhibits inappropriate behaviour(s). </p>
-                <p>3. Students are required to achieve a minimum of 80% attendance within the period of tuition.</p>
-                <p>4. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
-                <p>5. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
+                <p>2. As you are creating an account on behalf of a student, please ensure that all information filled are correct as it represent the student. You, the admin, should take
+                  all responsibility for any wrong information entered that may impact the student's prospect of being able to be accepted into UPStars.
+                </p>
+                <p>3. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
+                <p>4. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
                 <Header>Terms and Conditions</Header>
                 <p>Last modified: June 1, 2017</p>
               </Modal.Description>
@@ -507,6 +517,12 @@ class StudentForm extends Component {
             content='Server Error'
           />
           <Form.Button type='submit'>Add student</Form.Button>
+          <ReCAPTCHA
+            ref={(el) => { captcha = el }}
+            size='invisible'
+            sitekey='6LdCS1IUAAAAAHaYU_yJyFimpPuJShH-i80kFj3F' // Dev key under Ying Keat's account (yingkeatwon@gmail.com)
+            onChange={this.captchaChange}
+          />
         </Form>
       </div>
     )

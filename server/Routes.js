@@ -20,7 +20,7 @@ module.exports = app => {
   // Students
   app.get('/api/students', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getAll)
   app.get('/api/students/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getStudentById)
-  app.post('/api/students', hasRole(['SuperAdmin']), studentControl.addStudent)
+  app.post('/api/students', studentControl.addStudent)
   app.put('/api/students', hasRole(['Mentor', 'Admin', 'SuperAdmin']), studentControl.editStudentById)
   app.delete('/api/students', hasRole(['SuperAdmin']), studentControl.deleteStudent)
   app.post('/api/students/class', hasRole(['Admin', 'SuperAdmin']), classControl.addStudentsToClass)
