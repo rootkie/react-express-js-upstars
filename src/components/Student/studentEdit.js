@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Table, Icon, Menu, Segment, Dimmer, Loader } from 'semantic-ui-react'
+import { Form, Message, Button, Table, Icon, Menu, Segment, Dimmer, Loader, Header } from 'semantic-ui-react'
 import { func, string } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 import 'react-datepicker/dist/react-datepicker.css'
 
 const genderOptions = [
@@ -90,6 +91,7 @@ const initialState = {
   },
 
   status: '',
+  classes: [],
 
   tuitionChoices: {
     Cdac: false,
@@ -146,6 +148,7 @@ class StudentEdit extends Component {
             Mendaki: studentData.misc.tuition.includes('Mendaki'),
             Private: studentData.misc.tuition.includes('Private')
           },
+          classes: studentData.classes,
           isLoading: false
         })
       })
@@ -311,7 +314,7 @@ class StudentEdit extends Component {
   }
 
   render () {
-    const { isLoading, profile, father, mother, otherFamily, misc, admin, status, submitSuccess, tuitionChoices, error, serverError, activeItem, buttonContent } = this.state
+    const { isLoading, profile, father, mother, otherFamily, misc, admin, status, submitSuccess, tuitionChoices, error, serverError, activeItem, buttonContent, classes } = this.state
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
@@ -553,6 +556,24 @@ class StudentEdit extends Component {
           />
           <Form.Button type='submit'>{buttonContent}</Form.Button>
         </Form>
+        <Header as='h3' dividing>Classes</Header>
+        <Table compact celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell width='1'>S/N</Table.HeaderCell>
+              <Table.HeaderCell width='6'>Name</Table.HeaderCell>
+              <Table.HeaderCell width='5'>Status</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {classes.map((Class, i) => (
+              <Table.Row key={`class-${i}`}>
+                <Table.Cell>{i + 1}</Table.Cell>
+                <Table.Cell><Link to={`/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
+                <Table.Cell>{Class.status}</Table.Cell>
+              </Table.Row>))}
+          </Table.Body>
+        </Table>
       </div>
     )
   }

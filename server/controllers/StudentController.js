@@ -17,8 +17,6 @@ module.exports.addStudent = async (req, res, next) => {
     querystring.stringify({
       secret: '6LdCS1IUAAAAAKByA_qbWeQGuKCgBXNmD_k2XWSK',
       response: req.body.captchaCode
-    // remoteip: '127.0.0.1'
-    // remoteip: '128.199.214.107'
     }))
     .then(async response => {
       console.log(response.data)
@@ -158,7 +156,7 @@ module.exports.getAll = async (req, res, next) => {
     // Find all students from database
     const students = await Student.find({
       status: 'Active'
-    })
+    }).select('profile')
     return res.status(200).json({
       students
     })
@@ -167,6 +165,25 @@ module.exports.getAll = async (req, res, next) => {
     next(err)
   }
 }
+
+module.exports.getOtherStudents = async (req, res, next) => {
+  try {
+    // Find all students from database
+    const students = await Student.find({
+      status: {
+        $ne: 'Active'
+      }
+    }).select('profile status')
+      .sort('status profile.name')
+    return res.status(200).json({
+      students
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
 // Everyone with token
 module.exports.getStudentById = async (req, res, next) => {
   try {

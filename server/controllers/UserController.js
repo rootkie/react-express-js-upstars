@@ -24,8 +24,39 @@ module.exports.getAllUsers = async (req, res, next) => {
   }
 }
 
+module.exports.otherUsers = async (req, res, next) => {
+  try {
+    // Retrieve all users in the system that have status other than "Active"
+    const usersPending = await User.find({
+      'status': 'Pending'
+    }).select('profile roles').sort('profile.name')
+
+    const usersOthers = await User.find({
+      $nor: [
+        {
+          'status': 'Active'
+        }, {
+          'status': 'Pending'
+        }
+      ]
+    }).select('profile roles status').sort('profile.name status')
+
+    return res.status(200).json({
+      usersPending,
+      usersOthers
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
 // Everyone but restricted to their own class checked using token
-module.exports.getUser = async(req, res, next) => {
+module.exports.getUser = async (req, res, next) => {
   try {
     let approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
@@ -89,7 +120,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       })
     }
 
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot', 'status']
 
     // Go through list
     for (let checkChanged of list) {
@@ -109,6 +140,35 @@ module.exports.editUserParticulars = async (req, res, next) => {
       throw ({
         status: 404,
         error: 'The user you requested to edit does not exist.'
+      })
+    }
+
+    if (user.status === 'Active' && user.classes) {
+      await Class.update({
+        _id: {
+          $in: user.classes
+        }
+      }, {
+        $addToSet: {
+          students: user._id
+        }
+      }, {
+        new: true,
+        multi: true
+      })
+    } else if (user.classes) {
+      // If status if changed to anything other than Active, we will delete their IDs from the classes instead
+      await Class.update({
+        _id: {
+          $in: user.classes
+        }
+      }, {
+        $pull: {
+          students: user._id
+        }
+      }, {
+        new: true,
+        multi: true
       })
     }
     return res.status(200).json({

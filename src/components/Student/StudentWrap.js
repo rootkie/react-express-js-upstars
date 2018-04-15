@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import { string } from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
-import StudentEdit from './studentEdit'
+import StudentEdit from './StudentEdit'
+import StudentViewOthers from './StudentViewOthers'
 import axios from 'axios'
 import { filterData } from '../../utils'
 
@@ -17,7 +18,9 @@ class StudentWrap extends Component {
     super(props)
     this.state = {
       studentData: [],
+      otherStudentData: [],
       filteredData: false,
+      filteredDataOthers: false,
       isLoading: true
     }
     this.getStudents()
@@ -26,7 +29,15 @@ class StudentWrap extends Component {
   getStudents = () => {
     axios.get('students')
       .then(response => {
-        this.setState({ studentData: response.data.students, isLoading: false })
+        this.setState({ studentData: response.data.students })
+      })
+      .catch(err => {
+        console.log(err)
+      })
+
+    axios.get('otherStudents')
+      .then(response => {
+        this.setState({ otherStudentData: response.data.students, isLoading: false })
       })
       .catch(err => {
         console.log(err)
@@ -73,14 +84,20 @@ class StudentWrap extends Component {
     this.setState({filteredData: filterData(studentData, criteria)})
   }
 
+  searchFilterOthers = (criteria) => {
+    const { otherStudentData } = this.state
+    this.setState({filteredDataOthers: filterData(otherStudentData, criteria)})
+  }
+
   render () {
-    const { studentData, filteredData, isLoading } = this.state
+    const { studentData, otherStudentData, filteredData, isLoading, filteredDataOthers } = this.state
     const { op, sid } = this.props
     return (
       <div>
         {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
         {op === 'edit' && <StudentEdit id={sid} editStudent={this.editStudent} />}
         {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
+        {op === 'viewOthers' && <StudentViewOthers studentData={filteredDataOthers || otherStudentData} searchFilter={this.searchFilterOthers} isLoading={isLoading} />}
       </div>
     )
   }
