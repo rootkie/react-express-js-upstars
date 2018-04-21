@@ -16,13 +16,15 @@ module.exports.generateToken = req => {
     _id,
     roles,
     status,
-    classes
+    classes,
+    profile
   } = req
   const user = {
     _id,
     roles,
     status,
-    classes
+    classes,
+    name: profile.name
   }
   return jwt.sign(user, config.secret, {
     expiresIn: '100h'

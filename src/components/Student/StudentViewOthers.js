@@ -3,7 +3,6 @@ import { array, func, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Icon, Form, Dropdown, Dimmer, Loader } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
-import moment from 'moment'
 
 const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },

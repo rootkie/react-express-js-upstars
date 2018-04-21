@@ -33,13 +33,19 @@ class MainCtrl extends Component {
   }
 
   state = {
-    isLoggedIn: true
+    isLoggedIn: true,
+    name: '',
+    id: ''
   }
 
   isLoggedIn = () => {
     return axios.get('/check')
       .then(response => {
-        this.setState({ isLoggedIn: response.data.auth })
+        if (response.data.auth === false) {
+          this.setState({ isLoggedIn: false })
+        } else {
+          this.setState({ name: response.data.name, id: response.data._id })
+        }
       }).catch((err) => {
         console.log(err)
       })
@@ -56,6 +62,7 @@ class MainCtrl extends Component {
 
   render () {
     const { main, op, sid } = this.props.match.params || ''
+    const { name, id } = this.state
 
     if (!this.state.isLoggedIn) {
       console.log('we getting em login errors?')
@@ -64,7 +71,7 @@ class MainCtrl extends Component {
 
     return (
       <Container fluid>
-        <Topbar tab={main} />
+        <Topbar tab={main} name={name} id={id} />
         <Grid style={GridStyle}>
           <SideMenu activeItem={main + op || ''} />
           <Grid.Column width={13} style={MainContentStyle}>
