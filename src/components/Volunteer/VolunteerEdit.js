@@ -68,7 +68,7 @@ const initialState = {
   error: []
 }
 
-class Register extends Component {
+class VolunteerEdit extends Component {
   state = {
     ...initialState
   }
@@ -173,7 +173,7 @@ class Register extends Component {
     const { firstName, lastName, address, postalCode, mobileNumber, homeNumber, email, dateOfBirth, gender, nationality, NRICNumber, fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, hobbies, careerGoal, formalEducation, courses, achievements, cca, communityServices, workExperience, competences, purposeToJoin, developmentalGoals, intendedDateOfCommencement, intendedDateOfExit, termsDetails, error } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     return (
-      <div style={{ 'margin': '1.5em' }}>
+      <div>
         <Form onSubmit={this.handleSubmit}>
           <Header as='h3' dividing>Personal Particulars</Header>
           <Form.Group widths='equal'>
@@ -637,23 +637,5 @@ develop from service at Stars' name='developmentalGoals' value={developmentalGoa
     )
   }
 }
-export default Register
 
-/*
-axios.post('/register', data)
-.then((response) => {
-  console.log(response)
-  localStorage.setItem('token',response.data.token)
-  this.setState({...initialState, submitSuccess: true}) // reset form
-  setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
-  this.setState({ redirect:true })
-})
-.catch((error) => {
-  console.log(error)
-  this.setState({errorMessage: error.response.data.error})
-})
-} else { // incomplete required fields
-console.log('error occured')
-console.log(error)
-this.setState({error, errorMessage: 'Please Check Required Fields!'})
-} */
+export default VolunteerEdit

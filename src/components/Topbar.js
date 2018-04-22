@@ -10,7 +10,7 @@ const Topbar = ({tab, name}) => (
     <Menu.Menu position='right'>
       <Dropdown item text={name}>
         <Dropdown.Menu>
-          <Dropdown.Item><Link style={{color: 'black'}} to='/settings'>Settings</Link></Dropdown.Item>
+          <Dropdown.Item><Link style={{color: 'black'}} to='/volunteer/profile'>Profile</Link></Dropdown.Item>
           <Dropdown.Item onClick={() => window.localStorage.removeItem('token')}><Link style={{color: 'black'}} to='/'>Logout</Link></Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>

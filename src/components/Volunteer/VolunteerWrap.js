@@ -1,12 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import VolunteerForm from './VolunteerForm'
-import VolunteerAdminForm from './VolunteerAdminForm'
+import VolunteerView from './VolunteerView'
+import VolunteerEdit from './VolunteerAdminForm'
+import VolunteerChangePassword from './VolunteerChangePassword'
+
 const VolunteerWrap = ({ op }) => (
   <div>
-    {op === 'form-admin' && <VolunteerAdminForm /> }
-    {op === 'form' && <VolunteerForm />}
-    {op === 'view' && <h2>View</h2>}
+    {op === 'changepassword' && <VolunteerChangePassword /> }
+    {op === 'profile' && <VolunteerEdit />}
+    {op === 'view' && <VolunteerView />}
   </div>
 )
 

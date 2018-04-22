@@ -10,6 +10,7 @@ import { object } from 'prop-types'
 import VolunteerWrap from './Volunteer/VolunteerWrap'
 import AttendanceWrap from './Attendance/AttendanceWrap'
 import StudentWrap from './Student/StudentWrap'
+import AdminWrap from './Admin/AdminWrap'
 
 // axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 axios.defaults.baseURL = 'http://127.0.0.1:1444/api/'
@@ -80,6 +81,7 @@ class MainCtrl extends Component {
             {main === 'classes' && <ClassWrap op={op} sid={sid} />}
             {main === 'volunteer' && <VolunteerWrap op={op} />}
             {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
+            {main === 'admin' && <AdminWrap op={op} />}
           </Grid.Column>
         </Grid>
       </Container>

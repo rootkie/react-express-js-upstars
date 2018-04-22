@@ -25,8 +25,10 @@ const SideMenu = ({activeItem}) => (
       <Menu.Item>
         <Menu.Header>Volunteer</Menu.Header>
         <Menu.Menu>
-          <Link to='/volunteer/form-admin' className={`item ${activeItem === 'volunteerform-admin' && 'active'}`}>Admin Form</Link>
-          <Link to='/volunteer/form' className={`item ${activeItem === 'volunteerform' && 'active'}`}>Form</Link>
+          {/* view is special for admin only while profile and change password refers to operations on self */}
+          <Link to='/volunteer/view' className={`item ${activeItem === 'volunteerview' && 'active'}`}>view</Link>
+          <Link to='/volunteer/profile' className={`item ${activeItem === 'volunteerprofile' && 'active'}`}>profile</Link>
+          <Link to='/volunteer/changepassword' className={`item ${activeItem === 'volunteerchangepassword' && 'active'}`}>change password</Link>
         </Menu.Menu>
       </Menu.Item>
       <Menu.Item>
@@ -38,6 +40,14 @@ const SideMenu = ({activeItem}) => (
           <Link to='/attendance/student' className={`item ${activeItem === 'attendancestudent' && 'active'}`}>student</Link>
           <Link to='/attendance/class' className={`item ${activeItem === 'attendanceclass' && 'active'}`}>class</Link>
           <Link to='/attendance/summary' className={`item ${activeItem === 'attendancesummary' && 'active'}`}>summary</Link>
+        </Menu.Menu>
+      </Menu.Item>
+      <Menu.Item>
+        <Menu.Header>Admin</Menu.Header>
+        <Menu.Menu>
+          <Link to='/admin/status' className={`item ${activeItem === 'adminstatus' && 'active'}`}>change status</Link>
+          <Link to='/admin/password' className={`item ${activeItem === 'adminpassword' && 'active'}`}>change user password</Link>
+          <Link to='/admin/user' className={`item ${activeItem === 'adminuser' && 'active'}`}>add user</Link>
         </Menu.Menu>
       </Menu.Item>
     </Menu>

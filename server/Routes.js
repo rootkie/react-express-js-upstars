@@ -29,7 +29,6 @@ module.exports = app => {
 
   // Users
   app.get('/api/users', hasRole(['Admin', 'SuperAdmin']), userControl.getAllUsers)
-  app.get('/api/otherUsers', hasRole(['Admin', 'SuperAdmin']), userControl.otherUsers)
   app.get('/api/users/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.getUser)
   app.post('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.editUserParticulars)
   app.delete('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.deleteUser) //  Personal account deletion
@@ -62,10 +61,6 @@ module.exports = app => {
   app.delete('/api/admin/user', hasRole(['SuperAdmin']), adminControl.multipleUserDelete) //  Admin Mass deletion
 
   app.post('/api/register', authControl.register)
-  app.post('/api/simpleRegister', authControl.simpleRegister)
   app.post('/api/login', authControl.login)
   app.get('/api/check', authControl.check) // This is for frontend to check validity of token.
-
-  //  Special Treats
-  app.post('/api/generateAdminUser', adminControl.generateAdminUser)
 }

@@ -207,7 +207,7 @@ module.exports.getPendingUsers = async (req, res, next) => {
   }
 }
 
-module.exports.getSuspendedPeople = async(req, res, next) => {
+module.exports.getSuspendedPeople = async (req, res, next) => {
   try {
     // Find all people with status as Suspended
     const users = await User.find({
@@ -226,7 +226,7 @@ module.exports.getSuspendedPeople = async(req, res, next) => {
   }
 }
 
-module.exports.getDeletedPeople = async(req, res, next) => {
+module.exports.getDeletedPeople = async (req, res, next) => {
   try {
     // Find all people with status as Suspended
     const users = await User.find({
@@ -246,89 +246,7 @@ module.exports.getDeletedPeople = async(req, res, next) => {
   }
 }
 
-module.exports.generateAdminUser = async(req, res, next) => {
-  try {
-    // All compulsory fields: Full test input with validation
-    /* {
-    	"email": "test@gmail.com",
-    	"password": "password",
-    	"profile": {
-    		"name": "Admin",
-    		"gender": "M",
-    		"dob": 123,
-    		"nationality": "SG",
-    		"nric": "S1102s",
-    		"address": "Blk Scrub",
-    		"postalCode": 122222,
-    		"homephone": 123,
-    		"handphone": 123,
-    	}
-    } */
-    let {
-      email,
-      password,
-      profile
-    } = req.body
-    // Return error if no email provided
-    if (!email) {
-      throw ({
-        status: 400,
-        error: 'Please provide an email'
-      })
-    }
-
-    // Return error if no password provided
-    if (!password) {
-      throw ({
-        status: 400,
-        error: 'Please provide a password'
-      })
-    }
-
-    const existingUser = await User.findOne({
-      email
-    })
-
-    if (existingUser) {
-      throw ({
-        status: 409,
-        error: 'User already exist. Please log in instead.'
-      })
-    }
-
-    const user = new User({
-      email,
-      password,
-      profile,
-      commencementDate: '20170101',
-      exitDate: '20900101',
-      roles: ['SuperAdmin']
-    })
-    const error = await user.validateSync()
-    if (error) {
-      throw ({
-        status: 400,
-        error: 'There is something wrong with the client input. That is all we know.'
-      })
-    }
-
-    const userObject = await user.save()
-    res.status(201).json({
-      token: util.generateToken(userObject),
-      _id: userObject._id,
-      roles: userObject.roles
-    })
-  } catch (err) {
-    console.log(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
-  }
-}
-
-module.exports.multipleUserDelete = async(req, res, next) => {
+module.exports.multipleUserDelete = async (req, res, next) => {
   let {
     userId
   } = req.body
