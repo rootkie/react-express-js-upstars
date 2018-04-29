@@ -271,9 +271,9 @@ class StudentForm extends Component {
     return (
       <div>
         <Menu attached='top' tabular widths={3} inverted>
-          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'teal'} />
-          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'} />
-          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'green'} />
+          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />Personal Info</Menu.Item>
+          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />Personal Info</Menu.Item>
+          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'orange'}><Icon name='dashboard' />Personal Info</Menu.Item>
         </Menu>
         {/* The form only renders part of the form accordingly to the tab selected
         Most of the fields have names of '(parent)-(child)'. This is such that they can be separated easily by the hyphen

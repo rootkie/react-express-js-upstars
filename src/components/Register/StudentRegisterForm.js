@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment } from 'semantic-ui-react'
+import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment, Image } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -79,7 +79,7 @@ const initialState = {
   termsDetails: false,
 
   tuitionChoices: {
-    Cdac: false,
+    CDAC: false,
     Mendaki: false,
     Private: false
   },
@@ -252,9 +252,13 @@ class StudentForm extends Component {
 
     return (
       <div style={{ 'margin': '1.5em' }}>
+        <Image size='small' centered src={require('./../logo.png')} />
+        <Header as='h1' color='blue' textAlign='center'>
+              Sign up as a student
+        </Header>
         <Menu attached='top' tabular widths={2} inverted>
-          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'teal'} />
-          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'} />
+          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />Personal Info</Menu.Item>
+          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />Family Details</Menu.Item>
         </Menu>
         {/* The form only renders part of the form accordingly to the tab selected
         Most of the fields have names of '(parent)-(child)'. This is such that they can be separated easily by the hyphen
@@ -265,7 +269,7 @@ class StudentForm extends Component {
             <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='profile-name' value={name} onChange={this.handleChange} required />
             <Form.Group widths='equal'>
               <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='profile-icNumber' value={icNumber} onChange={this.handleChange} required />
-              <Form.Field error={error.includes('dateOfBirth')} required>
+              <Form.Field required>
                 <label>Date of Birth</label>
                 <DatePicker
                   placeholderText='Click to select a date'
@@ -449,7 +453,7 @@ class StudentForm extends Component {
                 <p>&emsp; c. If we disable your account, you will not create another one without our permission.</p>
                 <p>&emsp; d. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
                 <Header>Terms and Conditions</Header>
-                <p>Last modified: June 1, 2017</p>
+                <p>Last modified: June 17, 2017</p>
               </Modal.Description>
             </Modal.Content>
             <Modal.Actions>
