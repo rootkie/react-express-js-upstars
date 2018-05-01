@@ -146,18 +146,6 @@ module.exports.getClassById = async (req, res, next) => {
         error: 'Please provide a classId'
       })
     }
-    let approved = await util.checkClass({
-      roles: ['Admin', 'SuperAdmin'],
-      params: classId,
-      decoded: req.decoded
-    })
-    // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
-      throw ({
-        status: 403,
-        error: 'Your client does not have the permissions to access this function.'
-      })
-    }
 
     // Find a class and populate the students, users and external people to get their name
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')

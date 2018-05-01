@@ -4,6 +4,8 @@ const generateToken = util.generateToken
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const axios = require('axios')
+const querystring = require('querystring')
 // ============== Start of all the functions ==============
 // Everyone can access without token
 
@@ -68,89 +70,111 @@ module.exports.login = async (req, res, next) => {
 }
 
 module.exports.register = async (req, res, next) => {
-  try {
-    let {
-      email,
-      password,
-      profile,
-      commencementDate,
-      exitDate,
-      preferredTimeSlot
-    } = req.body
+  let {
+    email,
+    password,
+    profile,
+    commencementDate,
+    exitDate,
+    preferredTimeSlot,
+    misc,
+    mother,
+    father,
+    captchaCode
+  } = req.body
 
-    // Return error if no password or email provided
-    if (!email || !password || password.length < 6) {
-      throw ({
-        status: 400,
-        error: 'Please provide an email and password that is also at least 6 characters long.'
-      })
-    }
+  axios.post('https://www.google.com/recaptcha/api/siteverify',
+    querystring.stringify({
+      secret: '6LdCS1IUAAAAAKByA_qbWeQGuKCgBXNmD_k2XWSK',
+      response: captchaCode
+    }))
+    .then(async response => {
+      console.log(response.data)
+      if (response.data.success === false) {
+        throw ({
+          status: 401,
+          error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+        })
+      }
+      try {
+        // Return error if no password or email provided
+        if (!email || !password || password.length < 6) {
+          throw ({
+            status: 400,
+            error: 'Please provide an email and password that is also at least 6 characters long.'
+          })
+        }
 
-    // Find the user based on email
-    const existingUser = await User.findOne({
-      email
-    })
-    // 3 cases:
-    // case 1: Email exists and user is legitimate
-    if (existingUser && existingUser.status !== 'Deleted' && existingUser.status !== 'Suspended') {
-      throw {
-        status: 409,
-        error: 'Email already exists.'
-      }
-    }
-    // case 2: user has a bad record and is suspended
-    if (existingUser && existingUser.status === 'Suspended') {
-      throw {
-        status: 403,
-        error: 'Your account has been suspended. Please contact the administrator for follow up actions'
-      }
-    }
-    // case 3: user is deleted by admin or by oneself
-    // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
-    // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
-    // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
-    // Using the native crypto package, we generate true random strings to add to email and password so they are really gone.
-    if (existingUser && existingUser.status === 'Deleted') {
-      existingUser.email = crypto.randomBytes(4).toString('hex') + 'deleted' + existingUser._id + '@upstars.com'
-      existingUser.password = existingUser._id + crypto.randomBytes(5).toString('hex')
-      existingUser.status = 'PermaDeleted'
-      await existingUser.save()
-    }
+        // Find the user based on email
+        const existingUser = await User.findOne({
+          email
+        })
+        // 3 cases:
+        // case 1: Email exists and user is legitimate
+        if (existingUser && existingUser.status !== 'Deleted' && existingUser.status !== 'Suspended') {
+          throw {
+            status: 409,
+            error: 'Email already exists.'
+          }
+        }
+        // case 2: user has a bad record and is suspended
+        if (existingUser && existingUser.status === 'Suspended') {
+          throw {
+            status: 403,
+            error: 'Your account has been suspended. Please contact the administrator for follow up actions'
+          }
+        }
+        // case 3: user is deleted by admin or by oneself
+        // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
+        // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
+        // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
+        // Using the native crypto package, we generate true random strings to add to email and password so they are really gone.
+        if (existingUser && existingUser.status === 'Deleted') {
+          existingUser.email = crypto.randomBytes(4).toString('hex') + 'deleted' + existingUser._id + '@upstars.com'
+          existingUser.password = existingUser._id + crypto.randomBytes(5).toString('hex')
+          existingUser.status = 'PermaDeleted'
+          await existingUser.save()
+        }
 
-    // Create a new user after validating and making sure everything is right
-    const user = new User({
-      email,
-      password,
-      profile,
-      commencementDate: util.formatDate(commencementDate),
-      exitDate: util.formatDate(exitDate),
-      preferredTimeSlot,
-      roles: ['Tutor']
-    })
-    const error = await user.validateSync()
-    if (error) {
-      throw {
-        status: 400,
-        error: 'There is something wrong with the client input. That is all we know.'
+        // Create a new user after validating and making sure everything is right
+        const user = new User({
+          email,
+          password,
+          profile,
+          commencementDate,
+          exitDate,
+          preferredTimeSlot,
+          misc,
+          mother,
+          father,
+          roles: ['Tutor']
+        })
+        const error = await user.validateSync()
+        if (error) {
+          console.log(error)
+          throw {
+            status: 400,
+            error: 'There is something wrong with the client input. That is all we know.'
+          }
+        }
+        const userObject = await user.save()
+        res.status(201).json({
+          status: 'success',
+          token: generateToken(userObject),
+          _id: userObject._id,
+          email: userObject.email,
+          roles: userObject.roles,
+          name: userObject.profile.name
+        })
+      } catch (err) {
+        console.log(err)
+        if (err.status) {
+          res.status(err.status).send({
+            error: err.error
+          })
+        } else next(err)
       }
-    }
-    const userObject = await user.save()
-    res.status(201).json({
-      status: 'success',
-      token: generateToken(userObject),
-      _id: userObject._id,
-      email: userObject.email,
-      roles: userObject.roles,
-      name: userObject.profile.name
     })
-  } catch (err) {
-    console.log(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
-  }
 }
 
 module.exports.check = async (req, res, next) => {

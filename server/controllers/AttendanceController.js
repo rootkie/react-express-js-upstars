@@ -90,9 +90,9 @@ module.exports.deleteAttendance = async (req, res, next) => {
       })
     }
 
-    let approved = await util.checkRole({
+    let approved = await util.checkClass({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
-      params: req.params,
+      params: classId,
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
@@ -187,20 +187,6 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
       dateEnd
     } = req.params
     let user = {}
-
-    // Prevent users from getting attendance of other users unless they are admin
-    let approved = await util.checkRole({
-      roles: ['Admin', 'SuperAdmin'],
-      params: req.params,
-      decoded: req.decoded
-    })
-    // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
-      throw ({
-        status: 403,
-        error: 'Your client does not have the permissions to access this function.'
-      })
-    }
 
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)

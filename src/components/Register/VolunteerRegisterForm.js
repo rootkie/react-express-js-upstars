@@ -7,15 +7,15 @@ import ReCAPTCHA from 'react-google-recaptcha'
 let captcha
 
 const genderOptions = [
-  { key: 'male', text: 'Male', value: 'male' },
-  { key: 'female', text: 'Female', value: 'female' }
+  { key: 'male', text: 'Male', value: 'M' },
+  { key: 'female', text: 'Female', value: 'F' }
 ]
 
 const nationalityOptions = [
-  {key: 'singapore', text: 'Singapore', value: 'singapore'},
-  {key: 'korea', text: 'Korea', value: 'korea'},
-  {key: 'australia', text: 'Australia', value: 'australia'},
-  {key: 'malaysia', text: 'Malaysia', value: 'malaysia'}
+  {key: 'singaporean', text: 'Singaporean', value: 'singaporean'},
+  {key: 'korean', text: 'Korean', value: 'korean'},
+  {key: 'australian', text: 'Australian', value: 'australian'},
+  {key: 'malaysian', text: 'Malaysian', value: 'malaysian'}
 ]
 
 const timeSlotOptions = [
@@ -34,6 +34,7 @@ const initialState = {
   password: '',
   address: '',
   handphone: '',
+  postalCode: '',
   homephone: '',
   email: '',
   dob: '',
@@ -59,9 +60,9 @@ const initialState = {
   cip: [],
   workInternExp: [],
   competence: [{
-    language: '',
-    subjects: '',
-    interest: ''
+    languages: [''],
+    subjects: [''],
+    interests: ['']
   }],
   purposeObjectives: '',
   developmentGoals: '',
@@ -82,7 +83,8 @@ const initialState = {
   termsDetails: false,
   error: [],
   activeItem: 'Personal Info',
-  captchaCode: ''
+  captchaCode: '',
+  errorMessage: ''
 }
 
 class Register extends Component {
@@ -113,9 +115,7 @@ class Register extends Component {
   handleSubmit = e => {
     e.preventDefault()
     // check required fields
-    const error = this.checkRequired(['name', 'email', 'terms', 'address', 'postalCode', 'password',
-      'handphone', 'homephone', 'email', 'dob', 'gender', 'nationality', 'nric',
-      'purposeObjectives', 'developmentGoals', 'commencementDate', 'exitDate'])
+    const error = this.checkRequired(['terms', 'preferredTimeSlot'])
 
     const { name, address, postalCode, handphone, homephone, email, dob, gender, nationality, nric, password, schoolLevel, schoolClass,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
@@ -167,13 +167,21 @@ class Register extends Component {
         },
         captchaCode
       }
-      // const
 
       const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
       volunteerData.preferredTimeSlot = timeSlot
 
-      console.log(volunteerData)
-      // this.setState(initialState) // reset form
+      axios.post('/register', volunteerData)
+        .then(response => {
+          // put token inside and log in but not done yet..
+          console.log(response)
+          this.setState(initialState) // reset form
+          window.localStorage.setItem('token', response.data.token)
+        })
+        .catch((err) => {
+          console.log(err)
+          this.setState({errorMessage: err.response.data.error})
+        })
     } else {
       console.log('error occured')
       this.setState({error})
@@ -255,7 +263,7 @@ class Register extends Component {
     const { name, address, postalCode, handphone, homephone, email, dob, gender, nationality, nric, password, schoolLevel, schoolClass,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
       hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
-      purposeObjectives, developmentGoals, commencementDate, exitDate, terms, termsDetails, error, activeItem } = this.state // submitted version are used to display the info sent through POST (not necessary)
+      purposeObjectives, developmentGoals, commencementDate, exitDate, terms, termsDetails, error, activeItem, errorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     return (
       <div style={{ 'margin': '1.5em' }}>
@@ -280,8 +288,8 @@ class Register extends Component {
               <Form.Input label='Postal code' placeholder='Postal code' name='postalCode' value={postalCode} onChange={this.handleChange} type='number' required />
             </Form.Group>
             <Form.Group widths='equal'>
-              <Form.Input label='Class level' placeholder='school level' name='schoolLevel' value={schoolLevel} onChange={this.handleChange} required />
-              <Form.Input label='Class name' placeholder='class name' name='schoolClass' value={schoolClass} onChange={this.handleChange} type='number' required />
+              <Form.Input label='School level' placeholder='Sec 1 / JC 2' name='schoolLevel' value={schoolLevel} onChange={this.handleChange} required />
+              <Form.Input label='Class name' placeholder='class name' name='schoolClass' value={schoolClass} onChange={this.handleChange} required />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Mobile number' placeholder='Mobile number' name='handphone' value={handphone} onChange={this.handleChange} type='number' required />
@@ -293,9 +301,10 @@ class Register extends Component {
                 <label>Date of birth</label>
                 <DatePicker
                   placeholderText='Click to select a date'
-                  dateFormat='YYYY/MM/DD'
+                  dateFormat='DD/MM/YYYY'
+                  showYearDropdown
                   selected={dob}
-                  onChange={this.handleDateChange('dateOfBirth')}
+                  onChange={this.handleDateChange('dob')}
                   required />
               </Form.Field>
               <Form.Select label='Gender' options={genderOptions} placeholder='Gender' name='gender' value={gender} onChange={this.handleChange} required />
@@ -355,7 +364,7 @@ class Register extends Component {
                         <DatePicker
                           selected={formalEducation[i].dateTo}
                           selectsEnd
-                          minDate={formalEducation[i].dateTo}
+                          minDate={formalEducation[i].dateFrom}
                           onChange={this.updateRepeatableDateChange('formalEducation', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -497,7 +506,7 @@ class Register extends Component {
                       <Form.Field>
                         <DatePicker
                           selected={cca[i].dateTo}
-                          minDate={cca[i].maxDate}
+                          minDate={cca[i].dateFrom}
                           onChange={this.updateRepeatableDateChange('cca', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -681,7 +690,7 @@ class Register extends Component {
               dateFormat='YYYY/MM/DD'
               selected={exitDate}
               onChange={this.handleDateChange('exitDate')}
-              minDate={exitDate}
+              minDate={commencementDate}
               required />
           </Form.Field>
 
@@ -702,11 +711,11 @@ class Register extends Component {
               <Modal.Description>
                 <Header>Welcome to Ulu Pandan STARS</Header>
                 <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
-                   By signing up as a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
+                   By signing up as a volunteer, you are agreeing to these terms. <b>Please read them carefully.</b></p>
                 <Header>Volunteer rules</Header>
                 <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary Schools or Junior Colleges with primary or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
                 <p>2. Tutors are expected to be a role model for the tutees, care about their learning outcomes and behaviour, attend the tuition sessions punctually and regularly. In the event that the tutor will be absent from tuition, he/she should advise the Class Mentor and fellow tutors in advance. The programme organizer reserves the right to request the Tutor to leave the programme in the event that he/she exhibits undesirable behaviour. </p>
-                <p>3. A Tutor is expected to serve 12 months with minimum attendance of 70% in order to receive a Certificate of Attendance. Any service period of less than 12 months must be approved by the Programme Director prior to the commencement of service. In the exceptional event that tutors have to cease participation in Stars, at least one month’s notice should be given or the organizer reserves the right to deduct service hours from the earned service.
+                <p>3. A Tutor is expected to serve <b>12 months with minimum attendance of 70%</b> in order to receive a Certificate of Attendance. Any service period of less than 12 months must be approved by the Programme Director prior to the commencement of service. In the exceptional event that tutors have to cease participation in Stars, at least one month’s notice should be given or the organizer reserves the right to deduct service hours from the earned service.
                    A tutor may be requested to leave the programme if he/she attendance rate is irregular and unsatisfactory.</p>
                 <p>4. Tutors who made exceptional contributions to the Stars initiative and who have adopted and internalized the Stars selected Harvard competences*** can ask for testimonials from the Programme Director. (Note*** : google for Harvard competency dictionary for information)</p>
                 <p>5. The Stars programme reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
@@ -731,6 +740,11 @@ class Register extends Component {
             negative
             content='Please Check Required Fields!'
           />
+          <Message
+            hidden={errorMessage.length === 0}
+            color='orange'
+            content={errorMessage}
+          />
           <Form.Button>Register as volunteer</Form.Button>
           <ReCAPTCHA
             ref={(el) => { captcha = el }}
@@ -744,22 +758,3 @@ class Register extends Component {
   }
 }
 export default Register
-
-/*
-axios.post('/register', data)
-.then((response) => {
-  console.log(response)
-  localStorage.setItem('token',response.data.token)
-  this.setState({...initialState, submitSuccess: true}) // reset form
-  setTimeout(() => { this.setState({submitSuccess: false}) }, 5000) // remove message
-  this.setState({ redirect:true })
-})
-.catch((error) => {
-  console.log(error)
-  this.setState({errorMessage: error.response.data.error})
-})
-} else { // incomplete required fields
-console.log('error occured')
-console.log(error)
-this.setState({error, errorMessage: 'Please Check Required Fields!'})
-} */
