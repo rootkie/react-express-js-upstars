@@ -180,19 +180,21 @@ module.exports.register = async (req, res, next) => {
 module.exports.check = async (req, res, next) => {
   try {
     let token = req.headers['x-access-token']
-    let result = (auth, name, _id) => {
+    let result = (auth, name, _id, classes, roles) => {
       return res.status(200).json({
         auth,
         name,
-        _id
+        _id,
+        classes,
+        roles
       })
     }
-    if (!token) return result(false, null)
+    if (!token) return result(false, null, null, null, null)
     jwt.verify(token, config.secret, (err, decoded) => {
       if (err) {
-        return result(false, null)
+        return result(false, null, null, null, null)
       } else {
-        return result(true, decoded.name, decoded._id)
+        return result(true, decoded.name, decoded._id, decoded.classes, decoded.roles)
       }
     })
   } catch (err) {

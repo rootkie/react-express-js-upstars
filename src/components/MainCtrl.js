@@ -45,7 +45,8 @@ class MainCtrl extends Component {
         if (response.data.auth === false) {
           this.setState({ isLoggedIn: false })
         } else {
-          this.setState({ name: response.data.name, id: response.data._id })
+          let { name, classes, _id, roles } = response.data
+          this.setState({ name, _id, classes, roles })
         }
       }).catch((err) => {
         console.log(err)
@@ -63,7 +64,7 @@ class MainCtrl extends Component {
 
   render () {
     const { main, op, sid } = this.props.match.params || ''
-    const { name, id } = this.state
+    const { name, _id, classes, roles } = this.state
 
     if (!this.state.isLoggedIn) {
       console.log('we getting em login errors?')
@@ -72,9 +73,9 @@ class MainCtrl extends Component {
 
     return (
       <Container fluid>
-        <Topbar tab={main} name={name} id={id} />
+        <Topbar tab={main} name={name} _id={_id} />
         <Grid style={GridStyle}>
-          <SideMenu activeItem={main + op || ''} />
+          <SideMenu activeItem={main + op || ''} _id={_id} />
           <Grid.Column width={13} style={MainContentStyle}>
             {main === 'home' && <Home />}
             {main === 'students' && <StudentWrap op={op} sid={sid} />}

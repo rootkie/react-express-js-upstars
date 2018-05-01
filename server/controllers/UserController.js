@@ -89,7 +89,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       })
     }
 
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot', 'admin']
 
     // Go through list
     for (let checkChanged of list) {
@@ -103,7 +103,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       new: true,
       runValidators: true,
       runSettersOnQuery: true
-    }).select('-password -updatedAt -createdAt')
+    }).select('-password -updatedAt -createdAt -admin')
 
     if (!user) {
       throw ({
