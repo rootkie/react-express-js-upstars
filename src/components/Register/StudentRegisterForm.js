@@ -142,7 +142,7 @@ class StudentForm extends Component {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
     const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
-    // check required fields
+    // check required fields since anyone can play with the front end code.
     const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
 
     if (error.length === 0) {

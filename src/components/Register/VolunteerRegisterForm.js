@@ -115,7 +115,9 @@ class Register extends Component {
   handleSubmit = e => {
     e.preventDefault()
     // check required fields
-    const error = this.checkRequired(['terms', 'preferredTimeSlot'])
+    const error = this.checkRequired(['terms', 'preferredTimeSlot', 'name', 'address', 'postalCode',
+      'handphone', 'homephone', 'email', 'dob', 'gender', 'nric', 'password', 'schoolLevel', 'schoolClass', 'captchaCode',
+      'purposeObjectives', 'developmentGoals', 'commencementDate', 'exitDate'])
 
     const { name, address, postalCode, handphone, homephone, email, dob, gender, nationality, nric, password, schoolLevel, schoolClass,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
@@ -355,6 +357,7 @@ class Register extends Component {
                           selected={formalEducation[i].dateFrom}
                           selectsStart
                           maxDate={formalEducation[i].dateTo}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('formalEducation', 'dateFrom', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -365,6 +368,7 @@ class Register extends Component {
                           selected={formalEducation[i].dateTo}
                           selectsEnd
                           minDate={formalEducation[i].dateFrom}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('formalEducation', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -444,6 +448,7 @@ class Register extends Component {
                         <DatePicker
                           selected={achievements[i].dateFrom}
                           maxDate={achievements[i].dateTo}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('achievements', 'dateFrom', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -453,6 +458,7 @@ class Register extends Component {
                         <DatePicker
                           selected={achievements[i].dateTo}
                           minDate={achievements[i].dateFrom}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('achievements', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -498,6 +504,7 @@ class Register extends Component {
                         <DatePicker
                           selected={cca[i].dateFrom}
                           maxDate={cca[i].dateTo}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('cca', 'dateFrom', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -507,6 +514,7 @@ class Register extends Component {
                         <DatePicker
                           selected={cca[i].dateTo}
                           minDate={cca[i].dateFrom}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('cca', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -552,6 +560,7 @@ class Register extends Component {
                         <DatePicker
                           selected={cip[i].dateFrom}
                           maxDate={cip[i].dateTo}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('cip', 'dateFrom', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -561,6 +570,7 @@ class Register extends Component {
                         <DatePicker
                           selected={cip[i].dateTo}
                           minDate={cip[i].dateFrom}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('cip', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -606,6 +616,7 @@ class Register extends Component {
                         <DatePicker
                           selected={workInternExp[i].dateFrom}
                           maxDate={workInternExp[i].dateTo}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('workInternExp', 'dateFrom', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -615,6 +626,7 @@ class Register extends Component {
                         <DatePicker
                           selected={workInternExp[i].dateTo}
                           minDate={workInternExp[i].dateFrom}
+                          dateFormat='DD/MM/YYYY'
                           onChange={this.updateRepeatableDateChange('workInternExp', 'dateTo', i)}
                           placeholderText='Click to select' />
                       </Form.Field>
@@ -678,7 +690,7 @@ class Register extends Component {
             <label>Intended Date of Commencement</label>
             <DatePicker
               placeholderText='Click to select a date'
-              dateFormat='YYYY/MM/DD'
+              dateFormat='DD/MM/YYYY'
               selected={commencementDate}
               onChange={this.handleDateChange('commencementDate')}
               required />
@@ -687,7 +699,7 @@ class Register extends Component {
             <label>Intended Date of Exit</label>
             <DatePicker
               placeholderText='Click to select a date'
-              dateFormat='YYYY/MM/DD'
+              dateFormat='DD/MM/YYYY'
               selected={exitDate}
               onChange={this.handleDateChange('exitDate')}
               minDate={commencementDate}

@@ -3,7 +3,7 @@ const External = require('../models/external-personnel')
 const util = require('../util')
 const Class = require('../models/class')
 
-// Admin / SA
+// All. 
 module.exports.getAllUsers = async (req, res, next) => {
   try {
     // Retrieve all users in the system
@@ -33,7 +33,7 @@ module.exports.getUser = async (req, res, next) => {
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
+    if (approved.auth === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
@@ -82,7 +82,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
+    if (approved.auth === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
@@ -149,7 +149,7 @@ module.exports.deleteUser = async (req, res, next) => {
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
+    if (approved.auth === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'

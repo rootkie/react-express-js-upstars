@@ -66,10 +66,6 @@ const UserSchema = new Schema({
       required: true
     },
 
-    schoolName: {
-      type: String
-    },
-
     schoolLevel: {
       type: String
     },

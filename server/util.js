@@ -37,16 +37,28 @@ module.exports.checkRole = req => {
     params,
     decoded
   } = req
-  // If the token _id does not corrosponds to the user involved
-  // Check if he has a role associated to perform administrative functions
-  if (params !== decoded._id) {
-    for (const list in roles) {
-      if (decoded.roles.indexOf(roles[list]) !== -1) return true
-    }
-    return false
-  } else return true
 
-  // Or simply return true and comment the entire code for testing so it will always work.
+  // Check if he has a role associated to perform administrative functions
+  // If not, then check if he is checking one's own stuff
+  for (const list in roles) {
+    if (decoded.roles.indexOf(roles[list]) !== -1) {
+      return {
+        privilege: true,
+        auth: true
+      }
+    }
+  }
+  if (params === decoded._id) {
+    return {
+      privilege: false,
+      auth: true
+    }
+  } else {
+    return {
+      privilege: false,
+      auth: false
+    }
+  }
 }
 
 module.exports.checkClass = req => {
