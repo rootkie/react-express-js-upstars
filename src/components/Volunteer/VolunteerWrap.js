@@ -4,7 +4,6 @@ import VolunteerView from './VolunteerView'
 import VolunteerEdit from './VolunteerEdit'
 import VolunteerChangePassword from './VolunteerChangePassword'
 import axios from 'axios'
-import { filterData } from '../../utils'
 
 class VolunteerWrap extends Component {
   static propTypes = {
@@ -29,19 +28,13 @@ class VolunteerWrap extends Component {
       .catch((err) => console.log(err))
   }
 
-  // filteredData could be different from the userData
-  // userData is everything untouched which filtered changes. The front-end will display the filtered data as a priority to userData
-  searchFilter = (criteria, userData) => {
-    return filterData(userData, criteria)
-  }
-
   render () {
     const { op, sid } = this.props
     return (
       <div>
         {op === 'changepassword' && <VolunteerChangePassword /> }
         {op === 'profile' && <VolunteerEdit userId={sid} />}
-        {op === 'view' && <VolunteerView searchFilter={this.searchFilter} deleteUser={this.deleteUser} />}
+        {op === 'view' && <VolunteerView deleteUser={this.deleteUser} />}
       </div>
     )
   }

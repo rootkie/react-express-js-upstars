@@ -5,6 +5,7 @@ import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader 
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 import axios from 'axios'
+import { filterData } from '../../utils'
 
 const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },
@@ -13,8 +14,7 @@ const genderOptions = [
 
 class VolunteerView extends Component {
   static propTypes = {
-    deleteUser: func.isRequired,
-    searchFilter: func.isRequired
+    deleteUser: func.isRequired
   }
   constructor (props) {
     super(props)
@@ -25,7 +25,8 @@ class VolunteerView extends Component {
       moreOptions: false,
       genderSelector: [],
       isLoading: true,
-      volunteerData: []
+      volunteerData: [],
+      editedData: []
     }
     this.getVolunteers()
   }
@@ -34,8 +35,9 @@ class VolunteerView extends Component {
     axios.get('/users')
       .then(response => {
         let volunteerData = response.data.users
+        let editedData = response.data.users
         console.log(volunteerData)
-        this.setState({ isLoading: false, volunteerData })
+        this.setState({ isLoading: false, volunteerData, editedData })
       })
       .catch(err => {
         console.log(err)
@@ -83,12 +85,19 @@ class VolunteerView extends Component {
 
   handleFilter = (e) => {
     e.preventDefault()
-    const { searchFilter } = this.props
     const { searchName, genderSelector, volunteerData } = this.state
     const options = []
     searchName.length > 0 && options.push({field: 'profile-name', value: searchName})
     genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
-    searchFilter(options, volunteerData)
+    if (options.length === 0) {
+      this.setState({ editedData: volunteerData })
+    } else {
+      this.searchFilter(options, volunteerData)
+    }
+  }
+
+  searchFilter = (criteria, userData) => {
+    this.setState({ editedData: filterData(userData, criteria) })
   }
 
   clearAll = e => {
@@ -97,7 +106,7 @@ class VolunteerView extends Component {
   }
 
   render () {
-    const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, volunteerData } = this.state
+    const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, editedData } = this.state
     if (isLoading) {
       return (
         <div>
@@ -141,7 +150,7 @@ class VolunteerView extends Component {
           </Table.Header>
 
           <Table.Body>
-            {volunteerData.map((user, i) => (
+            {editedData.map((user, i) => (
               <Table.Row key={`user-${i}`}>
                 <Table.Cell collapsing>
                   <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
@@ -162,7 +171,7 @@ class VolunteerView extends Component {
                   open={deleteConfirmationVisibility}
                   header='Deleting the following students:'
                   content={selected.map((id) => (
-                    volunteerData.filter((user) => (user._id === id))[0].profile.name
+                    editedData.filter((user) => (user._id === id))[0].profile.name
                   )).join(', ')}
                   onCancel={this.handleDeleteConfirmation('cancel')}
                   onConfirm={this.handleDeleteConfirmation('confirm')}
