@@ -12,6 +12,7 @@
     "moment": "^2.20.1",
     "mongoose": "^5.0.6",
     "morgan": "^1.8.1",
+    "nodemailer": "^4.6.5",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-async-script": "^0.9.1",

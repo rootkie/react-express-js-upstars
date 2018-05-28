@@ -2,13 +2,16 @@ const User = require('../models/user')
 const Student = require('../models/student')
 const Class = require('../models/class')
 let util = require('../util.js')
+const crypto = require('crypto')
+const nodemailer = require('nodemailer')
 
+// This email function really WORKS. PLEASE DONT RANDOMLY SEND MESSAGES TO GMAIL ACCOUNTS UNDER MY ADDRESS
+// IM USING MY PERSONAL ADDRESS FOR TESTING. PLEASE REPLACE IT WITH THE REAL ONE ASAP!
 module.exports.adminChangePassword = async (req, res, next) => {
 // Every function here is restricted to SA only
   try {
     let {
-      userId,
-      newPassword
+      userId
     } = req.body
 
     // Find user and replace it with the newPassword before saving
@@ -24,9 +27,46 @@ module.exports.adminChangePassword = async (req, res, next) => {
         error: 'There is an error processing this as the user does not exist'
       })
     }
+    let userName = user.profile.name
+    let email = user.email
+    let newPassword = crypto.randomBytes(20).toString('hex')
     user.password = newPassword
     const pwChanged = await user.save()
+    if (pwChanged.password) {
+      let transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: 'yingkeatwon@gmail.com',
+          clientId: '925154463776-1se2s2h200ur2jsnrv5btkrl72970339.apps.googleusercontent.com',
+          clientSecret: 'CLDCZqXyLXlXnl-KAbvyPRuA',
+          refreshToken: '1/O2eZ6i9-Ih6gH5U4vK9ojcMJCV5eVWJbx9GomDitHQEkqQNxyfFBE5eHBukpCdwa'
+        }
+      })
 
+      transporter.on('token', token => {
+        console.log('A new access token was generated')
+        console.log('User: %s', token.user)
+        console.log('Access Token: %s', token.accessToken)
+        console.log('Expires: %s', new Date(token.expires))
+      })
+
+      let message = {
+        from: 'yingkeatwon@gmail.com',
+        to: email,
+        subject: 'Password Request for UPStars',
+        html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b>If you have no idea what this message is about, please ignore it.</b></p>
+        <p>New Password: ${newPassword}</p><p>You may now log into UPStars with this new password!</p><p>Thanks,<br />UPStars</p>`
+      }
+      transporter.sendMail(message, function (error, info) {
+        if (error) {
+          return console.log(error)
+        }
+        console.log('Message sent: ' + info.response)
+      })
+    }
     res.status(200).json({
       user: pwChanged
     })

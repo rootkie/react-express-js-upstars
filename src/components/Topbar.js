@@ -10,8 +10,9 @@ const Topbar = ({tab, name, _id}) => (
     <Menu.Menu position='right'>
       <Dropdown item text={name}>
         <Dropdown.Menu>
-          <Dropdown.Item><Link style={{color: 'black'}} to={`/volunteer/profile/${_id}`}>Profile</Link></Dropdown.Item>
-          <Dropdown.Item onClick={() => window.localStorage.removeItem('token')}><Link style={{color: 'black'}} to='/'>Logout</Link></Dropdown.Item>
+          <Link to={`/volunteer/profile/${_id}`}><Dropdown.Item style={{color: 'black'}}>Profile</Dropdown.Item></Link>
+          <Link to={`/volunteer/changepassword`}><Dropdown.Item style={{color: 'black'}}>Change Password</Dropdown.Item></Link>
+          <Link to='/'><Dropdown.Item onClick={() => window.localStorage.removeItem('token')} style={{color: 'black'}}>Logout</Dropdown.Item></Link>
         </Dropdown.Menu>
       </Dropdown>
     </Menu.Menu>

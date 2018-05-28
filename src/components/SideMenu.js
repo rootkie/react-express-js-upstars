@@ -27,7 +27,6 @@ const SideMenu = ({activeItem}) => (
         <Menu.Menu>
           {/* view is special for admin only while change password refers to operations on self */}
           <Link to='/volunteer/view' className={`item ${activeItem === 'volunteerview' && 'active'}`}>view</Link>
-          <Link to='/volunteer/changepassword' className={`item ${activeItem === 'volunteerchangepassword' && 'active'}`}>change password</Link>
         </Menu.Menu>
       </Menu.Item>
       <Menu.Item>

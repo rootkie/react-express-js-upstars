@@ -8,7 +8,8 @@ import axios from 'axios'
 class VolunteerWrap extends Component {
   static propTypes = {
     op: PropTypes.string,
-    sid: PropTypes.string
+    sid: PropTypes.string,
+    _id: PropTypes.string
   }
 
   constructor (props) {
@@ -29,10 +30,10 @@ class VolunteerWrap extends Component {
   }
 
   render () {
-    const { op, sid } = this.props
+    const { op, sid, _id } = this.props
     return (
       <div>
-        {op === 'changepassword' && <VolunteerChangePassword /> }
+        {op === 'changepassword' && <VolunteerChangePassword _id={_id} /> }
         {op === 'profile' && <VolunteerEdit userId={sid} />}
         {op === 'view' && <VolunteerView deleteUser={this.deleteUser} />}
       </div>

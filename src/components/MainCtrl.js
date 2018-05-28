@@ -80,7 +80,7 @@ class MainCtrl extends Component {
             {main === 'home' && <Home />}
             {main === 'students' && <StudentWrap op={op} sid={sid} />}
             {main === 'classes' && <ClassWrap op={op} sid={sid} />}
-            {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} />}
+            {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} />}
             {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
             {main === 'admin' && <AdminWrap op={op} />}
           </Grid.Column>
