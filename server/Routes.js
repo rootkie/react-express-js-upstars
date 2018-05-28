@@ -56,11 +56,11 @@ module.exports = app => {
   app.get('/api/admin/suspended', hasRole(['SuperAdmin']), adminControl.getSuspendedPeople)
   app.get('/api/admin/deleted', hasRole(['SuperAdmin']), adminControl.getDeletedPeople)
   app.post('/api/admin/user', hasRole(['SuperAdmin']), adminControl.createUser)
-  app.post('/api/admin/changePassword', hasRole(['SuperAdmin']), adminControl.adminChangePassword)
   app.post('/api/admin/userStatusPermissions', hasRole(['SuperAdmin']), adminControl.changeUserStatusAndPermissions)
   app.delete('/api/admin/user', hasRole(['SuperAdmin']), adminControl.multipleUserDelete) //  Admin Mass deletion
 
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
+  app.post('/api/changepassword', authControl.changePassword)
   app.get('/api/check', authControl.check) // This is for frontend to check validity of token.
 }

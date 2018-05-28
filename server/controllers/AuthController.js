@@ -5,6 +5,7 @@ const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const axios = require('axios')
+const nodemailer = require('nodemailer')
 const querystring = require('querystring')
 // ============== Start of all the functions ==============
 // Everyone can access without token
@@ -58,6 +59,94 @@ module.exports.login = async (req, res, next) => {
       email: user.email,
       roles: user.roles,
       name: user.profile.name
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
+module.exports.changePassword = async (req, res, next) => {
+  try {
+    let {
+      email,
+      nric
+    } = req.body
+    if (!email || !nric) {
+      throw ({
+        status: 400,
+        error: 'Please provide an email address and your NRIC number.'
+      })
+    }
+
+    // Search for any users whose accounts are not yet deleted
+    const user = await User.findOne({
+      email,
+      status: {
+        $ne: 'Deleted'
+      }
+    })
+
+    // Checks if user exists
+    if (!user || user.profile.nric !== nric) {
+      throw ({
+        status: 403,
+        error: 'Wrong email or nric. Please try again'
+      })
+    }
+    if (user.status === 'Suspended') {
+      throw ({
+        status: 403,
+        error: 'Your account has been suspended, please contact the administrator for follow up actions'
+      })
+    }
+    let userName = user.profile.name
+    let newPassword = crypto.randomBytes(20).toString('hex')
+    user.password = 'password'
+    // user.password = newPassword
+    const pwChanged = await user.save()
+    if (pwChanged.password) {
+      let transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: 'yingkeatwon@gmail.com',
+          clientId: '925154463776-1se2s2h200ur2jsnrv5btkrl72970339.apps.googleusercontent.com',
+          clientSecret: 'CLDCZqXyLXlXnl-KAbvyPRuA',
+          refreshToken: '1/O2eZ6i9-Ih6gH5U4vK9ojcMJCV5eVWJbx9GomDitHQEkqQNxyfFBE5eHBukpCdwa'
+        }
+      })
+
+      transporter.on('token', token => {
+        console.log('A new access token was generated')
+        console.log('User: %s', token.user)
+        console.log('Access Token: %s', token.accessToken)
+        console.log('Expires: %s', new Date(token.expires))
+      })
+
+      let message = {
+        from: 'yingkeatwon@gmail.com',
+        to: 'test/sakaskajskaska@1.com',
+        // to: email,
+        subject: 'Password Request for UPStars',
+        html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b>If you have no idea what this message is about, please ignore it.</b></p>
+        <p>New Password: ${newPassword}</p><p>You may now log into UPStars with this new password!</p><p>Thanks,<br />UPStars</p>`
+      }
+      transporter.sendMail(message, function (error, info) {
+        if (error) {
+          return console.log(error)
+        }
+        console.log('Message sent: ' + info.response)
+      })
+    }
+    res.status(200).json({
+      user: pwChanged
     })
   } catch (err) {
     console.log(err)
