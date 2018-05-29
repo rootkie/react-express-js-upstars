@@ -3,7 +3,7 @@ const External = require('../models/external-personnel')
 const util = require('../util')
 const Class = require('../models/class')
 
-// All. 
+// All
 module.exports.getAllUsers = async (req, res, next) => {
   try {
     // Retrieve all users in the system

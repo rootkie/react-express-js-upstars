@@ -3,10 +3,10 @@ const util = require('../util.js')
 const generateToken = util.generateToken
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
 const axios = require('axios')
 const nodemailer = require('nodemailer')
 const querystring = require('querystring')
+const crypto = require('crypto')
 // ============== Start of all the functions ==============
 // Everyone can access without token
 
@@ -104,49 +104,122 @@ module.exports.changePassword = async (req, res, next) => {
         error: 'Your account has been suspended, please contact the administrator for follow up actions'
       })
     }
+    // Fix plaintext security flaw: using encoded jwt to send as link for password change.
+    // Currently using the same password to sign jwt. Expires in 30 minutes
     let userName = user.profile.name
-    let newPassword = crypto.randomBytes(20).toString('hex')
-    user.password = 'password'
-    // user.password = newPassword
-    const pwChanged = await user.save()
-    if (pwChanged.password) {
-      let transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          type: 'OAuth2',
-          user: 'yingkeatwon@gmail.com',
-          clientId: '925154463776-1se2s2h200ur2jsnrv5btkrl72970339.apps.googleusercontent.com',
-          clientSecret: 'CLDCZqXyLXlXnl-KAbvyPRuA',
-          refreshToken: '1/O2eZ6i9-Ih6gH5U4vK9ojcMJCV5eVWJbx9GomDitHQEkqQNxyfFBE5eHBukpCdwa'
-        }
-      })
+    let random = crypto.randomBytes(15).toString('hex')
+    user.resetPasswordToken = random
+    user.save()
 
-      transporter.on('token', token => {
-        console.log('A new access token was generated')
-        console.log('User: %s', token.user)
-        console.log('Access Token: %s', token.accessToken)
-        console.log('Expires: %s', new Date(token.expires))
-      })
-
-      let message = {
-        from: 'yingkeatwon@gmail.com',
-        to: 'test/sakaskajskaska@1.com',
-        // to: email,
-        subject: 'Password Request for UPStars',
-        html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b>If you have no idea what this message is about, please ignore it.</b></p>
-        <p>New Password: ${newPassword}</p><p>You may now log into UPStars with this new password!</p><p>Thanks,<br />UPStars</p>`
+    let objectToEncode = {
+      email,
+      _id: user._id,
+      random
+    }
+    let encodedString = jwt.sign(objectToEncode, config.secret, {
+      expiresIn: 60 * 30
+    })
+    let transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        type: 'OAuth2',
+        user: config.user,
+        clientId: config.clientId,
+        clientSecret: config.clientSecret,
+        refreshToken: config.refreshToken
       }
-      transporter.sendMail(message, function (error, info) {
-        if (error) {
-          return console.log(error)
-        }
-        console.log('Message sent: ' + info.response)
+    })
+    let link = `http://localhost:3000/resetpassword/${encodedString}`
+    let message = {
+      from: config.user,
+      to: email,
+      subject: 'Password Request for UPStars',
+      html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b> If you have no idea what this message is about, please ignore it.</b></p>
+       <p>Reset your password by clicking at this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UPStars Team</p>`
+    }
+    transporter.sendMail(message, function (error, info) {
+      if (error) {
+        console.log(error)
+        throw ({
+          status: 400,
+          error: 'An error has occurred. That is all we know.'
+        })
+      }
+      console.log('Message sent: ' + info.response)
+      res.status(200).json({
+        success: true
+      })
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
+module.exports.resetPassword = async (req, res, next) => {
+  try {
+    let {
+      password,
+      token
+    } = req.body
+    if (!password || !token) {
+      throw ({
+        status: 400,
+        error: 'There\'s something wrong, please try again.'
       })
     }
-    res.status(200).json({
-      user: pwChanged
+
+    jwt.verify(token, config.secret, async (err, decoded) => {
+      try {
+        if (err) {
+          throw ({
+            status: 403,
+            error: 'Something went wrong, please try again.'
+          })
+        }
+        let { email, _id, random } = decoded
+        const user = await User.findOne({
+          email,
+          _id,
+          status: {
+            $ne: 'Deleted'
+          }
+        })
+        // Checks if user exists
+        if (!user || user.resetPasswordToken !== random) {
+          throw ({
+            status: 403,
+            error: 'Something went wrong, please try again.'
+          })
+        }
+        if (user.status === 'Suspended') {
+          throw ({
+            status: 403,
+            error: 'Your account has been suspended, please contact the administrator for follow up actions'
+          })
+        }
+        user.password = password
+        user.resetPasswordToken = ''
+        const pwChanged = await user.save()
+        if (pwChanged) {
+          return res.status(200).json({
+            status: 'success'
+          })
+        }
+      } catch (err) {
+        console.log(err)
+        if (err.status) {
+          res.status(err.status).send({
+            error: err.error
+          })
+        } else next(err)
+      }
     })
   } catch (err) {
     console.log(err)

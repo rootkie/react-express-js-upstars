@@ -2,7 +2,6 @@ const User = require('../models/user')
 const Student = require('../models/student')
 const Class = require('../models/class')
 let util = require('../util.js')
-const crypto = require('crypto')
 
 module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
   try {

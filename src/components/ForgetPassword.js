@@ -5,11 +5,11 @@ import { Link, Redirect } from 'react-router-dom'
 
 const initialState = {
   email: '',
-  password: '',
+  nric: '',
   message: ''
 }
 
-class Login extends Component {
+class ForgetPassword extends Component {
   state = {...initialState, redirect: false}
 
   // Before the page starts to render
@@ -36,15 +36,11 @@ class Login extends Component {
 
   handleSubmit = e => {
     e.preventDefault()
-    const { email, password } = this.state
-
-    // Set the message and attempts to log in
-    this.setState({ message: 'Logging in...' })
-    axios.post('/login', { email, password })
+    const { email, nric } = this.state
+    this.setState({ message: 'Processing in progress...' })
+    axios.post('/changepassword', { email, nric })
       .then(response => {
-        window.localStorage.setItem('token', response.data.token)
-        axios.defaults.headers.common['x-access-token'] = window.localStorage.token
-        this.setState({ redirect: true })
+        this.setState({ message: 'A password reset link has been sent to your email. Please allow for 5 minutes before requesting for a new link if you did not receive any email.' })
       })
       // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
@@ -54,18 +50,18 @@ class Login extends Component {
   }
 
   render () {
-    const { email, password, message, redirect } = this.state
+    const { email, nric, message, redirect } = this.state
 
     if (redirect) {
       return <Redirect to='/home' />
     }
 
     return (
-      <div className='login-form'>
+      <div className='resetpassword-form'>
         <style>{`
           body > div,
           body > div > div,
-          body > div > div > div.login-form {
+          body > div > div > div.resetpassword-form {
             height: 100%;
           }
     `}</style>
@@ -76,26 +72,26 @@ class Login extends Component {
           <Grid.Column style={{ maxWidth: 550 }}>
             <Image size='big' centered src={require('./logo.png')} />
             <Header as='h2' color='teal' textAlign='center'>
-              Log-in to your account
+              Reset your account password
             </Header>
             <Form size='large' onSubmit={this.handleSubmit}>
               <Segment stacked>
                 <Form.Input
                   fluid
-                  icon='user'
+                  icon='mail'
                   iconPosition='left'
                   placeholder='E-mail address'
                   name='email' value={email} type='email' onChange={this.handleChange} required />
                 <Form.Input
                   fluid
-                  icon='lock'
+                  icon='user'
                   iconPosition='left'
-                  placeholder='Password'
-                  type='password' name='password' value={password} onChange={this.handleChange} required />
+                  placeholder='NRIC number'
+                  type='text' name='nric' value={nric} onChange={this.handleChange} required />
 
-                <Button color='teal' fluid size='large' type='submit'>Login</Button>
-                <Message hidden={message === ''}negative>
-                  {message}.<Link to='/forgetpassword'> Forget password?</Link>
+                <Button color='teal' fluid size='large' type='submit'>Request for password reset</Button>
+                <Message hidden={message === ''} negative>
+                  {message}
                 </Message>
               </Segment>
             </Form>
@@ -109,4 +105,4 @@ class Login extends Component {
   }
 }
 
-export default Login
+export default ForgetPassword

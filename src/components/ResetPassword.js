@@ -1,17 +1,21 @@
 import React, { Component } from 'react'
 import { Form, Button, Header, Message, Image, Segment, Grid } from 'semantic-ui-react'
 import axios from 'axios'
-import { Link, Redirect } from 'react-router-dom'
+import { object } from 'prop-types'
+import { Redirect, NavLink } from 'react-router-dom'
 
 const initialState = {
-  email: '',
   password: '',
-  message: ''
+  confirmPassword: '',
+  message: '',
+  success: false
 }
 
-class Login extends Component {
+class ResetPassword extends Component {
   state = {...initialState, redirect: false}
-
+  static propTypes = {
+    match: object
+  }
   // Before the page starts to render
   constructor () {
     super()
@@ -36,15 +40,17 @@ class Login extends Component {
 
   handleSubmit = e => {
     e.preventDefault()
-    const { email, password } = this.state
+    const { password, confirmPassword } = this.state
+    const { token } = this.props.match.params
+    if (password !== confirmPassword) {
+      this.setState({ message: 'The 2 passwords do not match, please try again.' })
+      return
+    }
 
-    // Set the message and attempts to log in
-    this.setState({ message: 'Logging in...' })
-    axios.post('/login', { email, password })
+    this.setState({ message: 'Resetting password...' })
+    axios.post('/resetpassword', { password, token })
       .then(response => {
-        window.localStorage.setItem('token', response.data.token)
-        axios.defaults.headers.common['x-access-token'] = window.localStorage.token
-        this.setState({ redirect: true })
+        this.setState({message: 'Your password has been successfully reset. Please proceed to log-in', success: true})
       })
       // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
@@ -54,18 +60,18 @@ class Login extends Component {
   }
 
   render () {
-    const { email, password, message, redirect } = this.state
+    const { confirmPassword, password, message, redirect, success } = this.state
 
     if (redirect) {
       return <Redirect to='/home' />
     }
 
     return (
-      <div className='login-form'>
+      <div className='resetpassword-form'>
         <style>{`
           body > div,
           body > div > div,
-          body > div > div > div.login-form {
+          body > div > div > div.resetpassword-form {
             height: 100%;
           }
     `}</style>
@@ -76,32 +82,31 @@ class Login extends Component {
           <Grid.Column style={{ maxWidth: 550 }}>
             <Image size='big' centered src={require('./logo.png')} />
             <Header as='h2' color='teal' textAlign='center'>
-              Log-in to your account
+              Reset your password
             </Header>
             <Form size='large' onSubmit={this.handleSubmit}>
               <Segment stacked>
                 <Form.Input
                   fluid
-                  icon='user'
+                  icon='lock'
                   iconPosition='left'
-                  placeholder='E-mail address'
-                  name='email' value={email} type='email' onChange={this.handleChange} required />
+                  placeholder='Password'
+                  name='password' value={password} type='password' onChange={this.handleChange} required />
                 <Form.Input
                   fluid
                   icon='lock'
                   iconPosition='left'
-                  placeholder='Password'
-                  type='password' name='password' value={password} onChange={this.handleChange} required />
+                  placeholder='Confirm Password'
+                  type='password' name='confirmPassword' value={confirmPassword} onChange={this.handleChange} required />
 
-                <Button color='teal' fluid size='large' type='submit'>Login</Button>
+                <Button color='teal' fluid size='large' type='submit'>Reset password</Button>
                 <Message hidden={message === ''}negative>
-                  {message}.<Link to='/forgetpassword'> Forget password?</Link>
+                  {message}
+                </Message>
+                <Message hidden={success === false}><NavLink to='/login'>Login now!</NavLink>
                 </Message>
               </Segment>
             </Form>
-            <Message>
-          New to us? <Link to='/register/volunteer'>Sign Up</Link>
-            </Message>
           </Grid.Column>
         </Grid>
       </div>
@@ -109,4 +114,4 @@ class Login extends Component {
   }
 }
 
-export default Login
+export default ResetPassword

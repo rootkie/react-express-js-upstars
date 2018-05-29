@@ -270,6 +270,10 @@ const UserSchema = new Schema({
 
   refreshToken: {
     type: String
+  },
+
+  resetPasswordToken: {
+    type: String
   }
 
 }, {
