@@ -89,7 +89,8 @@ const initialState = {
 
 class Register extends Component {
   state = {
-    ...initialState
+    ...initialState,
+    success: false
   }
 
   checkRequired = (checkArray) => {
@@ -177,7 +178,7 @@ class Register extends Component {
         .then(response => {
           // put token inside and log in but not done yet..
           console.log(response)
-          this.setState(initialState) // reset form
+          this.setState({...initialState, success: true}) // reset form
           window.localStorage.setItem('token', response.data.token)
         })
         .catch((err) => {
@@ -263,7 +264,7 @@ class Register extends Component {
 
   render () {
     const { name, address, postalCode, handphone, homephone, email, dob, gender, nationality, nric, password, schoolLevel, schoolClass,
-      fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
+      fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot, success,
       hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
       purposeObjectives, developmentGoals, commencementDate, exitDate, terms, termsDetails, error, activeItem, errorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
@@ -751,6 +752,11 @@ class Register extends Component {
             hidden={error.length === 0}
             negative
             content='Please Check Required Fields!'
+          />
+          <Message
+            hidden={success === false}
+            positive
+            content='Success! Please check your email for verification link'
           />
           <Message
             hidden={errorMessage.length === 0}

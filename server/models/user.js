@@ -238,7 +238,7 @@ const UserSchema = new Schema({
 
   status: {
     type: String,
-    default: 'Pending',
+    default: 'Unverified',
     required: true
   },
 

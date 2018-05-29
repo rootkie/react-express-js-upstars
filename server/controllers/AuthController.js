@@ -53,6 +53,13 @@ module.exports.login = async (req, res, next) => {
       })
     }
 
+    if (user.status === 'Unverified') {
+      throw ({
+        status: 403,
+        error: 'Your account has yet to be verified, please verify your email by checking your email account'
+      })
+    }
+
     res.json({
       token: generateToken(user),
       _id: user._id,
@@ -320,6 +327,49 @@ module.exports.register = async (req, res, next) => {
           }
         }
         const userObject = await user.save()
+
+        // Send verification email: (3 days expiry just to be sure)
+        let objectToEncode = {
+          _id: userObject._id
+        }
+        let encodedString = jwt.sign(objectToEncode, config.secret, {
+          expiresIn: '3d'
+        })
+        let transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            type: 'OAuth2',
+            user: config.user,
+            clientId: config.clientId,
+            clientSecret: config.clientSecret,
+            refreshToken: config.refreshToken
+          }
+        })
+        let link = `http://localhost:3000/verifyaccount/${encodedString}`
+        let message = {
+          from: config.user,
+          to: config.user,
+          // to: email,
+          subject: 'Thanks for joining UPStars!',
+          html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
+           <p>${link}</p><p>Please note that for security purposes, the link will expire in 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
+           <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UPStars Team</p>`
+        }
+        transporter.sendMail(message, function (error, info) {
+          if (error) {
+            console.log(error)
+            throw ({
+              status: 400,
+              error: 'An error has occurred. That is all we know.'
+            })
+          }
+          console.log('Message sent: ' + info.response)
+          res.status(200).json({
+            success: true
+          })
+        })
         res.status(201).json({
           status: 'success',
           token: generateToken(userObject),
@@ -337,6 +387,48 @@ module.exports.register = async (req, res, next) => {
         } else next(err)
       }
     })
+}
+
+module.exports.verifyEmail = async (req, res, next) => {
+  let {token} = req.body
+  jwt.verify(token, config.secret, async (err, decoded) => {
+    try {
+      if (err) {
+        throw ({
+          status: 403,
+          error: 'Something went wrong, please try again.'
+        })
+      }
+      let { _id } = decoded
+      const user = await User.findOne({
+        _id,
+        status: {
+          $ne: 'Deleted'
+        }
+      })
+      // Checks if user exists
+      if (!user) {
+        throw ({
+          status: 403,
+          error: 'Something went wrong, please try again.'
+        })
+      }
+      user.status = 'Pending'
+      const newuser = await user.save()
+      if (newuser) {
+        return res.status(200).json({
+          status: 'success'
+        })
+      }
+    } catch (err) {
+      console.log(err)
+      if (err.status) {
+        res.status(err.status).send({
+          error: err.error
+        })
+      } else next(err)
+    }
+  })
 }
 
 module.exports.check = async (req, res, next) => {
