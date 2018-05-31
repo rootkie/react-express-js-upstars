@@ -44,8 +44,6 @@ const SideMenu = ({activeItem}) => (
         <Menu.Header>Admin</Menu.Header>
         <Menu.Menu>
           <Link to='/admin/status' className={`item ${activeItem === 'adminstatus' && 'active'}`}>change status</Link>
-          <Link to='/admin/password' className={`item ${activeItem === 'adminpassword' && 'active'}`}>change user password</Link>
-          <Link to='/admin/user' className={`item ${activeItem === 'adminuser' && 'active'}`}>add user</Link>
         </Menu.Menu>
       </Menu.Item>
     </Menu>

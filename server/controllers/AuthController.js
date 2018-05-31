@@ -332,9 +332,7 @@ module.exports.register = async (req, res, next) => {
         let objectToEncode = {
           _id: userObject._id
         }
-        let encodedString = jwt.sign(objectToEncode, config.secret, {
-          expiresIn: '3d'
-        })
+        let encodedString = jwt.sign(objectToEncode, config.secret)
         let transporter = nodemailer.createTransport({
           host: 'smtp.gmail.com',
           port: 465,
@@ -350,11 +348,10 @@ module.exports.register = async (req, res, next) => {
         let link = `http://localhost:3000/verifyaccount/${encodedString}`
         let message = {
           from: config.user,
-          to: config.user,
-          // to: email,
+          to: email,
           subject: 'Thanks for joining UPStars!',
           html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
-           <p>${link}</p><p>Please note that for security purposes, the link will expire in 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
+           <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
            <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UPStars Team</p>`
         }
         transporter.sendMail(message, function (error, info) {

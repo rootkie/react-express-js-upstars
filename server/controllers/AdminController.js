@@ -160,7 +160,7 @@ module.exports.getPendingUsers = async (req, res, next) => {
     // Find all users with status as Pending
     const users = await User.find({
       'status': 'Pending'
-    }).select('profile.name roles email').sort('profile.name')
+    }).select('profile.name roles status').sort('profile.name')
     res.json({
       users
     })
@@ -175,13 +175,9 @@ module.exports.getSuspendedPeople = async (req, res, next) => {
     // Find all people with status as Suspended
     const users = await User.find({
       'status': 'Suspended'
-    }).select('profile.name roles email').sort('profile.name')
-    const students = await Student.find({
-      'status': 'Suspended'
-    }).select('profile.name').sort('profile.name')
+    }).select('profile.name roles status').sort('profile.name')
     res.json({
-      users,
-      students
+      users
     })
   } catch (err) {
     console.log(err)
@@ -194,14 +190,9 @@ module.exports.getDeletedPeople = async (req, res, next) => {
     // Find all people with status as Suspended
     const users = await User.find({
       'status': 'Deleted'
-    }).select('profile.name roles email').sort('profile.name')
-    // Find students who are deleted
-    const students = await Student.find({
-      'status': 'Deleted'
-    }).select('profile.name').sort('profile.name')
+    }).select('profile.name roles status').sort('profile.name')
     res.json({
-      users,
-      students
+      users
     })
   } catch (err) {
     console.log(err)

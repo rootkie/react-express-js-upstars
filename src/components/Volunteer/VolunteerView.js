@@ -158,7 +158,7 @@ class VolunteerView extends Component {
                 <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                 <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
                 <Table.Cell>{user.profile.nric}</Table.Cell>
-                <Table.Cell>{user.profile.gender === 'F' ? 'female' : 'male'}</Table.Cell>
+                <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
               </Table.Row>))}
           </Table.Body>
 
