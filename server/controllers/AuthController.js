@@ -1,6 +1,6 @@
 const User = require('../models/user')
 const util = require('../util.js')
-const generateToken = util.generateToken
+const { generateToken, generateRefresh } = util
 const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
@@ -62,6 +62,7 @@ module.exports.login = async (req, res, next) => {
 
     res.json({
       token: generateToken(user),
+      refresh: generateRefresh(user._id),
       _id: user._id,
       email: user.email,
       roles: user.roles,
@@ -370,6 +371,7 @@ module.exports.register = async (req, res, next) => {
         res.status(201).json({
           status: 'success',
           token: generateToken(userObject),
+          refresh: generateRefresh(userObject._id),
           _id: userObject._id,
           email: userObject.email,
           roles: userObject.roles,
@@ -441,11 +443,58 @@ module.exports.check = async (req, res, next) => {
       })
     }
     if (!token) return result(false, null, null, null, null)
+
+    // Start token verification for expiry and integrity
     jwt.verify(token, config.secret, (err, decoded) => {
+      // Default error handling for expired jwt token: notify front end to call for refresh api
+      // Similarly, expiring tokens will also be send in for a refresh to enjoy uninterrupted usage
       if (err) {
         return result(false, null, null, null, null)
       } else {
+        // Expiring tokens will be refreshed before hand: (in minutes)
+        let timeLeft = Math.floor(decoded.exp - (Date.now() / 1000)) / 60
+        if (timeLeft <= 10) {
+          return result('expiring', decoded.name, decoded._id, decoded.classes, decoded.roles)
+        }
         return result(true, decoded.name, decoded._id, decoded.classes, decoded.roles)
+      }
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
+module.exports.refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body
+    let result = (status, token) => {
+      return res.status(200).json({
+        status,
+        token
+      })
+    }
+    // The response comes with both status (true or false) and the token (null if status is false)
+    if (!refreshToken) return result(false, null)
+    jwt.verify(refreshToken, config.secret, async (err, decoded) => {
+      if (err) {
+        return result(false, null)
+      } else {
+        let { _id } = decoded
+        const user = await User.findOne({
+          _id,
+          status: {
+            $ne: 'Deleted'
+          }
+        })
+        if (!user || user.status !== 'Active') {
+          return result(false, null)
+        }
+        return result(true, generateToken(user))
       }
     })
   } catch (err) {

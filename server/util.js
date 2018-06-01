@@ -27,7 +27,16 @@ module.exports.generateToken = req => {
     name: profile.name
   }
   return jwt.sign(user, config.secret, {
-    expiresIn: '100h'
+    expiresIn: '30m'
+  })
+}
+
+module.exports.generateRefresh = _id => {
+  const user = {
+    _id
+  }
+  return jwt.sign(user, config.secret, {
+    expiresIn: '1000d'
   })
 }
 

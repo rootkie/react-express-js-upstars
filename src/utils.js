@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 export function filterData (data, criteria) { // criteria = [{field, value}] where field is like 'profile-age' or 'profile-name'
   for (let criterion of criteria) {
     const { field, value } = criterion // example field is profile-age, value = ['M']

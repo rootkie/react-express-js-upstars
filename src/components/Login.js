@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
-import { Form, Button, Header, Message, Image, Segment, Grid } from 'semantic-ui-react'
+import { Form, Button, Header, Message, Image, Segment, Grid, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
 import { Link, Redirect } from 'react-router-dom'
 
 const initialState = {
   email: '',
   password: '',
-  message: ''
+  message: '',
+  isLoading: true
 }
 
 class Login extends Component {
@@ -18,15 +19,43 @@ class Login extends Component {
     this.isLoggedIn()
   }
 
-  // Call the API to check the validity of the token if any. The token is sent as the header to check and would be undefined if user
-  // has yet to log in. Will implement the refresh token scheme later after the main functions of the software is done.
-  isLoggedIn = () => {
+  isLoggedIn () {
     return axios({
       method: 'get',
       url: '/check',
       headers: { 'x-access-token': window.localStorage.token }
     }).then(response => {
-      this.setState({ redirect: response.data.auth })
+      // Send in refresh token first before anything else
+      if (response.data.auth === false) {
+        let refreshToken = window.localStorage.refreshToken
+        if (!refreshToken) {
+          // Cleaning up the interface
+          window.localStorage.removeItem('token')
+          this.setState({ isLoading: false })
+        } else {
+          axios.post('/refresh', { refreshToken })
+            .then(response => {
+              if (response.data.status === true) {
+                window.localStorage.setItem('token', response.data.token)
+                axios.defaults.headers.common['x-access-token'] = response.data.token
+                this.isLoggedIn()
+              } else {
+                // Well if refresh token is invalid, remove both to make stuff easier and let them Login.
+                // Anything that happens during the POST request will simply be made for them to login
+                window.localStorage.removeItem('token')
+                window.localStorage.removeItem('refreshToken')
+                this.setState({ isLoading: false })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.setState({ isLoading: false })
+            })
+        }
+      } else {
+        // Expiring means token is still valid, leave the refresh process to MainCtrl. Either way, redirect is true
+        this.setState({ redirect: true })
+      }
     }).catch((err) => {
       console.log(err)
     })
@@ -43,6 +72,7 @@ class Login extends Component {
     axios.post('/login', { email, password })
       .then(response => {
         window.localStorage.setItem('token', response.data.token)
+        window.localStorage.setItem('refreshToken', response.data.refresh)
         axios.defaults.headers.common['x-access-token'] = window.localStorage.token
         this.setState({ redirect: true })
       })
@@ -54,10 +84,19 @@ class Login extends Component {
   }
 
   render () {
-    const { email, password, message, redirect } = this.state
+    const { email, password, message, redirect, isLoading } = this.state
 
     if (redirect) {
       return <Redirect to='/home' />
+    }
+    if (isLoading) {
+      return (
+        <div>
+          <Dimmer active>
+            <Loader indeterminate>Loading data</Loader>
+          </Dimmer>
+        </div>
+      )
     }
 
     return (

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Redirect } from 'react-router'
-import { Container, Grid } from 'semantic-ui-react'
+import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
 import Topbar from './Topbar'
 import SideMenu from './SideMenu'
@@ -35,20 +35,69 @@ class MainCtrl extends Component {
 
   state = {
     isLoggedIn: true,
+    confirm: false,
     name: '',
     id: ''
   }
 
   isLoggedIn = () => {
-    return axios.get('/check')
+    axios.get('/check')
       .then(response => {
+        // If expired or malformed, we check if refresh token is available (refresh token is king)
+        // If it is, send it in to get a new x-access-token (a faulty refresh token will return an empty string as access token)
+        // isLoggedIn() is then called again to ensure access token is valid
+        // Else if there are any errors anywhere regardless, default auth is false.
         if (response.data.auth === false) {
-          this.setState({ isLoggedIn: false })
-        } else {
+          let refreshToken = window.localStorage.refreshToken
+          if (!refreshToken) {
+            // Redirect them to Login Page if they don't even if a refresh token.
+            this.setState({ isLoggedIn: false })
+          } else {
+            axios.post('/refresh', { refreshToken })
+              .then(response => {
+                if (response.data.status === true) {
+                  window.localStorage.setItem('token', response.data.token)
+                  axios.defaults.headers.common['x-access-token'] = response.data.token
+                  this.isLoggedIn()
+                } else {
+                  // Well if refresh token is invalid, remove both to make stuff easier and redirect them to Login.
+                  window.localStorage.removeItem('token')
+                  window.localStorage.removeItem('refreshToken')
+                  this.setState({ isLoggedIn: false })
+                }
+              })
+              .catch(err => {
+                console.log(err)
+                this.setState({ isLoggedIn: false })
+              })
+          }
+        }
+        if (response.data.auth === true) {
           let { name, classes, _id, roles } = response.data
-          this.setState({ name, _id, classes, roles })
+          this.setState({ name, _id, classes, roles, confirm: true })
+        }
+        // Silently change access token in the background, everything will continue. Even if refresh is invalid, simply ignore.
+        // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
+        if (response.data.auth === 'expiring') {
+          let { name, classes, _id, roles } = response.data
+          this.setState({ name, _id, classes, roles, confirm: true })
+          let refreshToken = window.localStorage.refreshToken
+          if (refreshToken) {
+            axios.post('/refresh', { refreshToken })
+              .then(response => {
+                if (response.data.status === true) {
+                  window.localStorage.setItem('token', response.data.token)
+                  axios.defaults.headers.common['x-access-token'] = response.data.token
+                }
+              })
+              .catch(err => {
+                console.log(err)
+                this.setState({ isLoggedIn: false })
+              })
+          }
         }
       }).catch((err) => {
+        this.setState({ isLoggedIn: false })
         console.log(err)
       })
   }
@@ -67,26 +116,33 @@ class MainCtrl extends Component {
     const { name, _id, classes, roles } = this.state
 
     if (!this.state.isLoggedIn) {
-      console.log('we getting em login errors?')
       return <Redirect to='/login' />
     }
 
-    return (
-      <Container fluid>
-        <Topbar tab={main} name={name} _id={_id} />
-        <Grid style={GridStyle}>
-          <SideMenu activeItem={main + op || ''} _id={_id} />
-          <Grid.Column width={13} style={MainContentStyle}>
-            {main === 'home' && <Home />}
-            {main === 'students' && <StudentWrap op={op} sid={sid} />}
-            {main === 'classes' && <ClassWrap op={op} sid={sid} />}
-            {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} />}
-            {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
-            {main === 'admin' && <AdminWrap op={op} />}
-          </Grid.Column>
-        </Grid>
-      </Container>
-    )
+    if (this.state.isLoggedIn && this.state.confirm) {
+      return (
+        <Container fluid>
+          <Topbar tab={main} name={name} _id={_id} />
+          <Grid style={GridStyle}>
+            <SideMenu activeItem={main + op || ''} _id={_id} />
+            <Grid.Column width={13} style={MainContentStyle}>
+              {main === 'home' && <Home />}
+              {main === 'students' && <StudentWrap op={op} sid={sid} />}
+              {main === 'classes' && <ClassWrap op={op} sid={sid} />}
+              {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} />}
+              {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
+              {main === 'admin' && <AdminWrap op={op} />}
+            </Grid.Column>
+          </Grid>
+        </Container>
+      )
+    } else {
+      return (
+        <Dimmer active>
+          <Loader>Loading</Loader>
+        </Dimmer>
+      )
+    }
   }
 }
 

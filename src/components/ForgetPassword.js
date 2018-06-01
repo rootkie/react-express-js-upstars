@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Form, Button, Header, Message, Image, Segment, Grid } from 'semantic-ui-react'
 import axios from 'axios'
-import { Link, Redirect } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const initialState = {
   email: '',
@@ -10,27 +10,7 @@ const initialState = {
 }
 
 class ForgetPassword extends Component {
-  state = {...initialState, redirect: false}
-
-  // Before the page starts to render
-  constructor () {
-    super()
-    this.isLoggedIn()
-  }
-
-  // Call the API to check the validity of the token if any. The token is sent as the header to check and would be undefined if user
-  // has yet to log in. Will implement the refresh token scheme later after the main functions of the software is done.
-  isLoggedIn = () => {
-    return axios({
-      method: 'get',
-      url: '/check',
-      headers: { 'x-access-token': window.localStorage.token }
-    }).then(response => {
-      this.setState({ redirect: response.data.auth })
-    }).catch((err) => {
-      console.log(err)
-    })
-  }
+  state = {...initialState}
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value })
 
@@ -50,11 +30,7 @@ class ForgetPassword extends Component {
   }
 
   render () {
-    const { email, nric, message, redirect } = this.state
-
-    if (redirect) {
-      return <Redirect to='/home' />
-    }
+    const { email, nric, message } = this.state
 
     return (
       <div className='resetpassword-form'>

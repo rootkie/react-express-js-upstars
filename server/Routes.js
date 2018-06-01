@@ -65,4 +65,5 @@ module.exports = app => {
   app.post('/api/resetpassword', authControl.resetPassword)
   app.post('/api/verifyEmail', authControl.verifyEmail)
   app.get('/api/check', authControl.check) // This is for frontend to check validity of token.
+  app.post('/api/refresh', authControl.refreshToken) // Getting refresh tokens if valid
 }

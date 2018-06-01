@@ -12,7 +12,10 @@ const Topbar = ({tab, name, _id}) => (
         <Dropdown.Menu>
           <Link to={`/volunteer/profile/${_id}`}><Dropdown.Item style={{color: 'black'}}>Profile</Dropdown.Item></Link>
           <Link to={`/volunteer/changepassword`}><Dropdown.Item style={{color: 'black'}}>Change Password</Dropdown.Item></Link>
-          <Link to='/'><Dropdown.Item onClick={() => window.localStorage.removeItem('token')} style={{color: 'black'}}>Logout</Dropdown.Item></Link>
+          <Link to='/'><Dropdown.Item onClick={() => {
+            window.localStorage.removeItem('token')
+            window.localStorage.removeItem('refreshToken')
+          }} style={{color: 'black'}}>Logout</Dropdown.Item></Link>
         </Dropdown.Menu>
       </Dropdown>
     </Menu.Menu>
