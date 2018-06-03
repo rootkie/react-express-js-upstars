@@ -19,7 +19,7 @@ module.exports = app => {
 
   // Students
   app.get('/api/students', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getAll)
-  app.get('/api/otherStudents', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getOtherStudents)
+  app.get('/api/otherStudents', hasRole(['Admin', 'SuperAdmin']), studentControl.getOtherStudents)
   app.get('/api/students/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getStudentById)
   app.post('/api/students', studentControl.addStudent)
   app.put('/api/students', hasRole(['Mentor', 'Admin', 'SuperAdmin']), studentControl.editStudentById)
@@ -28,7 +28,7 @@ module.exports = app => {
   app.delete('/api/students/class', hasRole(['Admin', 'SuperAdmin']), classControl.deleteStudentsFromClass)
 
   // Users
-  app.get('/api/users', hasRole(['SuperVisor', 'Admin', 'SuperAdmin']), userControl.getAllUsers)
+  app.get('/api/users', hasRole(['Mentor', 'Admin', 'SuperAdmin']), userControl.getAllUsers)
   app.get('/api/users/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.getUser)
   app.post('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.editUserParticulars)
   app.delete('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.deleteUser) //  Personal account deletion

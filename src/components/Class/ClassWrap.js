@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { string } from 'prop-types'
+import { string, array } from 'prop-types'
 import ClassForm from './ClassForm.js'
 import ClassView from './ClassView.js'
 import ClassEdit from './ClassEdit.js'
@@ -9,7 +9,8 @@ import axios from 'axios'
 class ClassWrap extends Component {
   static propTypes = {
     op: string.isRequired,
-    sid: string
+    sid: string,
+    roles: array.isRequired
   }
   // First init of state.
   constructor (props) {
@@ -83,13 +84,13 @@ class ClassWrap extends Component {
 
   // Various routes that would render different components
   render () {
-    const { op, sid } = this.props
+    const { op, sid, roles } = this.props
     const { classData, isLoading } = this.state
     return (
       <div>
         {op === 'add' && <ClassForm addClass={this.addClass} /> }
-        {op === 'id' && <ClassEdit editClass={this.editClass} id={sid} /> }
-        {op === 'view' && <ClassView classData={classData} stopClass={this.stopClass} isLoading={isLoading} /> }
+        {op === 'id' && <ClassEdit editClass={this.editClass} id={sid} roles={roles} /> }
+        {op === 'view' && <ClassView classData={classData} stopClass={this.stopClass} isLoading={isLoading} roles={roles} /> }
       </div>
     )
   }

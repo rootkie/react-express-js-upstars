@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { string } from 'prop-types'
+import { string, array } from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
 import StudentEdit from './StudentEdit'
@@ -10,12 +10,14 @@ import { filterData } from '../../utils'
 class StudentWrap extends Component {
   static propTypes = {
     op: string.isRequired,
-    sid: string
+    sid: string,
+    roles: array.isRequired
   }
 
   // get data from server
   constructor (props) {
     super(props)
+    let { roles } = props
     this.state = {
       studentData: [],
       otherStudentData: [],
@@ -24,20 +26,25 @@ class StudentWrap extends Component {
       isLoading: true
     }
     this.getStudents()
+    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+      this.getOtherStudents()
+    }
   }
 
   getStudents = () => {
     axios.get('students')
       .then(response => {
-        this.setState({ studentData: response.data.students })
+        this.setState({ studentData: response.data.students, isLoading: false })
       })
       .catch(err => {
         console.log(err)
       })
+  }
 
+  getOtherStudents = () => {
     axios.get('otherStudents')
       .then(response => {
-        this.setState({ otherStudentData: response.data.students, isLoading: false })
+        this.setState({ otherStudentData: response.data.students })
       })
       .catch(err => {
         console.log(err)
@@ -91,12 +98,12 @@ class StudentWrap extends Component {
 
   render () {
     const { studentData, otherStudentData, filteredData, isLoading, filteredDataOthers } = this.state
-    const { op, sid } = this.props
+    const { op, sid, roles } = this.props
     return (
       <div>
         {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-        {op === 'edit' && <StudentEdit id={sid} editStudent={this.editStudent} />}
-        {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} />}
+        {op === 'edit' && <StudentEdit id={sid} editStudent={this.editStudent} roles={roles} />}
+        {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} roles={roles} />}
         {op === 'viewOthers' && <StudentViewOthers studentData={filteredDataOthers || otherStudentData} searchFilter={this.searchFilterOthers} isLoading={isLoading} />}
       </div>
     )

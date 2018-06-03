@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Table, Icon, Menu, Segment, Dimmer, Loader, Header } from 'semantic-ui-react'
-import { func, string } from 'prop-types'
+import { func, string, array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import axios from 'axios'
@@ -103,7 +103,8 @@ const initialState = {
 class StudentEdit extends Component {
   static propTypes = {
     editStudent: func,
-    id: string
+    id: string,
+    roles: array.isRequired
   }
 
   constructor (props) {
@@ -139,7 +140,6 @@ class StudentEdit extends Component {
           profile: studentData.profile,
           father: studentData.father,
           mother: studentData.mother,
-          admin: studentData.admin,
           misc: studentData.misc,
           otherFamily: studentData.otherFamily,
           status: studentData.status,
@@ -151,6 +151,10 @@ class StudentEdit extends Component {
           classes: studentData.classes,
           isLoading: false
         })
+        let { roles } = this.props
+        if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+          this.setState({ admin: studentData.admin })
+        }
       })
   }
 
@@ -322,15 +326,20 @@ class StudentEdit extends Component {
 
     const { adminNotes, interviewDate, interviewNotes, commencementDate, exitDate, exitReason } = admin
 
+    const { roles } = this.props
+
     return (
       <div>
         <Dimmer active={isLoading} inverted>
           <Loader indeterminate active={isLoading}>Loading Data</Loader>
         </Dimmer>
-        <Menu attached='top' tabular widths={3} inverted>
+        {/* Essentially, I'm using basic html to restrict access, I'll see how I can restrict them in the API response */}
+        <Menu attached='top' tabular widths={(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) ? 3 : 2} inverted>
           <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleMenuClick} color={'teal'} />
           <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleMenuClick} color={'blue'} />
+          {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
           <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleMenuClick} color={'green'} />
+          }
         </Menu>
         {/* The form only renders part of the form accordingly to the tab selected
         Most of the fields have names of '(parent)-(child)'. This is such that they can be separated easily by the hyphen
@@ -554,7 +563,9 @@ class StudentEdit extends Component {
             negative
             content='Server Error'
           />
+          {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
           <Form.Button type='submit'>{buttonContent}</Form.Button>
+          }
         </Form>
         <Header as='h3' dividing>Classes</Header>
         <Table compact celled>

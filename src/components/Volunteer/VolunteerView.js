@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { func } from 'prop-types'
+import { func, array } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -14,7 +14,8 @@ const genderOptions = [
 
 class VolunteerView extends Component {
   static propTypes = {
-    deleteUser: func.isRequired
+    deleteUser: func.isRequired,
+    roles: array.isRequired
   }
   constructor (props) {
     super(props)
@@ -107,6 +108,7 @@ class VolunteerView extends Component {
 
   render () {
     const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, editedData } = this.state
+    const { roles } = this.props
     if (isLoading) {
       return (
         <div>
@@ -141,7 +143,9 @@ class VolunteerView extends Component {
               </Table.HeaderCell>
             </Table.Row>
             <Table.Row>
+              {roles.indexOf('SuperAdmin') !== -1 &&
               <Table.HeaderCell />
+              }
               <Table.HeaderCell>Name</Table.HeaderCell>
               <Table.HeaderCell>Age</Table.HeaderCell>
               <Table.HeaderCell>IC Number</Table.HeaderCell>
@@ -152,9 +156,11 @@ class VolunteerView extends Component {
           <Table.Body>
             {editedData.map((user, i) => (
               <Table.Row key={`user-${i}`}>
+                {roles.indexOf('SuperAdmin') !== -1 &&
                 <Table.Cell collapsing>
                   <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
                 </Table.Cell>
+                }
                 <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                 <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
                 <Table.Cell>{user.profile.nric}</Table.Cell>
@@ -166,16 +172,20 @@ class VolunteerView extends Component {
             <Table.Row>
               <Table.HeaderCell />
               <Table.HeaderCell colSpan='4'>
-                <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
-                <Confirm
-                  open={deleteConfirmationVisibility}
-                  header='Deleting the following students:'
-                  content={selected.map((id) => (
-                    editedData.filter((user) => (user._id === id))[0].profile.name
-                  )).join(', ')}
-                  onCancel={this.handleDeleteConfirmation('cancel')}
-                  onConfirm={this.handleDeleteConfirmation('confirm')}
-                />
+                {roles.indexOf('SuperAdmin') !== -1 &&
+                <div>
+                  <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
+                  <Confirm
+                    open={deleteConfirmationVisibility}
+                    header='Deleting the following students:'
+                    content={selected.map((id) => (
+                      editedData.filter((user) => (user._id === id))[0].profile.name
+                    )).join(', ')}
+                    onCancel={this.handleDeleteConfirmation('cancel')}
+                    onConfirm={this.handleDeleteConfirmation('confirm')}
+                  />
+                </div>
+                }
               </Table.HeaderCell>
             </Table.Row>
           </Table.Footer>

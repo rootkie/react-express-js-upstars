@@ -27,7 +27,8 @@ class StudentView extends Component {
     studentData: array.isRequired,
     deleteStudent: func.isRequired,
     searchFilter: func.isRequired,
-    isLoading: bool
+    isLoading: bool,
+    roles: array.isRequired
   }
 
   state = {
@@ -93,7 +94,7 @@ class StudentView extends Component {
 
   render () {
     const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, ageSelector } = this.state
-    const { studentData, isLoading } = this.props
+    const { studentData, isLoading, roles } = this.props
     if (isLoading) {
       return (
         <div>
@@ -132,7 +133,9 @@ class StudentView extends Component {
               </Table.HeaderCell>
             </Table.Row>
             <Table.Row>
+              {roles.indexOf('SuperAdmin') !== -1 &&
               <Table.HeaderCell />
+              }
               <Table.HeaderCell>Name</Table.HeaderCell>
               <Table.HeaderCell>Age</Table.HeaderCell>
               <Table.HeaderCell>IC Number</Table.HeaderCell>
@@ -143,9 +146,11 @@ class StudentView extends Component {
           <Table.Body>
             {studentData.map((student, i) => (
               <Table.Row key={`student-${i}`}>
+                {roles.indexOf('SuperAdmin') !== -1 &&
                 <Table.Cell collapsing>
                   <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                 </Table.Cell>
+                }
                 <Table.Cell><Link to={`/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
                 <Table.Cell>{moment().diff(student.profile.dob, 'years')}</Table.Cell>
                 <Table.Cell>{student.profile.icNumber}</Table.Cell>
@@ -157,21 +162,25 @@ class StudentView extends Component {
             <Table.Row>
               <Table.HeaderCell />
               <Table.HeaderCell colSpan='4'>
-                <Link to='/students/add'>
-                  <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
-                    <Icon name='user' />New Student
-                  </Button>
-                </Link>
-                <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
-                <Confirm
-                  open={deleteConfirmationVisibility}
-                  header='Deleting the following students:'
-                  content={selected.map((id) => (
-                    studentData.filter((student) => (student._id === id))[0].profile.name
-                  )).join(', ')}
-                  onCancel={this.handleDeleteConfirmation('cancel')}
-                  onConfirm={this.handleDeleteConfirmation('confirm')}
-                />
+                {roles.indexOf('SuperAdmin') !== -1 &&
+                <div>
+                  <Link to='/students/add'>
+                    <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
+                      <Icon name='user' />New Student
+                    </Button>
+                  </Link>
+                  <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
+                  <Confirm
+                    open={deleteConfirmationVisibility}
+                    header='Deleting the following students:'
+                    content={selected.map((id) => (
+                      studentData.filter((student) => (student._id === id))[0].profile.name
+                    )).join(', ')}
+                    onCancel={this.handleDeleteConfirmation('cancel')}
+                    onConfirm={this.handleDeleteConfirmation('confirm')}
+                  />
+                </div>
+                }
               </Table.HeaderCell>
             </Table.Row>
           </Table.Footer>

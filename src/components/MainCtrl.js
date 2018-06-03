@@ -28,6 +28,8 @@ const MainContentStyle = {
   overflow: 'auto'
 }
 
+let forceRefresh
+
 class MainCtrl extends Component {
   static propTypes = {
     match: object
@@ -105,9 +107,22 @@ class MainCtrl extends Component {
   constructor (props) {
     super()
     this.isLoggedIn()
+    forceRefresh = window.setInterval(this.changeState, 600000)
   }
 
   componentWillReceiveProps (nextProps) {
+    window.clearInterval(forceRefresh)
+    // Force confirm state of "confirm" every 10 minutes so there wont be issues that the main() renders after token expire
+    // While the state of "confirm" is still true as the user afk for 30 minutes. (Token will be refreshed but calls are made with old tokens)
+    this.isLoggedIn()
+    forceRefresh = window.setInterval(this.changeState, 600000)
+  }
+
+  componentWillUnmount () {
+    window.clearInterval(forceRefresh)
+  }
+
+  changeState = () => {
     this.isLoggedIn()
   }
 
@@ -124,12 +139,12 @@ class MainCtrl extends Component {
         <Container fluid>
           <Topbar tab={main} name={name} _id={_id} />
           <Grid style={GridStyle}>
-            <SideMenu activeItem={main + op || ''} _id={_id} />
+            <SideMenu activeItem={main + op || ''} roles={roles} />
             <Grid.Column width={13} style={MainContentStyle}>
               {main === 'home' && <Home />}
-              {main === 'students' && <StudentWrap op={op} sid={sid} />}
-              {main === 'classes' && <ClassWrap op={op} sid={sid} />}
-              {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} />}
+              {main === 'students' && <StudentWrap op={op} sid={sid} roles={roles} />}
+              {main === 'classes' && <ClassWrap op={op} sid={sid} roles={roles} />}
+              {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} roles={roles} />}
               {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
               {main === 'admin' && <AdminWrap op={op} />}
             </Grid.Column>

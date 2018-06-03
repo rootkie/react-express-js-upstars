@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Form, Message, Header, Table, Checkbox, Button, Icon, Dropdown, Dimmer, Loader } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { func, string } from 'prop-types'
+import { func, string, array } from 'prop-types'
 import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
@@ -40,7 +40,8 @@ const initialState = {
 class ClassEdit extends Component {
   static propTypes = {
     editClass: func,
-    id: string
+    id: string,
+    roles: array.isRequried
   }
 
   constructor (props) {
@@ -252,6 +253,7 @@ class ClassEdit extends Component {
     // 2. students / users Value: The array of ids that are to be added to the class
     // 3. students / users Selected: The array of ids that are checked, prepared to be deleted.
     // 4. Edit Mode is switched off. This determines the look of the page. Once the roles are finished, we can limit the edit function to only Admins
+    const { roles } = this.props
     const { submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected, students, users, edit, ButtonContent } = this.state // submitted version are used to display the info sent through POST (not necessary)
     // Renders if isLoading is true
     if (isLoading) {
@@ -284,12 +286,14 @@ class ClassEdit extends Component {
             </Form.Field>
             <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly={!edit} required={oneClassData.classType === 'Tuition'} disabled={oneClassData.classType === 'Enrichment'} />
             {/* Will work on the roles management that only people who own this class or are Admin could use the front-end edit function */}
+            {roles.indexOf('SuperAdmin') !== -1 &&
             <Form.Button content={ButtonContent} type='submit' value='Submit' />
+            }
             {submitSuccess && <Message positive>Class Updated</Message> }
             <br />
           </Form>
           {/* This only renders if edit is true. You can see the delete buttons, the dropdown to input students or users for adding */}
-          {edit &&
+          {(roles.indexOf('SuperAdmin') !== -1 && edit) &&
           <div>
             <Header as='h3' dividing>Students</Header>
             <Table compact celled>
@@ -361,7 +365,7 @@ class ClassEdit extends Component {
           </div>
           }
           {/* The non-edit mode (view only) offers a light version that is clean to view */}
-          {!edit &&
+          {(!edit || roles.indexOf('SuperAdmin') === -1) &&
           <div>
             <Header as='h3' dividing>Students</Header>
             <Table compact celled>

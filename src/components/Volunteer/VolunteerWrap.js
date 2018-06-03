@@ -9,7 +9,8 @@ class VolunteerWrap extends Component {
   static propTypes = {
     op: PropTypes.string,
     sid: PropTypes.string,
-    _id: PropTypes.string
+    _id: PropTypes.string,
+    roles: PropTypes.array.isRequired
   }
 
   constructor (props) {
@@ -30,12 +31,12 @@ class VolunteerWrap extends Component {
   }
 
   render () {
-    const { op, sid, _id } = this.props
+    const { op, sid, _id, roles } = this.props
     return (
       <div>
         {op === 'changepassword' && <VolunteerChangePassword _id={_id} /> }
         {op === 'profile' && <VolunteerEdit userId={sid} />}
-        {op === 'view' && <VolunteerView deleteUser={this.deleteUser} />}
+        {op === 'view' && <VolunteerView deleteUser={this.deleteUser} roles={roles} />}
       </div>
     )
   }
