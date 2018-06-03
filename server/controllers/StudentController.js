@@ -6,10 +6,11 @@ const Class = require('../models/class')
 // Add student function works for everyone
 module.exports.addStudent = async (req, res, next) => {
   let edited = {}
+  let { roles } = req.decoded
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
 
   // If editor has no admin rights, restrict the entering of Admin Field
-  if (req.body.admin) {
+  if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) {
     edited['admin'] = req.body.admin
   }
 

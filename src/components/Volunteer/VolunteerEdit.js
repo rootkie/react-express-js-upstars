@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Form, Button, Header, Table, Icon, Menu, Segment, Message, Dimmer, Loader } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
-import { string } from 'prop-types'
+import { string, array } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -72,7 +72,8 @@ const initialState = {
 
 class VolunteerEdit extends Component {
   static propTypes = {
-    userId: string
+    userId: string,
+    roles: array.isRequired
   }
   state = {
     ...initialState
@@ -83,6 +84,7 @@ class VolunteerEdit extends Component {
   }
 
   getProfile = (userId) => {
+    let { roles } = this.props
     axios.get(`/users/${userId}`)
       .then(response => {
         let userData = response.data.user
@@ -129,12 +131,16 @@ class VolunteerEdit extends Component {
             'Saturday 12.00-2.30pm': userData.preferredTimeSlot.includes('Saturday 12.00-2.30pm')
           },
           classes: userData.classes,
-          interviewDate: userData.admin.interviewDate,
-          realCommencementDate: userData.admin.commencementDate,
-          interviewNotes: userData.admin.interviewNotes,
-          adminNotes: userData.admin.adminNotes,
           isLoading: false
         })
+        if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) {
+          this.setState({
+            interviewDate: userData.admin.interviewDate,
+            realCommencementDate: userData.admin.commencementDate,
+            interviewNotes: userData.admin.interviewNotes,
+            adminNotes: userData.admin.adminNotes
+          })
+        }
       })
       .catch(err => {
         console.log(err)
@@ -320,16 +326,20 @@ class VolunteerEdit extends Component {
       hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
       commencementDate, exitDate, error, activeItem, errorMessage, isLoading } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
+    const { roles } = this.props
+
     return (
       <div>
         <Dimmer active={isLoading} inverted>
           <Loader indeterminate active={isLoading}>Loading Data</Loader>
         </Dimmer>
-        <Menu attached='top' tabular widths={4} inverted>
+        <Menu attached='top' tabular widths={(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) ? 4 : 3} inverted>
           <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />Personal Info*</Menu.Item>
           <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />Family Details</Menu.Item>
           <Menu.Item name='Personal Statement' active={activeItem === 'Personal Statement'} onClick={this.handleItemClick} color={'orange'}><Icon name='write' />Personal Statement</Menu.Item>
+          {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
           <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'green'}><Icon name='dashboard' />For office use</Menu.Item>
+          }
         </Menu>
         <Form onSubmit={this.handleSubmit}>
           { activeItem === 'Personal Info' &&
@@ -709,7 +719,7 @@ class VolunteerEdit extends Component {
             </Table>
           </Segment>
           }
-          { activeItem === 'For office use' &&
+          {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) && activeItem === 'For office use' &&
           <Segment attached='bottom'>
             <Form.Field>
               <label>Interview date</label>

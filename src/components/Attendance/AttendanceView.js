@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { string, object } from 'prop-types'
+import { string, object, array } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -14,6 +14,7 @@ const initialState = {
   hours: '',
   edit: false,
   isLoading: true,
+  testClass: [],
   empty: true,
   buttonName: 'Edit',
   deleteConfirm: false
@@ -32,7 +33,9 @@ let users = [{text: 'Not found. Please try another search'}]
 
 class AttendanceView extends Component {
   static propTypes = {
-    attendanceId: string.isRequired
+    attendanceId: string.isRequired,
+    classData: array.isRequired,
+    roles: array.isRequired
   }
   static contextTypes = {
     router: object.isRequired
@@ -69,6 +72,7 @@ class AttendanceView extends Component {
                 }
               }
             }
+            let testClass = props.classData.map(el => el.text)
             console.log(users)
             if (data.students.length !== 0) {
               for (let [index, studentData] of data.students.entries()) {
@@ -91,6 +95,7 @@ class AttendanceView extends Component {
               date: moment(data.date),
               users,
               students,
+              testClass,
               empty: false
             })
             // Else just remove the loading screen and show the default values
@@ -218,7 +223,8 @@ class AttendanceView extends Component {
   }
 
   render () {
-    const { date, type, className, students, users, submitSuccess, hours, edit, buttonName, deleteConfirm, isLoading, empty } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { date, type, className, students, users, submitSuccess, hours, edit, buttonName, deleteConfirm, isLoading, empty, testClass } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { roles } = this.props
     return (
       <div>
         {submitSuccess && <Message success onDismiss={this.dismiss}>Submitted</Message> }
@@ -280,8 +286,12 @@ class AttendanceView extends Component {
                 </Table.Row>))}
             </Table.Body>
           </Table>
-          <Form.Button fluid floated='left' disabled={empty} value='submit' type='submit'>{buttonName}</Form.Button>
-          <Form.Button fluid negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
+          {(roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || testClass.indexOf(className) !== -1) &&
+          <div>
+            <Form.Button fluid floated='left' disabled={empty} value='submit' type='submit'>{buttonName}</Form.Button>
+            <Form.Button fluid negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
+          </div>
+          }
         </Form>
         <Modal open={deleteConfirm} onClose={this.close} basic size='small'>
           <Header icon='archive' content='Delete Attendance' />

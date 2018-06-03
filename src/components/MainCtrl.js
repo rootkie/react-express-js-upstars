@@ -145,7 +145,7 @@ class MainCtrl extends Component {
               {main === 'students' && <StudentWrap op={op} sid={sid} roles={roles} />}
               {main === 'classes' && <ClassWrap op={op} sid={sid} roles={roles} />}
               {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} roles={roles} />}
-              {main === 'attendance' && <AttendanceWrap op={op} sid={sid} />}
+              {main === 'attendance' && <AttendanceWrap op={op} sid={sid} roles={roles} />}
               {main === 'admin' && <AdminWrap op={op} />}
             </Grid.Column>
           </Grid>

@@ -35,7 +35,7 @@ class VolunteerWrap extends Component {
     return (
       <div>
         {op === 'changepassword' && <VolunteerChangePassword _id={_id} /> }
-        {op === 'profile' && <VolunteerEdit userId={sid} />}
+        {op === 'profile' && <VolunteerEdit userId={sid} roles={roles} />}
         {op === 'view' && <VolunteerView deleteUser={this.deleteUser} roles={roles} />}
       </div>
     )

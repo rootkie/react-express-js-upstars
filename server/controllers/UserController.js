@@ -6,14 +6,26 @@ const Class = require('../models/class')
 // All
 module.exports.getAllUsers = async (req, res, next) => {
   try {
-    // Retrieve all users in the system
-    const users = await User.find({
-      'status': 'Active'
-    }).select('profile roles status').sort('profile.name')
+    let { roles, _id } = req.decoded
+    // Retrieve all users in the system based on roles and permissions
+    if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || roles.indexOf('Mentor') !== -1) {
+      const users = await User.find({
+        'status': 'Active'
+      }).select('profile roles status').sort('profile.name')
 
-    return res.status(200).json({
-      users
-    })
+      return res.status(200).json({
+        users
+      })
+    } else {
+      const users = await User.find({
+        '_id': _id,
+        'status': 'Active'
+      }).select('profile roles status').sort('profile.name')
+
+      return res.status(200).json({
+        users
+      })
+    }
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -27,6 +39,7 @@ module.exports.getAllUsers = async (req, res, next) => {
 // Everyone but restricted to their own class checked using token
 module.exports.getUser = async (req, res, next) => {
   try {
+    let user
     let approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
       params: req.params.id,
@@ -40,8 +53,12 @@ module.exports.getUser = async (req, res, next) => {
       })
     }
 
-    // Find user based on ID and retrieve its className
-    const user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt')
+    // Find user based on ID and retrieve its className. Restrict based on the need to view admin
+    if (approved.privilege === false) {
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin')
+    } else {
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt')
+    }
     if (!user) {
       throw ({
         status: 404,

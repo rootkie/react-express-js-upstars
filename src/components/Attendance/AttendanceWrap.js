@@ -39,7 +39,7 @@ class AttendanceWrap extends Component {
 
   render () {
     const { isLoading } = this.state
-    const { op, sid } = this.props
+    const { op, sid, roles } = this.props
     if (isLoading) {
       return (
         <div>
@@ -59,7 +59,7 @@ class AttendanceWrap extends Component {
         <div>
           {op === 'add' && <AttendanceForm classData={this.state.classData} /> }
           {op === 'search' && <AttendanceSearch classData={this.state.classData} /> }
-          {op === 'view' && sid && <AttendanceView attendanceId={sid} /> }
+          {op === 'view' && sid && <AttendanceView attendanceId={sid} roles={roles} classData={this.state.classData} /> }
           {op === 'user' && <AttendanceUser classData={this.state.classData} />}
           {op === 'student' && <AttendanceStudent classData={this.state.classData} />}
           {op === 'class' && <AttendanceClass classData={this.state.classData} />}
@@ -72,7 +72,8 @@ class AttendanceWrap extends Component {
 
 AttendanceWrap.propTypes = {
   op: PropTypes.string,
-  sid: PropTypes.string
+  sid: PropTypes.string,
+  roles: PropTypes.array.isRequired
 }
 
 export default AttendanceWrap

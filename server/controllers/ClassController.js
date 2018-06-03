@@ -60,7 +60,6 @@ module.exports.addClass = async (req, res, next) => {
   }
 }
 
-
 // SuperAdmin
 module.exports.editClass = async (req, res, next) => {
   try {
@@ -112,11 +111,11 @@ module.exports.editClass = async (req, res, next) => {
   }
 }
 
-
 // Everyone
 // The special thing about classes is they can be either stopped or active.
 module.exports.getAll = async (req, res, next) => {
   try {
+    let { classes, roles } = req.decoded
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
@@ -124,6 +123,16 @@ module.exports.getAll = async (req, res, next) => {
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
     }).select('-createdAt')
+    // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
+    if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
+      console.log(classes)
+      let filteredActive = activeClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
+      let filteredStop = stoppedClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
+      return res.status(200).json({
+        activeClasses: filteredActive,
+        stoppedClasses: filteredStop
+      })
+    }
     return res.status(200).json({
       activeClasses,
       stoppedClasses
