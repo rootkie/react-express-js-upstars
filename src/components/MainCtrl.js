@@ -11,6 +11,9 @@ import VolunteerWrap from './Volunteer/VolunteerWrap'
 import AttendanceWrap from './Attendance/AttendanceWrap'
 import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
+import FourZeroThree from './Error/403'
+import FourZeroFour from './Error/404'
+import FiveHundred from './Error/500'
 
 // axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
 axios.defaults.baseURL = 'http://127.0.0.1:1444/api/'
@@ -39,7 +42,8 @@ class MainCtrl extends Component {
     isLoggedIn: true,
     confirm: false,
     name: '',
-    id: ''
+    id: '',
+    errorCode: false
   }
 
   isLoggedIn = () => {
@@ -75,14 +79,14 @@ class MainCtrl extends Component {
           }
         }
         if (response.data.auth === true) {
-          let { name, classes, _id, roles } = response.data
-          this.setState({ name, _id, classes, roles, confirm: true })
+          let { name, _id, roles } = response.data
+          this.setState({ name, _id, roles, confirm: true })
         }
         // Silently change access token in the background, everything will continue. Even if refresh is invalid, simply ignore.
         // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
         if (response.data.auth === 'expiring') {
-          let { name, classes, _id, roles } = response.data
-          this.setState({ name, _id, classes, roles, confirm: true })
+          let { name, _id, roles } = response.data
+          this.setState({ name, _id, roles, confirm: true })
           let refreshToken = window.localStorage.refreshToken
           if (refreshToken) {
             axios.post('/refresh', { refreshToken })
@@ -108,6 +112,17 @@ class MainCtrl extends Component {
     super()
     this.isLoggedIn()
     forceRefresh = window.setInterval(this.changeState, 600000)
+    axios.interceptors.response.use(response => {
+      return response
+    }, error => {
+      if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
+        let errorCode = error.response.status
+        this.setState({errorCode})
+        return Promise.reject(error)
+      } else {
+        return true
+      }
+    })
   }
 
   componentWillReceiveProps (nextProps) {
@@ -128,13 +143,27 @@ class MainCtrl extends Component {
 
   render () {
     const { main, op, sid } = this.props.match.params || ''
-    const { name, _id, classes, roles } = this.state
+    const { name, _id, roles, errorCode } = this.state
 
     if (!this.state.isLoggedIn) {
       return <Redirect to='/login' />
     }
 
-    if (this.state.isLoggedIn && this.state.confirm) {
+    if (errorCode === 403) {
+      return (
+        <FourZeroThree />
+      )
+    }
+    if (errorCode === 404) {
+      return (
+        <FourZeroFour />
+      )
+    }
+    if (errorCode === 500) {
+      return (
+        <FiveHundred />
+      )
+    } else if (this.state.isLoggedIn && this.state.confirm) {
       return (
         <Container fluid>
           <Topbar tab={main} name={name} _id={_id} />

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Button, Modal, Header, Table, Icon, Menu, Segment, Image, Message } from 'semantic-ui-react'
+import { Form, Button, Modal, Header, Icon, Menu, Segment, Image, Message } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import axios from 'axios'
 import ReCAPTCHA from 'react-google-recaptcha'
@@ -41,31 +41,9 @@ const initialState = {
   gender: '',
   nationality: '',
   nric: '',
-  fatherName: '',
-  fatherOccupation: '',
-  fatherEmail: '',
-  motherName: '',
-  motherOccupation: '',
-  motherEmail: '',
-  hobbies: '',
   careerGoal: '',
   schoolClass: '',
   schoolLevel: '',
-
-  /* Education / Training */
-  formalEducation: [],
-  coursesSeminar: [],
-  achievements: [],
-  cca: [],
-  cip: [],
-  workInternExp: [],
-  competence: [{
-    languages: [''],
-    subjects: [''],
-    interests: ['']
-  }],
-  purposeObjectives: '',
-  developmentGoals: '',
   commencementDate: '',
   exitDate: '',
   preferredTimeSlot: {
@@ -82,7 +60,7 @@ const initialState = {
   terms: false,
   termsDetails: false,
   error: [],
-  activeItem: 'Personal Info',
+  activeItem: 'Login Details',
   captchaCode: '',
   errorMessage: ''
 }
@@ -118,12 +96,10 @@ class Register extends Component {
     // check required fields
     const error = this.checkRequired(['terms', 'preferredTimeSlot', 'name', 'address', 'postalCode',
       'handphone', 'homephone', 'email', 'dob', 'gender', 'nric', 'password', 'schoolLevel', 'schoolClass', 'captchaCode',
-      'purposeObjectives', 'developmentGoals', 'commencementDate', 'exitDate'])
+      'commencementDate', 'exitDate'])
 
     const { name, address, postalCode, handphone, homephone, email, dob, gender, nationality, nric, password, schoolLevel, schoolClass,
-      fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
-      hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
-      purposeObjectives, developmentGoals, commencementDate, exitDate, captchaCode } = this.state
+      preferredTimeSlot, commencementDate, exitDate, captchaCode } = this.state
 
     if (error.length === 0) {
       let volunteerData = {
@@ -145,29 +121,6 @@ class Register extends Component {
           schoolClass,
           schoolLevel
         },
-        father: {
-          name: fatherName,
-          email: fatherEmail,
-          occupation: fatherOccupation
-        },
-        mother: {
-          name: motherName,
-          occupation: motherOccupation,
-          email: motherEmail
-        },
-        misc: {
-          hobbies,
-          careerGoal,
-          formalEducation,
-          coursesSeminar,
-          achievements,
-          cca,
-          cip,
-          workInternExp,
-          competence,
-          purposeObjectives,
-          developmentGoals
-        },
         captchaCode
       }
 
@@ -180,6 +133,7 @@ class Register extends Component {
           console.log(response)
           this.setState({...initialState, success: true}) // reset form
           window.localStorage.setItem('token', response.data.token)
+          window.localStorage.setItem('refreshToken', response.data.refresh)
         })
         .catch((err) => {
           console.log(err)
@@ -201,61 +155,6 @@ class Register extends Component {
 
   handleTermsDisagree = e => this.setState({terms: false, termsDetails: false})
 
-  handleRepeatable = (option, field) => (e) => {
-    e.preventDefault()
-    const updatingArray = this.state[field]
-    if (option === 'inc') {
-      if (field === 'formalEducation') {
-        updatingArray.push({
-          dateFrom: '',
-          dateTo: '',
-          school: '',
-          highestLevel: ''
-        })
-      } else if (field === 'coursesSeminar') {
-        updatingArray.push({
-          year: '',
-          courseAndObjective: ''
-        })
-      } else if (field === 'achievements') {
-        updatingArray.push({
-          dateFrom: '',
-          dateTo: '',
-          organisation: '',
-          description: ''
-        })
-      } else if (field === 'cca' || field === 'cip' || field === 'workInternExp') {
-        updatingArray.push({
-          dateFrom: '',
-          dateTo: '',
-          organisation: '',
-          rolePosition: ''
-        })
-      } else if (field === 'competence') {
-        updatingArray.push({
-          language: '',
-          subjects: '',
-          interests: ''
-        })
-      }
-      this.setState({[field]: updatingArray})
-    } else if (option === 'dec') { // remove last item
-      this.setState({[field]: updatingArray.slice(0, updatingArray.length - 1)})
-    }
-  }
-
-  updateRepeatableChange = (index, field, property) => (e, {value}) => {
-    const updatingArray = this.state[field]
-    updatingArray[index][property] = value
-    this.setState({[field]: updatingArray})
-  }
-
-  updateRepeatableDateChange = (field, dateType, i) => (date) => {
-    const updatingArray = this.state[field]
-    updatingArray[i][dateType] = date
-    this.setState({[field]: updatingArray})
-  }
-
   handleItemClick = (e, { name }) => this.setState({ activeItem: name })
 
   captchaChange = value => {
@@ -264,9 +163,7 @@ class Register extends Component {
 
   render () {
     const { name, address, postalCode, handphone, homephone, email, dob, gender, nationality, nric, password, schoolLevel, schoolClass,
-      fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot, success,
-      hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
-      purposeObjectives, developmentGoals, commencementDate, exitDate, terms, termsDetails, error, activeItem, errorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
+      preferredTimeSlot, success, commencementDate, exitDate, terms, termsDetails, error, activeItem, errorMessage } = this.state
 
     return (
       <div style={{ 'margin': '1.5em' }}>
@@ -274,31 +171,34 @@ class Register extends Component {
         <Header as='h1' color='blue' textAlign='center'>
               Sign up as a volunteer
         </Header>
-        <Menu attached='top' tabular widths={3} inverted>
-          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />Personal Info*</Menu.Item>
-          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />Family Details</Menu.Item>
-          <Menu.Item name='Personal Statement' active={activeItem === 'Personal Statement'} onClick={this.handleItemClick} color={'orange'}><Icon name='write' />Personal Statement</Menu.Item>
+        <Menu attached='top' tabular widths={2} inverted>
+          <Menu.Item name='Login Details' active={activeItem === 'Login Details'} onClick={this.handleItemClick} color={'red'}><Icon name='lock' />Login Details*</Menu.Item>
+          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'blue'}><Icon name='user' />Personal Info*</Menu.Item>
         </Menu>
         <Form onSubmit={this.handleSubmit}>
+          {activeItem === 'Login Details' &&
+          <Segment attached='bottom'>
+            <Form.Input label='Email' placeholder='Email' name='email' value={email} onChange={this.handleChange} required type='email' />
+            <Form.Input label='Password' placeholder='Password' name='password' value={password} onChange={this.handleChange} required type='password' />
+          </Segment>
+          }
           { activeItem === 'Personal Info' &&
           <Segment attached='bottom'>
             <Form.Group widths='equal'>
               <Form.Input label='Name' placeholder='Name' name='name' value={name} onChange={this.handleChange} required />
-              <Form.Input label='Password' placeholder='Password' name='password' value={password} onChange={this.handleChange} required type='password' />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Address' placeholder='Address' name='address' value={address} onChange={this.handleChange} required />
               <Form.Input label='Postal code' placeholder='Postal code' name='postalCode' value={postalCode} onChange={this.handleChange} type='number' required />
             </Form.Group>
             <Form.Group widths='equal'>
-              <Form.Input label='School level' placeholder='Sec 1 / JC 2' name='schoolLevel' value={schoolLevel} onChange={this.handleChange} required />
-              <Form.Input label='Class name' placeholder='class name' name='schoolClass' value={schoolClass} onChange={this.handleChange} required />
+              <Form.Input label='School' placeholder='E.G. UPStars Secondary School' name='schoolLevel' value={schoolLevel} onChange={this.handleChange} required />
+              <Form.Input label='Class level - name' placeholder='E.G. Sec 3-1' name='schoolClass' value={schoolClass} onChange={this.handleChange} required />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Mobile number' placeholder='Mobile number' name='handphone' value={handphone} onChange={this.handleChange} type='number' required />
               <Form.Input label='Home tel' placeholder='Home tel' name='homephone' value={homephone} onChange={this.handleChange} required type='number' />
             </Form.Group>
-            <Form.Input label='Email' placeholder='Email' name='email' value={email} onChange={this.handleChange} required type='email' />
             <Form.Group widths='equal'>
               <Form.Field>
                 <label>Date of birth</label>
@@ -318,395 +218,27 @@ class Register extends Component {
             </Form.Group>
           </Segment>
           }
-          {activeItem === 'Family Details' &&
-          <Segment attached='bottom'>
-            <Form.Group widths='equal'>
-              <Form.Input label="Father's name" placeholder="Father's name" name='fatherName' value={fatherName} onChange={this.handleChange} />
-              <Form.Input label="Father's occupation" placeholder="Father's occupation" name='fatherOccupation' value={fatherOccupation} onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Input label="Father's email" type='email' placeholder="Father's email" name='fatherEmail' value={fatherEmail} onChange={this.handleChange} />
-            <Form.Group widths='equal'>
-              <Form.Input label="Mother's name" placeholder="Mother's name" name='motherName' value={motherName} onChange={this.handleChange} />
-              <Form.Input label="Mother's occupation" placeholder="Mother's occupation" name='motherOccupation' value={motherOccupation} onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Input label="Mother's email" type='email' placeholder="Mother's email" name='motherEmail' value={motherEmail} onChange={this.handleChange} />
-            <Form.Group widths='equal'>
-              <Form.Input label='Your Hobbies' placeholder='Your Hobbies' name='hobbies' value={hobbies} onChange={this.handleChange} />
-              <Form.Input label='Career Goal' name='careerGoal' value={careerGoal} onChange={this.handleChange} />
-            </Form.Group>
-
-          </Segment>
-          }
-          {activeItem === 'Personal Statement' &&
-          <Segment attached='bottom'>
-            <Header as='h3' dividing>Formal Education</Header>
-            <Table celled striped columns={4} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Starting Date</Table.HeaderCell>
-                  <Table.HeaderCell>Ending Date</Table.HeaderCell>
-                  <Table.HeaderCell>Name of Institution / School</Table.HeaderCell>
-                  <Table.HeaderCell>Highest Level / Course</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {formalEducation.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={formalEducation[i].dateFrom}
-                          selectsStart
-                          maxDate={formalEducation[i].dateTo}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('formalEducation', 'dateFrom', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={formalEducation[i].dateTo}
-                          selectsEnd
-                          minDate={formalEducation[i].dateFrom}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('formalEducation', 'dateTo', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`school-${i}`} name={`school-${i}`} value={formalEducation[i].school} placeholder='Name of Institution' onChange={this.updateRepeatableChange(i, 'formalEducation', 'school')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`highestLevel-${i}`} name={`highestLevel-${i}`} value={formalEducation[i].highestLevel} placeholder='Highest Level' onChange={this.updateRepeatableChange(i, 'formalEducation', 'highestLevel')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'formalEducation')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'formalEducation')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-
-            <Header as='h3' dividing>Courses and seminars</Header>
-            <Table celled striped columns={2} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width={3}>Year</Table.HeaderCell>
-                  <Table.HeaderCell width={7}>Course title and Learning Objectives</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {coursesSeminar.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Input transparent type='number' key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year} placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`courseTitle-${i}`} name={`courseTitle-${i}`} value={coursesSeminar[i].courseAndObjective} placeholder='Name of Institution' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'courseAndObjective')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='2'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'coursesSeminar')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'coursesSeminar')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-
-            <Header as='h3' dividing>Achievements</Header>
-            <Table celled striped columns={4} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Starting Date</Table.HeaderCell>
-                  <Table.HeaderCell>Ending Date</Table.HeaderCell>
-                  <Table.HeaderCell>Name of Organisation</Table.HeaderCell>
-                  <Table.HeaderCell>Description of Award</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {achievements.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={achievements[i].dateFrom}
-                          maxDate={achievements[i].dateTo}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('achievements', 'dateFrom', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={achievements[i].dateTo}
-                          minDate={achievements[i].dateFrom}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('achievements', 'dateTo', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`organisation-${i}`} name={`organisation-${i}`} value={achievements[i].organisation} placeholder='Name of Organisation' onChange={this.updateRepeatableChange(i, 'achievements', 'organisation')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`description-${i}`} name={`description-${i}`} value={achievements[i].description} placeholder='Description of Award' onChange={this.updateRepeatableChange(i, 'achievements', 'description')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'achievements')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'achievements')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-
-            <Header as='h3' dividing>Co-Curricular Activities</Header>
-            <Table celled striped columns={4} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Starting Date</Table.HeaderCell>
-                  <Table.HeaderCell>Ending Date</Table.HeaderCell>
-                  <Table.HeaderCell>Name of Organisation</Table.HeaderCell>
-                  <Table.HeaderCell>Position / Role</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {cca.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={cca[i].dateFrom}
-                          maxDate={cca[i].dateTo}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('cca', 'dateFrom', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={cca[i].dateTo}
-                          minDate={cca[i].dateFrom}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('cca', 'dateTo', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`organisation-${i}`} name={`organisation-${i}`} value={cca[i].organisation} placeholder='Name of Organisation' onChange={this.updateRepeatableChange(i, 'cca', 'organisation')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`rolePosition-${i}`} name={`rolePosition-${i}`} value={cca[i].rolePosition} placeholder='rolePosition' onChange={this.updateRepeatableChange(i, 'cca', 'rolePosition')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'cca')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'cca')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-
-            <Header as='h3' dividing>Community Servies</Header>
-            <Table celled striped columns={4} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Starting Date</Table.HeaderCell>
-                  <Table.HeaderCell>Ending Date</Table.HeaderCell>
-                  <Table.HeaderCell>Name of Organisation</Table.HeaderCell>
-                  <Table.HeaderCell>Position / Role</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {cip.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={cip[i].dateFrom}
-                          maxDate={cip[i].dateTo}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('cip', 'dateFrom', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={cip[i].dateTo}
-                          minDate={cip[i].dateFrom}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('cip', 'dateTo', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`organisation-${i}`} name={`organisation-${i}`} value={cip[i].organisation} placeholder='Name of Organisation' onChange={this.updateRepeatableChange(i, 'cip', 'organisation')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`rolePosition-${i}`} name={`rolePosition-${i}`} value={cip[i].rolePosition} placeholder='rolePosition' onChange={this.updateRepeatableChange(i, 'cip', 'rolePosition')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'cip')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'cip')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-
-            <Header as='h3' dividing>Name of Employer / Organisation</Header>
-            <Table celled striped columns={4} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Starting Date</Table.HeaderCell>
-                  <Table.HeaderCell>Ending Date</Table.HeaderCell>
-                  <Table.HeaderCell>Name of Organisation</Table.HeaderCell>
-                  <Table.HeaderCell>Position / Role</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {workInternExp.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={workInternExp[i].dateFrom}
-                          maxDate={workInternExp[i].dateTo}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('workInternExp', 'dateFrom', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Field>
-                        <DatePicker
-                          selected={workInternExp[i].dateTo}
-                          minDate={workInternExp[i].dateFrom}
-                          dateFormat='DD/MM/YYYY'
-                          onChange={this.updateRepeatableDateChange('workInternExp', 'dateTo', i)}
-                          placeholderText='Click to select' />
-                      </Form.Field>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`organisation-${i}`} name={`organisation-${i}`} value={workInternExp[i].organisation} placeholder='Name of Organisation' onChange={this.updateRepeatableChange(i, 'workInternExp', 'organisation')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`rolePosition-${i}`} name={`rolePosition-${i}`} value={workInternExp[i].rolePosition} placeholder='rolePosition' onChange={this.updateRepeatableChange(i, 'workInternExp', 'rolePosition')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'workInternExp')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'workInternExp')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-
-            <Header as='h3' dividing>Competences Relevant For Teaching Children</Header>
-            <Table celled striped columns={3} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width={4}>Languages</Table.HeaderCell>
-                  <Table.HeaderCell width={4}>Subjects</Table.HeaderCell>
-                  <Table.HeaderCell width={4}>Interests</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                <Table.Row>
-                  <Table.Cell style={{ overflow: 'visible' }}>
-                    <Form.Input transparent key={`languages`} placeholder='Specific language' name={`languages`} value={competence.languages} onChange={this.updateRepeatableChange(0, 'competence', 'languages')} />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Form.Input transparent key={`subjects`} name={`subjects`} value={competence.subjects} placeholder='Specific subjects' onChange={this.updateRepeatableChange(0, 'competence', 'subjects')} />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Form.Input transparent key={`interests`} name={`interests`} value={competence.interests} placeholder='Specific interests' onChange={this.updateRepeatableChange(0, 'competence', 'interests')} />
-                  </Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            </Table>
-          </Segment>
-          }
-          <Header as='h3' dividing>My Purpose to Join Stars and My Objectives / Goals *</Header>
-          <Form.TextArea placeholder='purpose, objectives, goals' name='purposeObjectives' value={purposeObjectives} onChange={this.handleChange} required />
-
-          <Header as='h3' dividing>My Developmental Goals *</Header>
-          <Form.TextArea placeholder='My personal strengths / weakness / leadership qualities that I would like to
-          develop from service at Stars' name='developmentGoals' value={developmentGoals} onChange={this.handleChange} required />
-
-          <Form.Field>
-            <label>Intended Date of Commencement</label>
-            <DatePicker
-              placeholderText='Click to select a date'
-              dateFormat='DD/MM/YYYY'
-              selected={commencementDate}
-              onChange={this.handleDateChange('commencementDate')}
-              required />
-          </Form.Field>
-          <Form.Field>
-            <label>Intended Date of Exit</label>
-            <DatePicker
-              placeholderText='Click to select a date'
-              dateFormat='DD/MM/YYYY'
-              selected={exitDate}
-              onChange={this.handleDateChange('exitDate')}
-              minDate={commencementDate}
-              required />
-          </Form.Field>
-
+          <Form.Group widths='equal'>
+            <Form.Field>
+              <label>Intended Date of Commencement</label>
+              <DatePicker
+                placeholderText='Click to select a date'
+                dateFormat='DD/MM/YYYY'
+                selected={commencementDate}
+                onChange={this.handleDateChange('commencementDate')}
+                required />
+            </Form.Field>
+            <Form.Field>
+              <label>Intended Date of Exit</label>
+              <DatePicker
+                placeholderText='Click to select a date'
+                dateFormat='DD/MM/YYYY'
+                selected={exitDate}
+                onChange={this.handleDateChange('exitDate')}
+                minDate={commencementDate}
+                required />
+            </Form.Field>
+          </Form.Group>
           <Form.Group inline>
             <label>Date of Preferred Time Slot *</label>
             {timeSlotOptions.map((option, i) => {

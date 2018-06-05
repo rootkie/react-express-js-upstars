@@ -247,9 +247,6 @@ module.exports.register = async (req, res, next) => {
     commencementDate,
     exitDate,
     preferredTimeSlot,
-    misc,
-    mother,
-    father,
     captchaCode
   } = req.body
 
@@ -305,6 +302,13 @@ module.exports.register = async (req, res, next) => {
           existingUser.status = 'PermaDeleted'
           await existingUser.save()
         }
+        // Case 4: User have not confirmed email
+        if (existingUser && existingUser.status === 'Unverified') {
+          throw {
+            status: 401,
+            error: 'Your account has yet to be verified. Please confirm your email address by checking your email inbox'
+          }
+        }
 
         // Create a new user after validating and making sure everything is right
         const user = new User({
@@ -314,9 +318,13 @@ module.exports.register = async (req, res, next) => {
           commencementDate,
           exitDate,
           preferredTimeSlot,
-          misc,
-          mother,
-          father,
+          misc: {
+            competence: [{
+              languages: [''],
+              subjects: [''],
+              interests: ['']
+          }],
+          },
           roles: ['Tutor']
         })
         const error = await user.validateSync()
