@@ -62,11 +62,7 @@ module.exports.login = async (req, res, next) => {
 
     res.json({
       token: generateToken(user),
-      refresh: generateRefresh(user._id),
-      _id: user._id,
-      email: user.email,
-      roles: user.roles,
-      name: user.profile.name
+      refresh: generateRefresh(user._id)
     })
   } catch (err) {
     console.log(err)
@@ -323,7 +319,7 @@ module.exports.register = async (req, res, next) => {
               languages: [''],
               subjects: [''],
               interests: ['']
-          }],
+            }]
           },
           roles: ['Tutor']
         })
@@ -377,13 +373,8 @@ module.exports.register = async (req, res, next) => {
           })
         })
         res.status(201).json({
-          status: 'success',
           token: generateToken(userObject),
-          refresh: generateRefresh(userObject._id),
-          _id: userObject._id,
-          email: userObject.email,
-          roles: userObject.roles,
-          name: userObject.profile.name
+          refresh: generateRefresh(userObject._id)
         })
       } catch (err) {
         console.log(err)

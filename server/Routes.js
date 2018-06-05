@@ -55,7 +55,6 @@ module.exports = app => {
   app.get('/api/admin/pendingUsers', hasRole(['SuperAdmin']), adminControl.getPendingUsers)
   app.get('/api/admin/suspended', hasRole(['SuperAdmin']), adminControl.getSuspendedPeople)
   app.get('/api/admin/deleted', hasRole(['SuperAdmin']), adminControl.getDeletedPeople)
-  app.post('/api/admin/user', hasRole(['SuperAdmin']), adminControl.createUser)
   app.post('/api/admin/userStatusPermissions', hasRole(['SuperAdmin']), adminControl.changeUserStatusAndPermissions)
   app.delete('/api/admin/user', hasRole(['SuperAdmin']), adminControl.multipleUserDelete) //  Admin Mass deletion
 

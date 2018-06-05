@@ -2,7 +2,6 @@ const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
 const External = require('../models/external-personnel')
-const util = require('../util')
 
 // SuperAdmin
 module.exports.addClass = async (req, res, next) => {
@@ -45,10 +44,10 @@ module.exports.addClass = async (req, res, next) => {
         error: 'There is something wrong with the client input. That is all we know.'
       })
     }
-    const newClassCreated = await newClass.save()
+    await newClass.save()
 
     res.status(201).json({
-      newClass: newClassCreated
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -97,7 +96,7 @@ module.exports.editClass = async (req, res, next) => {
     }
 
     res.status(200).json({
-      editedClass: newClass
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -119,10 +118,10 @@ module.exports.getAll = async (req, res, next) => {
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
-    }).select('-createdAt')
+    }).select('-createdAt -students -users -externalPersonnel -updatedAt -startDate')
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
-    }).select('-createdAt')
+    }).select('-createdAt -students -users -externalPersonnel -updatedAt -startDate')
     // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
     if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
       console.log(classes)
@@ -156,8 +155,9 @@ module.exports.getClassById = async (req, res, next) => {
       })
     }
 
-    // Find a class and populate the students, users and external people to get their name
+    // Find a class and populate the students, users and external people to get their name. Using class1 because class is a reserved word
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
+      .select('-updatedAt -createdAt')
     // If class does not exist, throw an error
     if (!class1) {
       throw ({
@@ -210,7 +210,7 @@ module.exports.deleteClass = async (req, res, next) => {
       })
     }
     return res.status(200).json({
-      classDeleted
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -498,7 +498,7 @@ module.exports.assignExternalPersonnelToClass = async (req, res, next) => {
       res.status(err.status).send({
         error: err.error
       })
-    } else if (err.name == 'ValidationError') {
+    } else if (err.name === 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
       })

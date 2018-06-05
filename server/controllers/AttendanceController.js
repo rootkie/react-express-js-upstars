@@ -49,7 +49,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
       type
     }
     // Find attendance based on class and date. If exist, updates; else creates a new one.
-    const newAttendance = await Attendance.findOneAndUpdate({
+    await Attendance.findOneAndUpdate({
       class: classId,
       date
     }, attendance1, {
@@ -59,8 +59,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
     })
 
     res.status(200).json({
-      status: 'success',
-      attendance: newAttendance
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -104,15 +103,14 @@ module.exports.deleteAttendance = async (req, res, next) => {
     }
 
     // Remove it from database
-    const removed = await Attendance.remove({
+    await Attendance.remove({
       '_id': {
         '$in': attendanceId
       }
     })
 
     res.status(200).json({
-      status: 'success',
-      removed
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -136,6 +134,7 @@ module.exports.getAttendance = async (req, res, next) => {
     let attendances = Attendance.find()
       .limit(150)
       .populate('class', ['className'])
+      .select('-users -students -updatedAt -createdAt')
       .sort('class.className -date')
 
     if (classId) {
@@ -167,6 +166,7 @@ module.exports.getAttendanceById = async (req, res, next) => {
     let attendanceId = req.params.id
 
     const attendances = await Attendance.findById(attendanceId)
+      .select('-updatedAt -createdAt')
       .populate('class', ['className'])
       .populate('students.list users.list', 'profile.name')
     return res.status(200).json({

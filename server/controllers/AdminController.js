@@ -1,5 +1,4 @@
 const User = require('../models/user')
-const Student = require('../models/student')
 const Class = require('../models/class')
 let util = require('../util.js')
 
@@ -11,7 +10,6 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
       newRoles
     } = req.body
     let edited = {}
-    let editedClass = null
     // Check if these fields exist, if it does it will get updated in the database
     if (newStatus) {
       edited.status = newStatus
@@ -33,7 +31,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
     // Add the user back to the previous classes if admin restores Suspended or Deleted Account.
     // Else, the user would be deleted from the respective classes if they are suspended or deleted.
     if (updatedUser.status === 'Active' && updatedUser.classes) {
-      editedClass = await Class.update({
+      Class.update({
         _id: {
           $in: updatedUser.classes
         }
@@ -46,7 +44,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
         multi: true
       })
     } else if (updatedUser.classes) {
-      editedClass = await Class.update({
+      Class.update({
         _id: {
           $in: updatedUser.classes
         }
@@ -62,12 +60,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
 
     // Returns token and necessary information
     return res.status(200).json({
-      user: util.generateToken(updatedUser),
-      _id: updatedUser._id,
-      email: updatedUser.email,
-      roles: updatedUser.roles,
-      status: updatedUser.status,
-      editedClass
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -76,78 +69,6 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
         error: 'There is something wrong with the client input. That is all we know.'
       })
     } else if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
-  }
-}
-
-module.exports.createUser = async (req, res, next) => {
-  try {
-    let {
-      email,
-      password,
-      profile,
-      commencementDate,
-      exitDate,
-      roles
-    } = req.body
-    // Check that both email and password are provided
-    if (!email) {
-      throw ({
-        status: 400,
-        error: 'Please provide an email'
-      })
-    }
-    if (!password) {
-      throw ({
-        status: 400,
-        error: 'Please provide a password'
-      })
-    }
-    // Check if the email has already been used
-    const existingUser = await User.findOne({
-      email
-    })
-
-    if (existingUser) {
-      throw ({
-        status: 409,
-        error: 'Email already exist.'
-      })
-    }
-    // Create new User and save it after validating it.
-    const user = new User({
-      email,
-      password,
-      profile,
-      commencementDate: util.formatDate(commencementDate),
-      exitDate: util.formatDate(exitDate),
-      roles,
-      status: 'Accepted'
-    })
-    const error = await user.validateSync()
-    if (error) {
-      throw ({
-        status: 400,
-        error: 'There is something wrong with the client input. That is all we know.'
-      })
-    }
-    const userObject = await user.save()
-
-    let newUser = {
-      _id: userObject._id,
-      name: userObject.profile.name,
-      roles: userObject.roles
-    }
-
-    res.status(201).json({
-      newUser
-    })
-  } catch (err) {
-    console.log(err)
-    if (err.status) {
       res.status(err.status).send({
         error: err.error
       })
@@ -255,8 +176,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
       }
     }
     return res.status(200).json({
-      status: 'success',
-      userDeleted
+      status: 'success'
     })
   } catch (err) {
     console.log(err)

@@ -47,7 +47,7 @@ module.exports.addStudent = async (req, res, next) => {
           })
         }
 
-        const successStudentSignup = await newStudent.save()
+        const successStudentSignup = await newStudent.save().select('_id')
         res.status(201).json({
           newStudent: successStudentSignup
         })
@@ -131,7 +131,7 @@ module.exports.editStudentById = async (req, res, next) => {
       })
     }
     res.status(200).json({
-      editedStudent
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -157,7 +157,7 @@ module.exports.getAll = async (req, res, next) => {
     // Find all students from database
     const students = await Student.find({
       status: 'Active'
-    }).select('profile')
+    }).select('profile.name profile.icNumber profile.dob profile.gender')
     return res.status(200).json({
       students
     })
@@ -174,7 +174,7 @@ module.exports.getOtherStudents = async (req, res, next) => {
       status: {
         $ne: 'Active'
       }
-    }).select('profile status')
+    }).select('profile.name profile.icNumber profile.dob profile.gender status')
       .sort('status profile.name')
     return res.status(200).json({
       students
@@ -191,7 +191,7 @@ module.exports.getStudentById = async (req, res, next) => {
     let studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className status')
+    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt')
     if (!student) {
       throw ({
         status: 404,
@@ -262,8 +262,7 @@ module.exports.deleteStudent = async (req, res, next) => {
       }
     }
     return res.status(200).json({
-      status: 'success',
-      deleted: studentDeleted
+      success: true
     })
   } catch (err) {
     console.log(err)

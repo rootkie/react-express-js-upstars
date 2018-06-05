@@ -32,6 +32,7 @@ const MainContentStyle = {
 }
 
 let forceRefresh
+let myInterceptor
 
 class MainCtrl extends Component {
   static propTypes = {
@@ -112,12 +113,14 @@ class MainCtrl extends Component {
     super()
     this.isLoggedIn()
     forceRefresh = window.setInterval(this.changeState, 600000)
-    axios.interceptors.response.use(response => {
+    // Catch all 403 /404 / 500 errors that occur in the dashboard. Login is not affected.
+    myInterceptor = axios.interceptors.response.use(response => {
       return response
     }, error => {
       if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
         let errorCode = error.response.status
         this.setState({errorCode})
+        // Error catches in the local code are ignored.
         return Promise.reject(error)
       } else {
         return true
@@ -135,6 +138,8 @@ class MainCtrl extends Component {
 
   componentWillUnmount () {
     window.clearInterval(forceRefresh)
+    // Once unmount, remove the axios interceptors so that there might not be unintended effects to other pages etc
+    axios.interceptors.request.eject(myInterceptor)
   }
 
   changeState = () => {

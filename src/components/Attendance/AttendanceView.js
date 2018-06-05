@@ -193,7 +193,6 @@ class AttendanceView extends Component {
         classId
       }
     }).then(response => {
-      console.log(response)
       this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
       this.setState({isLoading: false})
       this.context.router.history.push('/attendance/search')
@@ -213,7 +212,6 @@ class AttendanceView extends Component {
       hours,
       type
     }).then((response) => {
-      console.log(response)
       this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true, isLoading: false })
     })
   }
