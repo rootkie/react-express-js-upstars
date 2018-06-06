@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Form, Button, Header, Table, Icon, Menu, Segment, Message, Dimmer, Loader } from 'semantic-ui-react'
+import { Form, Button, Header, Table, Icon, Menu, Segment, Message, Dimmer, Loader, Modal } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
-import { string, array } from 'prop-types'
+import { string, array, object } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -67,13 +67,17 @@ const initialState = {
   activeItem: 'Personal Info',
   errorMessage: '',
   edit: false,
-  buttonContent: 'Toggle Edit Mode'
+  buttonContent: 'Toggle Edit Mode',
+  deactivate: false
 }
 
 class VolunteerEdit extends Component {
   static propTypes = {
     userId: string,
     roles: array.isRequired
+  }
+  static contextTypes = {
+    router: object.isRequired
   }
   state = {
     ...initialState
@@ -320,11 +324,35 @@ class VolunteerEdit extends Component {
 
   handleItemClick = (e, { name }) => this.setState({ activeItem: name })
 
+  deactivateAccount = (e) => {
+    this.setState({ deactivate: true })
+  }
+
+  handleDeactivate = (e) => {
+    let { userId } = this.props
+    axios.delete('users', { data: {
+      userId
+    }
+    })
+      .then(response => {
+        window.localStorage.removeItem('token')
+        window.localStorage.removeItem('refreshToken')
+        this.context.router.history.replace('/')
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  handleClose = () => {
+    this.setState({ deactivate: false })
+  }
+
   render () {
     const { name, address, postalCode, handphone, homephone, schoolLevel, schoolClass, buttonContent, classes, realCommencementDate, interviewDate,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot, interviewNotes, adminNotes,
       hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
-      commencementDate, exitDate, error, activeItem, errorMessage, isLoading } = this.state // submitted version are used to display the info sent through POST (not necessary)
+      commencementDate, exitDate, error, activeItem, errorMessage, isLoading, deactivate } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     const { roles } = this.props
 
@@ -793,6 +821,27 @@ class VolunteerEdit extends Component {
               </Table.Row>))}
           </Table.Body>
         </Table>
+        <Header as='h3' dividing>Personal Settings</Header>
+        <Button negative animated='vertical' onClick={this.deactivateAccount}>
+          <Button.Content visible>Deactivate your account</Button.Content>
+          <Button.Content hidden>
+            <Icon name='trash' />
+          </Button.Content>
+        </Button>
+        <Modal open={deactivate} onClose={this.close} dimmer='blurring' size='fullscreen'>
+          <Modal.Header>Is this goodbye? =(</Modal.Header>
+          <Modal.Content>
+            <Modal.Description>
+              <Header>Before you go...</Header>
+              <p>Note that the account deactivation is highly irreverisble</p>
+              <p>UPStars thank you for being with us. We hope to have you onboard again!</p>
+            </Modal.Description>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button negative icon='close' labelPosition='right' content='Never mind, keep my account' onClick={this.handleClose} />
+            <Button positive icon='checkmark' labelPosition='right' content='Deactivate' onClick={this.handleDeactivate} />
+          </Modal.Actions>
+        </Modal>
       </div>
     )
   }
