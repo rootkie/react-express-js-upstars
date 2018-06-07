@@ -42,10 +42,6 @@ class ClassWrap extends Component {
       .then(response => {
       // Adds the new class to the array of ACTIVE classes so that when you click view you can see it immediately.
         this.setState({ classData: classData.concat({ ...classDataToSubmit, _id: response.data.newClass._id }) })
-        return response
-      })
-      .catch(err => {
-        console.log(err)
       })
   }
 

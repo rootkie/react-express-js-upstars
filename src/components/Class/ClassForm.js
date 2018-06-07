@@ -21,7 +21,8 @@ const initialState = {
   dayAndTime: '',
   classId: '',
   startDate: moment(),
-  submitSuccess: false
+  submitSuccess: false,
+  serverErrorMessage: ''
 }
 
 // Import the functions declared in ClassWrap here as props to be called - for cleaner code
@@ -56,12 +57,12 @@ class ClassForm extends Component {
 
     try {
       let classData = await addClass(data)
-      console.log(classData)
+      // console.log(classData)
       // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
       this.setState({...initialState, classId: classData.data.newClass._id})
       this.showSuccess()
-    } catch (error) {
-      this.setState({serverErrorMessage: error.response.data.error})
+    } catch (err) {
+      this.setState({serverErrorMessage: err.response.data.error})
     }
   }
 
@@ -77,10 +78,15 @@ class ClassForm extends Component {
   }
 
   render () {
-    const { className, classType, venue, dayAndTime, submitSuccess, classId } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { className, classType, venue, dayAndTime, submitSuccess, classId, serverErrorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
       <div>
         {submitSuccess && <Message positive onDismiss={this.closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message> }
+        <Message
+          hidden={serverErrorMessage.length === 0}
+          negative
+          content={serverErrorMessage}
+        />
         <Header as='h3' dividing>Class information</Header>
         <Form onSubmit={this.handleSubmit}>
           <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />

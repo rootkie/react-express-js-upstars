@@ -19,8 +19,8 @@ https.createServer(options, app).listen(443); //Remove options if the cert is no
 
 const app = require('./app')
 
-// const PORT = process.env.PORT || 3000
-const PORT = process.env.PORT || 1444
+const PORT = process.env.PORT || 3000
+// const PORT = process.env.PORT || 1444
 // Comment the bottom part if you are using the https.createServer function instead of app.listen
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`)

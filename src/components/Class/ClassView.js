@@ -82,7 +82,7 @@ class ClassView extends Component {
             </Table.Header>
 
             <Table.Body>
-              {classData.map((Class, i) => (
+              {classData.length > 0 && classData.map((Class, i) => (
                 <Table.Row key={`class-${i}`}>
                   {roles.indexOf('SuperAdmin') !== -1 &&
                   <Table.Cell collapsing>
@@ -98,6 +98,21 @@ class ClassView extends Component {
                   <Table.Cell>{Class.venue}</Table.Cell>
                   <Table.Cell>{Class.status}</Table.Cell>
                 </Table.Row>))}
+              {/* For class with no data sets */}
+              {classData.length === 0 &&
+                <Table.Row key={`class-1`}>
+                  {roles.indexOf('SuperAdmin') !== -1 &&
+                  <Table.Cell collapsing>
+                    <Checkbox />
+                  </Table.Cell>
+                  }
+                  <Table.Cell collapsing>1</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                  <Table.Cell>No results found</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                </Table.Row>}
             </Table.Body>
             <Table.Footer fullWidth>
               <Table.Row>

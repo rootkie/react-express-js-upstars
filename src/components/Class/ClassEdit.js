@@ -32,6 +32,7 @@ const initialState = {
   userSelected: [],
   isLoading: false,
   edit: false,
+  serverErrorMessage: '',
   ButtonContent: 'Edit Class Information'
 }
 
@@ -41,7 +42,7 @@ class ClassEdit extends Component {
   static propTypes = {
     editClass: func,
     id: string,
-    roles: array.isRequried
+    roles: array.isRequired
   }
 
   constructor (props) {
@@ -144,7 +145,7 @@ class ClassEdit extends Component {
         this.showSuccess()
         this.setState({edit: false, ButtonContent: 'Edit Class Information'})
       } catch (error) {
-        // this.setState({serverErrorMessage: error.response.data.error})
+        this.setState({serverErrorMessage: error.response.data.error})
         console.log(error)
       }
     }
@@ -254,7 +255,7 @@ class ClassEdit extends Component {
     // 3. students / users Selected: The array of ids that are checked, prepared to be deleted.
     // 4. Edit Mode is switched off. This determines the look of the page. Once the roles are finished, we can limit the edit function to only Admins
     const { roles } = this.props
-    const { submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected, students, users, edit, ButtonContent } = this.state // submitted version are used to display the info sent through POST (not necessary)
+    const { submitSuccess, oneClassData, isLoading, studentsValue, usersValue, studentSelected, userSelected, students, users, edit, ButtonContent, serverErrorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
     // Renders if isLoading is true
     if (isLoading) {
       return (
@@ -267,6 +268,11 @@ class ClassEdit extends Component {
     } else {
       return (
         <div>
+          <Message
+            hidden={serverErrorMessage.length === 0}
+            negative
+            content={serverErrorMessage}
+          />
           <Header as='h3' dividing>Class information</Header>
           <Form onSubmit={this.handleSubmit}>
             <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly={!edit} required />

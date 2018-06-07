@@ -135,7 +135,7 @@ module.exports.changePassword = async (req, res, next) => {
         refreshToken: config.refreshToken
       }
     })
-    let link = `http://localhost:3000/resetpassword/${encodedString}`
+    let link = `${config.domainName}/resetpassword/${encodedString}`
     let message = {
       from: config.user,
       to: email,
@@ -248,7 +248,7 @@ module.exports.register = async (req, res, next) => {
 
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: '6LdCS1IUAAAAAKByA_qbWeQGuKCgBXNmD_k2XWSK',
+      secret: config.captchaSecret,
       response: captchaCode
     }))
     .then(async response => {
@@ -350,7 +350,7 @@ module.exports.register = async (req, res, next) => {
             refreshToken: config.refreshToken
           }
         })
-        let link = `http://localhost:3000/verifyaccount/${encodedString}`
+        let link = `${config.domainName}/verifyaccount/${encodedString}`
         let message = {
           from: config.user,
           to: email,

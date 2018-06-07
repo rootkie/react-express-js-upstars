@@ -16,8 +16,7 @@ module.exports.addClass = async (req, res, next) => {
 
     // Check if the class already exist and prevent duplicate creation
     const classExist = await Class.findOne({
-      className,
-      startDate
+      className
     })
 
     if (classExist) {
@@ -44,10 +43,11 @@ module.exports.addClass = async (req, res, next) => {
         error: 'There is something wrong with the client input. That is all we know.'
       })
     }
-    await newClass.save()
+    const newClassCreated = await newClass.save()
 
     res.status(201).json({
-      success: true
+      success: true,
+      newClass: newClassCreated
     })
   } catch (err) {
     console.log(err)

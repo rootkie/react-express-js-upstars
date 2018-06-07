@@ -132,7 +132,7 @@ module.exports.getAttendance = async (req, res, next) => {
 
     // Find attendance based on the filters of class, dateStart and dateEnd if provided.
     let attendances = Attendance.find()
-      .limit(150)
+      .limit(200)
       .populate('class', ['className'])
       .select('-users -students -updatedAt -createdAt')
       .sort('class.className -date')

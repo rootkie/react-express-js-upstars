@@ -1,6 +1,5 @@
 const User = require('../models/user')
 const Class = require('../models/class')
-let util = require('../util.js')
 
 module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
   try {
@@ -10,6 +9,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
       newRoles
     } = req.body
     let edited = {}
+    let editedClass
     // Check if these fields exist, if it does it will get updated in the database
     if (newStatus) {
       edited.status = newStatus
@@ -31,7 +31,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
     // Add the user back to the previous classes if admin restores Suspended or Deleted Account.
     // Else, the user would be deleted from the respective classes if they are suspended or deleted.
     if (updatedUser.status === 'Active' && updatedUser.classes) {
-      Class.update({
+      editedClass = await Class.update({
         _id: {
           $in: updatedUser.classes
         }
@@ -44,7 +44,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
         multi: true
       })
     } else if (updatedUser.classes) {
-      Class.update({
+      editedClass = await Class.update({
         _id: {
           $in: updatedUser.classes
         }
@@ -60,7 +60,8 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
 
     // Returns token and necessary information
     return res.status(200).json({
-      success: true
+      success: true,
+      editedClass
     })
   } catch (err) {
     console.log(err)

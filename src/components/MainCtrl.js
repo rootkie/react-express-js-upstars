@@ -15,8 +15,8 @@ import FourZeroThree from './Error/403'
 import FourZeroFour from './Error/404'
 import FiveHundred from './Error/500'
 
-// axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-axios.defaults.baseURL = 'http://127.0.0.1:1444/api/'
+axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
+// axios.defaults.baseURL = 'http://127.0.0.1:1444/api/'
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
@@ -120,11 +120,10 @@ class MainCtrl extends Component {
       if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
         let errorCode = error.response.status
         this.setState({errorCode})
-        // Error catches in the local code are ignored.
-        return Promise.reject(error)
-      } else {
         return true
       }
+      // Error catches in the local code are ignored.
+      return Promise.reject(error)
     })
   }
 
