@@ -1,46 +1,52 @@
 import React, { Component } from 'react'
-import { array, func, bool } from 'prop-types'
+import { func, array } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
+import axios from 'axios'
+import { filterData } from '../../utils'
 
 const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },
   { key: 'F', text: 'Female', value: 'F' }
 ]
 
-// From primary 1 to secondary 4
-const ageOptions = [
-  { key: '7', text: '7', value: '7' },
-  { key: '8', text: '8', value: '8' },
-  { key: '9', text: '9', value: '9' },
-  { key: '10', text: '10', value: '10' },
-  { key: '11', text: '11', value: '11' },
-  { key: '12', text: '12', value: '12' },
-  { key: '13', text: '13', value: '13' },
-  { key: '14', text: '14', value: '14' }
-]
-
-class StudentView extends Component {
+class VolunteerView extends Component {
   static propTypes = {
-    studentData: array.isRequired,
-    deleteStudent: func.isRequired,
-    searchFilter: func.isRequired,
-    isLoading: bool,
+    deleteUser: func.isRequired,
     roles: array.isRequired
   }
-
-  state = {
-    selected: [],
-    deleteConfirmationVisibility: false,
-    searchName: '',
-    moreOptions: false,
-    genderSelector: [],
-    ageSelector: []
+  constructor (props) {
+    super(props)
+    this.state = {
+      selected: [],
+      deleteConfirmationVisibility: false,
+      searchName: '',
+      moreOptions: false,
+      genderSelector: [],
+      isLoading: true,
+      volunteerData: [],
+      editedData: []
+    }
+    this.getVolunteers()
   }
 
-  handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually the ID of the student
+  getVolunteers = () => {
+    axios.get('/users')
+      .then(response => {
+        let volunteerData = response.data.users
+        let editedData = response.data.users
+        console.log(volunteerData)
+        this.setState({ isLoading: false, volunteerData, editedData })
+      })
+      .catch(err => {
+        console.log(err)
+        this.setState({isLoading: false})
+      })
+  }
+
+  handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually the ID of the user
     let { selected } = this.state
     if (checked) {
       selected.push(_id)
@@ -56,8 +62,10 @@ class StudentView extends Component {
 
   handleDelete = () => {
     const { selected } = this.state
-    const { deleteStudent } = this.props
-    selected.length > 0 && deleteStudent(selected)
+    const { deleteUser } = this.props
+    this.setState({ isLoading: true })
+    selected.length > 0 && deleteUser(selected)
+    setTimeout(this.getVolunteers(), 1500)
     this.setState({selected: []})
   }
 
@@ -78,23 +86,29 @@ class StudentView extends Component {
 
   handleFilter = (e) => {
     e.preventDefault()
-    const { searchFilter } = this.props
-    const { searchName, ageSelector, genderSelector } = this.state
+    const { searchName, genderSelector, volunteerData } = this.state
     const options = []
     searchName.length > 0 && options.push({field: 'profile-name', value: searchName})
-    ageSelector.length > 0 && options.push({field: 'profile-age', value: ageSelector})
     genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
-    searchFilter(options)
+    if (options.length === 0) {
+      this.setState({ editedData: volunteerData })
+    } else {
+      this.searchFilter(options, volunteerData)
+    }
+  }
+
+  searchFilter = (criteria, userData) => {
+    this.setState({ editedData: filterData(userData, criteria) })
   }
 
   clearAll = e => {
     e.preventDefault()
-    this.setState({ genderSelector: [], ageSelector: [], searchName: '' })
+    this.setState({ genderSelector: [], searchName: '' })
   }
 
   render () {
-    const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, ageSelector } = this.state
-    const { studentData, isLoading, roles } = this.props
+    const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, editedData } = this.state
+    const { roles } = this.props
     if (isLoading) {
       return (
         <div>
@@ -123,10 +137,6 @@ class StudentView extends Component {
                       <label>Filter by Gender</label>
                       <Dropdown name='genderSelector' value={genderSelector} placeholder='Male or Female' multiple selection options={genderOptions} onChange={this.handleChange} />
                     </Form.Field>
-                    <Form.Field>
-                      <label>Filter by Age</label>
-                      <Dropdown name='ageSelector' value={ageSelector} placeholder='Select age range' search multiple selection options={ageOptions} onChange={this.handleChange} />
-                    </Form.Field>
                   </div>}
 
                 </Form>
@@ -144,17 +154,17 @@ class StudentView extends Component {
           </Table.Header>
 
           <Table.Body>
-            {studentData.map((student, i) => (
-              <Table.Row key={`student-${i}`}>
+            {editedData.map((user, i) => (
+              <Table.Row key={`user-${i}`}>
                 {roles.indexOf('SuperAdmin') !== -1 &&
                 <Table.Cell collapsing>
-                  <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
+                  <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
                 </Table.Cell>
                 }
-                <Table.Cell><Link to={`/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
-                <Table.Cell>{moment().diff(student.profile.dob, 'years')}</Table.Cell>
-                <Table.Cell>{student.profile.icNumber}</Table.Cell>
-                <Table.Cell>{student.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
+                <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
+                <Table.Cell>{user.profile.nric}</Table.Cell>
+                <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
               </Table.Row>))}
           </Table.Body>
 
@@ -164,17 +174,12 @@ class StudentView extends Component {
               <Table.HeaderCell colSpan='4'>
                 {roles.indexOf('SuperAdmin') !== -1 &&
                 <div>
-                  <Link to='/students/add'>
-                    <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
-                      <Icon name='user' />New Student
-                    </Button>
-                  </Link>
                   <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
                   <Confirm
                     open={deleteConfirmationVisibility}
                     header='Deleting the following students:'
                     content={selected.map((id) => (
-                      studentData.filter((student) => (student._id === id))[0].profile.name
+                      editedData.filter((user) => (user._id === id))[0].profile.name
                     )).join(', ')}
                     onCancel={this.handleDeleteConfirmation('cancel')}
                     onConfirm={this.handleDeleteConfirmation('confirm')}
@@ -190,4 +195,4 @@ class StudentView extends Component {
   }
 }
 
-export default StudentView
+export default VolunteerView

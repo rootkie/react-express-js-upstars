@@ -2,7 +2,6 @@ const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
 const External = require('../models/external-personnel')
-const util = require('../util')
 
 // SuperAdmin
 module.exports.addClass = async (req, res, next) => {
@@ -17,8 +16,7 @@ module.exports.addClass = async (req, res, next) => {
 
     // Check if the class already exist and prevent duplicate creation
     const classExist = await Class.findOne({
-      className,
-      startDate
+      className
     })
 
     if (classExist) {
@@ -48,6 +46,7 @@ module.exports.addClass = async (req, res, next) => {
     const newClassCreated = await newClass.save()
 
     res.status(201).json({
+      success: true,
       newClass: newClassCreated
     })
   } catch (err) {
@@ -59,7 +58,6 @@ module.exports.addClass = async (req, res, next) => {
     } else next(err)
   }
 }
-
 
 // SuperAdmin
 module.exports.editClass = async (req, res, next) => {
@@ -98,7 +96,7 @@ module.exports.editClass = async (req, res, next) => {
     }
 
     res.status(200).json({
-      editedClass: newClass
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -112,18 +110,28 @@ module.exports.editClass = async (req, res, next) => {
   }
 }
 
-
 // Everyone
 // The special thing about classes is they can be either stopped or active.
 module.exports.getAll = async (req, res, next) => {
   try {
+    let { classes, roles } = req.decoded
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
-    }).select('-createdAt')
+    }).select('-createdAt -students -users -externalPersonnel -updatedAt -startDate')
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
-    }).select('-createdAt')
+    }).select('-createdAt -students -users -externalPersonnel -updatedAt -startDate')
+    // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
+    if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
+      console.log(classes)
+      let filteredActive = activeClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
+      let filteredStop = stoppedClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
+      return res.status(200).json({
+        activeClasses: filteredActive,
+        stoppedClasses: filteredStop
+      })
+    }
     return res.status(200).json({
       activeClasses,
       stoppedClasses
@@ -146,21 +154,10 @@ module.exports.getClassById = async (req, res, next) => {
         error: 'Please provide a classId'
       })
     }
-    let approved = await util.checkClass({
-      roles: ['Admin', 'SuperAdmin'],
-      params: classId,
-      decoded: req.decoded
-    })
-    // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
-      throw ({
-        status: 403,
-        error: 'Your client does not have the permissions to access this function.'
-      })
-    }
 
-    // Find a class and populate the students, users and external people to get their name
+    // Find a class and populate the students, users and external people to get their name. Using class1 because class is a reserved word
     const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
+      .select('-updatedAt -createdAt')
     // If class does not exist, throw an error
     if (!class1) {
       throw ({
@@ -213,7 +210,7 @@ module.exports.deleteClass = async (req, res, next) => {
       })
     }
     return res.status(200).json({
-      classDeleted
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -501,7 +498,7 @@ module.exports.assignExternalPersonnelToClass = async (req, res, next) => {
       res.status(err.status).send({
         error: err.error
       })
-    } else if (err.name == 'ValidationError') {
+    } else if (err.name === 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
       })

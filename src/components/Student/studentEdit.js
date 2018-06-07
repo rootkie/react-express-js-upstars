@@ -1,16 +1,22 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment } from 'semantic-ui-react'
-import { func, object } from 'prop-types'
+import { Form, Message, Button, Table, Icon, Menu, Segment, Dimmer, Loader, Header } from 'semantic-ui-react'
+import { func, string, array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
+import axios from 'axios'
+import { Link } from 'react-router-dom'
 import 'react-datepicker/dist/react-datepicker.css'
-import ReCAPTCHA from 'react-google-recaptcha'
-
-let captcha
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
   { key: 'f', text: 'Female', value: 'F' }
+]
+
+const statusOptions = [
+  { key: 'active', text: 'Active', value: 'Active' },
+  { key: 'stopped', text: 'Stopped', value: 'Stopped' },
+  { key: 'deleted', text: 'Deleted', value: 'Deleted' },
+  { key: 'suspended', text: 'Suspended', value: 'Suspended' }
 ]
 
 const citizenshipOptions = [
@@ -36,7 +42,7 @@ const initialState = {
   profile: {
     name: '',
     icNumber: '',
-    dob: null,
+    dob: '',
     address: '',
     gender: '',
     nationality: '',
@@ -49,20 +55,20 @@ const initialState = {
     name: '',
     icNumber: '',
     nationality: '',
-    contactNumber: undefined,
+    contactNumber: '',
     email: '',
     occupation: '',
-    income: undefined
+    income: ''
   },
 
   mother: {
     name: '',
     icNumber: '',
     nationality: '',
-    contactNumber: undefined,
+    contactNumber: '',
     email: '',
     occupation: '',
-    income: undefined
+    income: ''
   },
 
   otherFamily: [], // each object {name, relationship, age}
@@ -76,40 +82,81 @@ const initialState = {
 
   /* Official use */
   admin: {
-    interviewDate: undefined,
+    interviewDate: '',
     interviewNotes: '',
-    commencementDate: undefined,
+    commencementDate: '',
     adminNotes: '',
-    exitDate: undefined,
+    exitDate: '',
     exitReason: ''
   },
 
-  /* Terms and conditions */
-  terms: false,
-  termsDetails: false,
+  status: '',
+  classes: [],
 
   tuitionChoices: {
     Cdac: false,
     Mendaki: false,
     Private: false
-  },
-
-  error: [],
-  serverError: false,
-  activeItem: 'Personal Info',
-  captchaCode: ''
+  }
 }
 
-class StudentForm extends Component {
+class StudentEdit extends Component {
   static propTypes = {
-    addStudent: func
+    editStudent: func,
+    id: string,
+    roles: array.isRequired
   }
 
-  static contextTypes = {
-    router: object.isRequired
+  constructor (props) {
+    super(props)
+    this.state = {
+      isLoading: true,
+      error: [],
+      serverError: false,
+      activeItem: 'Personal Info',
+      submitSuccess: false,
+      edit: false,
+      buttonContent: 'Toggle Edit Mode',
+      ...initialState
+    }
   }
 
-  state = { ...initialState }
+  // Before the component mounts, call the getStudent function to retrieve everything about the student
+  // But since reacts runs it async, it is likely the API call is only completed after the rendering starts, thus the initial state declares them to
+  // be blank fields, users will however be unable to see because of the loading screen.
+  componentWillMount () {
+    this.getStudent(this.props.id)
+  }
+
+  getStudent = (studentId) => {
+    axios.get(`students/${studentId}`)
+      .then(response => {
+        let studentData = response.data.student
+        studentData.profile.dob = moment(studentData.profile.dob)
+        if (studentData.admin.commencementDate) studentData.admin.commencementDate = moment(studentData.admin.commencementDate)
+        if (studentData.admin.interviewDate) studentData.admin.interviewDate = moment(studentData.admin.interviewDate)
+        if (studentData.admin.exitDate) studentData.admin.exitDate = moment(studentData.admin.exitDate)
+        this.setState({
+          profile: studentData.profile,
+          father: studentData.father,
+          mother: studentData.mother,
+          misc: studentData.misc,
+          otherFamily: studentData.otherFamily,
+          status: studentData.status,
+          tuitionChoices: {
+            CDAC: studentData.misc.tuition.includes('CDAC'),
+            Mendaki: studentData.misc.tuition.includes('Mendaki'),
+            Private: studentData.misc.tuition.includes('Private')
+          },
+          classes: studentData.classes,
+          isLoading: false
+        })
+        let { roles } = this.props
+        if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+          this.setState({ admin: studentData.admin })
+        }
+      })
+  }
 
   checkRequired = (checkArray) => {
     const error = []
@@ -124,143 +171,154 @@ class StudentForm extends Component {
   }
 
   handleChange = (e, { name, value, checked }) => {
-    const nameArr = name.split('-') // ['father', 'name']
-    const parentProp = nameArr[0]
-    const childProp = nameArr[1]
-    if (childProp) {
-      this.setState({
-        [parentProp]: {
-          ...this.state[parentProp],
-          [childProp]: value || checked
-        }
-      })
-    } else {
-      this.setState({ [parentProp]: value || checked })
+    let { edit } = this.state
+    if (edit) {
+      const nameArr = name.split('-') // ['father', 'name']
+      const parentProp = nameArr[0]
+      const childProp = nameArr[1]
+      if (childProp) {
+        this.setState({
+          [parentProp]: {
+            ...this.state[parentProp],
+            [childProp]: value || checked
+          }
+        })
+      } else {
+        this.setState({ [parentProp]: value || checked })
+      }
     }
   }
 
   handleDateChange = (dateType) => (date) => {
-    const dateTypeArr = dateType.split('-')
-    const parentProp = dateTypeArr[0]
-    const childProp = dateTypeArr[1]
-    this.setState({
-      [parentProp]: {
-        ...this.state[parentProp],
-        [childProp]: date
-      }
-    })
+    let { edit } = this.state
+    if (edit) {
+      const dateTypeArr = dateType.split('-')
+      const parentProp = dateTypeArr[0]
+      const childProp = dateTypeArr[1]
+      this.setState({
+        [parentProp]: {
+          ...this.state[parentProp],
+          [childProp]: date
+        }
+      })
+    }
   }
 
-  showSuccess = (studentId) => {
-    this.context.router.history.push(`/students/edit/${studentId}`)
+  showSuccess = () => {
+    this.setState({submitSuccess: true, isLoading: false, buttonContent: 'Toggle Edit Mode'})
+    setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
   handleSubmit = async e => {
     e.preventDefault()
+    this.setState({ isLoading: true })
     /* submit inputs in fields (stored in state) */
-    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
-    const { addStudent } = this.props
-
+    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices, edit, status } = this.state
+    const { editStudent } = this.props
+    if (!edit) {
+      this.setState({ edit: true, isLoading: false, buttonContent: 'Save Edits' })
+    } else {
     // check required fields
-    const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
+      const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address'])
 
-    if (error.length === 0) {
-    // Do some wizardry to format data here
-      let studentDataToSubmit = {
-        profile, father, mother, otherFamily, misc, admin
+      if (error.length === 0) {
+        // Do some wizardry to format data here
+        let studentDataToSubmit = {
+          profile, father, mother, otherFamily, misc, admin, status
+        }
+        // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
+        // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
+        // else if that option is not checked (false), the list will remain the same (nothing added)
+        const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
+        ), [])
+
+        studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
+
+        try {
+          await editStudent(studentDataToSubmit)
+          this.showSuccess()
+        // Clear everything to show an empty page. Might change it though.
+        } catch (error) {
+          console.log(error)
+          this.setState({serverError: true})
+        }
+      } else { // incomplete Field
+        console.log('Incomplete Fields')
+        this.setState({error})
       }
-      // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
-      // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
-      // else if that option is not checked (false), the list will remain the same (nothing added)
-      const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
-      ), [])
-
-      studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
-
-      try {
-        let submittedData = await addStudent(studentDataToSubmit)
-        // Populate the field so that the user can click the button to proceed to the page.
-        this.showSuccess(submittedData._id)
-      } catch (error) {
-        this.setState({serverError: true})
-      }
-    } else { // incomplete Field
-      console.log('Incomplete Fields')
-      this.setState({error})
     }
   }
-
-  handleTermsOpen = (e) => {
-    captcha.execute()
-    if (this.state.terms === false) this.setState({termsDetails: true})
-  }
-
-  handleTermsClose = (e) => this.setState({termsDetails: false})
-
-  handleTermsDisagree = e => this.setState({terms: false, termsDetails: false})
 
   // For the filling in of those fields where user can add / delete accordingly.This functions add / delete a whole row
   // The 2 fields are to be handled separately because they exists in a different state, academicInfo is nested within misc
   handleRepeatable = (option, field) => (e) => {
     e.preventDefault()
-    if (option === 'inc') {
-      if (field === 'otherFamily') {
-        const updatingArray = this.state.otherFamily
-        updatingArray.push({
-          name: '',
-          relationship: '',
-          age: undefined
-        })
-        this.setState({otherFamily: updatingArray})
-      } else if (field === 'academicInfo') {
-        const updatingArray = this.state.misc.academicInfo
-        updatingArray.push({
-          year: undefined,
-          term: undefined,
-          english: undefined,
-          math: undefined,
-          motherTongue: undefined,
-          science: undefined,
-          overall: undefined
-        })
-        let misc = {...this.state.misc}
-        misc.academicInfo = updatingArray
-        this.setState({misc})
-      }
-    } else if (option === 'dec') { // remove last item
-      if (field === 'otherFamily') this.setState({otherFamily: this.state.otherFamily.slice(0, this.state.otherFamily.length - 1)})
-      else if (field === 'academicInfo') {
-        let misc = {...this.state.misc}
-        misc.academicInfo = misc.academicInfo.slice(0, misc.academicInfo.length - 1)
-        this.setState({misc})
+    let {edit} = this.state
+    if (edit) {
+      if (option === 'inc') {
+        if (field === 'otherFamily') {
+          const updatingArray = this.state.otherFamily
+          updatingArray.push({
+            name: '',
+            relationship: '',
+            age: ''
+          })
+          this.setState({otherFamily: updatingArray})
+        } else if (field === 'academicInfo') {
+          const updatingArray = this.state.misc.academicInfo
+          updatingArray.push({
+            year: '',
+            term: '',
+            english: '',
+            math: '',
+            motherTongue: '',
+            science: '',
+            overall: ''
+          })
+          let misc = {...this.state.misc}
+          misc.academicInfo = updatingArray
+          this.setState({misc})
+        }
+      } else if (option === 'dec') { // remove last item
+        if (field === 'otherFamily') this.setState({otherFamily: this.state.otherFamily.slice(0, this.state.otherFamily.length - 1)})
+        else if (field === 'academicInfo') {
+          let misc = {...this.state.misc}
+          misc.academicInfo = misc.academicInfo.slice(0, misc.academicInfo.length - 1)
+          this.setState({misc})
+        }
       }
     }
   }
 
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+  handleItemClick = (e, { name }) => {
+    if (this.state.edit) {
+      this.setState({ activeItem: name })
+    }
+  }
+
+  handleMenuClick = (e, { name }) => this.setState({ activeItem: name })
 
   // This is for handling the individual fields within the repeatables
   updateRepeatableChange = (index, property) => (e, {value}) => {
-    const otherFamily = this.state.otherFamily
-    otherFamily[index][property] = value
-    this.setState({otherFamily})
+    let {edit} = this.state
+    if (edit) {
+      const otherFamily = this.state.otherFamily
+      otherFamily[index][property] = value
+      this.setState({otherFamily})
+    }
   }
 
   updateRepeatableChangeForAcademic = (index, property) => (e, {value}) => {
-    let misc = {...this.state.misc}
-    misc.academicInfo[index][property] = value
-    this.setState({misc})
-  }
-
-  // Specially added for captcha validation by Google
-  captchaChange = value => {
-    this.setState({ captchaCode: value })
+    let {edit} = this.state
+    if (edit) {
+      let misc = {...this.state.misc}
+      misc.academicInfo[index][property] = value
+      this.setState({misc})
+    }
   }
 
   render () {
-    const {
-      profile, father, mother, otherFamily, misc, admin, terms, tuitionChoices, termsDetails, error, serverError, activeItem
-    } = this.state
+    const { isLoading, profile, father, mother, otherFamily, misc, admin, status, submitSuccess, tuitionChoices, error, serverError, activeItem, buttonContent, classes } = this.state
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
@@ -268,12 +326,20 @@ class StudentForm extends Component {
 
     const { adminNotes, interviewDate, interviewNotes, commencementDate, exitDate, exitReason } = admin
 
+    const { roles } = this.props
+
     return (
       <div>
-        <Menu attached='top' tabular widths={3} inverted>
-          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />Personal Info</Menu.Item>
-          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />Personal Info</Menu.Item>
-          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'orange'}><Icon name='dashboard' />For office use</Menu.Item>
+        <Dimmer active={isLoading} inverted>
+          <Loader indeterminate active={isLoading}>Loading Data</Loader>
+        </Dimmer>
+        {/* Essentially, I'm using basic html to restrict access, I'll see how I can restrict them in the API response */}
+        <Menu attached='top' tabular widths={(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) ? 3 : 2} inverted>
+          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleMenuClick} color={'teal'} />
+          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleMenuClick} color={'blue'} />
+          {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
+          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleMenuClick} color={'green'} />
+          }
         </Menu>
         {/* The form only renders part of the form accordingly to the tab selected
         Most of the fields have names of '(parent)-(child)'. This is such that they can be separated easily by the hyphen
@@ -318,31 +384,31 @@ class StudentForm extends Component {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {academicInfo.map((year, i) => (
+                { academicInfo.map((year, i) => (
                   <Table.Row key={i}>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
+                      <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={this.updateRepeatableChangeForAcademic(i, 'term')} />
+                      <Form.Input transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={this.updateRepeatableChangeForAcademic(i, 'term')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChangeForAcademic(i, 'english')} />
+                      <Form.Input transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChangeForAcademic(i, 'english')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChangeForAcademic(i, 'math')} />
+                      <Form.Input transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChangeForAcademic(i, 'math')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChangeForAcademic(i, 'motherTongue')} />
+                      <Form.Input transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChangeForAcademic(i, 'motherTongue')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={this.updateRepeatableChangeForAcademic(i, 'science')} />
+                      <Form.Input transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={this.updateRepeatableChangeForAcademic(i, 'science')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
+                      <Form.Input transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
                     </Table.Cell>
                   </Table.Row>
-                ))}
+                )) }
               </Table.Body>
               <Table.Footer>
                 <Table.Row>
@@ -369,11 +435,11 @@ class StudentForm extends Component {
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Email' placeholder='email' type='email' name='father-email' value={father.email} onChange={this.handleChange} />
-              <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
+              <Form.Input label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Occupation' placeholder='Occupation' name='father-occupation' value={father.occupation} onChange={this.handleChange} />
-              <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
+              <Form.Input label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
             </Form.Group>
 
             {/* Mother's information */}
@@ -384,11 +450,11 @@ class StudentForm extends Component {
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Email' placeholder='email' type='email' name='mother-email' value={mother.email} onChange={this.handleChange} />
-              <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
+              <Form.Input label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
             </Form.Group>
             <Form.Group widths='equal'>
               <Form.Input label='Occupation' placeholder='Occupation' name='mother-occupation' value={mother.occupation} onChange={this.handleChange} />
-              <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
+              <Form.Input label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
             </Form.Group>
 
             {/* adding additional family members */}
@@ -413,7 +479,7 @@ class StudentForm extends Component {
                       <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamily[i].relationship} placeholder='Relationship' onChange={this.updateRepeatableChange(i, 'relationship')} />
                     </Table.Cell>
                     <Table.Cell>
-                      <Form.Input type='number' transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={this.updateRepeatableChange(i, 'age')} />
+                      <Form.Input transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={this.updateRepeatableChange(i, 'age')} />
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -446,6 +512,7 @@ class StudentForm extends Component {
           }
           { activeItem === 'For office use' &&
           <Segment attached='bottom'>
+            <Form.Select label='Status' options={statusOptions} placeholder='change status of student' name='status' value={status} onChange={this.handleChange} />
             <Form.Field error={error.includes('interviewDate')}>
               <label>Interview date</label>
               <DatePicker
@@ -481,52 +548,46 @@ class StudentForm extends Component {
           </Segment>
           }
 
-          {/* terms and conditions */}
-          <Form.Checkbox label={<label onClick={this.handleTermsOpen}>I agree to the Terms and Conditions</label>} name='terms' required onChange={this.handleChange} checked={terms} />
-          <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen'>
-            <Modal.Header>Terms and conditions</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <Header>Welcome to Ulu Pandan STARS</Header>
-                <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
-                   By signing up for a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
-                <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
-                   or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
-                <p>2. As you are creating an account on behalf of a student, please ensure that all information filled are correct as it represent the student. You, the admin, should take
-                  all responsibility for any wrong information entered that may impact the student's prospect of being able to be accepted into UPStars.
-                </p>
-                <p>3. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
-                <p>4. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
-                <Header>Terms and Conditions</Header>
-                <p>Last modified: June 1, 2017</p>
-              </Modal.Description>
-            </Modal.Content>
-            <Modal.Actions>
-              <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={this.handleTermsDisagree} />
-              <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={this.handleTermsClose} />
-            </Modal.Actions>
-          </Modal>
           <Message
             hidden={error.length === 0}
             negative
             content='Please Check Required Fields!'
           />
           <Message
+            hidden={!submitSuccess}
+            positive
+            content='Successfully Submitted and saved'
+          />
+          <Message
             hidden={!serverError}
             negative
             content='Server Error'
           />
-          <Form.Button type='submit'>Add student</Form.Button>
-          <ReCAPTCHA
-            ref={(el) => { captcha = el }}
-            size='invisible'
-            sitekey='6LdCS1IUAAAAAHaYU_yJyFimpPuJShH-i80kFj3F' // Dev key under Ying Keat's account (yingkeatwon@gmail.com)
-            onChange={this.captchaChange}
-          />
+          {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
+          <Form.Button type='submit'>{buttonContent}</Form.Button>
+          }
         </Form>
+        <Header as='h3' dividing>Classes</Header>
+        <Table compact celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell width='1'>S/N</Table.HeaderCell>
+              <Table.HeaderCell width='6'>Name</Table.HeaderCell>
+              <Table.HeaderCell width='5'>Status</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {classes.map((Class, i) => (
+              <Table.Row key={`class-${i}`}>
+                <Table.Cell>{i + 1}</Table.Cell>
+                <Table.Cell><Link to={`/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
+                <Table.Cell>{Class.status}</Table.Cell>
+              </Table.Row>))}
+          </Table.Body>
+        </Table>
       </div>
     )
   }
 }
 
-export default StudentForm
+export default StudentEdit

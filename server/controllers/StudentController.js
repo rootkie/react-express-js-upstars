@@ -1,52 +1,70 @@
+const axios = require('axios')
+const querystring = require('querystring')
 const Student = require('../models/student')
 const Class = require('../models/class')
-// Add student function works for SA only. If need ability for students to sign up, please tell me.
+const config = require('../config/constConfig')
+
+// Add student function works for everyone
 module.exports.addStudent = async (req, res, next) => {
-  try {
-    let edited = {}
+  let edited = {}
+  let { roles } = req.decoded
+  const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
 
-    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
-
-    // If editor has no admin rights, restrict the entering of Admin Field
-    if (req.body.admin) {
-      edited['admin'] = req.body.admin
-    }
-
-    // Use a loop to populate edited if field is present
-    for (let checkChanged of list) {
-      if (req.body[checkChanged]) {
-        edited[checkChanged] = await req.body[checkChanged]
-      }
-    }
-
-    // Update student based on IC Number and validate it
-    const newStudent = new Student(edited)
-    const error = await newStudent.validateSync()
-
-    if (error) {
-      console.error(error)
-      throw ({
-        status: 400,
-        error: 'There is something wrong with the client input. That is all we know.'
-      })
-    }
-
-    const successStudentSignup = await newStudent.save()
-    res.status(201).json({
-      newStudent: successStudentSignup
-    })
-  } catch (err) {
-    console.log(err)
-    if (err.code === 11000) {
-      return res.status(400).send({
-        error: 'Account already exist. If this is a mistake please contact our system admin.'
-      })
-    } else if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
+  // If editor has no admin rights, restrict the entering of Admin Field
+  if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) {
+    edited['admin'] = req.body.admin
   }
+
+  axios.post('https://www.google.com/recaptcha/api/siteverify',
+    querystring.stringify({
+      secret: config.captchaSecret,
+      response: req.body.captchaCode
+    }))
+    .then(async response => {
+      console.log(response.data)
+      try {
+        if (response.data.success === false) {
+          throw ({
+            status: 401,
+            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+          })
+        }
+        // Use a loop to populate edited if field is present
+        for (let checkChanged of list) {
+          if (req.body[checkChanged]) {
+            edited[checkChanged] = await req.body[checkChanged]
+          }
+        }
+
+        // Update student based on IC Number and validate it
+        const newStudent = new Student(edited)
+        const error = await newStudent.validateSync()
+
+        if (error) {
+          console.error(error)
+          throw ({
+            status: 400,
+            error: 'There is something wrong with the client input. That is all we know.'
+          })
+        }
+
+        const successStudentSignup = await newStudent.save().select('_id')
+        res.status(201).json({
+          newStudent: successStudentSignup
+        })
+      } catch (err) {
+        console.log(err)
+        if (err.code === 11000) {
+          return res.status(400).send({
+            error: 'Account already exist. If this is a mistake please contact our system admin.'
+          })
+        } else if (err.status) {
+          res.status(err.status).send({
+            error: err.error
+          })
+        } else next(err)
+      }
+    })
 }
 
 // Mentor / Admin / SuperAdmin only
@@ -98,9 +116,8 @@ module.exports.editStudentById = async (req, res, next) => {
         new: true,
         multi: true
       })
-    }
-    // If status if changed to anything other than Active, we will delete their IDs from the classes instead
-    else if (editedStudent.classes) {
+    } else if (editedStudent.classes) {
+      // If status if changed to anything other than Active, we will delete their IDs from the classes instead
       await Class.update({
         _id: {
           $in: editedStudent.classes
@@ -115,7 +132,7 @@ module.exports.editStudentById = async (req, res, next) => {
       })
     }
     res.status(200).json({
-      editedStudent
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -141,7 +158,7 @@ module.exports.getAll = async (req, res, next) => {
     // Find all students from database
     const students = await Student.find({
       status: 'Active'
-    })
+    }).select('profile.name profile.icNumber profile.dob profile.gender')
     return res.status(200).json({
       students
     })
@@ -150,13 +167,32 @@ module.exports.getAll = async (req, res, next) => {
     next(err)
   }
 }
+
+module.exports.getOtherStudents = async (req, res, next) => {
+  try {
+    // Find all students from database
+    const students = await Student.find({
+      status: {
+        $ne: 'Active'
+      }
+    }).select('profile.name profile.icNumber profile.dob profile.gender status')
+      .sort('status profile.name')
+    return res.status(200).json({
+      students
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
 // Everyone with token
 module.exports.getStudentById = async (req, res, next) => {
   try {
     let studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className status')
+    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt')
     if (!student) {
       throw ({
         status: 404,
@@ -227,8 +263,7 @@ module.exports.deleteStudent = async (req, res, next) => {
       }
     }
     return res.status(200).json({
-      status: 'success',
-      deleted: studentDeleted
+      success: true
     })
   } catch (err) {
     console.log(err)

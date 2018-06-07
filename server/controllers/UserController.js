@@ -3,17 +3,29 @@ const External = require('../models/external-personnel')
 const util = require('../util')
 const Class = require('../models/class')
 
-// Admin / SA
+// All
 module.exports.getAllUsers = async (req, res, next) => {
   try {
-    // Retrieve all users in the system
-    const users = await User.find({
-      'status': 'Active'
-    }).select('profile roles status').sort('profile.name')
+    let { roles, _id } = req.decoded
+    // Retrieve all users in the system based on roles and permissions
+    if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || roles.indexOf('Mentor') !== -1) {
+      const users = await User.find({
+        'status': 'Active'
+      }).select('profile.name profile.nric profile.gender profile.dob roles status').sort('profile.name')
 
-    return res.status(200).json({
-      users
-    })
+      return res.status(200).json({
+        users
+      })
+    } else {
+      const users = await User.find({
+        '_id': _id,
+        'status': 'Active'
+      }).select('profile.name profile.nric profile.gender profile.dob roles status').sort('profile.name')
+
+      return res.status(200).json({
+        users
+      })
+    }
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -25,23 +37,28 @@ module.exports.getAllUsers = async (req, res, next) => {
 }
 
 // Everyone but restricted to their own class checked using token
-module.exports.getUser = async(req, res, next) => {
+module.exports.getUser = async (req, res, next) => {
   try {
+    let user
     let approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
       params: req.params.id,
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
+    if (approved.auth === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
       })
     }
 
-    // Find user based on ID and retrieve its className
-    const user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt')
+    // Find user based on ID and retrieve its className. Restrict based on the need to view admin
+    if (approved.privilege === false) {
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -profile.dob -profile.nationality -commencementDate -email')
+    } else {
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -profile.dob -profile.nationality -commencementDate -email')
+    }
     if (!user) {
       throw ({
         status: 404,
@@ -82,14 +99,14 @@ module.exports.editUserParticulars = async (req, res, next) => {
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
+    if (approved.auth === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
       })
     }
 
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot', 'admin']
 
     // Go through list
     for (let checkChanged of list) {
@@ -103,7 +120,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       new: true,
       runValidators: true,
       runSettersOnQuery: true
-    }).select('-password -updatedAt -createdAt')
+    }).select('-password -updatedAt -createdAt -admin')
 
     if (!user) {
       throw ({
@@ -111,8 +128,9 @@ module.exports.editUserParticulars = async (req, res, next) => {
         error: 'The user you requested to edit does not exist.'
       })
     }
+
     return res.status(200).json({
-      editedUser: user
+      success: true
     })
   } catch (err) {
     console.log(err)
@@ -133,7 +151,6 @@ module.exports.deleteUser = async (req, res, next) => {
   let {
     userId
   } = req.body
-  let editedClass = null
   try {
     // Check userId is provided
     if (!userId) {
@@ -148,7 +165,7 @@ module.exports.deleteUser = async (req, res, next) => {
       decoded: req.decoded
     })
     // Check if user has admin rights and is only querying their own particulars
-    if (approved === false) {
+    if (approved.auth === false) {
       throw ({
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
@@ -174,7 +191,7 @@ module.exports.deleteUser = async (req, res, next) => {
     // If the user is in any classes, delete the user from the class so that the population would not fail. Upon restoring of their status (if necessary)
     // their classes would be re populated.
     if (userDeleted.classes) {
-      editedClass = await Class.update({
+      await Class.update({
         _id: {
           $in: userDeleted.classes
         }
@@ -188,9 +205,7 @@ module.exports.deleteUser = async (req, res, next) => {
       })
     }
     return res.status(200).json({
-      status: 'success',
-      userDeleted,
-      editedClass
+      status: 'success'
     })
   } catch (err) {
     console.log(err)

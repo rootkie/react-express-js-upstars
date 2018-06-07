@@ -42,8 +42,8 @@ class AttendanceUser extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: '',
-      endDate: '',
+      startDate: null,
+      endDate: null,
       moreOptions: false,
       isLoading: true,
       userOptions: [],
@@ -175,12 +175,12 @@ class AttendanceUser extends Component {
                   </div>
                   <Form.Field required>
                     <label>Volunteers</label>
-                    <Dropdown name='userSelector' value={userSelector} placeholder='Pick a Volunteer' search minCharacters='0' selection options={userOptions} onChange={this.handleSearchOptions} />
+                    <Dropdown name='userSelector' value={userSelector} placeholder='Pick a Volunteer' search minCharacters={0} selection options={userOptions} onChange={this.handleSearchOptions} />
                   </Form.Field>
                   {moreOptions && <div>
                     <Form.Field style={{paddingTop: '5px'}}>
                       <label>Classes</label>
-                      <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters='0' options={classData} onChange={this.handleSearchOptions} />
+                      <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.handleSearchOptions} />
                     </Form.Field>
                   </div>}
 

@@ -1,17 +1,45 @@
-import React from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import VolunteerForm from './VolunteerForm'
-import VolunteerAdminForm from './VolunteerAdminForm'
-const VolunteerWrap = ({ op }) => (
-  <div>
-    {op === 'form-admin' && <VolunteerAdminForm /> }
-    {op === 'form' && <VolunteerForm />}
-    {op === 'view' && <h2>View</h2>}
-  </div>
-)
+import VolunteerView from './VolunteerView'
+import VolunteerEdit from './VolunteerEdit'
+import VolunteerChangePassword from './VolunteerChangePassword'
+import axios from 'axios'
 
-VolunteerWrap.propTypes = {
-  op: PropTypes.string
+class VolunteerWrap extends Component {
+  static propTypes = {
+    op: PropTypes.string,
+    sid: PropTypes.string,
+    _id: PropTypes.string,
+    roles: PropTypes.array.isRequired
+  }
+
+  constructor (props) {
+    super(props)
+    this.state = {
+      filterData: false
+    }
+  }
+
+  deleteUser = (userId) => {
+    axios.delete('/admin/user',
+      {
+        data: {
+          userId
+        }
+      })
+      .catch((err) => console.log(err))
+  }
+
+  render () {
+    const { op, sid, _id, roles } = this.props
+    return (
+      <div>
+        {op === 'changepassword' && <VolunteerChangePassword _id={_id} /> }
+        {op === 'profile' && <VolunteerEdit userId={sid} roles={roles} />}
+        {op === 'view' && <VolunteerView deleteUser={this.deleteUser} roles={roles} />}
+      </div>
+    )
+  }
 }
 
 export default VolunteerWrap

@@ -66,10 +66,6 @@ const UserSchema = new Schema({
       required: true
     },
 
-    schoolName: {
-      type: String
-    },
-
     schoolLevel: {
       type: String
     },
@@ -242,7 +238,7 @@ const UserSchema = new Schema({
 
   status: {
     type: String,
-    default: 'Pending',
+    default: 'Unverified',
     required: true
   },
 
@@ -273,14 +269,6 @@ const UserSchema = new Schema({
   },
 
   resetPasswordToken: {
-    type: String
-  },
-
-  resetPasswordExpires: {
-    type: Date
-  },
-
-  refreshToken: {
     type: String
   }
 

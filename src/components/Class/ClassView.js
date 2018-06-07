@@ -8,7 +8,8 @@ class ClassView extends Component {
   static propTypes = {
     classData: array.isRequired,
     stopClass: func,
-    isLoading: bool
+    isLoading: bool,
+    roles: array.isRequired
   }
 
   state = {
@@ -52,7 +53,7 @@ class ClassView extends Component {
 
   render () {
     const { selected, deleteConfirmationVisibility } = this.state
-    const { classData, isLoading } = this.props
+    const { classData, isLoading, roles } = this.props
     if (isLoading) {
       return (
         <div>
@@ -68,7 +69,10 @@ class ClassView extends Component {
           <Table compact celled>
             <Table.Header>
               <Table.Row>
+                {roles.indexOf('SuperAdmin') !== -1 &&
                 <Table.HeaderCell />
+                }
+                <Table.HeaderCell>S/N</Table.HeaderCell>
                 <Table.HeaderCell>Class Name</Table.HeaderCell>
                 <Table.HeaderCell>ClassType</Table.HeaderCell>
                 <Table.HeaderCell>Day and Time</Table.HeaderCell>
@@ -78,11 +82,14 @@ class ClassView extends Component {
             </Table.Header>
 
             <Table.Body>
-              {classData.map((Class, i) => (
+              {classData.length > 0 && classData.map((Class, i) => (
                 <Table.Row key={`class-${i}`}>
+                  {roles.indexOf('SuperAdmin') !== -1 &&
                   <Table.Cell collapsing>
                     <Checkbox name={Class._id} onChange={this.handleCheckBox} checked={selected.includes(Class._id)} />
                   </Table.Cell>
+                  }
+                  <Table.Cell collapsing>{i + 1}</Table.Cell>
                   <Table.Cell>
                     <Link to={'id/' + Class._id}>{Class.className}</Link>
                   </Table.Cell>
@@ -91,26 +98,45 @@ class ClassView extends Component {
                   <Table.Cell>{Class.venue}</Table.Cell>
                   <Table.Cell>{Class.status}</Table.Cell>
                 </Table.Row>))}
+              {/* For class with no data sets */}
+              {classData.length === 0 &&
+                <Table.Row key={`class-1`}>
+                  {roles.indexOf('SuperAdmin') !== -1 &&
+                  <Table.Cell collapsing>
+                    <Checkbox />
+                  </Table.Cell>
+                  }
+                  <Table.Cell collapsing>1</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                  <Table.Cell>No results found</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                  <Table.Cell>NA</Table.Cell>
+                </Table.Row>}
             </Table.Body>
             <Table.Footer fullWidth>
               <Table.Row>
                 <Table.HeaderCell />
-                <Table.HeaderCell colSpan='5'>
-                  <Link to='/classes/add'>
-                    <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
-                      <Icon name='group' />New Class
-                    </Button>
-                  </Link>
-                  <Button size='small' negative onClick={this.handleStoppingConfirmation('show')} disabled={selected.length === 0}>Stop</Button>
-                  <Confirm
-                    open={deleteConfirmationVisibility}
-                    header='Stopping the following classes:'
-                    content={selected.map((id) => (
-                      classData.filter((aClass) => (aClass._id === id))[0].className
-                    )).join(', ')}
-                    onCancel={this.handleStoppingConfirmation('cancel')}
-                    onConfirm={this.handleStoppingConfirmation('confirm')}
-                  />
+                <Table.HeaderCell colSpan='6'>
+                  {roles.indexOf('SuperAdmin') !== -1 &&
+                  <div>
+                    <Link to='/classes/add'>
+                      <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
+                        <Icon name='group' />New Class
+                      </Button>
+                    </Link>
+                    <Button size='small' negative onClick={this.handleStoppingConfirmation('show')} disabled={selected.length === 0}>Stop</Button>
+                    <Confirm
+                      open={deleteConfirmationVisibility}
+                      header='Stopping the following classes:'
+                      content={selected.map((id) => (
+                        classData.filter((aClass) => (aClass._id === id))[0].className
+                      )).join(', ')}
+                      onCancel={this.handleStoppingConfirmation('cancel')}
+                      onConfirm={this.handleStoppingConfirmation('confirm')}
+                    />
+                  </div>
+                  }
                 </Table.HeaderCell>
               </Table.Row>
             </Table.Footer>

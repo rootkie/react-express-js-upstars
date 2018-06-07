@@ -19,8 +19,8 @@ class AttendanceSearch extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: '',
-      endDate: '',
+      startDate: null,
+      endDate: null,
       moreOptions: false,
       classSelector: '',
       isLoading: true,
@@ -68,8 +68,17 @@ class AttendanceSearch extends Component {
     // Case 2: endDate is not given, similarly, endDate is optional
     // Case 3: class is not given. '?' in the API means the field is optional.
     // So an API like '/attendance/class/dateStart/dateEnd/' will simply return every single attendance records of every class.
-    if (startDate !== '') startDate = moment(startDate).format('[/]YYYYMMDD') //  From the moments docs, [] allows additional characters
-    if (endDate !== '') endDate = moment(endDate).format('[/]YYYYMMDD')
+    if (startDate !== null) {
+      startDate = moment(startDate).format('[/]YYYYMMDD') //  From the moments docs, [] allows additional characters
+    } else {
+      startDate = ''
+    }
+    if (endDate !== null) {
+      endDate = moment(endDate).format('[/]YYYYMMDD')
+    } else {
+      endDate = ''
+    }
+
     if (classSelector.length > 0) classSelector = '/' + classSelector
 
     // Get new data based on the search filters and populate attendance
@@ -89,7 +98,7 @@ class AttendanceSearch extends Component {
 
   clear = e => {
     e.preventDefault()
-    this.setState({startDate: '', endDate: '', classSelector: ''})
+    this.setState({startDate: null, endDate: null, classSelector: ''})
   }
 
   render () {
@@ -130,7 +139,7 @@ class AttendanceSearch extends Component {
                 {moreOptions && <div>
                   <Form.Field style={{paddingTop: '10px'}}>
                     <label>Classes</label>
-                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters='0' options={classData} onChange={this.getAttendance} />
+                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.getAttendance} />
                   </Form.Field>
                 </div>}
               </Form>
