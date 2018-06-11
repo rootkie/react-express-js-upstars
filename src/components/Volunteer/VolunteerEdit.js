@@ -243,8 +243,7 @@ class VolunteerEdit extends Component {
 
       axios.post('/users', volunteerData)
         .then(response => {
-          console.log(response)
-          this.getProfile(response.data._id)
+          this.getProfile(this.props.userId)
           this.setState({ isLoading: false, buttonContent: 'Toggle Edit Mode', edit: false })
         })
         .catch((err) => {
