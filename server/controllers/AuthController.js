@@ -373,8 +373,7 @@ module.exports.register = async (req, res, next) => {
           })
         })
         res.status(201).json({
-          token: generateToken(userObject),
-          refresh: generateRefresh(userObject._id)
+          success: 'true'
         })
       } catch (err) {
         console.log(err)

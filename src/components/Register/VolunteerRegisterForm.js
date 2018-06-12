@@ -132,8 +132,6 @@ class Register extends Component {
           // put token inside and log in but not done yet..
           console.log(response)
           this.setState({...initialState, success: true}) // reset form
-          window.localStorage.setItem('token', response.data.token)
-          window.localStorage.setItem('refreshToken', response.data.refresh)
         })
         .catch((err) => {
           console.log(err)
