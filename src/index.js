@@ -19,14 +19,14 @@ const Root = () => (
     <div id='page-layout'>
       <Switch>
         <Route exact path='/' component={Home} />
-        <Route path='/student' component={Student} />
-        <Route path='/volunteer' component={Volunteer} />
-        <Route path='/register/student' component={StudentRegister} />
-        <Route path='/register/volunteer' component={VolunteerRegister} />
-        <Route path='/login' component={Login} />
-        <Route path='/forgetpassword' component={ForgetPassword} />
-        <Route path='/resetpassword/:token' component={ResetPassword} />
-        <Route path='/verifyaccount/:token' component={EmailVerify} />
+        <Route exact path='/student' component={Student} />
+        <Route exact path='/volunteer' component={Volunteer} />
+        <Route exact path='/register/student' component={StudentRegister} />
+        <Route exact path='/register/volunteer' component={VolunteerRegister} />
+        <Route exact path='/login' component={Login} />
+        <Route exact path='/forgetpassword' component={ForgetPassword} />
+        <Route exact path='/resetpassword/:token' component={ResetPassword} />
+        <Route exact path='/verifyaccount/:token' component={EmailVerify} />
         <Route path='/dashboard/:main/:op?/:sid?' component={MainCtrl} />
       </Switch>
     </div>

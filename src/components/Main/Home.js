@@ -26,12 +26,12 @@ class PageHeader extends Component {
     this.scroll = () => {
       if (!mobile) {
         window.scrollTo({
-          top: 700,
+          top: 701,
           behaviour: 'smooth'
         })
       } else {
         window.scrollTo({
-          top: 350,
+          top: 351,
           behaviour: 'smooth'
         })
       }
