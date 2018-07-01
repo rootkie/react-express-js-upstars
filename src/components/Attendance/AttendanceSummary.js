@@ -45,7 +45,7 @@ class AttendanceSummary extends Component {
           <Table.Body>
             {summaryData.map((options, index) => (
               <Table.Row key={`class-${index}`}>
-                <Table.Cell collapsing><Link to={'/classes/id/' + options.id}>{options.className}</Link></Table.Cell>
+                <Table.Cell collapsing><Link to={'/dashboard/classes/id/' + options.id}>{options.className}</Link></Table.Cell>
                 <Table.Cell collapsing>{options.studentNumber}</Table.Cell>
                 <Table.Cell collapsing>{options.studentsPercentage * 100}%</Table.Cell>
                 <Table.Cell collapsing>{options.userNumber}</Table.Cell>

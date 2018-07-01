@@ -2,14 +2,14 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ChangeStatus from './ChangeStatus'
 
-const AdminWrap = ({ op }) => (
+const AdminWrap = ({ match }) => (
   <div>
-    {op === 'status' && <ChangeStatus />}
+    {match.params.op === 'status' && <ChangeStatus />}
   </div>
 )
 
 AdminWrap.propTypes = {
-  op: PropTypes.string
+  match: PropTypes.object
 }
 
 export default AdminWrap

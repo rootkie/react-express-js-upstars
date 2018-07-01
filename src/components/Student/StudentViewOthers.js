@@ -99,7 +99,7 @@ class StudentViewOthers extends Component {
           <Table.Body>
             {studentData.map((student, i) => (
               <Table.Row key={`student-${i}`}>
-                <Table.Cell><Link to={`/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
+                <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
                 <Table.Cell>{student.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
                 <Table.Cell>{student.status}</Table.Cell>
               </Table.Row>))}

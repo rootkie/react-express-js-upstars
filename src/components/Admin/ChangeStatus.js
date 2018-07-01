@@ -251,7 +251,7 @@ class ChangeStatus extends Component {
             <Table.Body>
               {pendingUsers.map((user, i) => (
                 <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                  <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('pendingUsers', i)} /></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('pendingUsers', i)} /></Table.Cell>
                 </Table.Row>))}
@@ -270,7 +270,7 @@ class ChangeStatus extends Component {
             <Table.Body>
               {activeUsers.map((user, i) => (
                 <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                  <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('activeUsers', i)} /></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('activeUsers', i)} /></Table.Cell>
                 </Table.Row>))}
@@ -289,7 +289,7 @@ class ChangeStatus extends Component {
             <Table.Body>
               {suspendedUsers.map((user, i) => (
                 <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                  <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('suspendedUsers', i)} /></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('suspendedUsers', i)} /></Table.Cell>
                 </Table.Row>))}
@@ -308,7 +308,7 @@ class ChangeStatus extends Component {
             <Table.Body>
               {deletedUsers.map((user, i) => (
                 <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                  <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('deletedUsers', i)} /></Table.Cell>
                   <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('deletedUsers', i)} /></Table.Cell>
                 </Table.Row>))}

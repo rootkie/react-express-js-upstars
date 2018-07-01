@@ -151,7 +151,7 @@ class StudentView extends Component {
                   <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                 </Table.Cell>
                 }
-                <Table.Cell><Link to={`/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
+                <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
                 <Table.Cell>{moment().diff(student.profile.dob, 'years')}</Table.Cell>
                 <Table.Cell>{student.profile.icNumber}</Table.Cell>
                 <Table.Cell>{student.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
@@ -164,7 +164,7 @@ class StudentView extends Component {
               <Table.HeaderCell colSpan='4'>
                 {roles.indexOf('SuperAdmin') !== -1 &&
                 <div>
-                  <Link to='/students/add'>
+                  <Link to='/dashboard/students/add'>
                     <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                       <Icon name='user' />New Student
                     </Button>

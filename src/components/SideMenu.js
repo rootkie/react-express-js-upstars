@@ -1,24 +1,24 @@
 import React, { Component } from 'react'
 import { Grid, Menu } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 class SideMenu extends Component {
   render () {
-    let { activeItem, roles } = this.props
+    let { roles } = this.props
     return (
       <Grid.Column width={3}>
         <Menu vertical fluid>
-          <Link to='/home' className={`item ${activeItem === 'home' && 'active disabled'}`}>Home</Link>
+          <NavLink to='/dashboard/home' className='item' activeClassName='active disabled'>Home</NavLink>
           <Menu.Item>
             <Menu.Header>Student</Menu.Header>
             <Menu.Menu>
               {(roles.indexOf('SuperAdmin') !== -1) &&
-              <Link to='/students/add' className={`item ${activeItem === 'studentsadd' && 'active disabled'}`}>add</Link>
+              <NavLink to='/dashboard/students/add' className='item' activeClassName='active disabled'>add</NavLink>
               }
-              <Link to='/students/view' className={`item ${activeItem === 'studentsview' && 'active disabled'}`}>view (active)</Link>
+              <NavLink to='/dashboard/students/view' className='item' activeClassName='active disabled'>view (active)</NavLink>
               {(roles.indexOf('SuperAdmin') !== -1) &&
-              <Link to='/students/viewOthers' className={`item ${activeItem === 'studentsviewOthers' && 'active disabled'}`}>view (others)</Link>
+              <NavLink to='/dashboard/students/viewOthers' className='item' activeClassName='active disabled'>view (others)</NavLink>
               }
             </Menu.Menu>
           </Menu.Item>
@@ -26,9 +26,9 @@ class SideMenu extends Component {
             <Menu.Header>Class</Menu.Header>
             <Menu.Menu>
               {(roles.indexOf('SuperAdmin') !== -1) &&
-              <Link to='/classes/add' className={`item ${activeItem === 'classesadd' && 'active disabled'}`}>add</Link>
+              <NavLink to='/dashboard/classes/add' className='item' activeClassName='active disabled'>add</NavLink>
               }
-              <Link to='/classes/view' className={`item ${activeItem === 'classesview' && 'active disabled'}`}>view</Link>
+              <NavLink to='/dashboard/classes/view' className='item' activeClassName='active disabled'>view</NavLink>
             </Menu.Menu>
           </Menu.Item>
           {/* view is special for admin only while change password (topbar) refers to operations on self */
@@ -36,20 +36,20 @@ class SideMenu extends Component {
             <Menu.Item>
               <Menu.Header>Volunteer</Menu.Header>
               <Menu.Menu>
-                <Link to='/volunteer/view' className={`item ${activeItem === 'volunteerview' && 'active disabled'}`}>view</Link>
+                <NavLink to='/dashboard/volunteer/view' className='item' activeClassName='active disabled'>view</NavLink>
               </Menu.Menu>
             </Menu.Item>
           }
           <Menu.Item>
             <Menu.Header>Attendance</Menu.Header>
             <Menu.Menu>
-              <Link to='/attendance/add' className={`item ${activeItem === 'attendanceadd' && 'active disabled'}`}>add</Link>
-              <Link to='/attendance/search' className={`item ${activeItem === 'attendancesearch' && 'active disabled'}`}>search</Link>
-              <Link to='/attendance/user' className={`item ${activeItem === 'attendanceuser' && 'active disabled'}`}>user</Link>
-              <Link to='/attendance/student' className={`item ${activeItem === 'attendancestudent' && 'active disabled'}`}>student</Link>
-              <Link to='/attendance/class' className={`item ${activeItem === 'attendanceclass' && 'active disabled'}`}>class</Link>
+              <NavLink to='/dashboard/attendance/add' className='item' activeClassName='active disabled'>add</NavLink>
+              <NavLink to='/dashboard/attendance/search' className='item' activeClassName='active disabled'>search</NavLink>
+              <NavLink to='/dashboard/attendance/user' className='item' activeClassName='active disabled'>user</NavLink>
+              <NavLink to='/dashboard/attendance/student' className='item' activeClassName='active disabled'>student</NavLink>
+              <NavLink to='/dashboard/attendance/class' className='item' activeClassName='active disabled'>class</NavLink>
               {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
-              <Link to='/attendance/summary' className={`item ${activeItem === 'attendancesummary' && 'active disabled'}`}>summary</Link>
+              <NavLink to='/dashboard/attendance/summary' className='item' activeClassName='active disabled'>summary</NavLink>
               }
             </Menu.Menu>
           </Menu.Item>
@@ -57,7 +57,7 @@ class SideMenu extends Component {
           <Menu.Item>
             <Menu.Header>Admin</Menu.Header>
             <Menu.Menu>
-              <Link to='/admin/status' className={`item ${activeItem === 'adminstatus' && 'active disabled'}`}>change status</Link>
+              <NavLink to='/dashboard/admin/status' className='item' activeClassName='active disabled'>change status</NavLink>
             </Menu.Menu>
           </Menu.Item>
           }
@@ -68,7 +68,6 @@ class SideMenu extends Component {
 }
 
 SideMenu.propTypes = {
-  activeItem: PropTypes.string.isRequired,
   roles: PropTypes.array.isRequired
 }
 

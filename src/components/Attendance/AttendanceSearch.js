@@ -161,7 +161,7 @@ class AttendanceSearch extends Component {
           {attendances.map((options, i) => (
             <Table.Row key={`attendance-${i}`}>
               <Table.Cell collapsing>{i + 1}</Table.Cell>
-              <Table.Cell><Link to={'/attendance/view/' + options._id}>{options.className}</Link></Table.Cell>
+              <Table.Cell><Link to={'/dashboard/attendance/view/' + options._id}>{options.className}</Link></Table.Cell>
               <Table.Cell>{options.date}</Table.Cell>
               <Table.Cell>{options.type}</Table.Cell>
               <Table.Cell>{options.hours}</Table.Cell>

@@ -230,7 +230,7 @@ class Student extends Component {
                   <Grid.Column width={5}>
                     <Header inverted as='h4' content='About' />
                     <List link inverted>
-                      <List.Item as='a'>Sitemap</List.Item>
+                      <List.Item as={Link} to='/sitemap.xml'>Sitemap</List.Item>
                       <List.Item as={Link} to='/student'>Student</List.Item>
                       <List.Item as={Link} to='/volunteer'>Volunteer</List.Item>
                     </List>

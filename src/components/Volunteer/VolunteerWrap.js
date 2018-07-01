@@ -7,8 +7,7 @@ import axios from 'axios'
 
 class VolunteerWrap extends Component {
   static propTypes = {
-    op: PropTypes.string,
-    sid: PropTypes.string,
+    match: PropTypes.object.isRequired,
     _id: PropTypes.string,
     roles: PropTypes.array.isRequired
   }
@@ -31,7 +30,8 @@ class VolunteerWrap extends Component {
   }
 
   render () {
-    const { op, sid, _id, roles } = this.props
+    const { match, _id, roles } = this.props
+    const { op, sid } = match.params
     return (
       <div>
         {op === 'changepassword' && <VolunteerChangePassword _id={_id} /> }

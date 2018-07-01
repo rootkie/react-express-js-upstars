@@ -13,6 +13,7 @@ import 'semantic-ui-css/semantic.min.css'
 import './index.css'
 import Student from './components/Main/Students'
 import Volunteer from './components/Main/Tutors'
+import FourZeroFour from './components/Error/404'
 
 const Root = () => (
   <Router>
@@ -27,7 +28,9 @@ const Root = () => (
         <Route exact path='/forgetpassword' component={ForgetPassword} />
         <Route exact path='/resetpassword/:token' component={ResetPassword} />
         <Route exact path='/verifyaccount/:token' component={EmailVerify} />
-        <Route path='/dashboard/:main/:op?/:sid?' component={MainCtrl} />
+        {/* <Route path='/dashboard/:main/:op?/:sid?' component={MainCtrl} /> */}
+        <Route path='/dashboard' component={MainCtrl} />
+        <Route component={FourZeroFour} />
       </Switch>
     </div>
   </Router>

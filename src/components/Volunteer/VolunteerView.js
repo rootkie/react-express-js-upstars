@@ -161,7 +161,7 @@ class VolunteerView extends Component {
                   <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
                 </Table.Cell>
                 }
-                <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
                 <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
                 <Table.Cell>{user.profile.nric}</Table.Cell>
                 <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>

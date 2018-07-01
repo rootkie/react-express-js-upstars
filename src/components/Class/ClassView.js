@@ -120,7 +120,7 @@ class ClassView extends Component {
                 <Table.HeaderCell colSpan='6'>
                   {roles.indexOf('SuperAdmin') !== -1 &&
                   <div>
-                    <Link to='/classes/add'>
+                    <Link to='/dashboard/classes/add'>
                       <Button as='div' floated='right' icon labelPosition='left' primary size='small'>
                         <Icon name='group' />New Class
                       </Button>

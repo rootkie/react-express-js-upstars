@@ -815,7 +815,7 @@ class VolunteerEdit extends Component {
             {classes.map((Class, i) => (
               <Table.Row key={`class-${i}`}>
                 <Table.Cell>{i + 1}</Table.Cell>
-                <Table.Cell><Link to={`/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
+                <Table.Cell><Link to={`/dashboard/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
                 <Table.Cell>{Class.status}</Table.Cell>
               </Table.Row>))}
           </Table.Body>
