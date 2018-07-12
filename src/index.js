@@ -28,7 +28,6 @@ const Root = () => (
         <Route exact path='/forgetpassword' component={ForgetPassword} />
         <Route exact path='/resetpassword/:token' component={ResetPassword} />
         <Route exact path='/verifyaccount/:token' component={EmailVerify} />
-        {/* <Route path='/dashboard/:main/:op?/:sid?' component={MainCtrl} /> */}
         <Route path='/dashboard' component={MainCtrl} />
         <Route component={FourZeroFour} />
       </Switch>
