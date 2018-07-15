@@ -109,6 +109,8 @@ class Register extends Component {
         }
       } else {
         console.log('error occured')
+        // Convert array to string to tell users what is wrong. (UX improvement)
+        error = error.join(', ')
         this.setState({error})
       }
     }
@@ -161,6 +163,7 @@ class Register extends Component {
         })
     } else {
       console.log('error occured')
+      error = error.join(', ')
       this.setState({error})
     }
   }
@@ -203,7 +206,8 @@ class Register extends Component {
             <Grid.Column textAlign='center'>
               <Header as='h1' color='blue'>
               Sign up as a volunteer
-              </Header></Grid.Column>
+              </Header>
+            </Grid.Column>
           </Grid.Row>
           <Grid.Row>
             <Grid.Column>
@@ -329,7 +333,7 @@ class Register extends Component {
                         <p>&emsp; c. If we disable your account, you will not create another one without our permission.</p>
                         <p>&emsp; d. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
                         <Header>Terms and Conditions</Header>
-                        <p>Last modified: June 17, 2017</p>
+                        <p>Last modified: July 17, 2018</p>
                       </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
@@ -348,7 +352,7 @@ class Register extends Component {
               <Message
                 hidden={error.length === 0}
                 negative
-                content='Please Check Required Fields!'
+                content={`Please Check Required Fields - ${error}`}
               />
               <Message
                 hidden={success === false}
@@ -373,7 +377,6 @@ class Register extends Component {
                 onExpired={this.handleCaptchaExpired}
               />
             </Form>
-            {/* </Grid.Column> */}
           </Grid.Row>
         </Grid>
       </Segment>
