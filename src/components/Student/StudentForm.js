@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment } from 'semantic-ui-react'
+import { Form, Message, Button, Modal, Header, Table, Icon, Menu, Segment, Grid } from 'semantic-ui-react'
 import { func, object } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
@@ -162,7 +162,7 @@ class StudentForm extends Component {
     const { addStudent } = this.props
 
     // check required fields
-    const error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
+    let error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address', 'terms'])
 
     if (error.length === 0) {
     // Do some wizardry to format data here
@@ -186,6 +186,7 @@ class StudentForm extends Component {
       }
     } else { // incomplete Field
       console.log('Incomplete Fields')
+      error = error.join(', ')
       this.setState({error})
     }
   }
@@ -257,6 +258,10 @@ class StudentForm extends Component {
     this.setState({ captchaCode: value })
   }
 
+  handleCaptchaExpired = () => {
+    this.setState({ terms: false, error: 'Timeout, please review and accept the terms again.' })
+  }
+
   render () {
     const {
       profile, father, mother, otherFamily, misc, admin, terms, tuitionChoices, termsDetails, error, serverError, activeItem
@@ -269,262 +274,271 @@ class StudentForm extends Component {
     const { adminNotes, interviewDate, interviewNotes, commencementDate, exitDate, exitReason } = admin
 
     return (
-      <div>
-        <Menu attached='top' tabular widths={3} inverted>
-          <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />Personal Info</Menu.Item>
-          <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />Personal Info</Menu.Item>
-          <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'orange'}><Icon name='dashboard' />For office use</Menu.Item>
-        </Menu>
+      <Grid stackable stretched>
+        <Grid.Row>
+          <Grid.Column>
+            <Menu attached='top' pointing fluid stackable>
+              <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={this.handleItemClick} color={'red'}><Icon name='user' />1. Personal Info</Menu.Item>
+              <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={this.handleItemClick} color={'blue'}><Icon name='info circle' />2. Family Info</Menu.Item>
+              <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={this.handleItemClick} color={'orange'}><Icon name='dashboard' />3. For office use</Menu.Item>
+            </Menu>
+          </Grid.Column>
+        </Grid.Row>
         {/* The form only renders part of the form accordingly to the tab selected
         Most of the fields have names of '(parent)-(child)'. This is such that they can be separated easily by the hyphen
         and will be edited accoringly. */}
-        <Form onSubmit={this.handleSubmit}>
-          { activeItem === 'Personal Info' &&
-          <Segment attached='bottom'>
-            <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='profile-name' value={name} onChange={this.handleChange} required />
-            <Form.Group widths='equal'>
-              <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='profile-icNumber' value={icNumber} onChange={this.handleChange} required />
-              <Form.Field error={error.includes('dateOfBirth')} required>
-                <label>Date of Birth</label>
-                <DatePicker
-                  placeholderText='Click to select a date'
-                  dateFormat='DD/MM/YYYY'
-                  showYearDropdown
-                  maxDate={moment()}
-                  selected={dob}
-                  onChange={this.handleDateChange('profile-dob')}
-                  required />
-              </Form.Field>
-            </Form.Group>
-            <Form.Group widths='equal'>
-              <Form.Input label='Nationality' placeholder='Nationality' name='profile-nationality' value={nationality} onChange={this.handleChange} required />
-              <Form.Select label='Gender' options={genderOptions} placeholder='Select Gender' name='profile-gender' value={gender} onChange={this.handleChange} required />
-            </Form.Group>
-            <Form.Input label='Residential address' placeholder='Residential address' name='profile-address' value={address} onChange={this.handleChange} required />
-            <Form.Group widths='equal'>
-              <Form.Input label='Name of School' placeholder='Name of School' name='profile-schoolName' value={schoolName} onChange={this.handleChange} required />
-              <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='profile-classLevel' value={classLevel} onChange={this.handleChange} required />
-            </Form.Group>
-            <Table celled striped columns={7} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Year</Table.HeaderCell>
-                  <Table.HeaderCell>Term (1/2/3/4)</Table.HeaderCell>
-                  <Table.HeaderCell>English (%)</Table.HeaderCell>
-                  <Table.HeaderCell>Maths (%)</Table.HeaderCell>
-                  <Table.HeaderCell>Mother tongue (%)</Table.HeaderCell>
-                  <Table.HeaderCell>Science (%)</Table.HeaderCell>
-                  <Table.HeaderCell>OVERALL (%)</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {academicInfo.map((year, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={this.updateRepeatableChangeForAcademic(i, 'term')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChangeForAcademic(i, 'english')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChangeForAcademic(i, 'math')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChangeForAcademic(i, 'motherTongue')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={this.updateRepeatableChangeForAcademic(i, 'science')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='7'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'academicInfo')}>
-                      <Icon name='plus' /> Add Year
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'academicInfo')}>
-                      <Icon name='minus' /> Remove Year
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-          </Segment>
-          }
-          { activeItem === 'Family Details' &&
-          <Segment attached='bottom'>
-            {/* Father's information */}
-            <Form.Input label="Father's name" placeholder='as in IC card' name='father-name' value={father.name} onChange={this.handleChange} />
-            <Form.Group widths='equal'>
-              <Form.Input label='Identification Card Number' placeholder='IC number' name='father-icNumber' value={father.icNumber} onChange={this.handleChange} />
-              <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='father-nationality' value={father.nationality} onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group widths='equal'>
-              <Form.Input label='Email' placeholder='email' type='email' name='father-email' value={father.email} onChange={this.handleChange} />
-              <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group widths='equal'>
-              <Form.Input label='Occupation' placeholder='Occupation' name='father-occupation' value={father.occupation} onChange={this.handleChange} />
-              <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
-            </Form.Group>
+        <Grid.Row>
+          <Grid.Column>
+            <Form onSubmit={this.handleSubmit}>
+              { activeItem === 'Personal Info' &&
+              <Segment attached='bottom'>
+                <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='profile-name' value={name} onChange={this.handleChange} required />
+                <Form.Group widths='equal'>
+                  <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='profile-icNumber' value={icNumber} onChange={this.handleChange} required />
+                  <Form.Field error={error.includes('dateOfBirth')} required>
+                    <label>Date of Birth</label>
+                    <DatePicker
+                      placeholderText='Click to select a date'
+                      dateFormat='DD/MM/YYYY'
+                      showYearDropdown
+                      maxDate={moment()}
+                      selected={dob}
+                      onChange={this.handleDateChange('profile-dob')}
+                      required />
+                  </Form.Field>
+                </Form.Group>
+                <Form.Group widths='equal'>
+                  <Form.Input label='Nationality' placeholder='Nationality' name='profile-nationality' value={nationality} onChange={this.handleChange} required />
+                  <Form.Select label='Gender' options={genderOptions} placeholder='Select Gender' name='profile-gender' value={gender} onChange={this.handleChange} required />
+                </Form.Group>
+                <Form.Input label='Residential address' placeholder='Residential address' name='profile-address' value={address} onChange={this.handleChange} required />
+                <Form.Group widths='equal'>
+                  <Form.Input label='Name of School' placeholder='Name of School' name='profile-schoolName' value={schoolName} onChange={this.handleChange} required />
+                  <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='profile-classLevel' value={classLevel} onChange={this.handleChange} required />
+                </Form.Group>
+                <Table celled striped columns={7} fixed>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>Year</Table.HeaderCell>
+                      <Table.HeaderCell>Term (1/2/3/4)</Table.HeaderCell>
+                      <Table.HeaderCell>English (%)</Table.HeaderCell>
+                      <Table.HeaderCell>Maths (%)</Table.HeaderCell>
+                      <Table.HeaderCell>Mother tongue (%)</Table.HeaderCell>
+                      <Table.HeaderCell>Science (%)</Table.HeaderCell>
+                      <Table.HeaderCell>OVERALL (%)</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {academicInfo.map((year, i) => (
+                      <Table.Row key={i}>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={this.updateRepeatableChangeForAcademic(i, 'year')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={this.updateRepeatableChangeForAcademic(i, 'term')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={this.updateRepeatableChangeForAcademic(i, 'english')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={this.updateRepeatableChangeForAcademic(i, 'math')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={this.updateRepeatableChangeForAcademic(i, 'motherTongue')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={this.updateRepeatableChangeForAcademic(i, 'science')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={this.updateRepeatableChangeForAcademic(i, 'overall')} />
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                  <Table.Footer>
+                    <Table.Row>
+                      <Table.HeaderCell colSpan='7'>
+                        <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'academicInfo')}>
+                          <Icon name='plus' /> Add Year
+                        </Button>
+                        <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'academicInfo')}>
+                          <Icon name='minus' /> Remove Year
+                        </Button>
+                      </Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Footer>
+                </Table>
+              </Segment>
+              }
+              { activeItem === 'Family Details' &&
+              <Segment attached='bottom'>
+                {/* Father's information */}
+                <Form.Input label="Father's name" placeholder='as in IC card' name='father-name' value={father.name} onChange={this.handleChange} />
+                <Form.Group widths='equal'>
+                  <Form.Input label='Identification Card Number' placeholder='IC number' name='father-icNumber' value={father.icNumber} onChange={this.handleChange} />
+                  <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='father-nationality' value={father.nationality} onChange={this.handleChange} />
+                </Form.Group>
+                <Form.Group widths='equal'>
+                  <Form.Input label='Email' placeholder='email' type='email' name='father-email' value={father.email} onChange={this.handleChange} />
+                  <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
+                </Form.Group>
+                <Form.Group widths='equal'>
+                  <Form.Input label='Occupation' placeholder='Occupation' name='father-occupation' value={father.occupation} onChange={this.handleChange} />
+                  <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
+                </Form.Group>
 
-            {/* Mother's information */}
-            <Form.Input label="Mother's name" placeholder='as in IC card' name='mother-name' value={mother.name} onChange={this.handleChange} />
-            <Form.Group widths='equal'>
-              <Form.Input label='Identification Card Number' placeholder='IC number' name='mother-icNumber' value={mother.icNumber} onChange={this.handleChange} />
-              <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='mother-nationality' value={mother.nationality} onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group widths='equal'>
-              <Form.Input label='Email' placeholder='email' type='email' name='mother-email' value={mother.email} onChange={this.handleChange} />
-              <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
-            </Form.Group>
-            <Form.Group widths='equal'>
-              <Form.Input label='Occupation' placeholder='Occupation' name='mother-occupation' value={mother.occupation} onChange={this.handleChange} />
-              <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
-            </Form.Group>
+                {/* Mother's information */}
+                <Form.Input label="Mother's name" placeholder='as in IC card' name='mother-name' value={mother.name} onChange={this.handleChange} />
+                <Form.Group widths='equal'>
+                  <Form.Input label='Identification Card Number' placeholder='IC number' name='mother-icNumber' value={mother.icNumber} onChange={this.handleChange} />
+                  <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='mother-nationality' value={mother.nationality} onChange={this.handleChange} />
+                </Form.Group>
+                <Form.Group widths='equal'>
+                  <Form.Input label='Email' placeholder='email' type='email' name='mother-email' value={mother.email} onChange={this.handleChange} />
+                  <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
+                </Form.Group>
+                <Form.Group widths='equal'>
+                  <Form.Input label='Occupation' placeholder='Occupation' name='mother-occupation' value={mother.occupation} onChange={this.handleChange} />
+                  <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
+                </Form.Group>
 
-            {/* adding additional family members */}
-            <Table celled striped columns={3} fixed>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='3'>Other family members in the same household</Table.HeaderCell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.HeaderCell>Name</Table.HeaderCell>
-                  <Table.HeaderCell>Relationship</Table.HeaderCell>
-                  <Table.HeaderCell>Age</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {otherFamily.map((member, i) => (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={otherFamily[i].name} placeholder='Name' onChange={this.updateRepeatableChange(i, 'name')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamily[i].relationship} placeholder='Relationship' onChange={this.updateRepeatableChange(i, 'relationship')} />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Form.Input type='number' transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={this.updateRepeatableChange(i, 'age')} />
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='3'>
-                    <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'otherFamily')}>
-                      <Icon name='user' /> Add Member
-                    </Button>
-                    <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'otherFamily')} >
-                      <Icon name='user' /> Remove Member
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
+                {/* adding additional family members */}
+                <Table celled striped columns={3} fixed>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell colSpan='3'>Other family members in the same household</Table.HeaderCell>
+                    </Table.Row>
+                    <Table.Row>
+                      <Table.HeaderCell>Name</Table.HeaderCell>
+                      <Table.HeaderCell>Relationship</Table.HeaderCell>
+                      <Table.HeaderCell>Age</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {otherFamily.map((member, i) => (
+                      <Table.Row key={i}>
+                        <Table.Cell>
+                          <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={otherFamily[i].name} placeholder='Name' onChange={this.updateRepeatableChange(i, 'name')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamily[i].relationship} placeholder='Relationship' onChange={this.updateRepeatableChange(i, 'relationship')} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Form.Input type='number' transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={this.updateRepeatableChange(i, 'age')} />
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                  <Table.Footer>
+                    <Table.Row>
+                      <Table.HeaderCell colSpan='3'>
+                        <Button floated='right' icon labelPosition='left' primary size='small' onClick={this.handleRepeatable('inc', 'otherFamily')}>
+                          <Icon name='user' /> Add Member
+                        </Button>
+                        <Button floated='right' icon labelPosition='left' negative size='small' onClick={this.handleRepeatable('dec', 'otherFamily')} >
+                          <Icon name='user' /> Remove Member
+                        </Button>
+                      </Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Footer>
+                </Table>
 
-            <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple />
-            {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
-            <Form.Group inline>
-              <label>Other Learning Support</label>
-              {tuitionOptions.map((option, i) => {
-                return (
-                  <Form.Checkbox label={option.text} key={`option-${i}`} name={`tuitionChoices-${option.value}`} onChange={this.handleChange} checked={tuitionChoices[option.value]} />
-                )
-              })}
-            </Form.Group>
-          </Segment>
-          }
-          { activeItem === 'For office use' &&
-          <Segment attached='bottom'>
-            <Form.Field error={error.includes('interviewDate')}>
-              <label>Interview date</label>
-              <DatePicker
-                placeholderText='Click to select a date'
-                dateFormat='DD/MM/YYYY'
-                selected={interviewDate}
-                onChange={this.handleDateChange('admin-interviewDate')}
-                isClearable />
-            </Form.Field>
-            <Form.Input label='Interview notes' placeholder='reason for acceptance' name='admin-interviewNotes' value={interviewNotes} onChange={this.handleChange} />
-            <Form.Field error={error.includes('commencementDate')} >
-              <label>Commencement date</label>
-              <DatePicker
-                placeholderText='Click to select a date'
-                dateFormat='DD/MM/YYYY'
-                minDate={interviewDate}
-                selected={commencementDate}
-                onChange={this.handleDateChange('admin-commencementDate')}
-                isClearable />
-            </Form.Field>
-            <Form.Input label='Admin notes' placeholder='up to 1000 words' name='admin-adminNotes' value={adminNotes} onChange={this.handleChange} />
-            <Form.Field error={error.includes('dateOfExit')} >
-              <label>Date of exit</label>
-              <DatePicker
-                placeholderText='Click to select a date'
-                dateFormat='DD/MM/YYYY'
-                minDate={commencementDate}
-                selected={exitDate}
-                onChange={this.handleDateChange('admin-exitDate')}
-                isClearable />
-            </Form.Field>
-            <Form.Input label='Reason for exit' placeholder='reason for exit' name='admin-exitReason' value={exitReason} onChange={this.handleChange} />
-          </Segment>
-          }
+                <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple />
+                {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
+                <Form.Group inline>
+                  <label>Other Learning Support</label>
+                  {tuitionOptions.map((option, i) => {
+                    return (
+                      <Form.Checkbox label={option.text} key={`option-${i}`} name={`tuitionChoices-${option.value}`} onChange={this.handleChange} checked={tuitionChoices[option.value]} />
+                    )
+                  })}
+                </Form.Group>
+              </Segment>
+              }
+              { activeItem === 'For office use' &&
+              <Segment attached='bottom'>
+                <Form.Field error={error.includes('interviewDate')}>
+                  <label>Interview date</label>
+                  <DatePicker
+                    placeholderText='Click to select a date'
+                    dateFormat='DD/MM/YYYY'
+                    selected={interviewDate}
+                    onChange={this.handleDateChange('admin-interviewDate')}
+                    isClearable />
+                </Form.Field>
+                <Form.Input label='Interview notes' placeholder='reason for acceptance' name='admin-interviewNotes' value={interviewNotes} onChange={this.handleChange} />
+                <Form.Field error={error.includes('commencementDate')} >
+                  <label>Commencement date</label>
+                  <DatePicker
+                    placeholderText='Click to select a date'
+                    dateFormat='DD/MM/YYYY'
+                    minDate={interviewDate}
+                    selected={commencementDate}
+                    onChange={this.handleDateChange('admin-commencementDate')}
+                    isClearable />
+                </Form.Field>
+                <Form.Input label='Admin notes' placeholder='up to 1000 words' name='admin-adminNotes' value={adminNotes} onChange={this.handleChange} />
+                <Form.Field error={error.includes('dateOfExit')} >
+                  <label>Date of exit</label>
+                  <DatePicker
+                    placeholderText='Click to select a date'
+                    dateFormat='DD/MM/YYYY'
+                    minDate={commencementDate}
+                    selected={exitDate}
+                    onChange={this.handleDateChange('admin-exitDate')}
+                    isClearable />
+                </Form.Field>
+                <Form.Input label='Reason for exit' placeholder='reason for exit' name='admin-exitReason' value={exitReason} onChange={this.handleChange} />
+              </Segment>
+              }
 
-          {/* terms and conditions */}
-          <Form.Checkbox label={<label onClick={this.handleTermsOpen}>I agree to the Terms and Conditions</label>} name='terms' required onChange={this.handleChange} checked={terms} />
-          <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen'>
-            <Modal.Header>Terms and conditions</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <Header>Welcome to Ulu Pandan STARS</Header>
-                <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
+              {/* terms and conditions */}
+              <Form.Checkbox label={<label onClick={this.handleTermsOpen}>I agree to the Terms and Conditions</label>} name='terms' required onChange={this.handleChange} checked={terms} />
+              <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen'>
+                <Modal.Header>Terms and conditions</Modal.Header>
+                <Modal.Content>
+                  <Modal.Description>
+                    <Header>Welcome to Ulu Pandan STARS</Header>
+                    <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
                    By signing up for a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
-                <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
+                    <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
                    or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
-                <p>2. As you are creating an account on behalf of a student, please ensure that all information filled are correct as it represent the student. You, the admin, should take
+                    <p>2. As you are creating an account on behalf of a student, please ensure that all information filled are correct as it represent the student. You, the admin, should take
                   all responsibility for any wrong information entered that may impact the student's prospect of being able to be accepted into UPStars.
-                </p>
-                <p>3. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
-                <p>4. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
-                <Header>Terms and Conditions</Header>
-                <p>Last modified: June 1, 2017</p>
-              </Modal.Description>
-            </Modal.Content>
-            <Modal.Actions>
-              <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={this.handleTermsDisagree} />
-              <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={this.handleTermsClose} />
-            </Modal.Actions>
-          </Modal>
-          <Message
-            hidden={error.length === 0}
-            negative
-            content='Please Check Required Fields!'
-          />
-          <Message
-            hidden={!serverError}
-            negative
-            content='Server Error'
-          />
-          <Form.Button type='submit'>Add student</Form.Button>
-          <ReCAPTCHA
-            ref={(el) => { captcha = el }}
-            size='invisible'
-            sitekey='6LdCS1IUAAAAAHaYU_yJyFimpPuJShH-i80kFj3F' // Dev key under Ying Keat's account (yingkeatwon@gmail.com)
-            onChange={this.captchaChange}
-          />
-        </Form>
-      </div>
+                    </p>
+                    <p>3. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
+                    <p>4. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
+                    <Header>Terms and Conditions</Header>
+                    <p>Last modified: June 1, 2017</p>
+                  </Modal.Description>
+                </Modal.Content>
+                <Modal.Actions>
+                  <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={this.handleTermsDisagree} />
+                  <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={this.handleTermsClose} />
+                </Modal.Actions>
+              </Modal>
+              <Message
+                hidden={error.length === 0}
+                negative
+                content={`Please Check Required Fields - ${error}`}
+              />
+              <Message
+                hidden={!serverError}
+                negative
+                content='Server Error'
+              />
+              <Form.Button type='submit'>Add student</Form.Button>
+              <ReCAPTCHA
+                ref={(el) => { captcha = el }}
+                size='invisible'
+                sitekey='6LdCS1IUAAAAAHaYU_yJyFimpPuJShH-i80kFj3F' // Dev key under Ying Keat's account (yingkeatwon@gmail.com)
+                onChange={this.captchaChange}
+                onExpired={this.handleCaptchaExpired}
+              />
+            </Form>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 }
