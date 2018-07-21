@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Header, Table, Checkbox, Button, Icon, Dropdown, Dimmer, Loader } from 'semantic-ui-react'
+import { Form, Message, Header, Table, Checkbox, Button, Icon, Dropdown, Dimmer, Loader, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { func, string, array } from 'prop-types'
 import axios from 'axios'
@@ -267,148 +267,166 @@ class ClassEdit extends Component {
       )
     } else {
       return (
-        <div>
-          <Message
-            hidden={serverErrorMessage.length === 0}
-            negative
-            content={serverErrorMessage}
-          />
-          <Header as='h3' dividing>Class information</Header>
-          <Form onSubmit={this.handleSubmit}>
-            <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly={!edit} required />
-            <Form.Group widths='equal'>
-              <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} required />
-              <Form.Select label='Status' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} required />
-            </Form.Group>
-            <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly={!edit} required />
-            <Form.Field>
-              <label>Starting Date</label>
-              <DatePicker
-                placeholderText='Click to select a date'
-                dateFormat='DD/MM/YYYY'
-                selected={moment(oneClassData.startDate)}
-                onChange={this.handleDateChange}
-                required readOnly={!edit} />
-            </Form.Field>
-            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly={!edit} required={oneClassData.classType === 'Tuition'} disabled={oneClassData.classType === 'Enrichment'} />
-            {/* Will work on the roles management that only people who own this class or are Admin could use the front-end edit function */}
-            {roles.indexOf('SuperAdmin') !== -1 &&
-            <Form.Button content={ButtonContent} type='submit' value='Submit' />
-            }
-            {submitSuccess && <Message positive>Class Updated</Message> }
-            <br />
-          </Form>
+        <Grid stackable stretched>
+          {serverErrorMessage.length === 0 &&
+          <Grid.Row>
+            <Grid.Column>
+              <Message
+                hidden={serverErrorMessage.length === 0}
+                negative
+                content={serverErrorMessage}
+              />
+            </Grid.Column>
+          </Grid.Row>
+          }
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Class information</Header>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <Form onSubmit={this.handleSubmit}>
+                <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={oneClassData.className} onChange={this.handleChange} readOnly={!edit} required />
+                <Form.Group widths='equal'>
+                  <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={oneClassData.classType} onChange={this.handleChange} required />
+                  <Form.Select label='Status' options={statusOptions} placeholder='Status' name='status' value={oneClassData.status} onChange={this.handleChange} required />
+                </Form.Group>
+                <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={oneClassData.venue} onChange={this.handleChange} readOnly={!edit} required />
+                <Form.Field>
+                  <label>Starting Date</label>
+                  <DatePicker
+                    placeholderText='Click to select a date'
+                    dateFormat='DD/MM/YYYY'
+                    selected={moment(oneClassData.startDate)}
+                    onChange={this.handleDateChange}
+                    required readOnly={!edit} />
+                </Form.Field>
+                <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={oneClassData.dayAndTime} onChange={this.handleChange} readOnly={!edit} required={oneClassData.classType === 'Tuition'} disabled={oneClassData.classType === 'Enrichment'} />
+                {/* Will work on the roles management that only people who own this class or are Admin could use the front-end edit function */}
+                {roles.indexOf('SuperAdmin') !== -1 &&
+                <Form.Button content={ButtonContent} type='submit' value='Submit' />
+                }
+                {submitSuccess && <Message positive>Class Updated</Message> }
+                <br />
+              </Form>
+            </Grid.Column>
+          </Grid.Row>
           {/* This only renders if edit is true. You can see the delete buttons, the dropdown to input students or users for adding */}
           {(roles.indexOf('SuperAdmin') !== -1 && edit) &&
-          <div>
-            <Header as='h3' dividing>Students</Header>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>Action</Table.HeaderCell>
-                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Students</Header>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>Action</Table.HeaderCell>
+                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
 
-              <Table.Body>
-                {oneClassData.students.map((Student, i) => (
-                  <Table.Row key={`student-${i}`}>
-                    <Table.Cell collapsing>
-                      <Checkbox name={Student._id} onChange={this.handleCheckBoxForStudent} checked={studentSelected.includes(Student._id)} />
-                    </Table.Cell>
-                    <Table.Cell>{Student.profile.name}</Table.Cell>
-                  </Table.Row>))}
-              </Table.Body>
+                <Table.Body>
+                  {oneClassData.students.map((Student, i) => (
+                    <Table.Row key={`student-${i}`}>
+                      <Table.Cell collapsing>
+                        <Checkbox name={Student._id} onChange={this.handleCheckBoxForStudent} checked={studentSelected.includes(Student._id)} />
+                      </Table.Cell>
+                      <Table.Cell>{Student.profile.name}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
 
-              <Table.Footer fullWidth>
-                <Table.Row>
-                  <Table.HeaderCell />
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' negative icon labelPosition='left' primary size='small' onClick={this.deleteStudent}>
-                      <Icon name='user delete' /> Delete Student(s)
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-            <Dropdown placeholder='Add Students' fluid multiple search selection options={students} name='studentsValue' value={studentsValue} onChange={this.handleInputChange} />
-            <br />
-            <Button positive fluid onClick={this.addStudent}>Add Students</Button>
+                <Table.Footer fullWidth>
+                  <Table.Row>
+                    <Table.HeaderCell />
+                    <Table.HeaderCell colSpan='4'>
+                      <Button floated='right' negative icon labelPosition='left' primary size='small' onClick={this.deleteStudent}>
+                        <Icon name='user delete' /> Delete Student(s)
+                      </Button>
+                    </Table.HeaderCell>
+                  </Table.Row>
+                </Table.Footer>
+              </Table>
+              <Dropdown placeholder='Add Students' fluid multiple search selection options={students} name='studentsValue' value={studentsValue} onChange={this.handleInputChange} />
+              <br />
+              <Button positive fluid onClick={this.addStudent}>Add Students</Button>
 
-            <Header as='h3' dividing>Users</Header>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>Action</Table.HeaderCell>
-                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {oneClassData.users.map((User, i) => (
-                  <Table.Row key={`user-${i}`}>
-                    <Table.Cell collapsing>
-                      <Checkbox name={User._id} onChange={this.handleCheckBoxForUser} checked={userSelected.includes(User._id)} />
-                    </Table.Cell>
-                    <Table.Cell>{User.profile.name}</Table.Cell>
-                  </Table.Row>))}
-              </Table.Body>
+              <Header as='h3' dividing>Users</Header>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>Action</Table.HeaderCell>
+                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {oneClassData.users.map((User, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell collapsing>
+                        <Checkbox name={User._id} onChange={this.handleCheckBoxForUser} checked={userSelected.includes(User._id)} />
+                      </Table.Cell>
+                      <Table.Cell>{User.profile.name}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
 
-              <Table.Footer fullWidth>
-                <Table.Row>
-                  <Table.HeaderCell />
-                  <Table.HeaderCell colSpan='4'>
-                    <Button floated='right' negative icon labelPosition='left' primary size='small' onClick={this.deleteUser}>
-                      <Icon name='user delete' /> Delete User(s)
-                    </Button>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
+                <Table.Footer fullWidth>
+                  <Table.Row>
+                    <Table.HeaderCell />
+                    <Table.HeaderCell colSpan='4'>
+                      <Button floated='right' negative icon labelPosition='left' primary size='small' onClick={this.deleteUser}>
+                        <Icon name='user delete' /> Delete User(s)
+                      </Button>
+                    </Table.HeaderCell>
+                  </Table.Row>
+                </Table.Footer>
+              </Table>
 
-            <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection name='usersValue' options={users} onChange={this.handleInputChange} />
-            <br />
-            <Button positive fluid onClick={this.addUser}>Add Users</Button>
-          </div>
+              <Dropdown value={usersValue} placeholder='Add Users' fluid multiple search selection name='usersValue' options={users} onChange={this.handleInputChange} />
+              <br />
+              <Button positive fluid onClick={this.addUser}>Add Users</Button>
+            </Grid.Column>
+          </Grid.Row>
           }
           {/* The non-edit mode (view only) offers a light version that is clean to view */}
           {(!edit || roles.indexOf('SuperAdmin') === -1) &&
-          <div>
-            <Header as='h3' dividing>Students</Header>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>No.</Table.HeaderCell>
-                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Students</Header>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>No.</Table.HeaderCell>
+                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
 
-              <Table.Body>
-                {oneClassData.students.map((Student, i) => (
-                  <Table.Row key={`student-${i}`}>
-                    <Table.Cell>{i + 1}</Table.Cell>
-                    <Table.Cell>{Student.profile.name}</Table.Cell>
-                  </Table.Row>))}
-              </Table.Body>
-            </Table>
+                <Table.Body>
+                  {oneClassData.students.map((Student, i) => (
+                    <Table.Row key={`student-${i}`}>
+                      <Table.Cell>{i + 1}</Table.Cell>
+                      <Table.Cell>{Student.profile.name}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
 
-            <Header as='h3' dividing>Users</Header>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>No.</Table.HeaderCell>
-                  <Table.HeaderCell width='12'>Name</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {oneClassData.users.map((User, i) => (
-                  <Table.Row key={`user-${i}`}>
-                    <Table.Cell>{i + 1}</Table.Cell>
-                    <Table.Cell>{User.profile.name}</Table.Cell>
-                  </Table.Row>))}
-              </Table.Body>
-            </Table>
-          </div>}
-        </div>
+              <Header as='h3' dividing>Users</Header>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>No.</Table.HeaderCell>
+                    <Table.HeaderCell width='12'>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {oneClassData.users.map((User, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell>{i + 1}</Table.Cell>
+                      <Table.Cell>{User.profile.name}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
+            </Grid.Column>
+          </Grid.Row>}
+        </Grid>
       )
     }
   }

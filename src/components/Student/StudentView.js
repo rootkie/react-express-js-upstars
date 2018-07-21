@@ -22,6 +22,13 @@ const ageOptions = [
   { key: '14', text: '14', value: '14' }
 ]
 
+const inlineStyle = {
+  confirm: {
+    marginTop: '1rem auto !important',
+    margin: '1rem auto'
+  }
+}
+
 class StudentView extends Component {
   static propTypes = {
     studentData: array.isRequired,
@@ -181,6 +188,7 @@ class StudentView extends Component {
                           )).join(', ')}
                           onCancel={this.handleDeleteConfirmation('cancel')}
                           onConfirm={this.handleDeleteConfirmation('confirm')}
+                          style={inlineStyle.confirm}
                         />
                       </div>
                       }

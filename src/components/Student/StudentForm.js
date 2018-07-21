@@ -100,6 +100,14 @@ const initialState = {
   captchaCode: ''
 }
 
+// Special CSS to fix the modal bug
+const inlineStyle = {
+  modal: {
+    marginTop: '1rem auto !important',
+    margin: '1rem auto'
+  }
+}
+
 class StudentForm extends Component {
   static propTypes = {
     addStudent: func
@@ -494,7 +502,7 @@ class StudentForm extends Component {
 
               {/* terms and conditions */}
               <Form.Checkbox label={<label onClick={this.handleTermsOpen}>I agree to the Terms and Conditions</label>} name='terms' required onChange={this.handleChange} checked={terms} />
-              <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen'>
+              <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen' style={inlineStyle.modal}>
                 <Modal.Header>Terms and conditions</Modal.Header>
                 <Modal.Content>
                   <Modal.Description>
