@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { func, array } from 'prop-types'
 import { Link } from 'react-router-dom'
-import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader } from 'semantic-ui-react'
+import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid } from 'semantic-ui-react'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 import axios from 'axios'
@@ -11,6 +11,13 @@ const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },
   { key: 'F', text: 'Female', value: 'F' }
 ]
+
+const inlineStyle = {
+  confirm: {
+    marginTop: '1rem auto !important',
+    margin: '1rem auto'
+  }
+}
 
 class VolunteerView extends Component {
   static propTypes = {
@@ -119,77 +126,84 @@ class VolunteerView extends Component {
       )
     } else {
       return (
-        <Table compact celled>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell colSpan='5'>
-                <Form>
-                  <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                    <Form.Group inline style={{marginBottom: 0}}>
-                      <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
-                      <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                      <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
-                    </Form.Group>
-                    <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
-                  </div>
-                  {moreOptions && <div>
-                    <Form.Field style={{paddingTop: '10px'}}>
-                      <label>Filter by Gender</label>
-                      <Dropdown name='genderSelector' value={genderSelector} placeholder='Male or Female' multiple selection options={genderOptions} onChange={this.handleChange} />
-                    </Form.Field>
-                  </div>}
+        <Grid stackable stretched>
+          <Grid.Row>
+            <Grid.Column>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell colSpan='5'>
+                      <Form>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                          <Form.Group inline style={{marginBottom: 0}}>
+                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
+                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
+                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                          </Form.Group>
+                          <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
+                        </div>
+                        {moreOptions && <div>
+                          <Form.Field style={{paddingTop: '10px'}}>
+                            <label>Filter by Gender</label>
+                            <Dropdown name='genderSelector' value={genderSelector} placeholder='Male or Female' multiple selection options={genderOptions} onChange={this.handleChange} />
+                          </Form.Field>
+                        </div>}
 
-                </Form>
-              </Table.HeaderCell>
-            </Table.Row>
-            <Table.Row>
-              {roles.indexOf('SuperAdmin') !== -1 &&
-              <Table.HeaderCell />
-              }
-              <Table.HeaderCell>Name</Table.HeaderCell>
-              <Table.HeaderCell>Age</Table.HeaderCell>
-              <Table.HeaderCell>IC Number</Table.HeaderCell>
-              <Table.HeaderCell>Gender</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
+                      </Form>
+                    </Table.HeaderCell>
+                  </Table.Row>
+                  <Table.Row>
+                    {roles.indexOf('SuperAdmin') !== -1 &&
+                    <Table.HeaderCell />
+                    }
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>Age</Table.HeaderCell>
+                    <Table.HeaderCell>IC Number</Table.HeaderCell>
+                    <Table.HeaderCell>Gender</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
 
-          <Table.Body>
-            {editedData.map((user, i) => (
-              <Table.Row key={`user-${i}`}>
-                {roles.indexOf('SuperAdmin') !== -1 &&
-                <Table.Cell collapsing>
-                  <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
-                </Table.Cell>
-                }
-                <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
-                <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
-                <Table.Cell>{user.profile.nric}</Table.Cell>
-                <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
-              </Table.Row>))}
-          </Table.Body>
+                <Table.Body>
+                  {editedData.map((user, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      {roles.indexOf('SuperAdmin') !== -1 &&
+                      <Table.Cell collapsing>
+                        <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
+                      </Table.Cell>
+                      }
+                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                      <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
+                      <Table.Cell>{user.profile.nric}</Table.Cell>
+                      <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
 
-          <Table.Footer fullWidth>
-            <Table.Row>
-              <Table.HeaderCell />
-              <Table.HeaderCell colSpan='4'>
-                {roles.indexOf('SuperAdmin') !== -1 &&
-                <div>
-                  <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
-                  <Confirm
-                    open={deleteConfirmationVisibility}
-                    header='Deleting the following students:'
-                    content={selected.map((id) => (
-                      editedData.filter((user) => (user._id === id))[0].profile.name
-                    )).join(', ')}
-                    onCancel={this.handleDeleteConfirmation('cancel')}
-                    onConfirm={this.handleDeleteConfirmation('confirm')}
-                  />
-                </div>
-                }
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Footer>
-        </Table>
+                <Table.Footer fullWidth>
+                  <Table.Row>
+                    <Table.HeaderCell />
+                    <Table.HeaderCell colSpan='4'>
+                      {roles.indexOf('SuperAdmin') !== -1 &&
+                      <div>
+                        <Button size='small' disabled={selected.length === 0} negative onClick={this.handleDeleteConfirmation('show')}>Delete</Button>
+                        <Confirm
+                          open={deleteConfirmationVisibility}
+                          header='Deleting the following students:'
+                          content={selected.map((id) => (
+                            editedData.filter((user) => (user._id === id))[0].profile.name
+                          )).join(', ')}
+                          onCancel={this.handleDeleteConfirmation('cancel')}
+                          onConfirm={this.handleDeleteConfirmation('confirm')}
+                          style={inlineStyle.confirm}
+                        />
+                      </div>
+                      }
+                    </Table.HeaderCell>
+                  </Table.Row>
+                </Table.Footer>
+              </Table>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       )
     }
   }
