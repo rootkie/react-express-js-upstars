@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Header, Table, Checkbox, Loader, Dimmer } from 'semantic-ui-react'
+import { Form, Message, Header, Table, Checkbox, Loader, Dimmer, Grid } from 'semantic-ui-react'
 import { array, object } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import axios from 'axios'
@@ -165,76 +165,90 @@ class AttendanceForm extends Component {
   render () {
     const { date, type, className, students, users, error, hours, classSelection, isLoading } = this.state
     const { classData } = this.props
-    return (
-      <div>
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Group widths='equal'>
-            <Form.Select label='Class' placeholder='Name of class' name='className' options={classData} search selection minCharacters={0} value={className} onChange={this.handleClass} required />
-            <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} disabled={!classSelection} required />
-            <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} disabled={type !== 'Class' || !classSelection} required={type === 'Class'} />
-          </Form.Group>
-          <Form.Group widths='equal'>
-            <Form.Field required>
-              <label>Date of class</label>
-              <DatePicker
-                placeholderText='Click to select a date'
-                dateFormat='YYYY/MM/DD'
-                disabled={!classSelection}
-                selected={date}
-                onChange={this.handleDateChange('date')}
-                isClearable required />
-            </Form.Field>
-          </Form.Group>
-          <Dimmer active={isLoading} inverted>
-            <Loader indeterminate active={isLoading}>Loading Data</Loader>
-          </Dimmer>
-          <Header as='h3' dividing>Student Attendance</Header>
-          <Table compact celled>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {students.map((options, i) => (
-                <Table.Row key={`users-${i}`}>
-                  <Table.Cell collapsing>
-                    <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class'} />
-                  </Table.Cell>
-                  <Table.Cell>{options.text}</Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-          <Header as='h3' dividing>User Attendance</Header>
+    if (isLoading) {
+      return (
+        <Dimmer active={isLoading} inverted>
+          <Loader indeterminate active={isLoading}>Loading Data</Loader>
+        </Dimmer>
+      )
+    } else {
+      return (
+        <Grid stackable stretched>
+          <Grid.Row>
+            <Grid.Column>
+              <Form onSubmit={this.handleSubmit}>
+                <Form.Group widths='equal'>
+                  <Form.Select label='Class' placeholder='Name of class' name='className' options={classData} search selection minCharacters={0} value={className} onChange={this.handleClass} required />
+                  <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} disabled={!classSelection} required />
+                  <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} disabled={type !== 'Class' || !classSelection} required={type === 'Class'} />
+                </Form.Group>
+                <Form.Group widths='equal'>
+                  <Form.Field required>
+                    <label>Date of class</label>
+                    <DatePicker
+                      placeholderText='Click to select a date'
+                      dateFormat='YYYY/MM/DD'
+                      disabled={!classSelection}
+                      selected={date}
+                      onChange={this.handleDateChange('date')}
+                      isClearable required />
+                  </Form.Field>
+                </Form.Group>
+                <Header as='h3' dividing>Student Attendance</Header>
+                <Table compact celled unstackable>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>Status</Table.HeaderCell>
+                      <Table.HeaderCell>Name</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {students.map((options, i) => (
+                      <Table.Row key={`users-${i}`}>
+                        <Table.Cell collapsing>
+                          <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class'} />
+                        </Table.Cell>
+                        <Table.Cell>{options.text}</Table.Cell>
+                      </Table.Row>))}
+                  </Table.Body>
+                </Table>
 
-          <Table compact celled>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {users.map((options, i) => (
-                <Table.Row key={`users-${i}`}>
-                  <Table.Cell collapsing>
-                    <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class'} />
-                  </Table.Cell>
-                  <Table.Cell>{options.text}</Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
+                <Header as='h3' dividing>User Attendance</Header>
 
-          <Form.Button disabled={!classSelection}>Submit</Form.Button>
-        </Form>
-        <Message
-          hidden={error.length === 0}
-          negative
-          content='Please Check Required Fields!'
-        />
-      </div>
-    )
+                <Table compact celled unstackable>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>Status</Table.HeaderCell>
+                      <Table.HeaderCell>Name</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {users.map((options, i) => (
+                      <Table.Row key={`users-${i}`}>
+                        <Table.Cell collapsing>
+                          <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class'} />
+                        </Table.Cell>
+                        <Table.Cell>{options.text}</Table.Cell>
+                      </Table.Row>))}
+                  </Table.Body>
+                </Table>
+
+                <Form.Button disabled={!classSelection}>Submit</Form.Button>
+              </Form>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <Message
+                hidden={error.length === 0}
+                negative
+                content={error}
+              />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      )
+    }
   }
 }
 

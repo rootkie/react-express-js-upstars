@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon } from 'semantic-ui-react'
+import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { string, object, array } from 'prop-types'
 import axios from 'axios'
@@ -30,6 +30,13 @@ const typeOptions = [
 // Before the details are loaded, default values that if no attendance records are found using that ID.
 let students = [{text: 'Not found. Please try another search'}]
 let users = [{text: 'Not found. Please try another search'}]
+
+const inlineStyle = {
+  modal: {
+    marginTop: '1rem auto !important',
+    margin: '1rem auto'
+  }
+}
 
 class AttendanceView extends Component {
   static propTypes = {
@@ -224,74 +231,78 @@ class AttendanceView extends Component {
     const { date, type, className, students, users, submitSuccess, hours, edit, buttonName, deleteConfirm, isLoading, empty, testClass } = this.state // submitted version are used to display the info sent through POST (not necessary)
     const { roles } = this.props
     return (
-      <div>
-        {submitSuccess && <Message success onDismiss={this.dismiss}>Submitted</Message> }
-        <Form onSubmit={this.handleEdit}>
-          <Form.Group widths='equal'>
-            <Form.Input label='Class' placeholder='Name of class' name='className' value={className} onChange={this.handleChange} readOnly required />
-            <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} required />
-            <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} readOnly={edit === false} disabled={type !== 'Class'} required={type === 'Class'} />
-          </Form.Group>
-          <Form.Group widths='equal'>
-            <Form.Field required>
-              {/* This date is perposely not editable, if dates are to be changed, please delete and create a new one! */}
-              <label>Date of class</label>
-              <DatePicker
-                placeholderText='Click to select a date'
-                dateFormat='YYYY/MM/DD'
-                selected={date}
-                readOnly
-                isClearable />
-            </Form.Field>
-          </Form.Group>
-          <Dimmer active={isLoading} inverted>
-            <Loader indeterminate active={isLoading}>Loading Data</Loader>
-          </Dimmer>
-          <Header as='h3' dividing>Student Attendance</Header>
-          <Table compact celled>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Type</Table.HeaderCell>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {students.map((options, i) => (
-                <Table.Row key={`users-${i}`}>
-                  <Table.Cell collapsing>
-                    <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
-                  </Table.Cell>
-                  <Table.Cell>{options.text}</Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-          <Header as='h3' dividing>User Attendance</Header>
+      <Grid stackable stretched>
+        {submitSuccess && <Grid.Row><Grid.Column><Message success onDismiss={this.dismiss}>Submitted</Message></Grid.Column></Grid.Row> }
+        <Grid.Row>
+          <Grid.Column>
+            <Form onSubmit={this.handleEdit}>
+              <Form.Group widths='equal'>
+                <Form.Input label='Class' placeholder='Name of class' name='className' value={className} onChange={this.handleChange} readOnly required />
+                <Form.Select label='Type' placeholder='Type' name='type' options={typeOptions} value={type} onChange={this.handleChangeType} required />
+                <Form.Input label='Hours' placeholder='enter hours here' type='number' name='hours' value={hours} onChange={this.handleChange} readOnly={edit === false} disabled={type !== 'Class'} required={type === 'Class'} />
+              </Form.Group>
+              <Form.Group widths='equal'>
+                <Form.Field required>
+                  {/* This date is perposely not editable, if dates are to be changed, please delete and create a new one! */}
+                  <label>Date of class</label>
+                  <DatePicker
+                    placeholderText='Click to select a date'
+                    dateFormat='YYYY/MM/DD'
+                    selected={date}
+                    readOnly
+                    isClearable />
+                </Form.Field>
+              </Form.Group>
+              <Dimmer active={isLoading} inverted>
+                <Loader indeterminate active={isLoading}>Loading Data</Loader>
+              </Dimmer>
+              <Header as='h3' dividing>Student Attendance</Header>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Type</Table.HeaderCell>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {students.map((options, i) => (
+                    <Table.Row key={`users-${i}`}>
+                      <Table.Cell collapsing>
+                        <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
+                      </Table.Cell>
+                      <Table.Cell>{options.text}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
+              <Header as='h3' dividing>User Attendance</Header>
 
-          <Table compact celled>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {users.map((options, i) => (
-                <Table.Row key={`users-${i}`}>
-                  <Table.Cell collapsing>
-                    <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
-                  </Table.Cell>
-                  <Table.Cell>{options.text}</Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-          {(roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || testClass.indexOf(className) !== -1) &&
-          <div>
-            <Form.Button fluid floated='left' disabled={empty} value='submit' type='submit'>{buttonName}</Form.Button>
-            <Form.Button fluid negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
-          </div>
-          }
-        </Form>
-        <Modal open={deleteConfirm} onClose={this.close} basic size='small'>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Status</Table.HeaderCell>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {users.map((options, i) => (
+                    <Table.Row key={`users-${i}`}>
+                      <Table.Cell collapsing>
+                        <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
+                      </Table.Cell>
+                      <Table.Cell>{options.text}</Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
+              {(roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || testClass.indexOf(className) !== -1) &&
+              <div>
+                <Form.Button fluid floated='left' disabled={empty} value='submit' type='submit'>{buttonName}</Form.Button>
+                <Form.Button fluid negative floated='left' onClick={this.handleDeletePopup} disabled={empty}>Delete</Form.Button>
+              </div>
+              }
+            </Form>
+          </Grid.Column>
+        </Grid.Row>
+        <Modal open={deleteConfirm} onClose={this.close} basic size='small' style={inlineStyle.modal}>
           <Header icon='archive' content='Delete Attendance' />
           {/* Just to make sure the user truly wants to delete the attendance since it is permanent. */}
           <Modal.Content>
@@ -306,7 +317,7 @@ class AttendanceView extends Component {
             </Button>
           </Modal.Actions>
         </Modal>
-      </div>
+      </Grid>
     )
   }
 }
