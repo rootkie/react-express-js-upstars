@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { array, func, bool } from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid } from 'semantic-ui-react'
-import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 
 const genderOptions = [
@@ -112,7 +111,7 @@ class StudentView extends Component {
       )
     } else {
       return (
-        <Grid stackable streched>
+        <Grid stackable stretched>
           <Grid.Row>
             <Grid.Column>
               <Table compact celled unstackable>

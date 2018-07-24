@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid } from 'semantic-ui-react'
-import 'react-datepicker/dist/react-datepicker.css'
 import axios from 'axios'
 
 const statusOptions = [

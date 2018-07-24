@@ -7,7 +7,7 @@ import moment from 'moment'
 
 // Initially, edit state is false.
 const initialState = {
-  date: null,
+  date: undefined,
   className: '',
   classId: '',
   type: '',
@@ -80,7 +80,6 @@ class AttendanceView extends Component {
               }
             }
             let testClass = props.classData.map(el => el.text)
-            console.log(users)
             if (data.students.length !== 0) {
               for (let [index, studentData] of data.students.entries()) {
                 students[index] = {
@@ -246,11 +245,10 @@ class AttendanceView extends Component {
                   {/* This date is perposely not editable, if dates are to be changed, please delete and create a new one! */}
                   <label>Date of class</label>
                   <DatePicker
-                    placeholderText='Click to select a date'
-                    dateFormat='YYYY/MM/DD'
+                    dateFormat='DD/MM/YYYY'
                     selected={date}
                     readOnly
-                    isClearable />
+                  />
                 </Form.Field>
               </Form.Group>
               <Dimmer active={isLoading} inverted>

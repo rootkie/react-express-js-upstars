@@ -19,8 +19,8 @@ class AttendanceSearch extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: null,
-      endDate: null,
+      startDate: undefined,
+      endDate: undefined,
       moreOptions: false,
       classSelector: '',
       isLoading: true,

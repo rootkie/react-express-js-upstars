@@ -62,7 +62,7 @@ class StudentViewOthers extends Component {
       )
     } else {
       return (
-        <Grid stackable streched>
+        <Grid stackable stretched>
           <Grid.Row>
             <Grid.Column>
               <Table compact celled unstackable>

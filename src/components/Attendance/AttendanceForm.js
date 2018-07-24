@@ -6,7 +6,7 @@ import axios from 'axios'
 
 // Note: classSelection is a bool that tracks if any class is provided by the user.
 const initialState = {
-  date: null,
+  date: undefined,
   className: '',
   type: 'Class',
   hours: '',
@@ -191,7 +191,7 @@ class AttendanceForm extends Component {
                       disabled={!classSelection}
                       selected={date}
                       onChange={this.handleDateChange('date')}
-                      isClearable required />
+                      required />
                   </Form.Field>
                 </Form.Group>
                 <Header as='h3' dividing>Student Attendance</Header>

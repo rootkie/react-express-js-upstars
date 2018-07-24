@@ -42,8 +42,8 @@ class AttendanceUser extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: null,
-      endDate: null,
+      startDate: undefined,
+      endDate: undefined,
       moreOptions: false,
       isLoading: true,
       userOptions: [],
@@ -246,8 +246,8 @@ class AttendanceUser extends Component {
               </Table.Header>
 
               <Table.Body>
-                {attendanceFormattedData.attendances.map((data, i) => (
-                  <Table.Row>
+                {attendanceFormattedData.attendances.map((data) => (
+                  <Table.Row key={data.className + data.date}>
                     <Table.Cell collapsing>{data.className}</Table.Cell>
                     <Table.Cell collapsing>{data.date}</Table.Cell>
                     <Table.Cell collapsing>{data.type}</Table.Cell>

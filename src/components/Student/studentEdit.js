@@ -42,7 +42,7 @@ const initialState = {
   profile: {
     name: '',
     icNumber: '',
-    dob: '',
+    dob: undefined,
     address: '',
     gender: '',
     nationality: '',
@@ -82,11 +82,11 @@ const initialState = {
 
   /* Official use */
   admin: {
-    interviewDate: '',
+    interviewDate: undefined,
     interviewNotes: '',
-    commencementDate: '',
+    commencementDate: undefined,
     adminNotes: '',
-    exitDate: '',
+    exitDate: undefined,
     exitReason: ''
   },
 
@@ -527,7 +527,7 @@ class StudentEdit extends Component {
                     dateFormat='DD/MM/YYYY'
                     selected={interviewDate}
                     onChange={this.handleDateChange('admin-interviewDate')}
-                    isClearable />
+                  />
                 </Form.Field>
                 <Form.Input label='Interview notes' placeholder='reason for acceptance' name='admin-interviewNotes' value={interviewNotes} onChange={this.handleChange} />
                 <Form.Field error={error.includes('commencementDate')} >
@@ -538,7 +538,7 @@ class StudentEdit extends Component {
                     minDate={interviewDate}
                     selected={commencementDate}
                     onChange={this.handleDateChange('admin-commencementDate')}
-                    isClearable />
+                  />
                 </Form.Field>
                 <Form.Input label='Admin notes' placeholder='up to 1000 words' name='admin-adminNotes' value={adminNotes} onChange={this.handleChange} />
                 <Form.Field error={error.includes('dateOfExit')} >
@@ -549,7 +549,7 @@ class StudentEdit extends Component {
                     minDate={commencementDate}
                     selected={exitDate}
                     onChange={this.handleDateChange('admin-exitDate')}
-                    isClearable />
+                  />
                 </Form.Field>
                 <Form.Input label='Reason for exit' placeholder='reason for exit' name='admin-exitReason' value={exitReason} onChange={this.handleChange} />
               </Segment>

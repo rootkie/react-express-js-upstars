@@ -44,7 +44,7 @@ const initialState = {
   profile: {
     name: '',
     icNumber: '',
-    dob: null,
+    dob: undefined,
     address: '',
     gender: '',
     nationality: '',
@@ -334,10 +334,12 @@ class StudentForm extends Component {
                       <DatePicker
                         placeholderText='Click to select a date'
                         dateFormat='DD/MM/YYYY'
-                        showYearDropdown
                         maxDate={moment()}
                         selected={dob}
                         onChange={this.handleDateChange('profile-dob')}
+                        showMonthDropdown
+                        showYearDropdown
+                        dropdownMode='select'
                         required />
                     </Form.Field>
                   </Form.Group>
