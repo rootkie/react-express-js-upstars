@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { string, array } from 'prop-types'
+import { array, object } from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
 import StudentEdit from './StudentEdit'
@@ -9,8 +9,7 @@ import { filterData } from '../../utils'
 
 class StudentWrap extends Component {
   static propTypes = {
-    op: string.isRequired,
-    sid: string,
+    match: object.isRequired,
     roles: array.isRequired
   }
 
@@ -60,7 +59,7 @@ class StudentWrap extends Component {
   }
 
   editStudent = (studentDataToSubmit) => {
-    const { sid } = this.props
+    const { sid } = this.props.match.params
     return axios.put('/students', {
       ...studentDataToSubmit,
       studentId: sid
@@ -98,7 +97,8 @@ class StudentWrap extends Component {
 
   render () {
     const { studentData, otherStudentData, filteredData, isLoading, filteredDataOthers } = this.state
-    const { op, sid, roles } = this.props
+    const { roles, match } = this.props
+    const { op, sid } = match.params
     return (
       <div>
         {op === 'add' && <StudentForm addStudent={this.addStudent} /> }

@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /api
+Disallow: /forgetpassword
+Disallow: /resetpassword
+Disallow: /verifyaccount
+
+Sitemap: https://test.rootkiddie.com/sitemap.xml
+

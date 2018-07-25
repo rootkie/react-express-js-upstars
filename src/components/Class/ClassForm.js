@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Message, Header } from 'semantic-ui-react'
+import { Form, Message, Header, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { func } from 'prop-types'
 import moment from 'moment'
@@ -80,31 +80,51 @@ class ClassForm extends Component {
   render () {
     const { className, classType, venue, dayAndTime, submitSuccess, classId, serverErrorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
     return (
-      <div>
-        {submitSuccess && <Message positive onDismiss={this.closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message> }
-        <Message
-          hidden={serverErrorMessage.length === 0}
-          negative
-          content={serverErrorMessage}
-        />
-        <Header as='h3' dividing>Class information</Header>
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
-          <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
-          <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-          <Form.Field required>
-            <label>Starting Date</label>
-            <DatePicker
-              inline
-              fixedHeight
-              dateFormat='DD/MM/YYYY'
-              selected={this.state.startDate}
-              onChange={this.handleDateChange} required />
-          </Form.Field>
-          <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
-          <Form.Button>Submit</Form.Button>
-        </Form>
-      </div>
+      <Grid stackable stretched>
+        {submitSuccess &&
+        <Grid.Row>
+          <Grid.Column>
+            <Message positive onDismiss={this.closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message>
+          </Grid.Column>
+        </Grid.Row>
+        }
+        {serverErrorMessage.length !== 0 &&
+          <Grid.Row>
+            <Grid.Column>
+              <Message
+                hidden={serverErrorMessage.length === 0}
+                negative
+                content={serverErrorMessage}
+              />
+            </Grid.Column>
+          </Grid.Row>
+        }
+        <Grid.Row>
+          <Grid.Column>
+            <Header as='h3' dividing>Class information</Header>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Form onSubmit={this.handleSubmit}>
+              <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
+              <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
+              <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
+              <Form.Field required>
+                <label>Starting Date</label>
+                <DatePicker
+                  inline
+                  fixedHeight
+                  dateFormat='DD/MM/YYYY'
+                  selected={this.state.startDate}
+                  onChange={this.handleDateChange} required />
+              </Form.Field>
+              <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
+              <Form.Button>Submit</Form.Button>
+            </Form>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 }

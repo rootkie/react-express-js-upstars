@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Redirect } from 'react-router'
+import { BrowserRouter as Redirect, Route, Switch } from 'react-router-dom'
 import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
 import Topbar from './Topbar'
@@ -16,7 +16,7 @@ import FourZeroFour from './Error/404'
 import FiveHundred from './Error/500'
 
 axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-// axios.defaults.baseURL = 'http://127.0.0.1:1444/api/'
+// axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
@@ -146,7 +146,8 @@ class MainCtrl extends Component {
   }
 
   render () {
-    const { main, op, sid } = this.props.match.params || ''
+    // const { main, op, sid } = this.props.match.params || ''
+    const { path } = this.props.match
     const { name, _id, roles, errorCode } = this.state
 
     if (!this.state.isLoggedIn) {
@@ -170,16 +171,23 @@ class MainCtrl extends Component {
     } else if (this.state.isLoggedIn && this.state.confirm) {
       return (
         <Container fluid>
-          <Topbar tab={main} name={name} _id={_id} />
-          <Grid style={GridStyle}>
-            <SideMenu activeItem={main + op || ''} roles={roles} />
+          <Topbar name={name} _id={_id} />
+          <Grid style={GridStyle} stackable>
+            <SideMenu roles={roles} />
             <Grid.Column width={13} style={MainContentStyle}>
-              {main === 'home' && <Home />}
-              {main === 'students' && <StudentWrap op={op} sid={sid} roles={roles} />}
-              {main === 'classes' && <ClassWrap op={op} sid={sid} roles={roles} />}
-              {main === 'volunteer' && <VolunteerWrap op={op} sid={sid} _id={_id} roles={roles} />}
-              {main === 'attendance' && <AttendanceWrap op={op} sid={sid} roles={roles} />}
-              {main === 'admin' && <AdminWrap op={op} />}
+              {/* OP is for type of OPeration (Add / Delete etc) while SID is for the unique ID allocated for the job */}
+              {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
+              Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
+              <Switch>
+                <Route exact path={`${path}/home`} render={() => <Home />} />
+                <Route exact path={`${path}/students/:op/:sid?`} render={(props) => <StudentWrap roles={roles} {...props} />} />
+                <Route exact path={`${path}/classes/:op/:sid?`} render={props => <ClassWrap roles={roles} {...props} />} />
+                <Route exact path={`${path}/volunteer/:op/:sid?`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
+                <Route exact path={`${path}/attendance/:op/:sid?`} render={props => <AttendanceWrap roles={roles} {...props} />} />
+                <Route exact path={`${path}/admin/:op`} render={(props) => <AdminWrap {...props} />} />
+                <Route component={FourZeroFour} />
+              </Switch>
+
             </Grid.Column>
           </Grid>
         </Container>
@@ -194,4 +202,4 @@ class MainCtrl extends Component {
   }
 }
 
-export default MainCtrl
+export default (MainCtrl)

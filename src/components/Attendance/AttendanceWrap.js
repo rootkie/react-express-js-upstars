@@ -39,7 +39,8 @@ class AttendanceWrap extends Component {
 
   render () {
     const { isLoading } = this.state
-    const { op, sid, roles } = this.props
+    const { match, roles } = this.props
+    const { op, sid } = match.params
     if (isLoading) {
       return (
         <div>
@@ -71,8 +72,7 @@ class AttendanceWrap extends Component {
 }
 
 AttendanceWrap.propTypes = {
-  op: PropTypes.string,
-  sid: PropTypes.string,
+  match: PropTypes.object.isRequired,
   roles: PropTypes.array.isRequired
 }
 

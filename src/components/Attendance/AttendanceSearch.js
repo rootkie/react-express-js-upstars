@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Loader, Dimmer } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Loader, Dimmer, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { array } from 'prop-types'
 import moment from 'moment'
@@ -19,8 +19,8 @@ class AttendanceSearch extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      startDate: null,
-      endDate: null,
+      startDate: undefined,
+      endDate: undefined,
       moreOptions: false,
       classSelector: '',
       isLoading: true,
@@ -106,68 +106,75 @@ class AttendanceSearch extends Component {
     const { classData } = this.props
 
     return (
-      <Table celled striped>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell colSpan='6'>
-              <Form>
-                <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
-                  <Form.Group inline style={{marginBottom: 0}}>
-                    <Form.Field style={datePickingStyle}>
-                      <label>Starting Date</label>
-                      <DatePicker
-                        dateFormat='DD/MM/YYYY'
-                        selected={this.state.startDate}
-                        maxDate={this.state.endDate}
-                        onChange={(date) => this.handleDateChange('startDate', date)}
-                        placeholderText='Click to select' />
-                    </Form.Field>
-                    <Form.Field style={datePickingStyle}>
-                      <label>Ending Date</label>
-                      <DatePicker
-                        dateFormat='DD/MM/YYYY'
-                        selected={this.state.endDate}
-                        minDate={this.state.startDate}
-                        onChange={(date) => this.handleDateChange('endDate', date)}
-                        placeholderText='Click to select' />
-                    </Form.Field>
-                    <Form.Button positive onClick={this.handleSearch}>Search attendance records</Form.Button>
-                    <Form.Button negative onClick={this.clear}>Clear all fields</Form.Button>
-                  </Form.Group>
-                  <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
-                </div>
-                {moreOptions && <div>
-                  <Form.Field style={{paddingTop: '10px'}}>
-                    <label>Classes</label>
-                    <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.getAttendance} />
-                  </Form.Field>
-                </div>}
-              </Form>
-              <Dimmer active={isLoading} inverted>
-                <Loader indeterminate active={isLoading}>Loading Data</Loader>
-              </Dimmer>
-            </Table.HeaderCell>
-          </Table.Row>
-          <Table.Row>
-            <Table.HeaderCell>Index</Table.HeaderCell>
-            <Table.HeaderCell>Class Name</Table.HeaderCell>
-            <Table.HeaderCell>Lesson Date</Table.HeaderCell>
-            <Table.HeaderCell>Status</Table.HeaderCell>
-            <Table.HeaderCell>Hours</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
+      <Grid stackable stretched>
+        <Grid.Row>
+          <Grid.Column>
+            <Table celled striped unstackable>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell colSpan='6'>
+                    <Form>
+                      <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <Form.Group inline style={{marginBottom: 0}}>
+                          <Form.Field style={datePickingStyle}>
+                            <label>Starting Date</label>
+                            <DatePicker
+                              dateFormat='DD/MM/YYYY'
+                              selected={this.state.startDate}
+                              maxDate={this.state.endDate}
+                              onChange={(date) => this.handleDateChange('startDate', date)}
+                              placeholderText='Click to select' />
+                          </Form.Field>
+                          <Form.Field style={datePickingStyle}>
+                            <label>Ending Date</label>
+                            <DatePicker
+                              dateFormat='DD/MM/YYYY'
+                              selected={this.state.endDate}
+                              minDate={this.state.startDate}
+                              onChange={(date) => this.handleDateChange('endDate', date)}
+                              placeholderText='Click to select' />
+                          </Form.Field>
+                          <Form.Button positive onClick={this.handleSearch}>Search attendance records</Form.Button>
+                          <Form.Button negative onClick={this.clear}>Clear all fields</Form.Button>
+                        </Form.Group>
+                        <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
+                      </div>
+                      {moreOptions && <div>
+                        <Form.Field style={{paddingTop: '10px'}}>
+                          <label>Classes</label>
+                          <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.getAttendance} />
+                        </Form.Field>
+                      </div>}
+                    </Form>
+                    <Dimmer active={isLoading} inverted>
+                      <Loader indeterminate active={isLoading}>Loading Data</Loader>
+                    </Dimmer>
+                  </Table.HeaderCell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.HeaderCell>Index</Table.HeaderCell>
+                  <Table.HeaderCell>Class Name</Table.HeaderCell>
+                  <Table.HeaderCell>Lesson Date</Table.HeaderCell>
+                  <Table.HeaderCell>Status</Table.HeaderCell>
+                  <Table.HeaderCell>Hours</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
 
-        <Table.Body>
-          {attendances.map((options, i) => (
-            <Table.Row key={`attendance-${i}`}>
-              <Table.Cell collapsing>{i + 1}</Table.Cell>
-              <Table.Cell><Link to={'/attendance/view/' + options._id}>{options.className}</Link></Table.Cell>
-              <Table.Cell>{options.date}</Table.Cell>
-              <Table.Cell>{options.type}</Table.Cell>
-              <Table.Cell>{options.hours}</Table.Cell>
-            </Table.Row>))}
-        </Table.Body>
-      </Table>
+              <Table.Body>
+                {attendances.map((options, i) => (
+                  <Table.Row key={`attendance-${i}`}>
+                    <Table.Cell collapsing>{i + 1}</Table.Cell>
+                    <Table.Cell><Link to={'/dashboard/attendance/view/' + options._id}>{options.className}</Link></Table.Cell>
+                    <Table.Cell>{options.date}</Table.Cell>
+                    <Table.Cell>{options.type}</Table.Cell>
+                    <Table.Cell>{options.hours}</Table.Cell>
+                  </Table.Row>))}
+              </Table.Body>
+            </Table>
+
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 }

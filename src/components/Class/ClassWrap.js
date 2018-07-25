@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { string, array } from 'prop-types'
+import { object, array } from 'prop-types'
 import ClassForm from './ClassForm.js'
 import ClassView from './ClassView.js'
 import ClassEdit from './ClassEdit.js'
@@ -8,8 +8,7 @@ import axios from 'axios'
 // Declare variables that originate from the URI
 class ClassWrap extends Component {
   static propTypes = {
-    op: string.isRequired,
-    sid: string,
+    match: object.isRequired,
     roles: array.isRequired
   }
   // First init of state.
@@ -48,7 +47,7 @@ class ClassWrap extends Component {
   // Called from ClassEdit during submit to PUT the necessary info into the DB
   editClass = (classDataToSubmit) => {
     const { classData } = this.state
-    const { sid } = this.props
+    const { sid } = this.props.match.params
     return axios.put('/class', {
       ...classDataToSubmit,
       classId: sid
@@ -80,7 +79,8 @@ class ClassWrap extends Component {
 
   // Various routes that would render different components
   render () {
-    const { op, sid, roles } = this.props
+    const { roles, match } = this.props
+    const { op, sid } = match.params
     const { classData, isLoading } = this.state
     return (
       <div>

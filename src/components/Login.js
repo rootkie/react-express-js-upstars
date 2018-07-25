@@ -87,7 +87,7 @@ class Login extends Component {
     const { email, password, message, redirect, isLoading } = this.state
 
     if (redirect) {
-      return <Redirect to='/home' />
+      return <Redirect to='/dashboard/home' />
     }
     if (isLoading) {
       return (

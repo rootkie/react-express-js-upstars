@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Form, Dropdown, Dimmer, Loader, Header, Message } from 'semantic-ui-react'
-import 'react-datepicker/dist/react-datepicker.css'
+import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid } from 'semantic-ui-react'
 import axios from 'axios'
 
 const statusOptions = [
@@ -215,106 +214,131 @@ class ChangeStatus extends Component {
       )
     } else {
       return (
-        <div>
-          <Table compact celled>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell colSpan='5'>
-                  <Form>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                      <Form.Group inline style={{marginBottom: 0}}>
-                        <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
-                        <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                        <Form.Button positive onClick={this.refresh}>Refresh Data</Form.Button>
-                      </Form.Group>
-                    </div>
-                  </Form>
-                </Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-          </Table>
-          <Message
-            hidden={error === ''}
-            negative
-            content={error}
-          />
-          <Header as='h3' dividing>Pending Users</Header>
-          <Table celled columns={3}>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Roles</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
+        <Grid stackable stretched>
+          <Grid.Row>
+            <Grid.Column>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell colSpan='5'>
+                      <Form>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                          <Form.Group inline style={{marginBottom: 0}}>
+                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
+                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
+                            <Form.Button positive onClick={this.refresh}>Refresh Data</Form.Button>
+                          </Form.Group>
+                        </div>
+                      </Form>
+                    </Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+              </Table>
+              <Message
+                hidden={error === ''}
+                negative
+                content={error}
+              />
+            </Grid.Column>
+          </Grid.Row>
 
-            <Table.Body>
-              {pendingUsers.map((user, i) => (
-                <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('pendingUsers', i)} /></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('pendingUsers', i)} /></Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-          <Header as='h3' dividing>Active Users</Header>
-          <Table celled columns={3}>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Roles</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Pending Users</Header>
+              <Table celled columns={3} unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>Status</Table.HeaderCell>
+                    <Table.HeaderCell>Roles</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
 
-            <Table.Body>
-              {activeUsers.map((user, i) => (
-                <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('activeUsers', i)} /></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('activeUsers', i)} /></Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-          <Header as='h3' dividing>Suspended Users</Header>
-          <Table celled columns={3}>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Roles</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
+                <Table.Body>
+                  {pendingUsers.map((user, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('pendingUsers', i)} /></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('pendingUsers', i)} /></Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
+            </Grid.Column>
+          </Grid.Row>
 
-            <Table.Body>
-              {suspendedUsers.map((user, i) => (
-                <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('suspendedUsers', i)} /></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('suspendedUsers', i)} /></Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-          <Header as='h3' dividing>Deleted Users</Header>
-          <Table celled columns={3}>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Roles</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Active Users</Header>
+              <Table celled columns={3} unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>Status</Table.HeaderCell>
+                    <Table.HeaderCell>Roles</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
 
-            <Table.Body>
-              {deletedUsers.map((user, i) => (
-                <Table.Row key={`user-${i}`}>
-                  <Table.Cell><Link to={`/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('deletedUsers', i)} /></Table.Cell>
-                  <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('deletedUsers', i)} /></Table.Cell>
-                </Table.Row>))}
-            </Table.Body>
-          </Table>
-        </div>
+                <Table.Body>
+                  {activeUsers.map((user, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('activeUsers', i)} /></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('activeUsers', i)} /></Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
+            </Grid.Column>
+          </Grid.Row>
+
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Suspended Users</Header>
+              <Table celled columns={3} unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>Status</Table.HeaderCell>
+                    <Table.HeaderCell>Roles</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+
+                <Table.Body>
+                  {suspendedUsers.map((user, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('suspendedUsers', i)} /></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('suspendedUsers', i)} /></Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+              </Table>
+            </Grid.Column>
+          </Grid.Row>
+
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Deleted Users</Header>
+              <Table celled columns={3} unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>Status</Table.HeaderCell>
+                    <Table.HeaderCell>Roles</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+
+                <Table.Body>
+                  {deletedUsers.map((user, i) => (
+                    <Table.Row key={`user-${i}`}>
+                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('deletedUsers', i)} /></Table.Cell>
+                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('deletedUsers', i)} /></Table.Cell>
+                    </Table.Row>))}
+                </Table.Body>
+
+              </Table>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       )
     }
   }
