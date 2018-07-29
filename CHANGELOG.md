@@ -1,5 +1,11 @@
 # Change Log
 
+## [v0.1.1-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/0.1.1-alpha1) (July 29, 2018, 5.00pm)
+- [Fixed] Sitemap internal react route parsing changed to express routing so the sitemap file can render properly by Nginx
+- [Removed] GUIDE.md is removed because it does not apply anymore as we move towards Beta testing
+- [Added] Preparing for the first beta release soon
+- [Fixed] README.md image centered and wording made prettier.. =)
+
 ## [v0.1.0-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/0.1.0-alpha1) (July 25, 2018, 8.07pm)
 
 - [Changed] Routes are fixed especially with the issue with the main page routing history etc

@@ -1,5 +1,6 @@
 ## React-Express-upstars
 ![UPStars](src/components/logo.png "UPStars Project")
+
 This project is to build a student volunteer content management system using react.js as front-end and express.js as backend for the beneficiary UPStars.
 
 ## Overview

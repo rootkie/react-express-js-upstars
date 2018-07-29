@@ -396,7 +396,7 @@ class Home extends Component {
                 <Grid.Column width={5}>
                   <Header inverted as='h4' content='About' />
                   <List link inverted>
-                    <List.Item as={Link} to='/sitemap.xml'>Sitemap</List.Item>
+                    <a href='/sitemap.xml'><List.Item as='a'>Sitemap</List.Item></a>
                     <List.Item as={Link} to='/student'>Student</List.Item>
                     <List.Item as={Link} to='/volunteer'>Volunteer</List.Item>
                   </List>
