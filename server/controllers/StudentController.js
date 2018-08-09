@@ -274,3 +274,41 @@ module.exports.deleteStudent = async (req, res, next) => {
     } else next(err)
   }
 }
+
+// Everyone
+module.exports.getStudentByName = async (req, res, next) => {
+  let {name} = req.params
+  try {
+    // Find students from database real-time using name
+    const studentsFiltered = await Student.find({
+      status: 'Active',
+      'profile.name': new RegExp(name, 'i')
+    }).select('profile.name')
+    return res.status(200).json({
+      studentsFiltered
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}
+
+// Admin only
+module.exports.getOtherStudentByName = async (req, res, next) => {
+  let {name} = req.params
+  try {
+    // Find other students from database real-time using name
+    const studentsFiltered = await Student.find({
+      status: {
+        $ne: 'Active'
+      },
+      'profile.name': new RegExp(name, 'i')
+    }).select('profile.name')
+    return res.status(200).json({
+      studentsFiltered
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}

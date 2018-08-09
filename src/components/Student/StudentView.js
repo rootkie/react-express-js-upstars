@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import { array, func, bool } from 'prop-types'
-import { Link } from 'react-router-dom'
-import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid } from 'semantic-ui-react'
+import { Link, Redirect } from 'react-router-dom'
+import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid, Search } from 'semantic-ui-react'
 import moment from 'moment'
+import axios from 'axios'
 
 const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },
@@ -37,13 +38,44 @@ class StudentView extends Component {
     roles: array.isRequired
   }
 
+  componentWillMount () {
+    this.resetComponent()
+  }
+
   state = {
     selected: [],
     deleteConfirmationVisibility: false,
-    searchName: '',
+    value: '',
+    results: [],
+    id: '',
+    redirect: false,
     moreOptions: false,
     genderSelector: [],
-    ageSelector: []
+    ageSelector: [],
+    isLoadingSearch: false
+  }
+
+  resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoadingSearch: true, value })
+    if (value.length < 1) return this.resetComponent()
+    axios.get(`studentsResponsive/${value}`)
+      .then(response => {
+        console.log(response)
+        let studentList = response.data.studentsFiltered.map(student => {
+          return {
+            title: student.profile.name,
+            id: student._id,
+            key: student._id
+          }
+        })
+        this.setState({ isLoadingSearch: false, results: studentList })
+      })
+  }
+
+  handleResultSelect = (e, { result }) => {
+    this.setState({redirect: true, id: result.id})
   }
 
   handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually the ID of the student
@@ -85,9 +117,8 @@ class StudentView extends Component {
   handleFilter = (e) => {
     e.preventDefault()
     const { searchFilter } = this.props
-    const { searchName, ageSelector, genderSelector } = this.state
+    const { ageSelector, genderSelector } = this.state
     const options = []
-    searchName.length > 0 && options.push({field: 'profile-name', value: searchName})
     ageSelector.length > 0 && options.push({field: 'profile-age', value: ageSelector})
     genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
     searchFilter(options)
@@ -95,11 +126,11 @@ class StudentView extends Component {
 
   clearAll = e => {
     e.preventDefault()
-    this.setState({ genderSelector: [], ageSelector: [], searchName: '' })
+    this.setState({ genderSelector: [], ageSelector: [] })
   }
 
   render () {
-    const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, ageSelector } = this.state
+    const { selected, results, id, deleteConfirmationVisibility, moreOptions, genderSelector, ageSelector, isLoadingSearch, value, redirect } = this.state
     const { studentData, isLoading, roles } = this.props
     if (isLoading) {
       return (
@@ -109,6 +140,8 @@ class StudentView extends Component {
           </Dimmer>
         </div>
       )
+    } else if (redirect && id.length !== 0) {
+      return <Redirect push to={`/dashboard/students/edit/${id}`} />
     } else {
       return (
         <Grid stackable stretched>
@@ -121,9 +154,13 @@ class StudentView extends Component {
                       <Form>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <Form.Group inline style={{marginBottom: 0}}>
-                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
-                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                            <Search
+                              loading={isLoadingSearch}
+                              onResultSelect={this.handleResultSelect}
+                              onSearchChange={this.handleSearchChange}
+                              results={results}
+                              value={value}
+                            />
                           </Form.Group>
                           <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                         </div>
@@ -136,6 +173,10 @@ class StudentView extends Component {
                             <label>Filter by Age</label>
                             <Dropdown name='ageSelector' value={ageSelector} placeholder='Select age range' search multiple selection options={ageOptions} onChange={this.handleChange} />
                           </Form.Field>
+                          <Form.Group>
+                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
+                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                          </Form.Group>
                         </div>}
 
                       </Form>

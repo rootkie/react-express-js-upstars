@@ -36,7 +36,7 @@ module.exports.getAllUsers = async (req, res, next) => {
   }
 }
 
-// Everyone but restricted to their own class checked using token
+// Everyone but restricted to their own profile checked using token. Only Admin and above can view all.
 module.exports.getUser = async (req, res, next) => {
   try {
     let user
@@ -54,6 +54,8 @@ module.exports.getUser = async (req, res, next) => {
     }
 
     // Find user based on ID and retrieve its className. Restrict based on the need to view admin
+    // The first check on top is to make sure the user has permission to view the profile of that ID at all
+    // This next check is to ensure that a non-admin viewing his personal profile won't get to edit / view admin matters
     if (approved.privilege === false) {
       user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -profile.dob -profile.nationality -commencementDate -email')
     } else {
@@ -279,5 +281,40 @@ module.exports.getExternal = async (req, res, next) => {
   } catch (err) {
     console.log(err)
     next(err)
+  }
+}
+
+// All
+module.exports.getUsersByName = async (req, res, next) => {
+  try {
+    let { roles, _id } = req.decoded
+    let { name } = req.params
+    // Retrieve users in the system based on roles and permissions
+    if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || roles.indexOf('Mentor') !== -1) {
+      const users = await User.find({
+        'status': 'Active',
+        'profile.name': new RegExp(name, 'i')
+      }).select('profile.name').sort('profile.name')
+
+      return res.status(200).json({
+        users
+      })
+    } else {
+      const users = await User.find({
+        '_id': _id,
+        'status': 'Active'
+      }).select('profile.name').sort('profile.name')
+
+      return res.status(200).json({
+        users
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
   }
 }

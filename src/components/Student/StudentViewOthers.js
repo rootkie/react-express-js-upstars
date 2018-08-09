@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { array, func, bool } from 'prop-types'
-import { Link } from 'react-router-dom'
-import { Table, Icon, Form, Dropdown, Dimmer, Loader, Grid } from 'semantic-ui-react'
+import { Link, Redirect } from 'react-router-dom'
+import { Table, Icon, Form, Dropdown, Dimmer, Loader, Grid, Search } from 'semantic-ui-react'
+import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
 
 const genderOptions = [
@@ -23,10 +24,37 @@ class StudentViewOthers extends Component {
   }
 
   state = {
-    searchName: '',
+    value: '',
+    results: [],
+    id: '',
+    redirect: false,
     moreOptions: false,
+    isLoadingSearch: false,
     statusSelector: [],
     genderSelector: []
+  }
+
+  resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoadingSearch: true, value })
+    if (value.length < 1) return this.resetComponent()
+    axios.get(`otherStudentsResponsive/${value}`)
+      .then(response => {
+        console.log(response)
+        let studentList = response.data.studentsFiltered.map(student => {
+          return {
+            title: student.profile.name,
+            id: student._id,
+            key: student._id
+          }
+        })
+        this.setState({ isLoadingSearch: false, results: studentList })
+      })
+  }
+
+  handleResultSelect = (e, { result }) => {
+    this.setState({redirect: true, id: result.id})
   }
 
   handleChange = (e, { name, value }) => this.setState({[name]: value})
@@ -36,9 +64,8 @@ class StudentViewOthers extends Component {
   handleFilter = (e) => {
     e.preventDefault()
     const { searchFilter } = this.props
-    const { searchName, statusSelector, genderSelector } = this.state
+    const { statusSelector, genderSelector } = this.state
     const options = []
-    searchName.length > 0 && options.push({field: 'profile-name', value: searchName})
     statusSelector.length > 0 && options.push({field: 'status', value: statusSelector})
     genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
     searchFilter(options)
@@ -46,11 +73,11 @@ class StudentViewOthers extends Component {
 
   clearAll = e => {
     e.preventDefault()
-    this.setState({ genderSelector: [], statusSelector: [], searchName: '' })
+    this.setState({ genderSelector: [], statusSelector: [] })
   }
 
   render () {
-    const { searchName, moreOptions, genderSelector, statusSelector } = this.state
+    const { moreOptions, genderSelector, statusSelector, value, results, id, redirect, isLoadingSearch } = this.state
     const { studentData, isLoading } = this.props
     if (isLoading) {
       return (
@@ -60,6 +87,8 @@ class StudentViewOthers extends Component {
           </Dimmer>
         </div>
       )
+    } else if (redirect && id.length !== 0) {
+      return <Redirect push to={`/dashboard/students/edit/${id}`} />
     } else {
       return (
         <Grid stackable stretched>
@@ -72,9 +101,13 @@ class StudentViewOthers extends Component {
                       <Form>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <Form.Group inline style={{marginBottom: 0}}>
-                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
-                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                            <Search
+                              loading={isLoadingSearch}
+                              onResultSelect={this.handleResultSelect}
+                              onSearchChange={this.handleSearchChange}
+                              results={results}
+                              value={value}
+                            />
                           </Form.Group>
                           <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                         </div>
@@ -87,6 +120,10 @@ class StudentViewOthers extends Component {
                             <label>Filter by Status</label>
                             <Dropdown name='statusSelector' value={statusSelector} placeholder='Select status' search multiple selection options={statusOptions} onChange={this.handleChange} />
                           </Form.Field>
+                          <Form.Group>
+                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
+                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                          </Form.Group>
                         </div>}
 
                       </Form>

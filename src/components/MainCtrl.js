@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { BrowserRouter as Route, Switch } from 'react-router-dom'
+import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
 import Topbar from './Topbar'
@@ -36,8 +36,7 @@ let myInterceptor
 
 class MainCtrl extends Component {
   static propTypes = {
-    match: object,
-    history: object
+    match: object
   }
 
   state = {
@@ -151,7 +150,7 @@ class MainCtrl extends Component {
     const { name, _id, roles, errorCode, isLoggedIn } = this.state
 
     if (!isLoggedIn) {
-      this.props.history.replace('/login')
+      return <Redirect to='/login' />
     }
 
     if (errorCode === 403) {
@@ -187,7 +186,6 @@ class MainCtrl extends Component {
                 <Route exact path={`${path}/admin/:op`} render={(props) => <AdminWrap {...props} />} />
                 <Route component={FourZeroFour} />
               </Switch>
-
             </Grid.Column>
           </Grid>
         </Container>
