@@ -4,7 +4,6 @@ import { Link, Redirect } from 'react-router-dom'
 import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid, Search } from 'semantic-ui-react'
 import moment from 'moment'
 import axios from 'axios'
-
 const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },
   { key: 'F', text: 'Female', value: 'F' }
@@ -38,10 +37,6 @@ class StudentView extends Component {
     roles: array.isRequired
   }
 
-  componentWillMount () {
-    this.resetComponent()
-  }
-
   state = {
     selected: [],
     deleteConfirmationVisibility: false,
@@ -53,6 +48,9 @@ class StudentView extends Component {
     genderSelector: [],
     ageSelector: [],
     isLoadingSearch: false
+  }
+  componentWillMount () {
+    this.resetComponent()
   }
 
   resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })

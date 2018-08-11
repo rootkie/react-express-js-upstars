@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Header, Dimmer, Loader, Message, Grid } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Header, Dimmer, Loader, Message, Grid, Search } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
@@ -42,7 +42,9 @@ class AttendanceStudent extends Component {
       endDate: undefined,
       moreOptions: false,
       isLoading: true,
-      studentOptions: [],
+      results: [],
+      value: '',
+      isLoadingSearch: false,
       classSelector: '',
       studentSelector: '',
       error: '',
@@ -51,26 +53,30 @@ class AttendanceStudent extends Component {
   }
 
   componentDidMount () {
-    // get attendance initial data to be passed to search
-    this.getStudents()
+    this.setState({isLoading: false})
   }
 
-  getStudents () {
-    axios.get('students')
+  resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoadingSearch: true, value })
+    if (value.length < 1) return this.resetComponent()
+    axios.get(`studentsResponsive/${value}`)
       .then(response => {
-        let studentOptions = []
         console.log(response)
-        for (let [index, studentData] of response.data.students.entries()) {
-          studentOptions[index] = {
-            key: studentData._id,
-            text: studentData.profile.name,
-            value: studentData._id
+        let studentList = response.data.studentsFiltered.map(student => {
+          return {
+            title: student.profile.name,
+            id: student._id,
+            key: student._id
           }
-        }
-        this.setState({studentOptions, isLoading: false})
-      }).catch((error) => {
-        console.log(error)
+        })
+        this.setState({ isLoadingSearch: false, results: studentList })
       })
+  }
+
+  handleResultSelect = (e, { result }) => {
+    this.setState({value: result.title, studentSelector: result.id})
   }
 
   formatStudentAttendance = (rawStudentData) => {
@@ -113,7 +119,9 @@ class AttendanceStudent extends Component {
         // If there are any records, else a default text is shown to inform the user.
           if (response.data.attendances.length > 0) {
             this.setState({attendanceFormattedData: this.formatStudentAttendance(response.data.attendances[0]), isLoading: false})
-          } else this.setState({isLoading: false, attendanceData: noResultsStudent})
+          } else {
+            this.setState({isLoading: false, attendanceFormattedData: noResultsStudent})
+          }
         }).catch(error => {
           console.log(error)
         })
@@ -127,7 +135,7 @@ class AttendanceStudent extends Component {
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
   render () {
-    const { moreOptions, classSelector, studentSelector, isLoading, studentOptions, attendanceFormattedData, error } = this.state
+    const { moreOptions, classSelector, value, results, isLoadingSearch, isLoading, attendanceFormattedData, error } = this.state
     const { classData } = this.props
 
     return (
@@ -167,7 +175,13 @@ class AttendanceStudent extends Component {
                       </div>
                       <Form.Field required>
                         <label>Students</label>
-                        <Dropdown name='studentSelector' value={studentSelector} placeholder='Pick a Student' search minCharacters={0} selection options={studentOptions} onChange={this.handleSearchOptions} />
+                        <Search
+                          loading={isLoadingSearch}
+                          onResultSelect={this.handleResultSelect}
+                          onSearchChange={this.handleSearchChange}
+                          results={results}
+                          value={value}
+                        />
                       </Form.Field>
                       {moreOptions && <div>
                         <Form.Field style={{paddingTop: '5px'}}>

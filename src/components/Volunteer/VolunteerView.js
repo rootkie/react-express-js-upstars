@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { func, array } from 'prop-types'
-import { Link } from 'react-router-dom'
-import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid } from 'semantic-ui-react'
+import { Link, Redirect } from 'react-router-dom'
+import { Table, Checkbox, Button, Icon, Form, Dropdown, Confirm, Dimmer, Loader, Grid, Search } from 'semantic-ui-react'
 import moment from 'moment'
 import axios from 'axios'
 import { filterData } from '../../utils'
@@ -28,7 +28,11 @@ class VolunteerView extends Component {
     this.state = {
       selected: [],
       deleteConfirmationVisibility: false,
-      searchName: '',
+      isLoadingSearch: false,
+      results: [],
+      id: '',
+      value: '',
+      redirect: false,
       moreOptions: false,
       genderSelector: [],
       isLoading: true,
@@ -50,6 +54,29 @@ class VolunteerView extends Component {
         console.log(err)
         this.setState({isLoading: false})
       })
+  }
+
+  resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoadingSearch: true, value })
+    if (value.length < 1) return this.resetComponent()
+    axios.get(`usersResponsive/${value}`)
+      .then(response => {
+        console.log(response)
+        let volunteerList = response.data.users.map(user => {
+          return {
+            title: user.profile.name,
+            id: user._id,
+            key: user._id
+          }
+        })
+        this.setState({ isLoadingSearch: false, results: volunteerList })
+      })
+  }
+
+  handleResultSelect = (e, { result }) => {
+    this.setState({redirect: true, id: result.id})
   }
 
   handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually the ID of the user
@@ -113,7 +140,7 @@ class VolunteerView extends Component {
   }
 
   render () {
-    const { selected, searchName, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, editedData } = this.state
+    const { selected, isLoadingSearch, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, editedData, redirect, id, results, value } = this.state
     const { roles } = this.props
     if (isLoading) {
       return (
@@ -123,6 +150,8 @@ class VolunteerView extends Component {
           </Dimmer>
         </div>
       )
+    } else if (redirect && id.length !== 0) {
+      return <Redirect push to={`/dashboard/volunteer/profile/${id}`} />
     } else {
       return (
         <Grid stackable stretched>
@@ -135,9 +164,13 @@ class VolunteerView extends Component {
                       <Form>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <Form.Group inline style={{marginBottom: 0}}>
-                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
-                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                            <Search
+                              loading={isLoadingSearch}
+                              onResultSelect={this.handleResultSelect}
+                              onSearchChange={this.handleSearchChange}
+                              results={results}
+                              value={value}
+                            />
                           </Form.Group>
                           <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
                         </div>
@@ -146,6 +179,10 @@ class VolunteerView extends Component {
                             <label>Filter by Gender</label>
                             <Dropdown name='genderSelector' value={genderSelector} placeholder='Male or Female' multiple selection options={genderOptions} onChange={this.handleChange} />
                           </Form.Field>
+                          <Form.Group>
+                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
+                            <Form.Button color='red' onClick={this.clearAll}>Clear all</Form.Button>
+                          </Form.Group>
                         </div>}
 
                       </Form>

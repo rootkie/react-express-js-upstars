@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Header, Dimmer, Loader, Message, Grid } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Icon, Header, Dimmer, Loader, Message, Grid, Search } from 'semantic-ui-react'
 import { array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
@@ -46,7 +46,9 @@ class AttendanceUser extends Component {
       endDate: undefined,
       moreOptions: false,
       isLoading: true,
-      userOptions: [],
+      isLoadingSearch: false,
+      results: [],
+      value: '',
       classSelector: '',
       userSelector: '',
       error: '',
@@ -55,29 +57,30 @@ class AttendanceUser extends Component {
   }
 
   componentDidMount () {
-    // get attendance initial user data to be passed to search
-    // Most prob fix this using the instant user search API (enhancement future feature)
-    this.getUsers()
+    this.setState({isLoading: false})
   }
 
-  getUsers () {
-    axios.get('users')
+  resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoadingSearch: true, value })
+    if (value.length < 1) return this.resetComponent()
+    axios.get(`usersResponsive/${value}`)
       .then(response => {
-        let userOptions = []
         console.log(response)
-        // Sort the old array into a new one in the correct key and value.
-        for (let [index, userData] of response.data.users.entries()) {
-          userOptions[index] = {
-            key: userData._id,
-            text: userData.profile.name,
-            value: userData._id
+        let volunteerList = response.data.users.map(user => {
+          return {
+            title: user.profile.name,
+            id: user._id,
+            key: user._id
           }
-        }
-        console.log(userOptions)
-        this.setState({userOptions, isLoading: false})
-      }).catch(error => {
-        console.log(error)
+        })
+        this.setState({ isLoadingSearch: false, results: volunteerList })
       })
+  }
+
+  handleResultSelect = (e, { result }) => {
+    this.setState({value: result.title, userSelector: result.id})
   }
 
   // Once the class is selected, the attendance data returned will be parsed through this to sort them.
@@ -138,7 +141,7 @@ class AttendanceUser extends Component {
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
   render () {
-    const { moreOptions, classSelector, userSelector, isLoading, userOptions, attendanceFormattedData, error } = this.state
+    const { moreOptions, classSelector, isLoading, value, results, isLoadingSearch, attendanceFormattedData, error } = this.state
     const { classData } = this.props
     return (
       <Grid stretched stackable>
@@ -177,7 +180,13 @@ class AttendanceUser extends Component {
                       </div>
                       <Form.Field required>
                         <label>Volunteers</label>
-                        <Dropdown name='userSelector' value={userSelector} placeholder='Pick a Volunteer' search minCharacters={0} selection options={userOptions} onChange={this.handleSearchOptions} />
+                        <Search
+                          loading={isLoadingSearch}
+                          onResultSelect={this.handleResultSelect}
+                          onSearchChange={this.handleSearchChange}
+                          results={results}
+                          value={value}
+                        />
                       </Form.Field>
                       {moreOptions && <div>
                         <Form.Field style={{paddingTop: '5px'}}>
