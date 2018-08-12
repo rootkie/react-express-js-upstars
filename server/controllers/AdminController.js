@@ -188,3 +188,39 @@ module.exports.multipleUserDelete = async (req, res, next) => {
     } else next(err)
   }
 }
+
+module.exports.responsiveSearch = async (req, res, next) => {
+  let { name } = req.params
+  try {
+    // Find all users with that name of whatever status
+    const pendingMatched = await User.find({
+      'status': 'Pending',
+      'profile.name': new RegExp(name, 'i')
+    }).select('profile.name roles status').sort('profile.name')
+
+    const activeMatched = await User.find({
+      'status': 'Active',
+      'profile.name': new RegExp(name, 'i')
+    }).select('profile.name roles status').sort('profile.name')
+
+    const suspendedMatched = await User.find({
+      'status': 'Suspended',
+      'profile.name': new RegExp(name, 'i')
+    }).select('profile.name roles status').sort('profile.name')
+
+    const deletedMatched = await User.find({
+      'status': 'Deleted',
+      'profile.name': new RegExp(name, 'i')
+    }).select('profile.name roles status').sort('profile.name')
+
+    res.json({
+      pendingMatched,
+      activeMatched,
+      suspendedMatched,
+      deletedMatched
+    })
+  } catch (err) {
+    console.log(err)
+    next(err)
+  }
+}

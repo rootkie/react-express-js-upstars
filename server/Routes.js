@@ -58,9 +58,11 @@ module.exports = app => {
   app.get('/api/admin/pendingUsers', hasRole(['SuperAdmin']), adminControl.getPendingUsers)
   app.get('/api/admin/suspended', hasRole(['SuperAdmin']), adminControl.getSuspendedPeople)
   app.get('/api/admin/deleted', hasRole(['SuperAdmin']), adminControl.getDeletedPeople)
+  app.get('/api/admin/search/:name', hasRole(['SuperAdmin']), adminControl.responsiveSearch)
   app.post('/api/admin/userStatusPermissions', hasRole(['SuperAdmin']), adminControl.changeUserStatusAndPermissions)
   app.delete('/api/admin/user', hasRole(['SuperAdmin']), adminControl.multipleUserDelete) //  Admin Mass deletion
 
+  // Routes that require no AUTH, usually used for the typical user who have no access to the dashboard
   app.get('/api/check', authControl.check) // This is for frontend to check validity of token.
   app.post('/api/register', authControl.register)
   app.post('/api/login', authControl.login)
