@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid, Search } from 'semantic-ui-react'
 import axios from 'axios'
 
 const statusOptions = [
@@ -25,11 +25,12 @@ class ChangeStatus extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      searchName: '',
       pendingUsers: [],
       activeUsers: [],
       suspendedUsers: [],
       deletedUsers: [],
+      isLoadingSearch: false,
+      value: '',
       error: '',
       isLoading: true
     }
@@ -83,7 +84,7 @@ class ChangeStatus extends Component {
         activeUsers[index].status = value
         axios.post('admin/userStatusPermissions', { userId: activeUsers[index]._id, newStatus: value })
           .then(response => {
-            this.setState({ pendingUsers, isLoading: false })
+            this.setState({ activeUsers, isLoading: false })
           })
           .catch(err => {
             console.log(err)
@@ -98,7 +99,7 @@ class ChangeStatus extends Component {
         suspendedUsers[index].status = value
         axios.post('admin/userStatusPermissions', { userId: suspendedUsers[index]._id, newStatus: value })
           .then(response => {
-            this.setState({ pendingUsers, isLoading: false })
+            this.setState({ suspendedUsers, isLoading: false })
           })
           .catch(err => {
             console.log(err)
@@ -113,7 +114,7 @@ class ChangeStatus extends Component {
         deletedUsers[index].status = value
         axios.post('admin/userStatusPermissions', { userId: deletedUsers[index]._id, newStatus: value })
           .then(response => {
-            this.setState({ pendingUsers, isLoading: false })
+            this.setState({ deletedUsers, isLoading: false })
           })
           .catch(err => {
             console.log(err)
@@ -202,8 +203,26 @@ class ChangeStatus extends Component {
     this.getData()
   }
 
+  resetComponent = () => {
+    this.setState({ isLoadingSearch: false })
+  }
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoadingSearch: true, value })
+    if (value.length < 1) return this.resetComponent()
+    axios.get(`admin/search/${value}`)
+      .then(response => {
+        console.log(response)
+        let pendingUsers = response.data.pendingMatched
+        let activeUsers = response.data.activeMatched
+        let suspendedUsers = response.data.suspendedMatched
+        let deletedUsers = response.data.deletedMatched
+        this.setState({ pendingUsers, activeUsers, suspendedUsers, deletedUsers, isLoadingSearch: false })
+      })
+  }
+
   render () {
-    const { searchName, isLoading, activeUsers, pendingUsers, suspendedUsers, deletedUsers, error } = this.state
+    const { isLoading, activeUsers, pendingUsers, suspendedUsers, deletedUsers, error, isLoadingSearch, value } = this.state
     if (isLoading) {
       return (
         <div>
@@ -222,11 +241,18 @@ class ChangeStatus extends Component {
                   <Table.Row>
                     <Table.HeaderCell colSpan='5'>
                       <Form>
-                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                          <Form.Group inline style={{marginBottom: 0}}>
-                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} />
-                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                            <Form.Button positive onClick={this.refresh}>Refresh Data</Form.Button>
+                        <div style={{display: 'flex'}}>
+                          <Search
+                            loading={isLoadingSearch}
+                            onSearchChange={this.handleSearchChange}
+                            value={value}
+                            showNoResults={false}
+                            placeholder='Search volunteer by name'
+                          />
+                          {/* <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} /> */}
+                          {/* <Form.Button onClick={this.handleFilter}>Filter results</Form.Button> */}
+                          <Form.Group inline style={{marginBottom: 0, padding: '0 0 0 1.3em'}}>
+                            <Form.Button positive onClick={this.refresh}>Refresh Data / Reset Search</Form.Button>
                           </Form.Group>
                         </div>
                       </Form>

@@ -378,7 +378,7 @@ class StudentEdit extends Component {
                   <Form.Input label='Name of School' placeholder='Name of School' name='profile-schoolName' value={schoolName} onChange={this.handleChange} required />
                   <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='profile-classLevel' value={classLevel} onChange={this.handleChange} required />
                 </Form.Group>
-                <Table celled striped columns={7} fixed>
+                <Table compact celled unstackable fixed>
                   <Table.Header>
                     <Table.Row>
                       <Table.HeaderCell>Year</Table.HeaderCell>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { BrowserRouter as Redirect, Route, Switch } from 'react-router-dom'
+import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
 import Topbar from './Topbar'
@@ -15,8 +15,8 @@ import FourZeroThree from './Error/403'
 import FourZeroFour from './Error/404'
 import FiveHundred from './Error/500'
 
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-// axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
+// axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
+axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
@@ -127,7 +127,7 @@ class MainCtrl extends Component {
     })
   }
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps () {
     window.clearInterval(forceRefresh)
     // Force confirm state of "confirm" every 10 minutes so there wont be issues that the main() renders after token expire
     // While the state of "confirm" is still true as the user afk for 30 minutes. (Token will be refreshed but calls are made with old tokens)
@@ -146,11 +146,10 @@ class MainCtrl extends Component {
   }
 
   render () {
-    // const { main, op, sid } = this.props.match.params || ''
     const { path } = this.props.match
-    const { name, _id, roles, errorCode } = this.state
+    const { name, _id, roles, errorCode, isLoggedIn } = this.state
 
-    if (!this.state.isLoggedIn) {
+    if (!isLoggedIn) {
       return <Redirect to='/login' />
     }
 
@@ -168,7 +167,7 @@ class MainCtrl extends Component {
       return (
         <FiveHundred />
       )
-    } else if (this.state.isLoggedIn && this.state.confirm) {
+    } else if (isLoggedIn && this.state.confirm) {
       return (
         <Container fluid>
           <Topbar name={name} _id={_id} />
@@ -187,7 +186,6 @@ class MainCtrl extends Component {
                 <Route exact path={`${path}/admin/:op`} render={(props) => <AdminWrap {...props} />} />
                 <Route component={FourZeroFour} />
               </Switch>
-
             </Grid.Column>
           </Grid>
         </Container>
