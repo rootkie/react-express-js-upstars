@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.1.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/0.1.0-beta) (August 13, 2018, 9.32pm)
+- [Fixed] Redirect issue when user tries to access /dashboard when not authenticated shows a blank screen instead of login page
+- [Added] APIs for Student, Volunteer and Admin to allow for real time search to ease front-end load in production
+- [Fixed] Attendance search filter not working as intended fixed
+- [Fixed] Admin Change Status setState fixed to show correct data
+- [Temp] Real-time API for Admin dashboard in review of performance issues and scalability
+
 ## [v0.1.1-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/0.1.1-alpha1) (July 29, 2018, 5.00pm)
 - [Fixed] Sitemap internal react route parsing changed to express routing so the sitemap file can render properly by Nginx
 - [Removed] GUIDE.md is removed because it does not apply anymore as we move towards Beta testing
