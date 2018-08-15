@@ -11,24 +11,22 @@ const datePickingStyle = {
   alignItems: 'center'
 }
 
-let attendanceFormattedData = {
-  attendances: [{}]
-}
-
 let noResultsStudent = {
-  total: 0,
-  attended: 0,
-  totalHours: 0,
+  total: 'Oops! No Attendance Records Found!',
+  attended: 'Change your search parameters!',
+  totalHours: 'nil',
   percentage: 0,
   attendances: [{
-    className: '-',
-    date: '-',
-    type: '-',
-    hours: '-',
-    classId: '-',
+    className: 'nil',
+    date: 'nil',
+    type: 'nil',
+    hours: 'nil',
+    classId: 'nil ',
     status: 0
   }]
 }
+
+let attendanceFormattedData = noResultsStudent
 
 class AttendanceStudent extends Component {
   static propTypes = {

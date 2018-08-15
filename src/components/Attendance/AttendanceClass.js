@@ -10,8 +10,8 @@ class AttendanceClass extends Component {
   }
   constructor (props) {
     super(props)
-    // Basic Stats contains the non-changing details as well as the filtered dates to be displayed
-    // student and tutor attendance contains filtered attendance data taking account of the pages and number to be displayed.
+    // Basic Stats contains the non-changing details as well as the filtered dates (only) to be displayed
+    // student and tutor attendance contains filtered attendance data (corrosponding to the dates in Basic Stats) taking account of the pages and number to be displayed.
     this.state = {
       classSelector: '',
       basicStats: {
@@ -33,9 +33,10 @@ class AttendanceClass extends Component {
     this.setState({isLoading: true})
     axios.get(`/attendance/${this.state.classSelector}/summary`)
       .then(response => {
+        let rawClassData = response.data
         // Calculate pages required by rounding up the number divided by 6 (6 sets of data / page)
         let pagesRequired = Math.ceil(response.data.attendanceDates.length / 6)
-        let rawClassData = response.data
+        // number 1 is the default since we always display the first page when user selects any class
         let editedClassData = this.processData(rawClassData, 1)
         this.setState({
           basicStats: editedClassData.basicStats,
@@ -53,6 +54,8 @@ class AttendanceClass extends Component {
 
   processData = (rawData, activePage) => {
     // They calculate the index so that we can slice off the necesary data based on the current page user selects
+    // E.G. For first (1) page, indexOfLast is six (6) and indexOfFirst is zero (0), thus slicing a total of six (6) data sets
+    // For Array.Slice, the end index is NOT included
     const indexOfLast = activePage * 6
     const indexOfFirst = indexOfLast - 6
     let attendanceDates = rawData.attendanceDates.slice(indexOfFirst, indexOfLast)
@@ -63,7 +66,7 @@ class AttendanceClass extends Component {
       status: rawData.status,
       attendanceDates
     }
-    let studentAttendance = rawData.compiledStudentAttendance.map((user, index) => {
+    let studentAttendance = rawData.compiledStudentAttendance.map((user) => {
       return {
         details: user.details.slice(indexOfFirst, indexOfLast),
         attended: user.attended,
@@ -73,7 +76,7 @@ class AttendanceClass extends Component {
         total: user.total
       }
     })
-    let tutorAttendance = rawData.compiledUserAttendance.map((user, index) => {
+    let tutorAttendance = rawData.compiledUserAttendance.map((user) => {
       return {
         details: user.details.slice(indexOfFirst, indexOfLast),
         attended: user.attended,
@@ -93,7 +96,7 @@ class AttendanceClass extends Component {
   handlePaginationChange = (e, { activePage }) => {
     e.preventDefault()
     this.setState({isLoading: true})
-    // Here, the same processData function is called.
+    // Here, the same processData function is called in which activePage is whatever page user selects
     let editedClassData = this.processData(this.state.rawClassData, activePage)
     this.setState({
       basicStats: editedClassData.basicStats,
@@ -178,37 +181,37 @@ class AttendanceClass extends Component {
                 <Table.Row>
                   <Table.HeaderCell>Name</Table.HeaderCell>
                   <Table.HeaderCell>Role</Table.HeaderCell>
-                  <Table.HeaderCell>Total Class</Table.HeaderCell>
+                  <Table.HeaderCell>Total Class Held</Table.HeaderCell>
                   <Table.HeaderCell>No. attendeed</Table.HeaderCell>
                   <Table.HeaderCell>Percentage</Table.HeaderCell>
                   {/* Display attendance dates (6 sets per page) */}
-                  {basicStats.status === 'success' && basicStats.attendanceDates.map((date, index) => (
+                  {basicStats.status === 'success' && basicStats.attendanceDates.map((date) => (
                     <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
                   ))}
                 </Table.Row>
               </Table.Header>
               <Table.Body>
                 {/* nested maps allow the various details to be displayed out in order */}
-                {basicStats.status === 'success' && studentAttendance.map((attendance, index) => (
-                  <Table.Row key={`attendanceStudent-${index}`}>
+                {basicStats.status === 'success' && studentAttendance.map((attendance) => (
+                  <Table.Row key={`attendanceStudent-${attendance.studentName}`}>
                     <Table.Cell>{attendance.studentName}</Table.Cell>
                     <Table.Cell>Student</Table.Cell>
                     <Table.Cell>{attendance.total}</Table.Cell>
                     <Table.Cell>{attendance.attended}</Table.Cell>
                     <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
-                    {attendance.details.map((individualStatus, index) => (
+                    {attendance.details.map((individualStatus) => (
                       <Table.Cell>{individualStatus}</Table.Cell>
                     ))}
                   </Table.Row>
                 ))}
-                {basicStats.status === 'success' && tutorAttendance.map((attendance, index) => (
-                  <Table.Row key={`attendanceUser-${index}`} positive>
+                {basicStats.status === 'success' && tutorAttendance.map((attendance) => (
+                  <Table.Row key={`attendanceUser-${attendance.userName}`} positive>
                     <Table.Cell>{attendance.userName}</Table.Cell>
                     <Table.Cell>Tutor</Table.Cell>
                     <Table.Cell>{attendance.total}</Table.Cell>
                     <Table.Cell>{attendance.attended}</Table.Cell>
                     <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
-                    {attendance.details.map((individualStatus, index) => (
+                    {attendance.details.map((individualStatus) => (
                       <Table.Cell>{individualStatus}</Table.Cell>
                     ))}
                   </Table.Row>

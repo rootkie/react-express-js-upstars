@@ -11,25 +11,23 @@ const datePickingStyle = {
   alignItems: 'center'
 }
 
-let attendanceFormattedData = {
-  attendances: [{}]
-}
-
-// Default response when no results are found
+// Default response when no results are found or before search
 let noResultsUser = {
-  total: 0,
-  attended: 0,
-  totalHours: 0,
+  total: 'Oops! No Attendance Records Found!',
+  attended: 'Change your search parameters!',
+  totalHours: 'nil',
   percentage: 0,
   attendances: [{
-    className: '-',
-    date: '-',
-    type: '-',
-    hours: '-',
-    classId: '-',
+    className: 'nil',
+    date: 'nil',
+    type: 'nil',
+    hours: 'nil',
+    classId: 'nil ',
     status: 0
   }]
 }
+
+let attendanceFormattedData = noResultsUser
 
 // Judging from the API calls, only superAdmin are allowed to call these without prompting a 403.
 // Maybe we can have a page at 'home' to compile the login user's attendance and class.
@@ -85,7 +83,6 @@ class AttendanceUser extends Component {
 
   // Once the class is selected, the attendance data returned will be parsed through this to sort them.
   formatUserAttendance = (rawUserData) => {
-    console.log(rawUserData)
     let attendances = []
     let user = {}
     for (let [index, attendanceData] of rawUserData.userAttendance.entries()) {

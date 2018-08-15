@@ -194,7 +194,7 @@ class StudentView extends Component {
                 <Table.Body>
                   {studentData.map((student, i) => (
                     <Table.Row key={`student-${i}`}>
-                      {roles.indexOf('SuperAdmin') !== -1 &&
+                      {roles.indexOf('SuperAdmin') !== -1 && studentData.length !== 0 &&
                       <Table.Cell collapsing>
                         <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                       </Table.Cell>
