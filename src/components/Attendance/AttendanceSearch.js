@@ -159,7 +159,7 @@ class AttendanceSearch extends Component {
                   <Table.HeaderCell>Hours</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
-
+              {attendances.length !== 0 &&
               <Table.Body>
                 {attendances.map((options, i) => (
                   <Table.Row key={`attendance-${i}`}>
@@ -170,6 +170,18 @@ class AttendanceSearch extends Component {
                     <Table.Cell>{options.hours}</Table.Cell>
                   </Table.Row>))}
               </Table.Body>
+              }
+              {attendances.length === 0 &&
+              <Table.Body>
+                <Table.Row key={`empty-attendance`}>
+                  <Table.Cell collapsing>1</Table.Cell>
+                  <Table.Cell>Oops! No Attendance Found!</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+              }
             </Table>
 
           </Grid.Column>

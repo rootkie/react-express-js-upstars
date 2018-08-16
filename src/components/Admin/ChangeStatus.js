@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid, Search } from 'semantic-ui-react'
+import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid } from 'semantic-ui-react'
 import axios from 'axios'
 
 const statusOptions = [
@@ -29,15 +29,16 @@ class ChangeStatus extends Component {
       activeUsers: [],
       suspendedUsers: [],
       deletedUsers: [],
-      isLoadingSearch: false,
-      value: '',
       error: '',
+      searchName: '',
       isLoading: true
     }
     this.getData()
   }
 
-  handleChange = (e, { name, value }) => this.setState({[name]: value})
+  handleChange = (e, { value }) => {
+    this.setState({searchName: value})
+  }
 
   getData = () => {
     axios.all(
@@ -197,20 +198,14 @@ class ChangeStatus extends Component {
     }
   }
 
-  refresh = (e) => {
-    e.preventDefault()
-    this.setState({ isLoading: true })
-    this.getData()
-  }
-
-  resetComponent = () => {
-    this.setState({ isLoadingSearch: false })
-  }
-
-  handleSearchChange = (e, { value }) => {
-    this.setState({ isLoadingSearch: true, value })
-    if (value.length < 1) return this.resetComponent()
-    axios.get(`admin/search/${value}`)
+  handleFilter = () => {
+    let { searchName } = this.state
+    if (searchName.length < 1) {
+      this.setState({ isLoading: true })
+      this.getData()
+      return
+    }
+    axios.get(`admin/search/${searchName}`)
       .then(response => {
         console.log(response)
         let pendingUsers = response.data.pendingMatched
@@ -221,8 +216,14 @@ class ChangeStatus extends Component {
       })
   }
 
+  refresh = (e) => {
+    e.preventDefault()
+    this.setState({ isLoading: true, searchName: '' })
+    this.getData()
+  }
+
   render () {
-    const { isLoading, activeUsers, pendingUsers, suspendedUsers, deletedUsers, error, isLoadingSearch, value } = this.state
+    const { isLoading, activeUsers, pendingUsers, suspendedUsers, deletedUsers, error, searchName } = this.state
     if (isLoading) {
       return (
         <div>
@@ -242,16 +243,9 @@ class ChangeStatus extends Component {
                     <Table.HeaderCell colSpan='5'>
                       <Form>
                         <div style={{display: 'flex'}}>
-                          <Search
-                            loading={isLoadingSearch}
-                            onSearchChange={this.handleSearchChange}
-                            value={value}
-                            showNoResults={false}
-                            placeholder='Search volunteer by name'
-                          />
-                          {/* <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} onChange={this.handleChange} /> */}
-                          {/* <Form.Button onClick={this.handleFilter}>Filter results</Form.Button> */}
-                          <Form.Group inline style={{marginBottom: 0, padding: '0 0 0 1.3em'}}>
+                          <Form.Group inline style={{marginBottom: 0}}>
+                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} icon='search' onChange={this.handleChange} />
+                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
                             <Form.Button positive onClick={this.refresh}>Refresh Data / Reset Search</Form.Button>
                           </Form.Group>
                         </div>
@@ -279,7 +273,7 @@ class ChangeStatus extends Component {
                     <Table.HeaderCell>Roles</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {pendingUsers.length !== 0 &&
                 <Table.Body>
                   {pendingUsers.map((user, i) => (
                     <Table.Row key={`user-${i}`}>
@@ -288,6 +282,16 @@ class ChangeStatus extends Component {
                       <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('pendingUsers', i)} /></Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {pendingUsers.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-pending-user`}>
+                    <Table.Cell>Oops! No Pending Users Found!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
             </Grid.Column>
           </Grid.Row>
@@ -303,7 +307,7 @@ class ChangeStatus extends Component {
                     <Table.HeaderCell>Roles</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {activeUsers.length !== 0 &&
                 <Table.Body>
                   {activeUsers.map((user, i) => (
                     <Table.Row key={`user-${i}`}>
@@ -312,6 +316,16 @@ class ChangeStatus extends Component {
                       <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('activeUsers', i)} /></Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {activeUsers.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-active-user`}>
+                    <Table.Cell>Oops! No Active Users Found!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
             </Grid.Column>
           </Grid.Row>
@@ -327,7 +341,7 @@ class ChangeStatus extends Component {
                     <Table.HeaderCell>Roles</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {suspendedUsers.length !== 0 &&
                 <Table.Body>
                   {suspendedUsers.map((user, i) => (
                     <Table.Row key={`user-${i}`}>
@@ -336,6 +350,16 @@ class ChangeStatus extends Component {
                       <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('suspendedUsers', i)} /></Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {suspendedUsers.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-suspended-user`}>
+                    <Table.Cell>Oops! No Suspended Users Found!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
             </Grid.Column>
           </Grid.Row>
@@ -351,7 +375,7 @@ class ChangeStatus extends Component {
                     <Table.HeaderCell>Roles</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {deletedUsers.length !== 0 &&
                 <Table.Body>
                   {deletedUsers.map((user, i) => (
                     <Table.Row key={`user-${i}`}>
@@ -360,7 +384,16 @@ class ChangeStatus extends Component {
                       <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('deletedUsers', i)} /></Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
-
+                }
+                {deletedUsers.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-deleted-user`}>
+                    <Table.Cell>Oops! No Deleted Users Found!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
             </Grid.Column>
           </Grid.Row>

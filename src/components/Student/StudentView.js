@@ -181,7 +181,7 @@ class StudentView extends Component {
                     </Table.HeaderCell>
                   </Table.Row>
                   <Table.Row>
-                    {roles.indexOf('SuperAdmin') !== -1 &&
+                    {roles.indexOf('SuperAdmin') !== -1 && studentData.length !== 0 &&
                     <Table.HeaderCell />
                     }
                     <Table.HeaderCell>Name</Table.HeaderCell>
@@ -190,11 +190,11 @@ class StudentView extends Component {
                     <Table.HeaderCell>Gender</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {studentData.length !== 0 &&
                 <Table.Body>
                   {studentData.map((student, i) => (
                     <Table.Row key={`student-${i}`}>
-                      {roles.indexOf('SuperAdmin') !== -1 &&
+                      {roles.indexOf('SuperAdmin') !== -1 && studentData.length !== 0 &&
                       <Table.Cell collapsing>
                         <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                       </Table.Cell>
@@ -205,6 +205,17 @@ class StudentView extends Component {
                       <Table.Cell>{student.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {studentData.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-student`}>
+                    <Table.Cell>Oops! No Students Found!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
 
                 <Table.Footer fullWidth>
                   <Table.Row>

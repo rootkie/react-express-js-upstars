@@ -135,7 +135,7 @@ class StudentViewOthers extends Component {
                     <Table.HeaderCell>Status</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {studentData.length !== 0 &&
                 <Table.Body>
                   {studentData.map((student, i) => (
                     <Table.Row key={`student-${i}`}>
@@ -144,6 +144,16 @@ class StudentViewOthers extends Component {
                       <Table.Cell>{student.status}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {studentData.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-otherstudent`}>
+                    <Table.Cell>Oops! No Student found in these criteria!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
             </Grid.Column>
           </Grid.Row>

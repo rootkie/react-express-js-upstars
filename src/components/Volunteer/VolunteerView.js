@@ -119,9 +119,8 @@ class VolunteerView extends Component {
 
   handleFilter = (e) => {
     e.preventDefault()
-    const { searchName, genderSelector, volunteerData } = this.state
+    const { genderSelector, volunteerData } = this.state
     const options = []
-    searchName.length > 0 && options.push({field: 'profile-name', value: searchName})
     genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
     if (options.length === 0) {
       this.setState({ editedData: volunteerData })
@@ -198,7 +197,7 @@ class VolunteerView extends Component {
                     <Table.HeaderCell>Gender</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {editedData.length !== 0 &&
                 <Table.Body>
                   {editedData.map((user, i) => (
                     <Table.Row key={`user-${i}`}>
@@ -213,7 +212,20 @@ class VolunteerView extends Component {
                       <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
-
+                }
+                {editedData.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-user`}>
+                    {roles.indexOf('SuperAdmin') !== -1 &&
+                      <Table.Cell collapsing />
+                    }
+                    <Table.Cell>Oops! No Volunteers Found!</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                    <Table.Cell>nil</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
                 <Table.Footer fullWidth>
                   <Table.Row>
                     <Table.HeaderCell />
