@@ -1,19 +1,23 @@
 # Change Log
+## [v0.2.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.2.0-beta) (August 16, 2018, 7.38pm)
+- [Added] Empty Responses Handling from back-end using custom front-end handling for all of the services
+- [Changed] Removed Real-time API from Admin Change Status due to performance considerations and practicality
+- [Changed] Version numbers
 
-## [v0.1.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/0.1.0-beta) (August 13, 2018, 9.32pm)
+## [v0.1.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.1.0-beta) (August 13, 2018, 9.32pm)
 - [Fixed] Redirect issue when user tries to access /dashboard when not authenticated shows a blank screen instead of login page
 - [Added] APIs for Student, Volunteer and Admin to allow for real time search to ease front-end load in production
 - [Fixed] Attendance search filter not working as intended fixed
 - [Fixed] Admin Change Status setState fixed to show correct data
 - [Temp] Real-time API for Admin dashboard in review of performance issues and scalability
 
-## [v0.1.1-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/0.1.1-alpha1) (July 29, 2018, 5.00pm)
+## [v0.1.1-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/v0.1.1-alpha1) (July 29, 2018, 5.00pm)
 - [Fixed] Sitemap internal react route parsing changed to express routing so the sitemap file can render properly by Nginx
 - [Removed] GUIDE.md is removed because it does not apply anymore as we move towards Beta testing
 - [Added] Preparing for the first beta release soon
 - [Fixed] README.md image centered and wording made prettier.. =)
 
-## [v0.1.0-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/0.1.0-alpha1) (July 25, 2018, 8.07pm)
+## [v0.1.0-alpha1](https://github.com/rootkie/react-express-js-upstars/tree/v0.1.0-alpha1) (July 25, 2018, 8.07pm)
 
 - [Changed] Routes are fixed especially with the issue with the main page routing history etc
 - [Changed] Front landing page to fit the overall simplistic theme instead of the older design
