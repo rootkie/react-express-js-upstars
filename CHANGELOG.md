@@ -1,4 +1,7 @@
 # Change Log
+## [v0.2.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.2.1-beta) (August 16, 2018, 7.50pm)
+-[Fixed] Urgent Hot-Fix for wrong backend API URI
+
 ## [v0.2.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.2.0-beta) (August 16, 2018, 7.38pm)
 - [Added] Empty Responses Handling from back-end using custom front-end handling for all of the services
 - [Changed] Removed Real-time API from Admin Change Status due to performance considerations and practicality
