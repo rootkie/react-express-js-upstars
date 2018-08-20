@@ -1,10 +1,9 @@
 {
   "name": "react-express-js-upstars",
-  "version": "0.2.1beta",
+  "version": "0.3.0beta",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
-    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "express-mongo-sanitize": "^1.3.2",
@@ -26,7 +25,6 @@
   },
   "devDependencies": {
     "babel-eslint": "^8.2.3",
-    "csurf": "^1.9.0",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-config-standard-react": "^6.0.0",
@@ -35,7 +33,6 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-react": "^7.9.1",
     "eslint-plugin-standard": "^3.1.0",
-    "jest": "^23.1.0",
     "nodemon": "^1.17.5",
     "react-scripts": "^1.1.4"
   },
