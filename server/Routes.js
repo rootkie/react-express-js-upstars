@@ -24,6 +24,7 @@ module.exports = app => {
   app.get('/api/studentsResponsive/:name', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), studentControl.getStudentByName)
   app.get('/api/otherStudentsResponsive/:name', hasRole(['Admin', 'SuperAdmin']), studentControl.getOtherStudentByName)
   app.post('/api/students', studentControl.addStudent)
+  app.post('/api/admin/students', hasRole(['SuperAdmin']), studentControl.adminAddStudent)
   app.put('/api/students', hasRole(['Mentor', 'Admin', 'SuperAdmin']), studentControl.editStudentById)
   app.post('/api/students/class', hasRole(['Admin', 'SuperAdmin']), classControl.addStudentsToClass)
   app.delete('/api/students', hasRole(['SuperAdmin']), studentControl.deleteStudent)

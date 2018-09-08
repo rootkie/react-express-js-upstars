@@ -126,7 +126,7 @@ class MainCtrl extends Component {
       return Promise.reject(error)
     })
   }
-
+  // Deprecated function as of React 16 and above.. Still finding a way to replace it.. > https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
   componentWillReceiveProps () {
     window.clearInterval(forceRefresh)
     // Force confirm state of "confirm" every 10 minutes so there wont be issues that the main() renders after token expire

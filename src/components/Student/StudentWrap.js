@@ -51,10 +51,10 @@ class StudentWrap extends Component {
   }
 
   addStudent = (studentDataToSubmit) => {
-    return axios.post('/students', studentDataToSubmit)
+    return axios.post('admin/students', studentDataToSubmit)
       .then(response => {
         this.getStudents()
-        return response.data.newStudent
+        return response.data.newStudentId
       })
   }
 

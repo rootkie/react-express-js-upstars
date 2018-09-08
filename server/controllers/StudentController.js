@@ -5,15 +5,9 @@ const Class = require('../models/class')
 const config = require('../config/constConfig')
 
 // Add student function works for everyone
-module.exports.addStudent = async (req, res, next) => {
+module.exports.addStudent = (req, res, next) => {
   let edited = {}
-  let { roles } = req.decoded
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
-
-  // If editor has no admin rights, restrict the entering of Admin Field
-  if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) {
-    edited['admin'] = req.body.admin
-  }
 
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
@@ -51,6 +45,61 @@ module.exports.addStudent = async (req, res, next) => {
         const successStudentSignup = await newStudent.save().select('_id')
         res.status(201).json({
           newStudent: successStudentSignup
+        })
+      } catch (err) {
+        console.log(err)
+        if (err.code === 11000) {
+          return res.status(400).send({
+            error: 'Account already exist. If this is a mistake please contact our system admin.'
+          })
+        } else if (err.status) {
+          res.status(err.status).send({
+            error: err.error
+          })
+        } else next(err)
+      }
+    })
+}
+
+module.exports.adminAddStudent = (req, res, next) => {
+  let edited = {}
+  const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
+  axios.post('https://www.google.com/recaptcha/api/siteverify',
+    querystring.stringify({
+      secret: config.captchaSecret,
+      response: req.body.captchaCode
+    }))
+    .then(async response => {
+      console.log(response.data)
+      try {
+        if (response.data.success === false) {
+          throw ({
+            status: 401,
+            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+          })
+        }
+        // Use a loop to populate edited if field is present
+        for (let checkChanged of list) {
+          if (req.body[checkChanged]) {
+            edited[checkChanged] = await req.body[checkChanged]
+          }
+        }
+
+        // Update student based on IC Number and validate it
+        const newStudent = new Student(edited)
+        const error = await newStudent.validateSync()
+
+        if (error) {
+          console.error(error)
+          throw ({
+            status: 400,
+            error: 'There is something wrong with the client input. That is all we know.'
+          })
+        }
+
+        const successStudentSignup = await newStudent.save()
+        res.status(201).json({
+          newStudentId: successStudentSignup._id
         })
       } catch (err) {
         console.log(err)

@@ -241,7 +241,7 @@ class VolunteerEdit extends Component {
           interviewDate,
           interviewNotes,
           adminNotes,
-          realCommencementDate
+          commencementDate: realCommencementDate
         }
       }
 
@@ -493,7 +493,7 @@ class VolunteerEdit extends Component {
                     {coursesSeminar.map((year, i) => (
                       <Table.Row key={i}>
                         <Table.Cell>
-                          <Form.Input transparent type='number' key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year} placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
+                          <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year ? moment(coursesSeminar[i].year).format( 'YYYY') : undefined } placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
                         </Table.Cell>
                         <Table.Cell>
                           <Form.Input transparent key={`courseTitle-${i}`} name={`courseTitle-${i}`} value={coursesSeminar[i].courseAndObjective} placeholder='Name of Institution' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'courseAndObjective')} />
@@ -589,6 +589,7 @@ class VolunteerEdit extends Component {
                             <DatePicker
                               selected={cca[i].dateFrom ? moment(cca[i].dateFrom) : undefined}
                               maxDate={cca[i].dateTo ? moment(cca[i].dateTo) : undefined}
+                              dateFormat='DD/MM/YYYY'
                               onChange={this.updateRepeatableDateChange('cca', 'dateFrom', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -598,6 +599,7 @@ class VolunteerEdit extends Component {
                             <DatePicker
                               selected={cca[i].dateTo ? moment(cca[i].dateTo) : undefined}
                               minDate={cca[i].dateFrom ? moment(cca[i].dateFrom) : undefined}
+                              dateFormat='DD/MM/YYYY'
                               onChange={this.updateRepeatableDateChange('cca', 'dateTo', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -700,6 +702,7 @@ class VolunteerEdit extends Component {
                               selected={workInternExp[i].dateFrom ? moment(workInternExp[i].dateFrom) : undefined}
                               maxDate={workInternExp[i].dateTo ? moment(workInternExp[i].dateTo) : undefined}
                               onChange={this.updateRepeatableDateChange('workInternExp', 'dateFrom', i)}
+                              dateFormat='DD/MM/YYYY'
                               placeholderText='Click to select' />
                           </Form.Field>
                         </Table.Cell>
@@ -709,6 +712,7 @@ class VolunteerEdit extends Component {
                               selected={workInternExp[i].dateTo ? moment(workInternExp[i].dateTo) : undefined}
                               minDate={workInternExp[i].dateFrom ? moment(workInternExp[i].dateFrom) : undefined}
                               onChange={this.updateRepeatableDateChange('workInternExp', 'dateTo', i)}
+                              dateFormat='DD/MM/YYYY'
                               placeholderText='Click to select' />
                           </Form.Field>
                         </Table.Cell>
