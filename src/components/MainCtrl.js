@@ -109,10 +109,10 @@ class MainCtrl extends Component {
       })
   }
 
-  constructor (props) {
+  constructor () {
     super()
     this.isLoggedIn()
-    forceRefresh = window.setInterval(this.changeState, 600000)
+    this.setTimeInterval()
     // Catch all 403 /404 / 500 errors that occur in the dashboard. Login is not affected.
     myInterceptor = axios.interceptors.response.use(response => {
       return response
@@ -126,21 +126,31 @@ class MainCtrl extends Component {
       return Promise.reject(error)
     })
   }
-  // Deprecated function as of React 16 and above.. Still finding a way to replace it.. > https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
-  componentWillReceiveProps () {
-    window.clearInterval(forceRefresh)
-    // Force confirm state of "confirm" every 10 minutes so there wont be issues that the main() renders after token expire
-    // While the state of "confirm" is still true as the user afk for 30 minutes. (Token will be refreshed but calls are made with old tokens)
-    this.isLoggedIn()
-    forceRefresh = window.setInterval(this.changeState, 600000)
+  // Deprecated function as of React 16 and above.. > https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
+  // Thus replacing componentWillReceiveProps with componentDidUpdate. Initial testing seems good to go.
+  componentDidUpdate (prevProps) {
+    if (this.props !== prevProps) {
+      this.clearTimeInterval()
+      // Force confirm state of "confirm" every 10 minutes so there wont be issues that the main() renders after token expire
+      // While the state of "confirm" is still true as the user afk for 30 minutes. (Token will be refreshed but calls are made with old tokens)
+      this.isLoggedIn()
+      this.setTimeInterval()
+    }
   }
 
   componentWillUnmount () {
-    window.clearInterval(forceRefresh)
     // Once unmount, remove the axios interceptors so that there might not be unintended effects to other pages etc
     axios.interceptors.request.eject(myInterceptor)
+    this.clearTimeInterval()
   }
 
+  setTimeInterval = () => {
+    forceRefresh = window.setInterval(this.changeState, 600000)
+  }
+
+  clearTimeInterval = () => {
+    window.clearInterval(forceRefresh)
+  }
   changeState = () => {
     this.isLoggedIn()
   }

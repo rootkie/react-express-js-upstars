@@ -60,12 +60,16 @@ class StudentWrap extends Component {
 
   editStudent = (studentDataToSubmit) => {
     const { sid } = this.props.match.params
+    let { roles } = this.props
     return axios.put('/students', {
       ...studentDataToSubmit,
       studentId: sid
     })
       .then(response => {
         this.getStudents()
+        if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+          this.getOtherStudents()
+        }
       })
   }
 

@@ -75,7 +75,7 @@ const initialState = {
 
   misc: {
     fas: [],
-    fscName: '',
+    fsc: '',
     tuition: [],
     academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
   },
@@ -205,7 +205,7 @@ class StudentEdit extends Component {
   }
 
   showSuccess = () => {
-    this.setState({submitSuccess: true, isLoading: false, buttonContent: 'Toggle Edit Mode'})
+    this.setState({submitSuccess: true, isLoading: false, buttonContent: 'Toggle Edit Mode', edit: false})
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
@@ -323,7 +323,7 @@ class StudentEdit extends Component {
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
-    const { fas, fscName, academicInfo } = misc
+    const { fas, fsc, academicInfo } = misc
 
     const { adminNotes, interviewDate, interviewNotes, commencementDate, exitDate, exitReason } = admin
 
@@ -506,7 +506,7 @@ class StudentEdit extends Component {
                 </Table>
 
                 <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple />
-                {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
+                {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fsc' value={fsc} onChange={this.handleChange} /> }
                 <Form.Group inline>
                   <label>Other Learning Support</label>
                   {tuitionOptions.map((option, i) => {
