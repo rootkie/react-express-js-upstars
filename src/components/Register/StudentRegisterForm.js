@@ -77,7 +77,7 @@ const initialState = {
 
   misc: {
     fas: [],
-    fscName: '',
+    fsc: '',
     tuition: [],
     academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
   },
@@ -143,7 +143,7 @@ class StudentForm extends Component {
   }
 
   showSuccess = () => {
-    this.setState({ submitSuccess: true })
+    this.setState({ ...initialState, submitSuccess: true })
   }
 
   submitStepOne = e => {
@@ -155,7 +155,7 @@ class StudentForm extends Component {
     } else {
       let error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address'])
       if (error.length === 0) {
-        this.setState({ activeItem: 'Personal Info' })
+        this.setState({ activeItem: 'Family Details' })
       } else {
         console.log('error occured')
         // Convert array to string to tell users what is wrong. (UX improvement)
@@ -167,6 +167,7 @@ class StudentForm extends Component {
 
   submitStepTwo = async e => {
     e.preventDefault()
+    this.setState({ error: '', errorMessage: '' })
     /* submit inputs in fields (stored in state) */
     const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
     // check required fields since anyone can play with the front end code.
@@ -191,7 +192,7 @@ class StudentForm extends Component {
           this.showSuccess()
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err.response)
           this.setState({errorMessage: err.response.data.error})
         })
     } else { // incomplete Field
@@ -283,7 +284,7 @@ class StudentForm extends Component {
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
-    const { fas, fscName, academicInfo } = misc
+    const { fas, fsc, academicInfo } = misc
 
     return (
       <Segment style={{ padding: '3em 0em' }} vertical>
@@ -486,7 +487,7 @@ class StudentForm extends Component {
                   </Table>
 
                   <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple />
-                  {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
+                  {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fsc' value={fsc} onChange={this.handleChange} /> }
                   <Form.Group inline>
                     <label>Other Learning Support</label>
                     {tuitionOptions.map((option, i) => {

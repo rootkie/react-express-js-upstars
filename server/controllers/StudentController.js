@@ -42,9 +42,9 @@ module.exports.addStudent = (req, res, next) => {
           })
         }
 
-        const successStudentSignup = await newStudent.save().select('_id')
+        const successStudentSignup = await newStudent.save()
         res.status(201).json({
-          newStudent: successStudentSignup
+          newStudent: successStudentSignup._id
         })
       } catch (err) {
         console.log(err)
