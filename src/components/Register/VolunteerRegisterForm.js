@@ -256,6 +256,9 @@ class Register extends Component {
                       selected={exitDate}
                       onChange={this.handleDateChange('exitDate')}
                       minDate={commencementDate}
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode='select'
                       required />
                   </Form.Field>
                 </Segment>
@@ -289,7 +292,9 @@ class Register extends Component {
                       <DatePicker
                         placeholderText='Click to select a date'
                         dateFormat='DD/MM/YYYY'
+                        showMonthDropdown
                         showYearDropdown
+                        dropdownMode='select'
                         selected={dob}
                         onChange={this.handleDateChange('dob')}
                         required />

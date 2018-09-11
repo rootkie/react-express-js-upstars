@@ -115,6 +115,8 @@ class ClassForm extends Component {
                 <DatePicker
                   inline
                   fixedHeight
+                  showMonthDropdown
+                  dropdownMode='select'
                   dateFormat='DD/MM/YYYY'
                   selected={this.state.startDate}
                   onChange={this.handleDateChange} required />

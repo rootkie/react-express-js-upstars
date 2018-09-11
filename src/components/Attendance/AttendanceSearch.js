@@ -120,6 +120,9 @@ class AttendanceSearch extends Component {
                             <label>Starting Date</label>
                             <DatePicker
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               selected={this.state.startDate}
                               maxDate={this.state.endDate}
                               onChange={(date) => this.handleDateChange('startDate', date)}
@@ -129,6 +132,9 @@ class AttendanceSearch extends Component {
                             <label>Ending Date</label>
                             <DatePicker
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               selected={this.state.endDate}
                               minDate={this.state.startDate}
                               onChange={(date) => this.handleDateChange('endDate', date)}

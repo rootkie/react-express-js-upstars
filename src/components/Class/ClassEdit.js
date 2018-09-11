@@ -298,6 +298,8 @@ class ClassEdit extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    dropdownMode='select'
                     selected={moment(oneClassData.startDate)}
                     onChange={this.handleDateChange}
                     required readOnly={!edit} />

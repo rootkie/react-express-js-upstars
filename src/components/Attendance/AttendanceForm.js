@@ -187,7 +187,7 @@ class AttendanceForm extends Component {
                     <label>Date of class</label>
                     <DatePicker
                       placeholderText='Click to select a date'
-                      dateFormat='YYYY/MM/DD'
+                      dateFormat='DD/MM/YYYY'
                       disabled={!classSelection}
                       selected={date}
                       onChange={this.handleDateChange('date')}

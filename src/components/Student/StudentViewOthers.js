@@ -3,7 +3,6 @@ import { array, func, bool } from 'prop-types'
 import { Link, Redirect } from 'react-router-dom'
 import { Table, Icon, Form, Dropdown, Dimmer, Loader, Grid, Search } from 'semantic-ui-react'
 import axios from 'axios'
-import 'react-datepicker/dist/react-datepicker.css'
 
 const genderOptions = [
   { key: 'M', text: 'Male', value: 'M' },

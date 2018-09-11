@@ -313,7 +313,9 @@ class StudentForm extends Component {
                     <DatePicker
                       placeholderText='Click to select a date'
                       dateFormat='DD/MM/YYYY'
+                      showMonthDropdown
                       showYearDropdown
+                      dropdownMode='select'
                       maxDate={moment()}
                       selected={dob}
                       onChange={this.handleDateChange('profile-dob')}
@@ -485,6 +487,8 @@ class StudentForm extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    dropdownMode='select'
                     minDate={interviewDate}
                     selected={commencementDate}
                     onChange={this.handleDateChange('admin-commencementDate')}
@@ -496,6 +500,9 @@ class StudentForm extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode='select'
                     minDate={commencementDate}
                     selected={exitDate}
                     onChange={this.handleDateChange('admin-exitDate')}
