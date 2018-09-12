@@ -594,14 +594,25 @@ class StudentEdit extends Component {
                   <Table.HeaderCell width='5'>Status</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
+              {classes.length !== 0 &&
               <Table.Body>
                 {classes.map((Class, i) => (
-                  <Table.Row key={`class-${i}`}>
+                  <Table.Row key={`class-${Class._id}`}>
                     <Table.Cell>{i + 1}</Table.Cell>
                     <Table.Cell><Link to={`/dashboard/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
                     <Table.Cell>{Class.status}</Table.Cell>
                   </Table.Row>))}
               </Table.Body>
+              }
+              {classes.length === 0 &&
+              <Table.Body>
+                <Table.Row key={`empty-class`}>
+                  <Table.Cell>1</Table.Cell>
+                  <Table.Cell>Oops! No Classes Found!</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+              }
             </Table>
           </Grid.Column>
         </Grid.Row>

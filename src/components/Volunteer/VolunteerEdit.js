@@ -868,6 +868,7 @@ class VolunteerEdit extends Component {
                   <Table.HeaderCell width='5'>Status</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
+              {classes.length !== 0 &&
               <Table.Body>
                 {classes.map((Class, i) => (
                   <Table.Row key={Class._id}>
@@ -876,6 +877,16 @@ class VolunteerEdit extends Component {
                     <Table.Cell>{Class.status}</Table.Cell>
                   </Table.Row>))}
               </Table.Body>
+              }
+              {classes.length === 0 &&
+              <Table.Body>
+                <Table.Row key={'empty-class'}>
+                  <Table.Cell>1</Table.Cell>
+                  <Table.Cell>Oops! No classes found!</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+              }
             </Table>
           </Grid.Column>
         </Grid.Row>
