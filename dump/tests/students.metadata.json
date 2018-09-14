@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"tests.students"},{"v":2,"key":{"profile.name":1},"name":"profile.name_1","ns":"tests.students","background":true},{"v":2,"unique":true,"key":{"profile.icNumber":1},"name":"profile.icNumber_1","ns":"tests.students","background":true}]}
