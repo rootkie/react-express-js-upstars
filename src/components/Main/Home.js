@@ -101,7 +101,7 @@ class DesktopContainer extends Component {
             <Menu
               fixed={fixed ? 'top' : null}
               inverted={!fixed}
-              color={fixed ? 'white' : 'blue'}
+              color={fixed ? null : 'blue'}
               borderless
               size='large'
             >
@@ -396,7 +396,7 @@ class Home extends Component {
                 <Grid.Column width={5}>
                   <Header inverted as='h4' content='About' />
                   <List link inverted>
-                    <a href='/sitemap.xml'><List.Item as='a'>Sitemap</List.Item></a>
+                    <List.Item as='a' href='/sitemap.xml'>Sitemap</List.Item>
                     <List.Item as={Link} to='/student'>Student</List.Item>
                     <List.Item as={Link} to='/volunteer'>Volunteer</List.Item>
                   </List>

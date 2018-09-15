@@ -48,7 +48,7 @@ render () {
           <Header as='h2' color='teal' textAlign='center'>
               Verify your email
           </Header>
-          <Message icon hidden={success === true}>
+          <Message icon hidden={success === true || error === true}>
             <Icon name='circle notched' loading />
             <Message.Content>
               <Message.Header>Just one second</Message.Header>

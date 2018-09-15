@@ -39,7 +39,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
     let hoursInt = parseInt(hours, 10)
     // If there is no class, everyone will get 0 hours
     if (type !== 'Class') hoursInt = 0
-    //  Delcare a new attendance object
+    //  Declare a new attendance object
     let attendance1 = {
       date,
       hours: hoursInt,
@@ -48,8 +48,8 @@ module.exports.addEditAttendance = async (req, res, next) => {
       students,
       type
     }
-    // Find attendance based on class and date. If exist, updates; else creates a new one.
-    await Attendance.findOneAndUpdate({
+    // Find attendance based on class and date. If exist, update; else create a new one.
+    let newAttendance = await Attendance.findOneAndUpdate({
       class: classId,
       date
     }, attendance1, {
@@ -59,7 +59,8 @@ module.exports.addEditAttendance = async (req, res, next) => {
     })
 
     res.status(200).json({
-      success: true
+      success: true,
+      attendanceId: newAttendance._id
     })
   } catch (err) {
     console.log(err)

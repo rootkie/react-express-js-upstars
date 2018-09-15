@@ -1,6 +1,6 @@
 module.exports = {
   secret: 'topsecret',
-  database: 'mongodb://localhost:27017/test',
+  database: 'mongodb://localhost:27017/tests',
   debug: true,
   user: 'yingkeatwon@gmail.com',
   clientId: '925154463776-1se2s2h200ur2jsnrv5btkrl72970339.apps.googleusercontent.com',

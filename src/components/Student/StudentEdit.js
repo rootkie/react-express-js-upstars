@@ -75,7 +75,7 @@ const initialState = {
 
   misc: {
     fas: [],
-    fscName: '',
+    fsc: '',
     tuition: [],
     academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
   },
@@ -205,7 +205,7 @@ class StudentEdit extends Component {
   }
 
   showSuccess = () => {
-    this.setState({submitSuccess: true, isLoading: false, buttonContent: 'Toggle Edit Mode'})
+    this.setState({submitSuccess: true, isLoading: false, buttonContent: 'Toggle Edit Mode', edit: false})
     setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
@@ -323,7 +323,7 @@ class StudentEdit extends Component {
 
     const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
 
-    const { fas, fscName, academicInfo } = misc
+    const { fas, fsc, academicInfo } = misc
 
     const { adminNotes, interviewDate, interviewNotes, commencementDate, exitDate, exitReason } = admin
 
@@ -362,7 +362,9 @@ class StudentEdit extends Component {
                     <DatePicker
                       placeholderText='Click to select a date'
                       dateFormat='DD/MM/YYYY'
+                      showMonthDropdown
                       showYearDropdown
+                      dropdownMode='select'
                       maxDate={moment()}
                       selected={dob}
                       onChange={this.handleDateChange('profile-dob')}
@@ -506,7 +508,7 @@ class StudentEdit extends Component {
                 </Table>
 
                 <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple />
-                {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fscName' value={fscName} onChange={this.handleChange} /> }
+                {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fsc' value={fsc} onChange={this.handleChange} /> }
                 <Form.Group inline>
                   <label>Other Learning Support</label>
                   {tuitionOptions.map((option, i) => {
@@ -535,6 +537,8 @@ class StudentEdit extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    dropdownMode='select'
                     minDate={interviewDate}
                     selected={commencementDate}
                     onChange={this.handleDateChange('admin-commencementDate')}
@@ -546,6 +550,9 @@ class StudentEdit extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode='select'
                     minDate={commencementDate}
                     selected={exitDate}
                     onChange={this.handleDateChange('admin-exitDate')}
@@ -587,14 +594,25 @@ class StudentEdit extends Component {
                   <Table.HeaderCell width='5'>Status</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
+              {classes.length !== 0 &&
               <Table.Body>
                 {classes.map((Class, i) => (
-                  <Table.Row key={`class-${i}`}>
+                  <Table.Row key={`class-${Class._id}`}>
                     <Table.Cell>{i + 1}</Table.Cell>
                     <Table.Cell><Link to={`/dashboard/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
                     <Table.Cell>{Class.status}</Table.Cell>
                   </Table.Row>))}
               </Table.Body>
+              }
+              {classes.length === 0 &&
+              <Table.Body>
+                <Table.Row key={`empty-class`}>
+                  <Table.Cell>1</Table.Cell>
+                  <Table.Cell>Oops! No Classes Found!</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+              }
             </Table>
           </Grid.Column>
         </Grid.Row>

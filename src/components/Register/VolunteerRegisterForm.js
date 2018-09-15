@@ -200,7 +200,7 @@ class Register extends Component {
       <Segment style={{ padding: '3em 0em' }} vertical>
         <Grid container stackable verticalAlign='middle'>
           <Grid.Row>
-            <Image size='small' centered src={require('./../logo.png')} />
+            <Image size='small' centered src={require('./../logo.png')} style={{height: '100%'}} />
           </Grid.Row>
           <Grid.Row>
             <Grid.Column textAlign='center'>
@@ -256,6 +256,9 @@ class Register extends Component {
                       selected={exitDate}
                       onChange={this.handleDateChange('exitDate')}
                       minDate={commencementDate}
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode='select'
                       required />
                   </Form.Field>
                 </Segment>
@@ -289,7 +292,9 @@ class Register extends Component {
                       <DatePicker
                         placeholderText='Click to select a date'
                         dateFormat='DD/MM/YYYY'
+                        showMonthDropdown
                         showYearDropdown
+                        dropdownMode='select'
                         selected={dob}
                         onChange={this.handleDateChange('dob')}
                         required />

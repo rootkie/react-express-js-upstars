@@ -95,7 +95,7 @@ const initialState = {
   },
 
   error: [],
-  serverError: false,
+  serverError: '',
   activeItem: 'Personal Info',
   captchaCode: ''
 }
@@ -160,13 +160,13 @@ class StudentForm extends Component {
   }
 
   showSuccess = (studentId) => {
-    this.context.router.history.push(`/students/edit/${studentId}`)
+    this.context.router.history.push(`/dashboard/students/edit/${studentId}`)
   }
 
   handleSubmit = async e => {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
-    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices } = this.state
+    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices, captchaCode } = this.state
     const { addStudent } = this.props
 
     // check required fields
@@ -184,13 +184,14 @@ class StudentForm extends Component {
       ), [])
 
       studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
+      studentDataToSubmit.captchaCode = captchaCode
 
       try {
         let submittedData = await addStudent(studentDataToSubmit)
         // Populate the field so that the user can click the button to proceed to the page.
-        this.showSuccess(submittedData._id)
-      } catch (error) {
-        this.setState({serverError: true})
+        this.showSuccess(submittedData)
+      } catch (err) {
+        this.setState({serverError: err.response.data.error})
       }
     } else { // incomplete Field
       console.log('Incomplete Fields')
@@ -199,14 +200,18 @@ class StudentForm extends Component {
     }
   }
 
-  handleTermsOpen = (e) => {
-    captcha.execute()
+  handleTermsOpen = () => {
     if (this.state.terms === false) this.setState({termsDetails: true})
+    else this.setState({terms: false})
   }
 
-  handleTermsClose = (e) => this.setState({termsDetails: false})
+  handleTermsClose = () => {
+    captcha.execute()
+    if (this.state.captchaCode) this.setState({terms: true})
+    this.setState({termsDetails: false, errorMessage: ''})
+  }
 
-  handleTermsDisagree = e => this.setState({terms: false, termsDetails: false})
+  handleTermsDisagree = () => this.setState({terms: false, termsDetails: false})
 
   // For the filling in of those fields where user can add / delete accordingly.This functions add / delete a whole row
   // The 2 fields are to be handled separately because they exists in a different state, academicInfo is nested within misc
@@ -308,7 +313,9 @@ class StudentForm extends Component {
                     <DatePicker
                       placeholderText='Click to select a date'
                       dateFormat='DD/MM/YYYY'
+                      showMonthDropdown
                       showYearDropdown
+                      dropdownMode='select'
                       maxDate={moment()}
                       selected={dob}
                       onChange={this.handleDateChange('profile-dob')}
@@ -480,6 +487,8 @@ class StudentForm extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    dropdownMode='select'
                     minDate={interviewDate}
                     selected={commencementDate}
                     onChange={this.handleDateChange('admin-commencementDate')}
@@ -491,6 +500,9 @@ class StudentForm extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode='select'
                     minDate={commencementDate}
                     selected={exitDate}
                     onChange={this.handleDateChange('admin-exitDate')}
@@ -531,9 +543,9 @@ class StudentForm extends Component {
                 content={`Please Check Required Fields - ${error}`}
               />
               <Message
-                hidden={!serverError}
+                hidden={serverError.length === 0}
                 negative
-                content='Server Error'
+                content={serverError}
               />
               <Form.Button type='submit'>Add student</Form.Button>
               <ReCAPTCHA

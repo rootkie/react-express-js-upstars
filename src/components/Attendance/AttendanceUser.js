@@ -156,6 +156,9 @@ class AttendanceUser extends Component {
                             <DatePicker
                               dateFormat='DD/MM/YYYY'
                               required
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               selected={this.state.startDate}
                               maxDate={this.state.endDate}
                               onChange={(date) => this.handleDateChange('startDate', date)}
@@ -166,6 +169,9 @@ class AttendanceUser extends Component {
                             <DatePicker
                               dateFormat='DD/MM/YYYY'
                               required
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               selected={this.state.endDate}
                               minDate={this.state.startDate}
                               onChange={(date) => this.handleDateChange('endDate', date)}

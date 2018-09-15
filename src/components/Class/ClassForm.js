@@ -57,20 +57,20 @@ class ClassForm extends Component {
 
     try {
       let classData = await addClass(data)
-      // console.log(classData)
       // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
       this.setState({...initialState, classId: classData.data.newClass._id})
       this.showSuccess()
     } catch (err) {
+      console.log(err.response)
       this.setState({serverErrorMessage: err.response.data.error})
     }
   }
 
   // Function called to show the success message for 5 seconds (UX component)
   // There's still a 'x' button to close the message
+  // Remove timer to prevent memory leakage for changing state after unmounting
   showSuccess = () => {
     this.setState({submitSuccess: true})
-    setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
   }
 
   closeMessage = () => {
@@ -115,6 +115,8 @@ class ClassForm extends Component {
                 <DatePicker
                   inline
                   fixedHeight
+                  showMonthDropdown
+                  dropdownMode='select'
                   dateFormat='DD/MM/YYYY'
                   selected={this.state.startDate}
                   onChange={this.handleDateChange} required />

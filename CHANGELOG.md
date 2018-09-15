@@ -1,4 +1,25 @@
 # Change Log
+## [v0.3.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.3.0-beta) (September 15, 2018, 3.15pm)
+- [Fixed] Image stretching that only occur in chrome (logo)
+- [Added] New dependencies for production
+- [Changed] Files structure of test folders
+- [Fixed] Wrong routing path after student adding
+- [Fixed] Did not send in CaptchaCode
+- [Trial] An alternative to componentWillReceiveProps
+- [Warning] Deprecated function (componentWillReceiveProps) fixed under trial
+- [Fixed] Main page JS warnings
+- [Changed] Better UX for EmailVerify page
+- [Fixed] Re-render of student status after editing
+- [Fixed] Did not include name of FSC to DB (studentEdit)
+- [Fixed] Mongoose data processing
+- [Added] UX to allow users know what error is thrown
+- [Fixed] Bugs on button actions
+- [Feature] New dropdown for easy selection of dates
+- [Fixed] Axios returns proper details
+- [Fixed] Showing proper status after adding classes
+- [Fixed] Notify users about status of class, student or user
+- [Added] MongoDB dump for testing purpose
+
 ## [v0.2.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.2.1-beta) (August 16, 2018, 7.50pm)
 -[Fixed] Urgent Hot-Fix for wrong backend API URI
 

@@ -298,6 +298,8 @@ class ClassEdit extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    dropdownMode='select'
                     selected={moment(oneClassData.startDate)}
                     onChange={this.handleDateChange}
                     required readOnly={!edit} />
@@ -398,7 +400,7 @@ class ClassEdit extends Component {
                     <Table.HeaderCell width='12'>Name</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
-
+                {oneClassData.students.length !== 0 &&
                 <Table.Body>
                   {oneClassData.students.map((Student, i) => (
                     <Table.Row key={`student-${i}`}>
@@ -406,6 +408,15 @@ class ClassEdit extends Component {
                       <Table.Cell>{Student.profile.name}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {oneClassData.students.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-student`}>
+                    <Table.Cell>1</Table.Cell>
+                    <Table.Cell>Oops! No Students Found!</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
 
               <Header as='h3' dividing>Users</Header>
@@ -416,6 +427,7 @@ class ClassEdit extends Component {
                     <Table.HeaderCell width='12'>Name</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
+                {oneClassData.users.length !== 0 &&
                 <Table.Body>
                   {oneClassData.users.map((User, i) => (
                     <Table.Row key={`user-${i}`}>
@@ -423,6 +435,15 @@ class ClassEdit extends Component {
                       <Table.Cell>{User.profile.name}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
+                }
+                {oneClassData.users.length === 0 &&
+                <Table.Body>
+                  <Table.Row key={`empty-user`}>
+                    <Table.Cell>1</Table.Cell>
+                    <Table.Cell>Oops! No Volunteers Found!</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+                }
               </Table>
             </Grid.Column>
           </Grid.Row>}

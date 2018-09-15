@@ -241,7 +241,7 @@ class VolunteerEdit extends Component {
           interviewDate,
           interviewNotes,
           adminNotes,
-          realCommencementDate
+          commencementDate: realCommencementDate
         }
       }
 
@@ -442,6 +442,9 @@ class VolunteerEdit extends Component {
                               selected={formalEducation[i].dateFrom ? moment(formalEducation[i].dateFrom) : undefined}
                               selectsStart
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               maxDate={formalEducation[i].dateTo ? moment(formalEducation[i].dateTo) : undefined}
                               onChange={this.updateRepeatableDateChange('formalEducation', 'dateFrom', i)}
                               placeholderText='Click to select' />
@@ -453,6 +456,9 @@ class VolunteerEdit extends Component {
                               selected={formalEducation[i].dateTo ? moment(formalEducation[i].dateTo) : undefined}
                               selectsEnd
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               minDate={formalEducation[i].dateFrom ? moment(formalEducation[i].dateFrom) : undefined}
                               onChange={this.updateRepeatableDateChange('formalEducation', 'dateTo', i)}
                               placeholderText='Click to select' />
@@ -493,7 +499,7 @@ class VolunteerEdit extends Component {
                     {coursesSeminar.map((year, i) => (
                       <Table.Row key={i}>
                         <Table.Cell>
-                          <Form.Input transparent type='number' key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year} placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
+                          <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year ? moment(coursesSeminar[i].year).format('YYYY') : undefined} placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
                         </Table.Cell>
                         <Table.Cell>
                           <Form.Input transparent key={`courseTitle-${i}`} name={`courseTitle-${i}`} value={coursesSeminar[i].courseAndObjective} placeholder='Name of Institution' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'courseAndObjective')} />
@@ -534,6 +540,9 @@ class VolunteerEdit extends Component {
                               selected={achievements[i].dateFrom ? moment(achievements[i].dateFrom) : undefined}
                               maxDate={achievements[i].dateTo ? moment(achievements[i].dateTo) : undefined}
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               onChange={this.updateRepeatableDateChange('achievements', 'dateFrom', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -544,6 +553,9 @@ class VolunteerEdit extends Component {
                               selected={achievements[i].dateTo ? moment(achievements[i].dateTo) : undefined}
                               minDate={achievements[i].dateFrom ? moment(achievements[i].dateFrom) : undefined}
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               onChange={this.updateRepeatableDateChange('achievements', 'dateTo', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -589,6 +601,10 @@ class VolunteerEdit extends Component {
                             <DatePicker
                               selected={cca[i].dateFrom ? moment(cca[i].dateFrom) : undefined}
                               maxDate={cca[i].dateTo ? moment(cca[i].dateTo) : undefined}
+                              dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               onChange={this.updateRepeatableDateChange('cca', 'dateFrom', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -598,6 +614,10 @@ class VolunteerEdit extends Component {
                             <DatePicker
                               selected={cca[i].dateTo ? moment(cca[i].dateTo) : undefined}
                               minDate={cca[i].dateFrom ? moment(cca[i].dateFrom) : undefined}
+                              dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               onChange={this.updateRepeatableDateChange('cca', 'dateTo', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -644,6 +664,9 @@ class VolunteerEdit extends Component {
                               selected={cip[i].dateFrom ? moment(cip[i].dateFrom) : undefined}
                               maxDate={cip[i].dateTo ? moment(cip[i].dateTo) : undefined}
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               onChange={this.updateRepeatableDateChange('cip', 'dateFrom', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -654,6 +677,9 @@ class VolunteerEdit extends Component {
                               selected={cip[i].dateTo ? moment(cip[i].dateTo) : undefined}
                               minDate={cip[i].dateFrom ? moment(cip[i].dateFrom) : undefined}
                               dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               onChange={this.updateRepeatableDateChange('cip', 'dateTo', i)}
                               placeholderText='Click to select' />
                           </Form.Field>
@@ -700,6 +726,10 @@ class VolunteerEdit extends Component {
                               selected={workInternExp[i].dateFrom ? moment(workInternExp[i].dateFrom) : undefined}
                               maxDate={workInternExp[i].dateTo ? moment(workInternExp[i].dateTo) : undefined}
                               onChange={this.updateRepeatableDateChange('workInternExp', 'dateFrom', i)}
+                              dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               placeholderText='Click to select' />
                           </Form.Field>
                         </Table.Cell>
@@ -709,6 +739,10 @@ class VolunteerEdit extends Component {
                               selected={workInternExp[i].dateTo ? moment(workInternExp[i].dateTo) : undefined}
                               minDate={workInternExp[i].dateFrom ? moment(workInternExp[i].dateFrom) : undefined}
                               onChange={this.updateRepeatableDateChange('workInternExp', 'dateTo', i)}
+                              dateFormat='DD/MM/YYYY'
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode='select'
                               placeholderText='Click to select' />
                           </Form.Field>
                         </Table.Cell>
@@ -777,6 +811,8 @@ class VolunteerEdit extends Component {
                   <DatePicker
                     placeholderText='Click to select a date'
                     dateFormat='DD/MM/YYYY'
+                    showMonthDropdown
+                    dropdownMode='select'
                     minDate={interviewDate ? moment(interviewDate) : undefined}
                     selected={realCommencementDate ? moment(realCommencementDate) : undefined}
                     onChange={this.handleDateChange('realCommencementDate')}
@@ -790,6 +826,9 @@ class VolunteerEdit extends Component {
                 <DatePicker
                   placeholderText='Click to select a date'
                   dateFormat='DD/MM/YYYY'
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode='select'
                   selected={exitDate ? moment(exitDate) : undefined}
                   onChange={this.handleDateChange('exitDate')}
                   minDate={commencementDate ? moment(commencementDate) : undefined}
@@ -829,6 +868,7 @@ class VolunteerEdit extends Component {
                   <Table.HeaderCell width='5'>Status</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
+              {classes.length !== 0 &&
               <Table.Body>
                 {classes.map((Class, i) => (
                   <Table.Row key={Class._id}>
@@ -837,6 +877,16 @@ class VolunteerEdit extends Component {
                     <Table.Cell>{Class.status}</Table.Cell>
                   </Table.Row>))}
               </Table.Body>
+              }
+              {classes.length === 0 &&
+              <Table.Body>
+                <Table.Row key={'empty-class'}>
+                  <Table.Cell>1</Table.Cell>
+                  <Table.Cell>Oops! No classes found!</Table.Cell>
+                  <Table.Cell>nil</Table.Cell>
+                </Table.Row>
+              </Table.Body>
+              }
             </Table>
           </Grid.Column>
         </Grid.Row>

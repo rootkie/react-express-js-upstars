@@ -46,7 +46,6 @@ module.exports.checkRole = req => {
     params,
     decoded
   } = req
-
   // Check if he has a role associated to perform administrative functions
   // If not, then check if he is checking one's own stuff
   for (const list in roles) {

@@ -76,9 +76,8 @@ class Login extends Component {
         axios.defaults.headers.common['x-access-token'] = window.localStorage.token
         this.setState({ redirect: true })
       })
-      // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
-        console.log(error)
+        console.log(error.response)
         this.setState({message: error.response.data.error})
       })
   }
@@ -133,7 +132,7 @@ class Login extends Component {
                   type='password' name='password' value={password} onChange={this.handleChange} required />
 
                 <Button color='teal' fluid size='large' type='submit'>Login</Button>
-                <Message hidden={message === ''}negative>
+                <Message hidden={message === ''} negative>
                   {message}.<Link to='/forgetpassword'> Forget password?</Link>
                 </Message>
               </Segment>

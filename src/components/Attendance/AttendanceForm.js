@@ -137,29 +137,31 @@ class AttendanceForm extends Component {
 
   // Handle submit calls the submit API. It sents the data in exactly the backend wants. Although users and students have
   // additional fields like `key` and `text`, mongoose does not care and will simply ignore it and only accept those defined and accepted by backend
-  handleSubmit = e => {
+  handleSubmit = async e => {
     e.preventDefault()
     const { date, className, type, students, users, hours } = this.state
     // check required fields
     // submits sth to server
     console.table({ date, className, type, students, users, hours })
-    axios.post('/attendance',
-      {
-        date,
-        classId: className,
-        users,
-        students,
-        hours,
-        type
-      }).then(response => {
-      console.log(response)
-      this.setState({...initialState, submitSuccess: true})
-      this.context.router.history.push(`/attendance/view/${response.data.attendance._id}`)
-    })
-      .catch(error => {
-        console.log(error)
-        this.setState({ error: 'GOT PROBLEM SUBMITTING ATTENDANCE' })
-      })
+    try {
+      await axios.post('/attendance',
+        {
+          date,
+          classId: className,
+          users,
+          students,
+          hours,
+          type
+        })
+        .then(response => {
+          console.log(response)
+          this.setState({...initialState, submitSuccess: true})
+          this.context.router.history.push(`/dashboard/attendance/view/${response.data.attendanceId}`)
+        })
+    } catch (err) {
+      console.log(err)
+      this.setState({ error: 'GOT PROBLEM SUBMITTING ATTENDANCE' })
+    }
   }
 
   render () {
@@ -187,7 +189,7 @@ class AttendanceForm extends Component {
                     <label>Date of class</label>
                     <DatePicker
                       placeholderText='Click to select a date'
-                      dateFormat='YYYY/MM/DD'
+                      dateFormat='DD/MM/YYYY'
                       disabled={!classSelection}
                       selected={date}
                       onChange={this.handleDateChange('date')}

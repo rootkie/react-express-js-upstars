@@ -36,7 +36,7 @@ mongoose.connect(config.database)
   */
 mongoose.set('debug', true)
 
-app.use(helmet())
+app.use(helmet()) // Only enabled during production
 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
