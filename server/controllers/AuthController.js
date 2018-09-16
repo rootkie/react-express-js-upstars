@@ -34,8 +34,8 @@ module.exports.login = async (req, res, next) => {
     // Checks if user exists
     if (!user) {
       throw ({
-        status: 404,
-        error: 'Wrong email. Please sign up for an account here'
+        status: 401,
+        error: 'Wrong email or password'
       })
     }
     // compare password
