@@ -6,10 +6,11 @@ const helmet = require('helmet')
 const path = require('path')
 const app = express()
 const mongoose = require('mongoose')
-const config = require('./config/constConfig')
 
 // ===================Initialization ==============================
 
+// New in 0.3.1-beta to replace constConfig.js
+require('dotenv').config()
 // Setup logger
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
 // Serve static assets
@@ -27,9 +28,9 @@ app.use(function (req, res, next) {
 
 // Connecting to database
 mongoose.Promise = global.Promise
-mongoose.connect(config.database)
+mongoose.connect(process.env.DATABASE)
 /* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
-  mongoose.openUri(config.database, {
+  mongoose.openUri(process.env.DATABASE, {
   useMongoClient: true,
   ssl: true
   })

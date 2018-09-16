@@ -2,7 +2,6 @@ const axios = require('axios')
 const querystring = require('querystring')
 const Student = require('../models/student')
 const Class = require('../models/class')
-const config = require('../config/constConfig')
 
 // Add student function works for everyone
 module.exports.addStudent = (req, res, next) => {
@@ -11,7 +10,7 @@ module.exports.addStudent = (req, res, next) => {
 
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: config.captchaSecret,
+      secret: process.env.CAPTCHA_SECRET,
       response: req.body.captchaCode
     }))
     .then(async response => {
@@ -66,7 +65,7 @@ module.exports.adminAddStudent = (req, res, next) => {
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: config.captchaSecret,
+      secret: process.env.CAPTCHA_SECRET,
       response: req.body.captchaCode
     }))
     .then(async response => {

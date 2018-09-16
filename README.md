@@ -27,6 +27,7 @@ Type these commands into the shell:
 |/server            |Express.js stuff |
 |/server/controllers|All the application backend logic |
 |/server/models     |Schemas and database operations |
+|/dump              |A mongoDB template pre-created for testing purposes |
 
 
 ## Resources

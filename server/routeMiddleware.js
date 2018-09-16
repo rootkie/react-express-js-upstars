@@ -1,4 +1,3 @@
-const config = require('./config/constConfig')
 const jwt = require('jsonwebtoken')
 
 module.exports.hasRole = function (role) {
@@ -6,7 +5,7 @@ module.exports.hasRole = function (role) {
     let token = req.body.token || req.query.token || req.headers['x-access-token']
     if (token) {
       // verifies secret and checks exp
-      jwt.verify(token, config.secret, (err, decoded) => {
+      jwt.verify(token, process.env.SECRET, (err, decoded) => {
         if (err) {
           return res.status(401).json({
             success: false,
@@ -25,7 +24,7 @@ module.exports.hasRole = function (role) {
           })
         }
       })
-    } else if (config.debug) {
+    } else if (process.env.DEBUG) {
       next()
     } else {
       // if there is no token

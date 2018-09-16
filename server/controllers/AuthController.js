@@ -1,7 +1,6 @@
 const User = require('../models/user')
 const util = require('../util.js')
 const { generateToken, generateRefresh } = util
-const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
 const nodemailer = require('nodemailer')
@@ -120,7 +119,7 @@ module.exports.changePassword = async (req, res, next) => {
       _id: user._id,
       random
     }
-    let encodedString = jwt.sign(objectToEncode, config.secret, {
+    let encodedString = jwt.sign(objectToEncode, process.env.SECRET, {
       expiresIn: 60 * 30
     })
     let transporter = nodemailer.createTransport({
@@ -129,15 +128,15 @@ module.exports.changePassword = async (req, res, next) => {
       secure: true,
       auth: {
         type: 'OAuth2',
-        user: config.user,
-        clientId: config.clientId,
-        clientSecret: config.clientSecret,
-        refreshToken: config.refreshToken
+        user: process.env.USER,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN
       }
     })
-    let link = `${config.domainName}/resetpassword/${encodedString}`
+    let link = `${process.env.DOMAIN_NAME}/resetpassword/${encodedString}`
     let message = {
-      from: config.user,
+      from: process.env.USER,
       to: email,
       subject: 'Password Request for UPStars',
       html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b> If you have no idea what this message is about, please ignore it.</b></p>
@@ -179,7 +178,7 @@ module.exports.resetPassword = async (req, res, next) => {
       })
     }
 
-    jwt.verify(token, config.secret, async (err, decoded) => {
+    jwt.verify(token, process.env.SECRET, async (err, decoded) => {
       try {
         if (err) {
           throw ({
@@ -248,7 +247,7 @@ module.exports.register = async (req, res, next) => {
 
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: config.captchaSecret,
+      secret: process.env.CAPTCHA_SECRET,
       response: captchaCode
     }))
     .then(async response => {
@@ -337,22 +336,22 @@ module.exports.register = async (req, res, next) => {
         let objectToEncode = {
           _id: userObject._id
         }
-        let encodedString = jwt.sign(objectToEncode, config.secret)
+        let encodedString = jwt.sign(objectToEncode, process.env.SECRET)
         let transporter = nodemailer.createTransport({
           host: 'smtp.gmail.com',
           port: 465,
           secure: true,
           auth: {
             type: 'OAuth2',
-            user: config.user,
-            clientId: config.clientId,
-            clientSecret: config.clientSecret,
-            refreshToken: config.refreshToken
+            user: process.env.USER,
+            clientId: process.env.CLIENT_ID,
+            clientSecret: process.env.CLIENT_SECRET,
+            refreshToken: process.env.REFRESH_TOKEN
           }
         })
-        let link = `${config.domainName}/verifyaccount/${encodedString}`
+        let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
         let message = {
-          from: config.user,
+          from: process.env.USER,
           to: email,
           subject: 'Thanks for joining UPStars!',
           html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
@@ -388,7 +387,7 @@ module.exports.register = async (req, res, next) => {
 
 module.exports.verifyEmail = async (req, res, next) => {
   let {token} = req.body
-  jwt.verify(token, config.secret, async (err, decoded) => {
+  jwt.verify(token, process.env.SECRET, async (err, decoded) => {
     try {
       if (err) {
         throw ({
@@ -443,7 +442,7 @@ module.exports.check = async (req, res, next) => {
     if (!token) return result(false, null, null, null, null)
 
     // Start token verification for expiry and integrity
-    jwt.verify(token, config.secret, (err, decoded) => {
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
       // Default error handling for expired jwt token: notify front end to call for refresh api
       // Similarly, expiring tokens will also be send in for a refresh to enjoy uninterrupted usage
       if (err) {
@@ -478,7 +477,7 @@ module.exports.refreshToken = async (req, res, next) => {
     }
     // The response comes with both status (true or false) and the token (null if status is false)
     if (!refreshToken) return result(false, null)
-    jwt.verify(refreshToken, config.secret, async (err, decoded) => {
+    jwt.verify(refreshToken, process.env.SECRET, async (err, decoded) => {
       if (err) {
         return result(false, null)
       } else {
