@@ -20,9 +20,7 @@ app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*') // Security vulnerability for CSRF. Need to change to to the Domain name
   // res.header('Access-Control-Allow-Origin', 'https://test.rootkiddie.com')
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
-  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials, x-access-token')
-  res.header('Access-Control-Expose-Headers', 'x-access-token')
-  res.header('Access-Control-Allow-Credentials', 'true')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, x-access-token')
   next()
 })
 
