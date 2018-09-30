@@ -119,7 +119,7 @@ module.exports.changePassword = async (req, res, next) => {
       _id: user._id,
       random
     }
-    let encodedString = jwt.sign(objectToEncode, process.env.SECRET, {
+    let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
       expiresIn: 60 * 30
     })
     let transporter = nodemailer.createTransport({
@@ -178,7 +178,7 @@ module.exports.resetPassword = async (req, res, next) => {
       })
     }
 
-    jwt.verify(token, process.env.SECRET, async (err, decoded) => {
+    jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
       try {
         if (err) {
           throw ({
@@ -244,21 +244,22 @@ module.exports.register = async (req, res, next) => {
     preferredTimeSlot,
     captchaCode
   } = req.body
-
+  // Special addition for development, may remove during deployment / production
+  let secret = process.env.CAPTCHA_SECRET
+  if (process.env.DEBUG === 'true' && !captchaCode) secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: process.env.CAPTCHA_SECRET,
+      secret,
       response: captchaCode
     }))
     .then(async response => {
-      console.log(response.data)
-      if (response.data.success === false) {
-        throw ({
-          status: 401,
-          error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-        })
-      }
       try {
+        if (response.data.success === false) {
+          throw ({
+            status: 401,
+            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+          })
+        }
         // Return error if no password or email provided
         if (!email || !password || password.length < 6) {
           throw ({
@@ -297,13 +298,6 @@ module.exports.register = async (req, res, next) => {
           existingUser.status = 'PermaDeleted'
           await existingUser.save()
         }
-        // Case 4: User have not confirmed email
-        if (existingUser && existingUser.status === 'Unverified') {
-          throw {
-            status: 401,
-            error: 'Your account has yet to be verified. Please confirm your email address by checking your email inbox'
-          }
-        }
 
         // Create a new user after validating and making sure everything is right
         const user = new User({
@@ -336,7 +330,7 @@ module.exports.register = async (req, res, next) => {
         let objectToEncode = {
           _id: userObject._id
         }
-        let encodedString = jwt.sign(objectToEncode, process.env.SECRET)
+        let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL)
         let transporter = nodemailer.createTransport({
           host: 'smtp.gmail.com',
           port: 465,
@@ -367,12 +361,9 @@ module.exports.register = async (req, res, next) => {
             })
           }
           console.log('Message sent: ' + info.response)
-          res.status(200).json({
-            success: true
+          res.status(201).json({
+            success: 'true'
           })
-        })
-        res.status(201).json({
-          success: 'true'
         })
       } catch (err) {
         console.log(err)
@@ -387,7 +378,7 @@ module.exports.register = async (req, res, next) => {
 
 module.exports.verifyEmail = async (req, res, next) => {
   let {token} = req.body
-  jwt.verify(token, process.env.SECRET, async (err, decoded) => {
+  jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
     try {
       if (err) {
         throw ({
@@ -477,7 +468,7 @@ module.exports.refreshToken = async (req, res, next) => {
     }
     // The response comes with both status (true or false) and the token (null if status is false)
     if (!refreshToken) return result(false, null)
-    jwt.verify(refreshToken, process.env.SECRET, async (err, decoded) => {
+    jwt.verify(refreshToken, process.env.SECRET_REFRESH, async (err, decoded) => {
       if (err) {
         return result(false, null)
       } else {

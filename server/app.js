@@ -17,8 +17,7 @@ app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 app.use(express.static(path.resolve(__dirname, '..', 'build')))
 // Enable Cross Origin Resource Sharing
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*') // Security vulnerability for CSRF. Need to change to to the Domain name
-  // res.header('Access-Control-Allow-Origin', 'https://test.rootkiddie.com')
+  res.header('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN)
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type, x-access-token')
   next()
@@ -26,7 +25,11 @@ app.use(function (req, res, next) {
 
 // Connecting to database
 mongoose.Promise = global.Promise
-mongoose.connect(process.env.DATABASE)
+if (process.env.DEBUG === 'false') {
+  mongoose.connect(process.env.DATABASE)
+} else {
+  mongoose.connect(process.env.DATABASE_DEBUG)
+}
 /* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
   mongoose.openUri(process.env.DATABASE, {
   useMongoClient: true,
@@ -35,7 +38,7 @@ mongoose.connect(process.env.DATABASE)
   */
 mongoose.set('debug', true)
 
-// app.use(helmet()) // Only enabled during production
+app.use(helmet())
 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {

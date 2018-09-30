@@ -34,8 +34,8 @@ module.exports.generateRefresh = _id => {
   const user = {
     _id
   }
-  return jwt.sign(user, process.env.SECRET, {
-    expiresIn: '1000d'
+  return jwt.sign(user, process.env.SECRET_REFRESH, {
+    expiresIn: '90d'
   })
 }
 

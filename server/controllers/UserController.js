@@ -2,6 +2,7 @@ const User = require('../models/user')
 const External = require('../models/external-personnel')
 const util = require('../util')
 const Class = require('../models/class')
+const nodemailer = require('nodemailer')
 
 // All
 module.exports.getAllUsers = async (req, res, next) => {
@@ -255,8 +256,37 @@ module.exports.changePassword = async (req, res, next) => {
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
-      return res.status(200).json({
-        status: 'success'
+      let transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
+        }
+      })
+      let message = {
+        from: process.env.USER,
+        to: user.email,
+        subject: 'UPStars Password Changed',
+        html: `<p>What's up ${user.profile.name}!</p><p>You've asked us to update your password and we want to let you know that it has been
+          updated. You can use your new password to log in now!</p><p>If you didn't ask us to change it, please let us know.</p><p>Thanks,<br />The UPStars Team</p>`
+      }
+      transporter.sendMail(message, (error, info) => {
+        if (error) {
+          console.log(error)
+          throw ({
+            status: 400,
+            error: 'An error has occurred. That is all we know.'
+          })
+        }
+        console.log('Message sent: ' + info.response)
+        return res.status(200).json({
+          status: 'success'
+        })
       })
     }
   } catch (err) {
