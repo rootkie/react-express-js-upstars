@@ -89,13 +89,14 @@ module.exports.changePassword = async (req, res, next) => {
     // Search for any users whose accounts are not yet deleted
     const user = await User.findOne({
       email,
+      'profile.nric': nric,
       status: {
         $ne: 'Deleted'
       }
     })
 
     // Checks if user exists
-    if (!user || user.profile.nric !== nric) {
+    if (!user) {
       throw ({
         status: 403,
         error: 'Wrong email or nric. Please try again'
@@ -108,9 +109,12 @@ module.exports.changePassword = async (req, res, next) => {
       })
     }
     // Fix plaintext security flaw: using encoded jwt to send as link for password change.
-    // Currently using the same password to sign jwt. Expires in 30 minutes
+    // Random 15 bit char saved in DB and part of token of auth
     let userName = user.profile.name
     let random = crypto.randomBytes(15).toString('hex')
+    if (process.env.NODE_ENV === 'development') {
+      random = process.env.RESET_PASSWORD_RANDOM
+    }
     user.resetPasswordToken = random
     user.save()
 
@@ -122,18 +126,34 @@ module.exports.changePassword = async (req, res, next) => {
     let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
       expiresIn: 60 * 30
     })
-    let transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        type: 'OAuth2',
-        user: process.env.USER,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN
+    let mailConfig
+    if (process.env.NODE_ENV === 'production') {
+      // all emails delivered to real address
+      mailConfig = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
+        }
       }
-    })
+    } else {
+      // all emails caught by nodemailer in house ethereal.email service
+      // Login with the user and pass in https://ethereal.email/login to view the message
+      mailConfig = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: process.env.TEST_EMAIL,
+          pass: process.env.TEST_EMAIL_PW
+        }
+      }
+    }
+    let transporter = nodemailer.createTransport(mailConfig)
     let link = `${process.env.DOMAIN_NAME}/resetpassword/${encodedString}`
     let message = {
       from: process.env.USER,
@@ -150,7 +170,7 @@ module.exports.changePassword = async (req, res, next) => {
           error: 'An error has occurred. That is all we know.'
         })
       }
-      console.log('Message sent: ' + info.response)
+      console.log('Message sent')
       res.status(200).json({
         success: true
       })
@@ -176,6 +196,11 @@ module.exports.resetPassword = async (req, res, next) => {
         status: 400,
         error: 'There\'s something wrong, please try again.'
       })
+    } else if (password.length < 6) {
+      throw ({
+        status: 400,
+        error: 'Please provide a password that is at least 6 characters long.'
+      })
     }
 
     jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
@@ -190,12 +215,13 @@ module.exports.resetPassword = async (req, res, next) => {
         const user = await User.findOne({
           email,
           _id,
+          resetPasswordToken: random,
           status: {
             $ne: 'Deleted'
           }
         })
         // Checks if user exists
-        if (!user || user.resetPasswordToken !== random) {
+        if (!user) {
           throw ({
             status: 403,
             error: 'Something went wrong, please try again.'
@@ -246,7 +272,7 @@ module.exports.register = async (req, res, next) => {
   } = req.body
   // Special addition for development, may remove during deployment / production
   let secret = process.env.CAPTCHA_SECRET
-  if (process.env.DEBUG === 'true' && !captchaCode) secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
       secret,
@@ -331,18 +357,34 @@ module.exports.register = async (req, res, next) => {
           _id: userObject._id
         }
         let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL)
-        let transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
-          auth: {
-            type: 'OAuth2',
-            user: process.env.USER,
-            clientId: process.env.CLIENT_ID,
-            clientSecret: process.env.CLIENT_SECRET,
-            refreshToken: process.env.REFRESH_TOKEN
+        let mailConfig
+        if (process.env.NODE_ENV === 'production') {
+          // all emails delivered to real address
+          mailConfig = {
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+              type: 'OAuth2',
+              user: process.env.USER,
+              clientId: process.env.CLIENT_ID,
+              clientSecret: process.env.CLIENT_SECRET,
+              refreshToken: process.env.REFRESH_TOKEN
+            }
           }
-        })
+        } else {
+          // all emails caught by nodemailer in house ethereal.email service
+          // Login with the user and pass in https://ethereal.email/login to view the message
+          mailConfig = {
+            host: 'smtp.ethereal.email',
+            port: 587,
+            auth: {
+              user: process.env.TEST_EMAIL,
+              pass: process.env.TEST_EMAIL_PW
+            }
+          }
+        }
+        let transporter = nodemailer.createTransport(mailConfig)
         let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
         let message = {
           from: process.env.USER,
@@ -360,7 +402,7 @@ module.exports.register = async (req, res, next) => {
               error: 'An error has occurred. That is all we know.'
             })
           }
-          console.log('Message sent: ' + info.response)
+          console.log('Message sent')
           res.status(201).json({
             success: 'true'
           })

@@ -256,18 +256,34 @@ module.exports.changePassword = async (req, res, next) => {
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
-      let transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          type: 'OAuth2',
-          user: process.env.USER,
-          clientId: process.env.CLIENT_ID,
-          clientSecret: process.env.CLIENT_SECRET,
-          refreshToken: process.env.REFRESH_TOKEN
+      let mailConfig
+      if (process.env.NODE_ENV === 'production') {
+      // all emails delivered to real address
+        mailConfig = {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            type: 'OAuth2',
+            user: process.env.USER,
+            clientId: process.env.CLIENT_ID,
+            clientSecret: process.env.CLIENT_SECRET,
+            refreshToken: process.env.REFRESH_TOKEN
+          }
         }
-      })
+      } else {
+      // all emails caught by nodemailer in house ethereal.email service
+      // Login with the user and pass in https://ethereal.email/login to view the message
+        mailConfig = {
+          host: 'smtp.ethereal.email',
+          port: 587,
+          auth: {
+            user: process.env.TEST_EMAIL,
+            pass: process.env.TEST_EMAIL_PW
+          }
+        }
+      }
+      let transporter = nodemailer.createTransport(mailConfig)
       let message = {
         from: process.env.USER,
         to: user.email,
@@ -283,7 +299,7 @@ module.exports.changePassword = async (req, res, next) => {
             error: 'An error has occurred. That is all we know.'
           })
         }
-        console.log('Message sent: ' + info.response)
+        console.log('Message sent')
         return res.status(200).json({
           status: 'success'
         })

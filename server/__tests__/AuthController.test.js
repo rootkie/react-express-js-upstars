@@ -1,4 +1,5 @@
-import { generateToken, generateRefresh } from '../util'
+const util = require('../util.js')
+const { generateRefresh } = util
 const request = require('supertest')
 const jwt = require('jsonwebtoken')
 const app = request('http://localhost:3000/api')
@@ -78,10 +79,13 @@ describe('x-access-token functionalities', () => {
     const user = {
       _id: '5b912ba72b9ec042a58f88a4',
       classes: ['5b97b8f2adfb2e018c64d372'],
+      status: 'Active',
       roles: ['Tutor', 'SuperAdmin', 'Admin'],
       name: 'Wuying  Kong'
     }
-    expiringAccessToken = await generateToken(user)
+    expiringAccessToken = await jwt.sign(user, process.env.SECRET, {
+      expiresIn: '9m'
+    })
   })
   test('empty check returns false', async () => {
     expect.assertions(2)
@@ -148,7 +152,7 @@ describe('refresh tokens test', () => {
 })
 
 describe('testing user registration', () => {
-  // Make sure that DEBUG in .env file is set to true
+  // Make sure that NODE_ENV in .env file is set to development
   // This allows the test to bypass the captcha validation
   const userData =
   {
@@ -172,6 +176,7 @@ describe('testing user registration', () => {
     exitDate: '2018-10-25T12:53:52+00:00',
     preferredTimeSlot: ['Tuesday 7-9.30pm']
   }
+
   test('empty captcha, registration not working', async () => {
     expect.assertions(2)
     const response = await app.post('/register').send({
@@ -215,10 +220,8 @@ describe('testing user registration', () => {
 
     test('registration working', async () => {
       expect.assertions(2)
-      const response = await app.post('/register').send({
-        userData
-      })
-      expect(response.statusCode).toBe(200)
+      const response = await app.post('/register').send(userData)
+      expect(response.statusCode).toBe(201)
       expect(response.body).toEqual({'success': 'true'})
     })
 
@@ -268,8 +271,8 @@ describe('testing user registration', () => {
       expect.assertions(2)
       const response = await app.post('/register').send({
         ...missingUserInfo,
-        email: 'testuser@upstars.com',
-        password: 'pass'
+        email: 'testuser2@upstars.com',
+        password: 'password'
       })
       expect(response.statusCode).toBe(403)
       expect(response.body).toEqual({'error': 'Your account has been suspended. Please contact the administrator for follow up actions'})
@@ -286,7 +289,7 @@ describe('testing user registration', () => {
       })
       expect(response.statusCode).toBe(201)
       expect(response.body).toEqual({'success': 'true'})
-    })
+    }, 10000)
   })
 })
 
@@ -314,6 +317,7 @@ describe('verify email address exist using links', () => {
   })
 
   beforeAll(async () => {
+    // testuser5@upstars.com used
     const objectToEncode = {
       _id: '5ba8c8cb8e235732b485a60e'
     }
@@ -326,4 +330,105 @@ describe('verify email address exist using links', () => {
     expect(response.statusCode).toBe(200)
     expect(response.body).toEqual({'status': 'success'})
   })
+})
+
+describe('Password Changes by the User', () => {
+  test('no POST req body prompts errors', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword')
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
+  })
+
+  test('no email prompts errors', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword').send({nric: 'S925556F'})
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
+  })
+
+  test('no nric prompts errors', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com'})
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
+  })
+
+  test('wrong nric prompts errors', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S9255562F'})
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toEqual({'error': 'Wrong email or nric. Please try again'})
+  })
+
+  test('wrong email prompts errors', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword').send({email: 'testuser4@upstars.com', nric: 'S925556F'})
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toEqual({'error': 'Wrong email or nric. Please try again'})
+  })
+
+  test('suspended user prompts errors', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword').send({email: 'testuser2@upstars.com', nric: 'S924456F'})
+    expect(response.statusCode).toBe(403)
+    expect(response.body).toEqual({'error': 'Your account has been suspended, please contact the administrator for follow up actions'})
+  })
+
+  test('proper requests returns success', async () => {
+    expect.assertions(2)
+    const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toEqual({'success': true})
+  })
+})
+
+describe('reset password tests', () => {
+  let token
+  beforeAll(async () => {
+    const objectToEncode = {
+      email: 'testuser3@upstars.com',
+      _id: '5b9255700333773af993ae9c',
+      random: process.env.RESET_PASSWORD_RANDOM
+    }
+    await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
+    token = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
+      expiresIn: 60 * 30
+    })
+  })
+
+  test('no fields throws error', async () => {
+    expect.assertions(2)
+    const response = await app.post('/resetpassword')
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'There\'s something wrong, please try again.'})
+  })
+
+  test('no password throws error', async () => {
+    expect.assertions(2)
+    const response = await app.post('/resetpassword').send({token: 'test-token'})
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'There\'s something wrong, please try again.'})
+  })
+
+  test('no token throws error', async () => {
+    expect.assertions(2)
+    const response = await app.post('/resetpassword').send({password: 'password'})
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'There\'s something wrong, please try again.'})
+  })
+
+  test('bad password throws error', async () => {
+    expect.assertions(2)
+    const response = await app.post('/resetpassword').send({password: 'pass', token: 'test-token'})
+    expect(response.statusCode).toBe(400)
+    expect(response.body).toEqual({'error': 'Please provide a password that is at least 6 characters long.'})
+  })
+
+  test.only('proper reset password returns success', async () => {
+    expect.assertions(2)
+    const response = await app.post('/resetpassword').send({password: 'password123', token})
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toEqual({'status': 'success'})
+  },100000)
 })

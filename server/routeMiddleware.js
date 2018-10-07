@@ -24,7 +24,7 @@ module.exports.hasRole = function (role) {
           })
         }
       })
-    } else if (process.env.DEBUG === 'true') {
+    } else if (process.env.NODE_ENV === 'development') {
       next()
     } else {
       // if there is no token
