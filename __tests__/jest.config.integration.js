@@ -1,5 +1,6 @@
 module.exports = {
   verbose: true,
   rootDir: '../',
-  testMatch: [ '<rootDir>/server/__tests__/AuthController.test.js' ],
+  testEnvironment: 'node',
+  testMatch: [ '<rootDir>/server/__tests__/*.test.js' ]
 }

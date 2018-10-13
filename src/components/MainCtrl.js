@@ -15,7 +15,10 @@ import FourZeroThree from './Error/403'
 import FourZeroFour from './Error/404'
 import FiveHundred from './Error/500'
 
-axios.defaults.baseURL = process.env.BASE_URL
+// For development
+axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
+// For production
+// axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
