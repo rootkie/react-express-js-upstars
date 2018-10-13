@@ -34,6 +34,10 @@ Type these commands into the shell:
 
 All API documentation is in the [wiki](https://github.com/rootkie/react-express-js-upstars/wiki).
 
+## Testing
+
+All tests could be ran manually by following the steps in the [testing guide](https://github.com/rootkie/react-express-js-upstars/wiki/Testing-Guide)
+
 ## Troubleshoot
 ```
 bash: nodemon: command not found
