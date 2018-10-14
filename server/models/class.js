@@ -34,10 +34,6 @@ const ClassSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User'
   }],
-  externalPersonnel: [{
-    type: Schema.ObjectId,
-    ref: 'External'
-  }],
   status: {
     type: String,
     default: 'Active',

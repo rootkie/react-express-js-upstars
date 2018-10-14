@@ -1,7 +1,6 @@
 const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
-const External = require('../models/external-personnel')
 
 // SuperAdmin
 module.exports.addClass = async (req, res, next) => {
@@ -118,10 +117,10 @@ module.exports.getAll = async (req, res, next) => {
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
-    }).select('-createdAt -students -users -externalPersonnel -updatedAt -startDate')
+    }).select('-createdAt -students -users -updatedAt -startDate')
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
-    }).select('-createdAt -students -users -externalPersonnel -updatedAt -startDate')
+    }).select('-createdAt -students -users -updatedAt -startDate')
     // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
     if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
       console.log(classes)
@@ -155,8 +154,8 @@ module.exports.getClassById = async (req, res, next) => {
       })
     }
 
-    // Find a class and populate the students, users and external people to get their name. Using class1 because class is a reserved word
-    const class1 = await Class.findById(classId).populate('students users', 'profile.name').populate('externalPersonnel', 'name')
+    // Find a class and populate the students, users to get their name. Using class1 because class is a reserved word
+    const class1 = await Class.findById(classId).populate('students users', 'profile.name')
       .select('-updatedAt -createdAt')
     // If class does not exist, throw an error
     if (!class1) {
@@ -429,120 +428,6 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
     return res.status(200).json({
       class: classes,
       users
-    })
-  } catch (err) {
-    console.log(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
-  }
-}
-
-// SA
-module.exports.assignExternalPersonnelToClass = async (req, res, next) => {
-  try {
-    let {
-      classId,
-      name,
-      nric,
-      organisation,
-      relationTo,
-      nameOfRelatedPersonnel
-    } = req.body
-
-    // Check that nric exist
-    if (!nric) {
-      throw ({
-        status: 400,
-        error: 'Please provide an nric'
-      })
-    }
-
-    // Find from database. If exist, update; else create.
-    const externalPersonnel = await External.findOneAndUpdate({
-      nric
-    }, {
-      $addToSet: {
-        classId
-      },
-      $set: {
-        nric,
-        name,
-        organisation,
-        relationTo,
-        nameOfRelatedPersonnel
-      }
-    }, {
-      new: true,
-      upsert: true,
-      runValidators: true
-    })
-
-    // Add external into class's list of externals
-    const updatedClass = await Class.findByIdAndUpdate(classId, {
-      $addToSet: {
-        externalPersonnel: externalPersonnel._id
-      }
-    }, {
-      new: true
-    })
-    res.status(201).json({
-      externalPersonnel,
-      updatedClass
-    })
-  } catch (err) {
-    console.log(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else if (err.name === 'ValidationError') {
-      res.status(400).send({
-        error: 'There is something wrong with the client input. That is all we know.'
-      })
-    } else next(err)
-  }
-}
-
-// SA
-module.exports.removeExternalPersonnelFromClass = async (req, res, next) => {
-  try {
-    let {
-      classId,
-      externalId
-    } = req.body
-
-    // Check that externalId and classId provided
-    if (!externalId || !classId) {
-      throw ({
-        status: 400,
-        error: 'Please provide both externalId and class'
-      })
-    }
-
-    // Remove external from a class's list of externals
-    const updatedClass = await Class.findByIdAndUpdate(classId, {
-      $pull: {
-        externalPersonnel: externalId
-      }
-    }, {
-      new: true
-    })
-
-    // Remove class from an external's list of classes
-    const updatedExternal = await External.findByIdAndUpdate(externalId, {
-      $pull: {
-        classId
-      }
-    }, {
-      new: true
-    })
-
-    res.json({
-      updatedClass,
-      updatedExternal
     })
   } catch (err) {
     console.log(err)

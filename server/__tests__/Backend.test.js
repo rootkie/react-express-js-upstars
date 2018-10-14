@@ -6,6 +6,11 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 // mongorestore --drop -d tests dump/tests
+let userToken
+beforeAll(async () => {
+  const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
+  userToken = response.body.token
+})
 
 describe('testing auth related API mostly without token', () => {
   describe('login testing', () => {
@@ -438,12 +443,8 @@ describe('testing auth related API mostly without token', () => {
 })
 
 // There is no need for a x-access-token in development,refer to routeMiddleware.js
+// However, some APIs require it, so we will just parse it in
 describe('testing admin related APIs', async () => {
-  let userToken
-  beforeAll(async () => {
-    const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
-    userToken = response.body.token
-  })
   describe('retrieve pending users', () => {
     test('get pending users', async () => {
       expect.assertions(2)
@@ -598,4 +599,8 @@ describe('testing admin related APIs', async () => {
       expect(userData.body.user.roles).toEqual(['SuperAdmin', 'Admin', 'Tutor'])
     })
   })
+})
+
+describe('testing class related APIs', async () => {
+
 })

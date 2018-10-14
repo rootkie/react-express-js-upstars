@@ -1,5 +1,4 @@
 const User = require('../models/user')
-const External = require('../models/external-personnel')
 const util = require('../util')
 const Class = require('../models/class')
 const nodemailer = require('nodemailer')
@@ -312,21 +311,6 @@ module.exports.changePassword = async (req, res, next) => {
         error: err.error
       })
     } else next(err)
-  }
-}
-
-// Admin / SA
-// Note that external is the only party we conduct a permanent delete
-module.exports.getExternal = async (req, res, next) => {
-  try {
-    // Find the external and get className
-    const user = await External.findById(req.params.id).populate('classId', 'className')
-    return res.status(200).json({
-      user
-    })
-  } catch (err) {
-    console.log(err)
-    next(err)
   }
 }
 

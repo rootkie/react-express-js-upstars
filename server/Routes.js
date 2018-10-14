@@ -40,11 +40,6 @@ module.exports = app => {
   app.delete('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.deleteUser) //  Personal account deletion
   app.delete('/api/users/class', hasRole(['Admin', 'SuperAdmin']), classControl.deleteUsersFromClass)
 
-  // External
-  app.get('/api/external/:id', hasRole(['Admin', 'SuperAdmin']), userControl.getExternal)
-  app.post('/api/external/class', hasRole(['SuperAdmin']), classControl.assignExternalPersonnelToClass)
-  app.delete('/api/external/class', hasRole(['SuperAdmin']), classControl.removeExternalPersonnelFromClass)
-
   // Attendance controls
   app.get('/api/attendance/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceById)
   app.get('/api/attendance/class/:classId?/dateStart/:dateStart?/dateEnd/:dateEnd?', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendance)
