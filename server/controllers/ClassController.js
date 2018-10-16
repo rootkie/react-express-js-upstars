@@ -13,6 +13,12 @@ module.exports.addClass = async (req, res, next) => {
       startDate
     } = req.body
 
+    if (!className || className.length === 0) {
+      throw ({
+        status: 400,
+        error: 'Please provide a className to search for'
+      })
+    }
     // Check if the class already exist and prevent duplicate creation
     const classExist = await Class.findOne({
       className
@@ -100,7 +106,7 @@ module.exports.editClass = async (req, res, next) => {
   } catch (err) {
     console.log(err)
     if (err.name === 'ValidationError') {
-      res.status(400).send('Our server had issues validating your inputs. Please fill in using proper values')
+      res.status(400).send({error: 'Our server had issues validating your inputs. Please fill in using proper values'})
     } else if (err.status) {
       res.status(err.status).send({
         error: err.error
