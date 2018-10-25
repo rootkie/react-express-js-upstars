@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 // mongorestore --drop -d tests dump/tests
+// ./node_modules/.bin/jest -c __tests__/jest.config.integration.js
 let userToken
 beforeAll(async () => {
   const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
@@ -632,7 +633,7 @@ describe('testing admin related APIs', async () => {
   })
 })
 
-describe.only('testing class related APIs', async () => {
+describe('testing class related APIs', async () => {
   let lowPrivUserToken
   let classDetail = {
     className: 'Upstars Class B',
@@ -890,6 +891,667 @@ describe.only('testing class related APIs', async () => {
       expect(classData.body.class).toHaveProperty('status', 'Active')
       expect(classData.body.class).toHaveProperty('className', 'Upstars Class A 2018')
       expect(classData.body.class).toHaveProperty('venue', 'Ulu Pandan Room 2')
+    })
+  })
+})
+
+describe('testing user side APIs', () => {
+  let lowPrivUserToken
+  // Similarly, for getAllUser, this non-admin user can only see his / her own account details
+  beforeAll(async () => {
+    const response = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password123'})
+    lowPrivUserToken = response.body.token
+  })
+
+  describe('get all users functionality', () => {
+    test('non-admin personnel only retrieves his own profile', async () => {
+      const userData = {
+        'users': [
+          {
+            'profile': {
+              'name': 'Mr. Cristian Bartell',
+              'gender': 'M',
+              'nric': 'S925556F',
+              'dob': '2004-03-09T16:00:00.000Z'
+            },
+            'status': 'Active',
+            'roles': [
+              'Tutor'
+            ],
+            '_id': '5b9255700333773af993ae9c'
+          }
+        ]
+      }
+      expect.assertions(2)
+      const response = await app.get('/users').set('x-access-token', lowPrivUserToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toMatchObject(userData)
+    })
+
+    test('admin users retrieves everyone\'s profile', async () => {
+      const allUserData = {
+        'users': [
+          {
+            'profile': {
+              'name': 'Mr. Cristian Bartell',
+              'gender': 'M',
+              'nric': 'S925556F',
+              'dob': '2004-03-09T16:00:00.000Z'
+            },
+            'status': 'Active',
+            'roles': [
+              'Tutor'
+            ],
+            '_id': '5b9255700333773af993ae9c'
+          },
+          {
+            'profile': {
+              'name': 'Wuying  Kong',
+              'gender': 'M',
+              'nric': 'S923456F',
+              'dob': '2004-03-09T16:00:00.000Z'
+            },
+            'status': 'Active',
+            'roles': [
+              'SuperAdmin',
+              'Admin',
+              'Tutor'
+            ],
+            '_id': '5b912ba72b9ec042a58f88a4'
+          }
+        ]
+      }
+      expect.assertions(2)
+      const response = await app.get('/users').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toMatchObject(allUserData)
+    })
+  })
+
+  describe('viewing a single user data', () => {
+    const userFullData = {
+      'profile': {
+        'name': 'Mr. Cristian Bartell',
+        'gender': 'M',
+        'nric': 'S925556F',
+        'nationality': 'singaporean',
+        'dob': '2004-03-09T16:00:00.000Z',
+        'address': '486 Schmitt Drive',
+        'postalCode': 623411,
+        'handphone': 84720133,
+        'homephone': 60437898,
+        'schoolClass': 'Sec 3-3',
+        'schoolLevel': 'UPStars Secondary'
+      },
+      'father': {
+        'name': 'Sam Kong',
+        'email': 'samkong@upstars.com',
+        'occupation': 'Manager'
+      },
+      'mother': {
+        'name': 'Yahui  Geng',
+        'occupation': 'Poultry cutter',
+        'email': 'yahuigeng@upstars.com'
+      },
+      'misc': {
+        'hobbies': [
+          'Running. Studying'
+        ],
+        'careerGoal': 'Economist',
+        'formalEducation': [
+          {
+            'dateFrom': '2014-12-31T16:00:00.000Z',
+            'dateTo': '2015-12-30T16:00:00.000Z',
+            'school': 'Upstars Secondary',
+            'highestLevel': 'Sec 4'
+          }
+        ],
+        'coursesSeminar': [
+          {
+            'year': '2016-01-01T00:00:00.000Z',
+            'courseAndObjective': 'Upstars Institute'
+          }
+        ],
+        'achievements': [
+          {
+            'dateFrom': '2018-09-06T13:43:33.359Z',
+            'dateTo': '2018-09-06T13:43:33.359Z',
+            'organisation': 'Upstars',
+            'description': 'Great performance award'
+          }
+        ],
+        'cca': [
+          {
+            'dateFrom': '2015-01-01T16:00:00.000Z',
+            'dateTo': '2015-12-30T16:00:00.000Z',
+            'organisation': 'Upstars',
+            'rolePosition': 'Volunteer'
+          }
+        ],
+        'cip': [
+          {
+            'dateFrom': '2015-01-31T16:00:00.000Z',
+            'dateTo': '2018-09-06T13:45:56.027Z',
+            'organisation': 'Upstars',
+            'rolePosition': 'Volunteer'
+          }
+        ],
+        'workInternExp': [
+          {
+            'dateFrom': '2015-01-01T16:00:00.000Z',
+            'dateTo': '2018-09-06T13:46:12.164Z',
+            'organisation': 'Upstars',
+            'rolePosition': 'Volunteer'
+          }
+        ],
+        'competence': [
+          {
+            'languages': [
+              'English, Chinese'
+            ],
+            'subjects': [
+              'Math, Science, English, Chinese'
+            ],
+            'interests': [
+              'Everything'
+            ]
+          }
+        ]
+      },
+      'preferredTimeSlot': [
+        'Tuesday 7-9.30pm',
+        'Wednesday 7-9.30pm'
+      ],
+      'status': 'Active',
+      'roles': [
+        'Tutor'
+      ],
+      'classes': [
+        {
+          'status': 'Active',
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        }
+      ],
+      '_id': '5b9255700333773af993ae9c',
+      'exitDate': '2018-12-27T16:00:00.000Z',
+      '__v': 0
+    }
+
+    test('lowPriv user does not have auth to view other users', async () => {
+      expect.assertions(2)
+      const response = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', lowPrivUserToken)
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+    })
+
+    test('non-admin user is able to view personal account', async () => {
+      expect.assertions(2)
+      const response = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', lowPrivUserToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.user).toMatchObject(userFullData)
+    })
+
+    test('admin user is able to view anyone and see admin details', async () => {
+      expect.assertions(2)
+      const response = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.user).toMatchObject({
+        ...userFullData,
+        admin: {
+          'interviewDate': '2018-09-06T16:00:00.000Z',
+          'interviewNotes': 'Great person',
+          'adminNotes': 'Great!',
+          'commencementDate': '2018-09-06T16:00:00.000Z'
+        }
+      })
+    })
+
+    test('admin user simply cannot access non existent user', async () => {
+      expect.assertions(2)
+      const response = await app.get('/users/5b9255700333773af993ae20').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'User does not exist. Please try again'})
+    })
+  })
+
+  describe('retrieving a user detail via responsive name API', () => {
+    test('non-admin can only find themselves no matter the query', async () => {
+      expect.assertions(2)
+      const response = await app.get('/usersResponsive/crist').set('x-access-token', lowPrivUserToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.users).toEqual([
+        {
+          'profile': {
+            'name': 'Mr. Cristian Bartell'
+          },
+          '_id': '5b9255700333773af993ae9c'
+        }
+      ])
+    })
+
+    test('non-admin can only find themselves no matter the query 2', async () => {
+      expect.assertions(2)
+      const response = await app.get('/usersResponsive/anything').set('x-access-token', lowPrivUserToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.users).toEqual([
+        {
+          'profile': {
+            'name': 'Mr. Cristian Bartell'
+          },
+          '_id': '5b9255700333773af993ae9c'
+        }
+      ])
+    })
+
+    test('admin can obtain any active members details 1', async () => {
+      expect.assertions(2)
+      const response = await app.get('/usersResponsive/ch').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.users).toEqual([])
+    })
+
+    test('admin can obtain any active members details 2', async () => {
+      expect.assertions(2)
+      const response = await app.get('/usersResponsive/cRIS').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.users).toEqual([
+        {
+          'profile': {
+            'name': 'Mr. Cristian Bartell'
+          },
+          '_id': '5b9255700333773af993ae9c'
+        }
+      ])
+    })
+
+    test('admin can obtain any active members details 3', async () => {
+      expect.assertions(2)
+      const response = await app.get('/usersResponsive/i').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(200)
+      expect(response.body.users).toEqual([
+        {
+          'profile': {
+            'name': 'Mr. Cristian Bartell'
+          },
+          '_id': '5b9255700333773af993ae9c'
+        },
+        {
+          'profile': {
+            'name': 'Wuying  Kong'
+          },
+          '_id': '5b912ba72b9ec042a58f88a4'
+        }
+      ])
+    })
+  })
+
+  describe('changing user password', () => {
+    test('changing password without any fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/users/changePassword')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'})
+    })
+
+    test('changing password with missing fields throws error', async () => {
+      expect.assertions(2)
+      // Missing new password
+      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'})
+    })
+
+    test('changing password with bad password throws error', async () => {
+      expect.assertions(2)
+      // Less than the basic 6 characters
+      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'pass'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'})
+    })
+
+    test('changing password with non-existent userID throws error', async () => {
+      expect.assertions(2)
+      // Less than the basic 6 characters
+      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993a11c', oldPassword: 'password123', newPassword: 'password'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'User does not exist!'})
+    })
+
+    test('changing password with wrong oldPassword throws error', async () => {
+      expect.assertions(2)
+      // Actual is password123
+      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password12345', newPassword: 'password'})
+      expect(response.statusCode).toBe(401)
+      expect(response.body).toEqual({'error': 'Old password does not match. Please try again'})
+    })
+
+    test('changing password properly returns success', async () => {
+      expect.assertions(3)
+      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'password'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'status': 'success'})
+      const user = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password'})
+      expect(user.body).toHaveProperty('token')
+    })
+  })
+
+  describe('editing user particulars', () => {
+    const incompleteUserDetails = {
+      'profile': {
+        'name': 'Mr. Cristian Bartell',
+        'gender': 'M',
+        'nric': 'S925556F',
+        'nationality': 'singaporean',
+        'dob': '2004-03-09T16:00:00.000Z',
+        'address': '486 Schmitt Drive',
+        'postalCode': 623411,
+        'handphone': 84720133,
+        'homephone': 60437898,
+        'schoolClass': 'Sec 3-4',
+        'schoolLevel': 'UPStars Secondary'
+      },
+      'father': {
+        'name': 'Sam Kong',
+        'email': 'samkong@upstars.com',
+        'occupation': 'Manager'
+      },
+      'mother': {
+        'name': 'Yahui  Geng',
+        'occupation': 'Poultry cutter',
+        'email': 'yahuigeng@upstars.com'
+      },
+      'misc': {
+        'hobbies': [
+          'Running. Studying'
+        ],
+        'careerGoal': 'Economist',
+        'formalEducation': [
+          {
+            'dateFrom': '2014-12-31T16:00:00.000Z',
+            'dateTo': '2015-12-30T16:00:00.000Z',
+            'school': 'Upstars Secondary',
+            'highestLevel': 'Sec 4'
+          }
+        ],
+        'coursesSeminar': [
+          {
+            'year': '2016-01-01T00:00:00.000Z',
+            'courseAndObjective': 'Upstars Institute'
+          }
+        ],
+        'achievements': [
+          {
+            'dateFrom': '2018-09-06T13:43:33.359Z',
+            'dateTo': '2018-09-06T13:43:33.359Z',
+            'organisation': 'Upstars',
+            'description': 'Great performance award'
+          }
+        ],
+        'cca': [
+          {
+            'dateFrom': '2015-01-01T16:00:00.000Z',
+            'dateTo': '2015-12-30T16:00:00.000Z',
+            'organisation': 'Upstars',
+            'rolePosition': 'Volunteer'
+          }
+        ],
+        'cip': [
+          {
+            'dateFrom': '2015-01-31T16:00:00.000Z',
+            'dateTo': '2018-09-06T13:45:56.027Z',
+            'organisation': 'Upstars',
+            'rolePosition': 'Volunteer'
+          }
+        ],
+        'workInternExp': [
+          {
+            'dateFrom': '2015-01-01T16:00:00.000Z',
+            'dateTo': '2018-09-06T13:46:12.164Z',
+            'organisation': 'Upstars',
+            'rolePosition': 'Volunteer'
+          }
+        ],
+        'competence': [
+          {
+            'languages': [
+              'English, Chinese'
+            ],
+            'subjects': [
+              'Math, Science, English, Chinese'
+            ],
+            'interests': [
+              'Everything'
+            ]
+          }
+        ]
+      },
+      'preferredTimeSlot': [
+        'Tuesday 7-9.30pm',
+        'Wednesday 7-9.30pm'
+      ],
+      'exitDate': '2018-12-27T16:00:00.000Z'
+    }
+
+    test('editing without userID throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/users').set('x-access-token', lowPrivUserToken)
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a userId'})
+    })
+
+    test('non-admin editing others account throws error', async () => {
+      expect.assertions(2)
+      // UserId belongs to testuser@upstars.com
+      const response = await app.post('/users').set('x-access-token', lowPrivUserToken).send({
+        ...incompleteUserDetails,
+        userId: '5b912ba72b9ec042a58f88a4'})
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+    })
+
+    test('non-admin editing own account returns success', async () => {
+      expect.assertions(3)
+      const response = await app.post('/users').set('x-access-token', lowPrivUserToken).send({
+        ...incompleteUserDetails,
+        userId: '5b9255700333773af993ae9c'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'success': true})
+      const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', lowPrivUserToken)
+      // Instead of Class 3-3
+      expect(userData.body).toHaveProperty('user.profile.schoolClass', 'Sec 3-4')
+    })
+
+    test('admin editing other account returns success', async () => {
+      expect.assertions(3)
+      const response = await app.post('/users').set('x-access-token', userToken).send({
+        ...incompleteUserDetails,
+        userId: '5b9255700333773af993ae9c',
+        admin: {
+          'interviewDate': '2018-09-06T16:00:00.000Z',
+          'interviewNotes': 'Great person with strong ambition',
+          'adminNotes': 'Would become a great tutor. Classification: Tutor',
+          'commencementDate': '2018-09-06T16:00:00.000Z'
+        }
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'success': true})
+      const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
+      expect(userData.body.user.admin).toEqual({
+        'interviewDate': '2018-09-06T16:00:00.000Z',
+        'interviewNotes': 'Great person with strong ambition',
+        'adminNotes': 'Would become a great tutor. Classification: Tutor',
+        'commencementDate': '2018-09-06T16:00:00.000Z'
+      })
+    })
+  })
+
+  describe('deleting users from class', () => {
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/users/class')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('no classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/users/class').send({userIds: []})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('Bad classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/users/class').send({userIds: [], classId: '123'})
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+    })
+
+    test('correct classId and empty userId succeed', async () => {
+      expect.assertions(4)
+      const response = await app.delete('/users/class').send({userIds: [], classId: '5b97b8f2adfb2e018c64d372'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('class.students', ['5b936ce7defc1a592d677008'])
+      expect(response.body).toHaveProperty('class.users', [
+        '5b9255700333773af993ae9c',
+        '5b912ba72b9ec042a58f88a4'
+      ])
+      expect(response.body).toHaveProperty('users.nModified', 0)
+    })
+
+    test('correct classId and userId succeed', async () => {
+      expect.assertions(6)
+      // We need to check with the respective users if their class list is also updated
+      const response = await app.delete('/users/class').send({
+        userIds: ['5b9255700333773af993ae9c', '5b912ba72b9ec042a58f88a4'],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('class.students', ['5b936ce7defc1a592d677008'])
+      expect(response.body).toHaveProperty('class.users', [])
+      expect(response.body).toHaveProperty('users.nModified', 2)
+      const adminUser = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
+      const normalUser = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
+      expect(adminUser.body).toHaveProperty('user.classes', [])
+      expect(normalUser.body).toHaveProperty('user.classes', [])
+    })
+  })
+
+  describe('adding users to class', () => {
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/users/class')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('no classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/users/class').send({userIds: []})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('Bad classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/users/class').send({userIds: [], classId: '123'})
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+    })
+
+    test('correct classId returns success', async () => {
+      expect.assertions(4)
+      const response = await app.post('/users/class').send({
+        userIds: [],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('class.students', ['5b936ce7defc1a592d677008'])
+      expect(response.body).toHaveProperty('class.users', [])
+      expect(response.body).toHaveProperty('users.nModified', 0)
+    })
+
+    test('correct classId and userIds returns success', async () => {
+      expect.assertions(6)
+      const response = await app.post('/users/class').send({
+        userIds: ['5b9255700333773af993ae9c', '5b912ba72b9ec042a58f88a4'],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('class.students', ['5b936ce7defc1a592d677008'])
+      expect(response.body).toHaveProperty('class.users', [
+        '5b9255700333773af993ae9c',
+        '5b912ba72b9ec042a58f88a4'
+      ])
+      expect(response.body).toHaveProperty('users.nModified', 2)
+      const adminUser = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
+      const normalUser = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
+      expect(adminUser.body).toHaveProperty('user.classes', [
+        {
+          'status': 'Active',
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        }
+      ])
+      expect(normalUser.body).toHaveProperty('user.classes', [
+        {
+          'status': 'Active',
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        }
+      ])
+    })
+  })
+
+  describe('deleting their own account', () => {
+    test('deleting without userId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/users')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a userId and ensure input is correct'})
+    })
+
+    test('non-admin deleting other accounts throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/users')
+        .set('x-access-token', lowPrivUserToken)
+        .send({userId: '5b912ba72b9ec042a58f88a4'
+        })
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+    })
+
+    test('admin deleting non-existent account throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/users')
+        .set('x-access-token', userToken)
+        .send({userId: '5b912ba72b9ec042a58f8888'
+        })
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'The user you requested to delete does not exist.'})
+    })
+
+    test('non-admin deleting own account succeed', async () => {
+      expect.assertions(4)
+      const response = await app.delete('/users')
+        .set('x-access-token', lowPrivUserToken)
+        .send({userId: '5b9255700333773af993ae9c'
+        })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'status': 'success'})
+      const user = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
+      // Also make sure class has the user list updated
+      const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
+      expect(user.body).toHaveProperty('user.status', 'Deleted')
+      expect(classData.body.class.users).toEqual([
+        {
+          'profile': {
+            'name': 'Wuying  Kong'
+          },
+          '_id': '5b912ba72b9ec042a58f88a4'
+        }
+      ])
     })
   })
 })

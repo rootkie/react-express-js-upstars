@@ -57,9 +57,9 @@ module.exports.getUser = async (req, res, next) => {
     // The first check on top is to make sure the user has permission to view the profile of that ID at all
     // This next check is to ensure that a non-admin viewing his personal profile won't get to edit / view admin matters
     if (approved.privilege === false) {
-      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -profile.dob -profile.nationality -commencementDate -email')
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -commencementDate -email -resetPasswordToken')
     } else {
-      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -profile.dob -profile.nationality -commencementDate -email')
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -commencementDate -email -resetPasswordToken')
     }
     if (!user) {
       throw ({
@@ -108,13 +108,17 @@ module.exports.editUserParticulars = async (req, res, next) => {
       })
     }
 
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot', 'admin']
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
 
     // Go through list
     for (let checkChanged of list) {
       if (req.body[checkChanged]) {
         edited[checkChanged] = await req.body[checkChanged]
       }
+    }
+
+    if (approved.privilege === true) {
+      edited.admin = await req.body.admin
     }
 
     // Update user based on the new values
