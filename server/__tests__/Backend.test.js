@@ -1555,3 +1555,600 @@ describe('testing user side APIs', () => {
     })
   })
 })
+
+describe('testing student side APIs', () => {
+  const studentBasicData = {
+    'profile': {
+      'name': 'Laa Huu Min',
+      'icNumber': 'T0240435J',
+      'dob': '2002-04-18T16:00:00.000Z',
+      'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+      // 'gender': 'F',
+      'nationality': 'Singaporean',
+      'classLevel': 'Secondary 4',
+      'schoolName': 'Upstars Secondary'
+    },
+    'father': {
+      'name': 'Lai Ming Yuan',
+      'icNumber': 'S7571632Z',
+      'nationality': 'citizen',
+      'contactNumber': '94623272',
+      'email': 'laimingyuan@upstars.com',
+      'occupation': 'Teacher',
+      'income': '4000'
+    },
+    'mother': {
+      'name': 'Jin Rui Tong',
+      'icNumber': 'S7904993Z',
+      'nationality': 'pr',
+      'contactNumber': '84722333',
+      'email': 'jinruitong@upstars.com',
+      'occupation': 'Housewife',
+      'income': '0'
+    },
+    'otherFamily': [
+      {
+        'name': 'Lai Ruu Meng',
+        'relationship': 'Brother',
+        'age': '12'
+      }
+    ],
+    'misc': {
+      'fas': [
+        'FSC'
+      ],
+      'fsc': 'Singapore FSC',
+      'tuition': [
+        'Private'
+      ],
+      'academicInfo': [
+        {
+          'year': '2018',
+          'term': '1',
+          'english': '78',
+          'math': '76',
+          'motherTongue': '78',
+          'science': '76',
+          'overall': '77'
+        },
+        {
+          'year': '2018',
+          'term': '2',
+          'english': '65',
+          'math': '66',
+          'motherTongue': '65',
+          'science': '66',
+          'overall': '66'
+        },
+        {
+          'year': '2018',
+          'term': '3',
+          'english': '61',
+          'math': '63',
+          'motherTongue': '63',
+          'science': '61',
+          'overall': '62'
+        }
+      ]
+    }
+    // 'captchaCode': '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
+  }
+  describe('get all active students', () => {
+    test('everyone should retrieve all students profile', async () => {
+      const students = [
+        {
+          'profile': {
+            'name': 'Lingxin  Long',
+            'icNumber': 'T0299228D',
+            'dob': '2002-09-04T16:00:00.000Z',
+            'gender': 'F'
+          },
+          '_id': '5b936ce7defc1a592d677008'
+        },
+        {
+          'profile': {
+            'name': 'Yi Jia Yi',
+            'icNumber': 'T0416861A',
+            'dob': '2004-03-01T16:00:00.000Z',
+            'gender': 'F'
+          },
+          '_id': '5b9674ef22deaf1ee1aa4dc1'
+        }
+      ]
+      expect.assertions(2)
+      const response = await app.get('/students')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({students})
+    })
+  })
+
+  describe('get all students who are not active', () => {
+    test('API should be working', async () => {
+      expect.assertions(2)
+      const students = [
+        {
+          'profile': {
+            'name': 'Student Suspended',
+            'icNumber': 'T02994428D',
+            'dob': '2002-09-04T16:00:00.000Z',
+            'gender': 'F'
+          },
+          'status': 'Suspended',
+          '_id': '5b94e4ca97a4b26f4dbaf26e'
+        }
+      ]
+      const response = await app.get('/otherStudents')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({students})
+    })
+  })
+
+  describe('get individual student', () => {
+    test('bad studentId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/students/123')
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+    })
+
+    test('non-existent studentId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/students/5b936ce7defc1a592d677121')
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'Student does not exist. Please try again'})
+    })
+
+    test('correct studentId returns all values', async () => {
+      expect.assertions(10)
+      const response = await app.get('/students/5b936ce7defc1a592d677008')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('student.profile')
+      expect(response.body).toHaveProperty('student.father')
+      expect(response.body).toHaveProperty('student.mother')
+      expect(response.body).toHaveProperty('student.misc')
+      expect(response.body).toHaveProperty('student.admin')
+      expect(response.body).toHaveProperty('student.classes')
+      expect(response.body).toHaveProperty('student.status', 'Active')
+      expect(response.body).toHaveProperty('student._id', '5b936ce7defc1a592d677008')
+      expect(response.body).toHaveProperty('student.otherFamily')
+    })
+  })
+
+  describe('get active students responsively by name', () => {
+    test('API match responsively', async () => {
+      expect.assertions(2)
+      const response = await app.get('/studentsResponsive/abc')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'studentsFiltered': []})
+    })
+
+    test('API match case insensitive', async () => {
+      expect.assertions(2)
+      const response = await app.get('/studentsResponsive/NGx')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'studentsFiltered': [{'profile': {'name': 'Lingxin  Long'}, '_id': '5b936ce7defc1a592d677008'}]})
+    })
+  })
+
+  describe('get non-active students responsively by name', () => {
+    test('API match responsively', async () => {
+      expect.assertions(2)
+      const response = await app.get('/otherStudentsResponsive/abc')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'studentsFiltered': []})
+    })
+
+    test('API match case insensitive', async () => {
+      expect.assertions(2)
+      const response = await app.get('/otherStudentsResponsive/uDEn')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'studentsFiltered': [{'profile': {'name': 'Student Suspended'}, '_id': '5b94e4ca97a4b26f4dbaf26e'}]})
+    })
+  })
+
+  describe('adding student API', () => {
+    test('wrong captcha code throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData,
+        captchaCode: '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
+      })
+      expect(response.statusCode).toBe(401)
+      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
+    })
+
+    test('bypass captcha, missing fields throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+    })
+
+    test('bypass captcha, registration success', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData,
+        'profile': {
+          'name': 'Laa Huu Min',
+          'icNumber': 'T0240435J',
+          'dob': '2002-04-18T16:00:00.000Z',
+          'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+          'gender': 'F',
+          'nationality': 'Singaporean',
+          'classLevel': 'Secondary 4',
+          'schoolName': 'Upstars Secondary'
+        }
+      })
+      expect(response.statusCode).toBe(201)
+      expect(response.body).toEqual({'newStudent': expect.any(String)})
+    })
+
+    test('duplicate account throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData,
+        'profile': {
+          'name': 'Laa Huu Min',
+          'icNumber': 'T0240435J',
+          'dob': '2002-04-18T16:00:00.000Z',
+          'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+          'gender': 'F',
+          'nationality': 'Singaporean',
+          'classLevel': 'Secondary 4',
+          'schoolName': 'Upstars Secondary'
+        }
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
+    })
+  })
+
+  describe('admin API to add student', () => {
+    const admin = {
+      interviewDate: '2018-10-30T14:20:20+00:00',
+      interviewNotes: 'Great Student',
+      commencementDate: '2018-11-03T00:00:00+00:00',
+      adminNotes: 'Will make him a model student',
+      exitDate: '',
+      exitReason: ''
+    }
+    test('wrong captcha code throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/admin/students').send({
+        ...studentBasicData,
+        admin,
+        captchaCode: '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
+      })
+      expect(response.statusCode).toBe(401)
+      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
+    })
+
+    test('bypass captcha, missing fields throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData,
+        admin
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+    })
+
+    test('bypass captcha, registration success', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData,
+        admin,
+        'profile': {
+          'name': 'Lao Shu Min',
+          'icNumber': 'T0188435J',
+          'dob': '2001-11-10T16:00:00.000Z',
+          'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
+          'gender': 'F',
+          'nationality': 'Singaporean',
+          'classLevel': 'Sec 5-1',
+          'schoolName': 'Upstars Sec'
+        }
+      })
+      expect(response.statusCode).toBe(201)
+      expect(response.body).toEqual({'newStudent': expect.any(String)})
+    })
+
+    test('duplicate account throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students').send({
+        ...studentBasicData,
+        'profile': {
+          'name': 'Lao Shu Min',
+          'icNumber': 'T0188435J',
+          'dob': '2001-11-10T16:00:00.000Z',
+          'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
+          'gender': 'F',
+          'nationality': 'Singaporean',
+          'classLevel': 'Sec 5-1',
+          'schoolName': 'Upstars Sec'
+        }
+      })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
+    })
+  })
+
+  describe('deleting students from a class', () => {
+    test('deleting without any fields', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/students/class')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('deleting without classId', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/students/class').send({'studentIds': ['5b936ce7defc1a592d677008']})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('wrong classId returns null', async () => {
+      expect.assertions(3)
+      const response = await app.delete('/students/class').send({
+        'studentIds': ['5b936ce7defc1a592d677008'],
+        classId: '5b97b8f2adfb2e018c64d123'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('class', null)
+      expect(response.body.studentsRemoved).toHaveProperty('nModified', 1)
+    })
+
+    test('wrong studentId returns none modified', async () => {
+      expect.assertions(3)
+      const response = await app.delete('/students/class').send({
+        'studentIds': ['5b936ce7defc1a592d677123'],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body.class).toHaveProperty('students', ['5b936ce7defc1a592d677008'])
+      expect(response.body.studentsRemoved).toHaveProperty('nModified', 0)
+    })
+
+    test('correct parameters returns success', async () => {
+      expect.assertions(4)
+      const response = await app.delete('/students/class').send({
+        'studentIds': ['5b936ce7defc1a592d677008'],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body.class).toHaveProperty('students', [])
+      expect(response.body.studentsRemoved).toHaveProperty('nModified', 1)
+
+      const studentData = await app.get('/students/5b936ce7defc1a592d677008')
+      expect(studentData.body.student).toHaveProperty('classes', [])
+    })
+  })
+
+  describe('adding students to a class', () => {
+    test('adding without any fields', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students/class')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('adding without classId', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students/class').send({'studentIds': ['5b936ce7defc1a592d677008']})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('wrong classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/students/class').send({
+        'studentIds': ['5b936ce7defc1a592d677008'],
+        classId: '5b97b8f2adfb2e018c64d123'
+      })
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'Please provide an existing class'})
+    })
+
+    test('wrong studentId returns none modified', async () => {
+      expect.assertions(3)
+      const response = await app.post('/students/class').send({
+        'studentIds': ['5b936ce7defc1a592d677123'],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body.class).toHaveProperty('students', ['5b936ce7defc1a592d677123'])
+      expect(response.body.students).toHaveProperty('nModified', 0)
+    })
+
+    test('correct parameters returns success', async () => {
+      expect.assertions(4)
+      const response = await app.post('/students/class').send({
+        'studentIds': ['5b936ce7defc1a592d677008'],
+        classId: '5b97b8f2adfb2e018c64d372'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body.class).toHaveProperty('students', ['5b936ce7defc1a592d677123', '5b936ce7defc1a592d677008'])
+      expect(response.body.students).toHaveProperty('nModified', 1)
+
+      const studentData = await app.get('/students/5b936ce7defc1a592d677008')
+      expect(studentData.body.student.classes).toEqual([
+        {
+          'status': 'Active',
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        }
+      ])
+    })
+  })
+
+  describe('deleting a student by changing status to deleted', () => {
+    test('deleting student without any fields', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/students')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
+    })
+
+    test('deleting without proper studentId', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/students').send({studentId: []})
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+    })
+
+    test('deleting with wrong studentId', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677001']})
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+    })
+
+    test('deleting with malfunctioned studentId', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d6770021']})
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+    })
+
+    test('deleting mass number of studentId returns success', async () => {
+      expect.assertions()
+      const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677008', '5b9674ef22deaf1ee1aa4dc1']})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'success': true})
+
+      // Check if the respective classes have already removed them from the class list
+      const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
+      expect(classData.body.class).toHaveProperty('students', [])
+    })
+  })
+
+  describe('edit a student data', () => {
+    let editStudentData = {
+      'profile': {
+        'name': 'Lingxin  Long',
+        'icNumber': 'T0299228D',
+        'dob': '2002-09-04T16:00:00.000Z',
+        'address': 'Upstars Road 123',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Primary 6',
+        // Edited the school name
+        'schoolName': 'Upstars Primary School'
+      },
+      'father': {
+        'name': 'Long Lai La',
+        'icNumber': 'S7382913D',
+        'nationality': 'citizen',
+        'email': 'longlaila@upstars.com',
+        'occupation': 'Manager',
+        'contactNumber': 91231234,
+        'income': 5000
+      },
+      'mother': {
+        'name': 'Foo Fa Hui',
+        'icNumber': 'S7892838F',
+        'nationality': 'citizen',
+        'email': 'foofahui@upstars.com',
+        'occupation': 'Housewife',
+        'contactNumber': 81231234,
+        'income': 0
+      },
+      'misc': {
+        'fas': [
+          'MOE'
+        ],
+        'tuition': [
+          'CDAC',
+          'Mendaki',
+          'Private'
+        ],
+        'academicInfo': [
+          {
+            'year': 2018,
+            'term': 3,
+            'english': 60,
+            'math': 60,
+            'motherTongue': 60,
+            'science': 60,
+            'overall': 60
+          },
+          {
+            'year': 2018,
+            'term': 2,
+            'english': 65,
+            'math': 65,
+            'motherTongue': 65,
+            'science': 65,
+            'overall': 65
+          }
+        ],
+        'fsc': 'ABC FSC'
+      },
+      'admin': {
+        'interviewNotes': 'Good!',
+        'adminNotes': 'Good!',
+        'interviewDate': '2018-09-08T16:00:00.000Z',
+        'commencementDate': '2018-09-08T16:00:00.000Z',
+        'exitDate': null
+      },
+      'status': 'Active',
+      // 'studentId': '5b936ce7defc1a592d677008',
+      'otherFamily': [
+        {
+          'name': 'Long Lai Le',
+          'relationship': 'Brother',
+          'age': 12
+        }
+      ]
+    }
+    test('missing body fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.put('/students')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId'})
+    })
+
+    test('missing studentId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.put('/students').send(editStudentData)
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId'})
+    })
+
+    test('non existent student throws error', async () => {
+      expect.assertions(2)
+      const response = await app.put('/students').send({
+        ...editStudentData,
+        studentId: '5bd853dfc5cdec7794960abc'
+      })
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'The student you requested to edit does not exist.'})
+    })
+
+    test('proper edit changes classes and students', async () => {
+      expect.assertions(4)
+      const response = await app.put('/students').send({
+        ...editStudentData,
+        studentId: '5b936ce7defc1a592d677008'
+      })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'success': true})
+
+      // Check class and personal details
+      const userData = await app.get('/students/5b936ce7defc1a592d677008')
+      expect(userData.body.student.profile).toHaveProperty('schoolName', 'Upstars Primary School')
+      const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
+      expect(classData.body.class.students).toEqual([
+        {
+          'profile': {
+            'name': 'Lingxin  Long'
+          },
+          '_id': '5b936ce7defc1a592d677008'
+        }
+      ])
+    })
+  })
+})

@@ -254,7 +254,12 @@ module.exports.addStudentsToClass = async (req, res, next) => {
       new: true,
       runValidators: true
     })
-
+    if (!classes) {
+      throw ({
+        status: 404,
+        error: 'Please provide an existing class'
+      })
+    }
     // For every student in the array, add the class added into their class field
     const students = await Student.update({
       _id: {
