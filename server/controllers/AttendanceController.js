@@ -58,7 +58,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
       runValidators: true
     })
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       attendanceId: newAttendance._id
     })
@@ -192,7 +192,7 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
     // Init what factors to search in user later
     user['users.list'] = mongoose.Types.ObjectId(userId)
     user.date = {
-      $gte: new Date(moment(dateStart).format('YYYY-MM-DD')),
+      $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
 
@@ -276,7 +276,7 @@ module.exports.getAttendanceByStudent = async (req, res, next) => {
     // Init what factors to search in student later
     student['students.list'] = mongoose.Types.ObjectId(studentId)
     student.date = {
-      $gte: new Date(moment(dateStart).format('YYYY-MM-DD')),
+      $gte: new Date(moment(dateStart).utc().format('YYYY-MM-DD')),
       $lte: new Date(moment(dateEnd).format('YYYY-MM-DD'))
     }
 
@@ -455,11 +455,11 @@ module.exports.getClassAttendanceSummary = async (req, res, next) => {
       class: classId
     }).select('date type').sort('date')
 
-    // This part considers the student, the bottom one is for users respectively, both serving the same purpose.
+    // This part concerns the student, the bottom one is for users respectively, both serving the same purpose.
     // First we take the raw attendance from aggregate above and map it to get each individual student's compiled attendance.
     // Then we map all the dates retrieved from attendanceDates above. We cross check with all the dates that that student has attendance
     // records with and return its array position (variable pos). Using this info, we return the status of that student for that date.
-    // This way, every student will get back an array like this: "details": [ 1, 1, 1, 0, - , -]
+    // This way, every student will get back an array like this example: "details": [ 1, 1, 1, 0, - , -]
     // This means that there are a total of 6 classes held by the class. The student attended the first 3, absent on 4th and removed from class
     // before the 5th class. As such, all student / users have the same array length that corrosponds directly to the dates.
     let compiledStudentAttendance = foundAttendanceforStudent.map(student => {
@@ -519,7 +519,7 @@ module.exports.getAllClassAttendanceSummary = async (req, res, next) => {
         'type': 'Class'
       })
       // In this case, we only leave the students and class fields so that the unwind process can take place faster especially with
-      // a large database of 200+ people. Since the unwind process has a max limit of 100MB of RAM unless otherwise.
+      // a large database of 200+ people. Since the unwind process has a max limit of 100MB of RAM unless otherwise coded.
       .project({
         'students': 1,
         'class': 1
@@ -576,7 +576,7 @@ module.exports.getAllClassAttendanceSummary = async (req, res, next) => {
 
     // This process generates the JSON in the way the most ideal for displaying on the front-end.
     // The classes array is mapped, using the classID, search for the ID from the previously created students (studentsPart) and users (usersPart) array.
-    let editedActiveClass = await activeClasses.map((classInfo) => {
+    let editedActiveClass = await activeClasses.map(classInfo => {
       let details = {}
       // This simply means findIndex(function(x) { return x === classInfo._id }) but we use .equals() since we are comparing an object instead of string.
       let userPos = usersPart.findIndex(info => info._id.equals(classInfo._id))

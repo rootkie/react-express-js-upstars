@@ -2152,3 +2152,839 @@ describe('testing student side APIs', () => {
     })
   })
 })
+
+describe('testing attendance related APIs', () => {
+  let lowPrivUserToken
+  beforeAll(async (done) => {
+    const response = await app.post('/login').send({email: 'testuser4@upstars.com', password: 'password'})
+    lowPrivUserToken = response.body.token
+    done()
+  })
+  describe('get a single attendance by ID', () => {
+    test('bad attendance ID throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/123')
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+    })
+
+    test('non existent ID returns empty', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/5b990733cef48424966ed012')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'attendances': null})
+    })
+
+    test('working ID returns details', async () => {
+      expect.assertions(8)
+      const response = await app.get('/attendance/5b990733cef48424966ed0eb')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances).toHaveProperty('_id', '5b990733cef48424966ed0eb')
+      expect(response.body.attendances).toHaveProperty('class.className', 'Upstars Class A 2018')
+      expect(response.body.attendances).toHaveProperty('date', '2018-09-18T16:00:00.000Z')
+      expect(response.body.attendances).toHaveProperty('type', 'Class')
+      expect(response.body.attendances).toHaveProperty('hours', 4)
+      expect(response.body.attendances.students).toEqual([
+        {
+          'list': {
+            'profile': {
+              'name': 'Lingxin  Long'
+            },
+            '_id': '5b936ce7defc1a592d677008'
+          },
+          'status': 0
+        }
+      ])
+      expect(response.body.attendances.users).toEqual([
+        {
+          'list': {
+            'profile': {
+              'name': 'Wuying  Kong'
+            },
+            '_id': '5b912ba72b9ec042a58f88a4'
+          },
+          'status': 1
+        }
+      ])
+    })
+  })
+
+  describe('get attendance filter by class and date', () => {
+    const foundAttendances = [
+      {
+        '_id': '5b99073ecef48424966ed0f9',
+        'class': {
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        },
+        'date': '2018-09-25T16:00:00.000Z',
+        'type': 'Class',
+        'hours': 2,
+        '__v': 0
+      },
+      {
+        '_id': '5b990733cef48424966ed0eb',
+        'class': {
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        },
+        'date': '2018-09-18T16:00:00.000Z',
+        'type': 'Class',
+        'hours': 4,
+        '__v': 0
+      },
+      {
+        '_id': '5b990729cef48424966ed0de',
+        'class': {
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        },
+        'date': '2018-09-13T16:00:00.000Z',
+        'type': 'Cancelled',
+        'hours': 0,
+        '__v': 0
+      },
+      {
+        '_id': '5b99071dcef48424966ed0d1',
+        'class': {
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        },
+        'date': '2018-09-12T16:00:00.000Z',
+        'type': 'PHoliday',
+        'hours': 0,
+        '__v': 0
+      },
+      {
+        '_id': '5b99066acef48424966ed081',
+        'class': {
+          '_id': '5b97b8f2adfb2e018c64d372',
+          'className': 'Upstars Class A 2018'
+        },
+        'date': '2018-09-11T16:00:00.000Z',
+        'type': 'Class',
+        'hours': 3,
+        '__v': 0
+      }
+    ]
+    test('no filters returns all attendance', async () => {
+      expect.assertions(3)
+      const response = await app.get('/attendance/class/dateStart/dateEnd')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.status).toBe('success')
+      expect(response.body.foundAttendances).toEqual(foundAttendances)
+    })
+
+    test('class filter returns attendance from that class', async () => {
+      expect.assertions(3)
+      const response = await app.get('/attendance/class/5b97b8f2adfb2e018c64d372/dateStart/dateEnd')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.status).toBe('success')
+      expect(response.body.foundAttendances).toEqual(foundAttendances)
+    })
+
+    test('bad class ID returns null', async () => {
+      expect.assertions(3)
+      const response = await app.get('/attendance/class/5b97b8f2adfb2e018c64d312/dateStart/dateEnd')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.status).toBe('success')
+      expect(response.body.foundAttendances).toEqual([])
+    })
+
+    test('filter returns attendance from non existenent class returns empty', async () => {
+      expect.assertions(3)
+      const response = await app.get('/attendance/class/5b97bdc5058d1e1e64d232f3/dateStart/dateEnd')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.status).toBe('success')
+      expect(response.body.foundAttendances).toEqual([])
+    })
+
+    test('filter returns attendance after date', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/class/dateStart/20180916/dateEnd')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.foundAttendances).toEqual([
+        {
+          '_id': '5b99073ecef48424966ed0f9',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-25T16:00:00.000Z',
+          'type': 'Class',
+          'hours': 2,
+          '__v': 0
+        },
+        {
+          '_id': '5b990733cef48424966ed0eb',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-18T16:00:00.000Z',
+          'type': 'Class',
+          'hours': 4,
+          '__v': 0
+        }
+      ])
+    })
+
+    test('filter returns attendance before date', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/class/dateStart/dateEnd/20180916')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.foundAttendances).toEqual([
+        {
+          '_id': '5b990729cef48424966ed0de',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-13T16:00:00.000Z',
+          'type': 'Cancelled',
+          'hours': 0,
+          '__v': 0
+        },
+        {
+          '_id': '5b99071dcef48424966ed0d1',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-12T16:00:00.000Z',
+          'type': 'PHoliday',
+          'hours': 0,
+          '__v': 0
+        },
+        {
+          '_id': '5b99066acef48424966ed081',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-11T16:00:00.000Z',
+          'type': 'Class',
+          'hours': 3,
+          '__v': 0
+        }
+      ])
+    })
+
+    test('filter returns attendance for both dates date', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/class/dateStart/20180919/dateEnd/20180926')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.foundAttendances).toEqual([
+        {
+          '_id': '5b99073ecef48424966ed0f9',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-25T16:00:00.000Z',
+          'type': 'Class',
+          'hours': 2,
+          '__v': 0
+        },
+        {
+          '_id': '5b990733cef48424966ed0eb',
+          'class': {
+            '_id': '5b97b8f2adfb2e018c64d372',
+            'className': 'Upstars Class A 2018'
+          },
+          'date': '2018-09-18T16:00:00.000Z',
+          'type': 'Class',
+          'hours': 4,
+          '__v': 0
+        }
+      ])
+    })
+
+    test('bad date filter returns attendance empty', async () => {
+      expect.assertions(3)
+      const response = await app.get('/attendance/class/dateStart/20180926/dateEnd/20180919')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.status).toBe('success')
+      expect(response.body.foundAttendances).toEqual([])
+    })
+  })
+
+  describe('get attendance by userId', () => {
+    test('all fields are working', async () => {
+      expect.assertions(6)
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180901-20180926')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances[0]).toHaveProperty('total', 5)
+      expect(response.body.attendances[0]).toHaveProperty('attended', 2)
+      expect(response.body.attendances[0]).toHaveProperty('totalHours', 7)
+      expect(response.body.attendances[0]).toHaveProperty('percentage', 0.4)
+      expect(response.body.attendances[0].userAttendance).toEqual([
+        {
+          'status': 0,
+          'date': '2018-09-25T16:00:00.000Z',
+          'duration': 2,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 1,
+          'date': '2018-09-18T16:00:00.000Z',
+          'duration': 4,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-13T16:00:00.000Z',
+          'duration': 0,
+          'classType': 'Cancelled',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-12T16:00:00.000Z',
+          'duration': 0,
+          'classType': 'PHoliday',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 1,
+          'date': '2018-09-11T16:00:00.000Z',
+          'duration': 3,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        }
+      ])
+    })
+
+    test('all fields working 2', async () => {
+      expect.assertions(6)
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances[0]).toHaveProperty('total', 2)
+      expect(response.body.attendances[0]).toHaveProperty('attended', 1)
+      expect(response.body.attendances[0]).toHaveProperty('totalHours', 4)
+      expect(response.body.attendances[0]).toHaveProperty('percentage', 0.5)
+      expect(response.body.attendances[0].userAttendance).toEqual([
+        {
+          'status': 0,
+          'date': '2018-09-25T16:00:00.000Z',
+          'duration': 2,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 1,
+          'date': '2018-09-18T16:00:00.000Z',
+          'duration': 4,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        }
+      ])
+    })
+
+    test('adding class as a perimeter', async () => {
+      expect.assertions(6)
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926/5b97b8f2adfb2e018c64d372')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances[0]).toHaveProperty('total', 2)
+      expect(response.body.attendances[0]).toHaveProperty('attended', 1)
+      expect(response.body.attendances[0]).toHaveProperty('totalHours', 4)
+      expect(response.body.attendances[0]).toHaveProperty('percentage', 0.5)
+      expect(response.body.attendances[0].userAttendance).toEqual([
+        {
+          'status': 0,
+          'date': '2018-09-25T16:00:00.000Z',
+          'duration': 2,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 1,
+          'date': '2018-09-18T16:00:00.000Z',
+          'duration': 4,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        }
+      ])
+    })
+
+    test('non existent class returns empty', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926/5b97bdc5058d1e1e64d232f3')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances).toEqual([])
+    })
+  })
+
+  describe('get attendance by student ID', () => {
+    test('all fields are working', async () => {
+      expect.assertions(6)
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180901-20180926')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances[0]).toHaveProperty('total', 5)
+      expect(response.body.attendances[0]).toHaveProperty('attended', 2)
+      expect(response.body.attendances[0]).toHaveProperty('totalHours', 5)
+      expect(response.body.attendances[0]).toHaveProperty('percentage', 0.4)
+      expect(response.body.attendances[0].studentAttendance).toEqual([
+        {
+          'status': 1,
+          'date': '2018-09-25T16:00:00.000Z',
+          'duration': 2,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-18T16:00:00.000Z',
+          'duration': 4,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-13T16:00:00.000Z',
+          'duration': 0,
+          'classType': 'Cancelled',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-12T16:00:00.000Z',
+          'duration': 0,
+          'classType': 'PHoliday',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 1,
+          'date': '2018-09-11T16:00:00.000Z',
+          'duration': 3,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        }
+      ])
+    })
+
+    test('all fields working 2', async () => {
+      expect.assertions(6)
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances[0]).toHaveProperty('total', 2)
+      expect(response.body.attendances[0]).toHaveProperty('attended', 1)
+      expect(response.body.attendances[0]).toHaveProperty('totalHours', 2)
+      expect(response.body.attendances[0]).toHaveProperty('percentage', 0.5)
+      expect(response.body.attendances[0].studentAttendance).toEqual([
+        {
+          'status': 1,
+          'date': '2018-09-25T16:00:00.000Z',
+          'duration': 2,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-18T16:00:00.000Z',
+          'duration': 4,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        }
+      ])
+    })
+
+    test('adding class as a perimeter', async () => {
+      expect.assertions(6)
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926/5b97b8f2adfb2e018c64d372')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances[0]).toHaveProperty('total', 2)
+      expect(response.body.attendances[0]).toHaveProperty('attended', 1)
+      expect(response.body.attendances[0]).toHaveProperty('totalHours', 2)
+      expect(response.body.attendances[0]).toHaveProperty('percentage', 0.5)
+      expect(response.body.attendances[0].studentAttendance).toEqual([
+        {
+          'status': 1,
+          'date': '2018-09-25T16:00:00.000Z',
+          'duration': 2,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        },
+        {
+          'status': 0,
+          'date': '2018-09-18T16:00:00.000Z',
+          'duration': 4,
+          'classType': 'Class',
+          'className': [
+            'Upstars Class A 2018'
+          ],
+          'classId': [
+            '5b97b8f2adfb2e018c64d372'
+          ]
+        }
+      ])
+    })
+
+    test('non existent class returns empty', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926/5b97bdc5058d1e1e64d232f3')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.attendances).toEqual([])
+    })
+  })
+
+  describe('get a single class attendance summary', () => {
+    test('bad classId throws errors', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/5b97b8f2adfb2e018c64d3/summary')
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+    })
+
+    test('non-existent class returns empty array', async () => {
+      expect.assertions(7)
+      const response = await app.get('/attendance/5b97b8f2adfb2e018c64d377/summary')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('studentNumber', 0)
+      expect(response.body).toHaveProperty('tutorNumber', 0)
+      expect(response.body).toHaveProperty('studentTutorRatio', 0)
+      expect(response.body.compiledStudentAttendance).toEqual([])
+      expect(response.body.compiledUserAttendance).toEqual([])
+      expect(response.body.attendanceDates).toEqual([])
+    })
+
+    test('active class returns sorted information', async () => {
+      expect.assertions(7)
+      const response = await app.get('/attendance/5b97b8f2adfb2e018c64d372/summary')
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toHaveProperty('studentNumber', 1)
+      expect(response.body).toHaveProperty('tutorNumber', 1)
+      expect(response.body).toHaveProperty('studentTutorRatio', 1)
+      expect(response.body.compiledStudentAttendance).toEqual([
+        {
+          'studentID': '5b936ce7defc1a592d677008',
+          'studentName': [
+            'Lingxin  Long'
+          ],
+          'total': 3,
+          'attended': 2,
+          'percentage': 0.6666666666666666,
+          'details': [
+            1,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ])
+      expect(response.body.compiledUserAttendance).toEqual([
+        {
+          'userID': '5b912ba72b9ec042a58f88a4',
+          'userName': [
+            'Wuying  Kong'
+          ],
+          'total': 3,
+          'attended': 2,
+          'percentage': 0.6666666666666666,
+          'details': [
+            1,
+            0,
+            0,
+            1,
+            0
+          ]
+        }
+      ])
+      expect(response.body.attendanceDates).toEqual([
+        {
+          '_id': '5b99066acef48424966ed081',
+          'date': '2018-09-11T16:00:00.000Z',
+          'type': 'Class'
+        },
+        {
+          '_id': '5b99071dcef48424966ed0d1',
+          'date': '2018-09-12T16:00:00.000Z',
+          'type': 'PHoliday'
+        },
+        {
+          '_id': '5b990729cef48424966ed0de',
+          'date': '2018-09-13T16:00:00.000Z',
+          'type': 'Cancelled'
+        },
+        {
+          '_id': '5b990733cef48424966ed0eb',
+          'date': '2018-09-18T16:00:00.000Z',
+          'type': 'Class'
+        },
+        {
+          '_id': '5b99073ecef48424966ed0f9',
+          'date': '2018-09-25T16:00:00.000Z',
+          'type': 'Class'
+        }
+      ])
+    })
+  })
+
+  describe('get summary for all classes', () => {
+    test('no fields needed', async () => {
+      // This example shows that classes that are just created and does not have any single attendance record
+      // Will simply be ignored in the summary. That is a limitation of this function.
+      expect.assertions()
+      const response = await app.get('/attendance/summary/all')
+      expect(response.statusCode).toBe(200)
+      expect(response.body.editedActiveClass).toEqual([
+        {
+          'userNumber': 1,
+          'studentNumber': 2,
+          'className': 'Upstars Class A 2018',
+          'dayAndTime': 'Wednesday, 3pm',
+          'id': '5b97b8f2adfb2e018c64d372',
+          'STRatio': 2,
+          'usersPercentage': 0.6666666666666666,
+          'studentsPercentage': 0.6666666666666666
+        },
+        {
+          'userNumber': 0,
+          'studentNumber': 0,
+          'className': 'Upstars Class B',
+          'dayAndTime': 'Friday 9PM',
+          'id': expect.any(String),
+          'STRatio': 0,
+          'usersPercentage': 0,
+          'studentsPercentage': 0
+        }
+      ])
+    })
+  })
+
+  describe('add attendance for a class', () => {
+    const attendanceDetails = {
+      // 'date': '2018-12-17T16:00:00.000Z',
+      'hours': 5,
+      // 'classId': '5b97b8f2adfb2e018c64d372',
+      'users': [{
+        'list': '5b912ba72b9ec042a58f88a4',
+        'status': 1
+      }],
+      'students': [{
+        'list': '5b936ce7defc1a592d677008',
+        'status': 1
+      }],
+      'type': 'Class'
+    }
+
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/attendance').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('no classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/attendance')
+        .set('x-access-token', userToken)
+        .send(attendanceDetails)
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
+    })
+
+    test('missing fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/attendance')
+        .set('x-access-token', userToken)
+        .send({
+          ...attendanceDetails,
+          classId: '5b97b8f2adfb2e018c64d372'
+        })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+    })
+
+    test('no privilege throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/attendance')
+        .set('x-access-token', lowPrivUserToken)
+        .send({
+          ...attendanceDetails,
+          classId: '5b97b8f2adfb2e018c64d372'
+        })
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+    })
+
+    test('all fields present returns success', async () => {
+      expect.assertions(3)
+      const response = await app.post('/attendance')
+        .set('x-access-token', userToken)
+        .send({
+          ...attendanceDetails,
+          classId: '5b97b8f2adfb2e018c64d372',
+          date: '2018-10-17T16:00:00.000Z'
+        })
+      expect(response.statusCode).toBe(201)
+      expect(response.body.success).toBe(true)
+      expect(response.body).toHaveProperty('attendanceId')
+    })
+
+    test('editing an attendance works', async () => {
+      expect.assertions(4)
+      const response = await app.post('/attendance')
+        .set('x-access-token', userToken)
+        .send({
+          ...attendanceDetails,
+          hours: 2,
+          classId: '5b97b8f2adfb2e018c64d372',
+          date: '2018-10-17T16:00:00.000Z'
+        })
+      expect(response.statusCode).toBe(201)
+      expect(response.body.success).toBe(true)
+      expect(response.body).toHaveProperty('attendanceId')
+
+      const attendanceData = await app.get(`/attendance/${response.body.attendanceId}`)
+      expect(attendanceData.body.attendances.hours).toBe(2)
+    })
+  })
+
+  describe('deleting attendance', () => {
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/attendance').set('x-access-token', userToken)
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+    })
+
+    test('no attendanceId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/attendance')
+        .set('x-access-token', userToken)
+        .send({
+          classId: '5b97b8f2adfb2e018c64d372'
+        })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+    })
+
+    test('no classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/attendance')
+        .set('x-access-token', userToken)
+        .send({
+          // classId: '5b97b8f2adfb2e018c64d372'
+          attendanceId: '5b990729cef48424966ed0de'
+        })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+    })
+
+    test('insufficient privilege throws error', async () => {
+      expect.assertions(2)
+      const response = await app.delete('/attendance')
+        .set('x-access-token', lowPrivUserToken)
+        .send({
+          classId: '5b97b8f2adfb2e018c64d372',
+          attendanceId: '5b990729cef48424966ed0de'
+        })
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+    })
+
+    test('proper token returns success', async () => {
+      expect.assertions(3)
+      const response = await app.delete('/attendance')
+        .set('x-access-token', userToken)
+        .send({
+          classId: '5b97b8f2adfb2e018c64d372',
+          attendanceId: '5b990729cef48424966ed0de'
+        })
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({'success': true})
+
+      const attendanceData = await app.get('/attendance/5b990729cef48424966ed0de')
+      expect(attendanceData.body.attendances).toBe(null)
+    })
+  })
+})
