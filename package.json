@@ -1,6 +1,6 @@
 {
   "name": "react-express-js-upstars",
-  "version": "0.3.0beta",
+  "version": "0.3.1beta",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -44,11 +44,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "jest",
+    "unit": "jest -c __tests__/jest.config.unit.js",
+    "integration": "jest -c __tests__/jest.config.integration.js",
     "eject": "react-scripts eject"
-  },
-  "jest": {
-    "verbose": true,
-    "setupTestFrameworkScriptFile": "<rootDir>/src/config.js"
   }
 }

@@ -1,7 +1,7 @@
 const User = require('../models/user')
-const External = require('../models/external-personnel')
 const util = require('../util')
 const Class = require('../models/class')
+const nodemailer = require('nodemailer')
 
 // All
 module.exports.getAllUsers = async (req, res, next) => {
@@ -57,9 +57,9 @@ module.exports.getUser = async (req, res, next) => {
     // The first check on top is to make sure the user has permission to view the profile of that ID at all
     // This next check is to ensure that a non-admin viewing his personal profile won't get to edit / view admin matters
     if (approved.privilege === false) {
-      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -profile.dob -profile.nationality -commencementDate -email')
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -commencementDate -email -resetPasswordToken')
     } else {
-      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -profile.dob -profile.nationality -commencementDate -email')
+      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -commencementDate -email -resetPasswordToken')
     }
     if (!user) {
       throw ({
@@ -108,13 +108,17 @@ module.exports.editUserParticulars = async (req, res, next) => {
       })
     }
 
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot', 'admin']
+    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
 
     // Go through list
     for (let checkChanged of list) {
       if (req.body[checkChanged]) {
         edited[checkChanged] = await req.body[checkChanged]
       }
+    }
+
+    if (approved.privilege === true) {
+      edited.admin = await req.body.admin
     }
 
     // Update user based on the new values
@@ -255,8 +259,53 @@ module.exports.changePassword = async (req, res, next) => {
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
-      return res.status(200).json({
-        status: 'success'
+      let mailConfig
+      if (process.env.NODE_ENV === 'production') {
+      // all emails delivered to real address
+        mailConfig = {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            type: 'OAuth2',
+            user: process.env.USER,
+            clientId: process.env.CLIENT_ID,
+            clientSecret: process.env.CLIENT_SECRET,
+            refreshToken: process.env.REFRESH_TOKEN
+          }
+        }
+      } else {
+      // all emails caught by nodemailer in house ethereal.email service
+      // Login with the user and pass in https://ethereal.email/login to view the message
+        mailConfig = {
+          host: 'smtp.ethereal.email',
+          port: 587,
+          auth: {
+            user: process.env.TEST_EMAIL,
+            pass: process.env.TEST_EMAIL_PW
+          }
+        }
+      }
+      let transporter = nodemailer.createTransport(mailConfig)
+      let message = {
+        from: process.env.USER,
+        to: user.email,
+        subject: 'UPStars Password Changed',
+        html: `<p>What's up ${user.profile.name}!</p><p>You've asked us to update your password and we want to let you know that it has been
+          updated. You can use your new password to log in now!</p><p>If you didn't ask us to change it, please let us know.</p><p>Thanks,<br />The UPStars Team</p>`
+      }
+      transporter.sendMail(message, (error, info) => {
+        if (error) {
+          console.log(error)
+          throw ({
+            status: 400,
+            error: 'An error has occurred. That is all we know.'
+          })
+        }
+        console.log('Message sent')
+        return res.status(200).json({
+          status: 'success'
+        })
       })
     }
   } catch (err) {
@@ -266,21 +315,6 @@ module.exports.changePassword = async (req, res, next) => {
         error: err.error
       })
     } else next(err)
-  }
-}
-
-// Admin / SA
-// Note that external is the only party we conduct a permanent delete
-module.exports.getExternal = async (req, res, next) => {
-  try {
-    // Find the external and get className
-    const user = await External.findById(req.params.id).populate('classId', 'className')
-    return res.status(200).json({
-      user
-    })
-  } catch (err) {
-    console.log(err)
-    next(err)
   }
 }
 

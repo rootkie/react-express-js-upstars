@@ -1,15 +1,5 @@
 'use strict'
 const jwt = require('jsonwebtoken')
-const config = require('./config/constConfig')
-
-module.exports.formatDate = yyyymmdd => {
-  yyyymmdd = yyyymmdd.constructor === String ? yyyymmdd : JSON.stringify(yyyymmdd)
-  let year = yyyymmdd.substring(0, 4)
-  let month = yyyymmdd.substring(4, 6)
-  let day = yyyymmdd.substring(6, 8)
-  let dateString = year + '-' + month + '-' + day
-  return new Date(dateString)
-}
 
 module.exports.generateToken = req => {
   const {
@@ -26,7 +16,7 @@ module.exports.generateToken = req => {
     classes,
     name: profile.name
   }
-  return jwt.sign(user, config.secret, {
+  return jwt.sign(user, process.env.SECRET, {
     expiresIn: '30m'
   })
 }
@@ -35,8 +25,8 @@ module.exports.generateRefresh = _id => {
   const user = {
     _id
   }
-  return jwt.sign(user, config.secret, {
-    expiresIn: '1000d'
+  return jwt.sign(user, process.env.SECRET_REFRESH, {
+    expiresIn: '90d'
   })
 }
 

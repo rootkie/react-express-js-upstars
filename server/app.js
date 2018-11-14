@@ -6,37 +6,39 @@ const helmet = require('helmet')
 const path = require('path')
 const app = express()
 const mongoose = require('mongoose')
-const config = require('./config/constConfig')
 
 // ===================Initialization ==============================
 
+// New in 0.3.1-beta to replace constConfig.js
+require('dotenv').config()
 // Setup logger
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
 // Serve static assets
 app.use(express.static(path.resolve(__dirname, '..', 'build')))
 // Enable Cross Origin Resource Sharing
 app.use(function (req, res, next) {
-  // res.header('Access-Control-Allow-Origin', '*') // Security vulnerability for CSRF. Need to change to to the Domain name
-  res.header('Access-Control-Allow-Origin', 'https://test.rootkiddie.com')
+  res.header('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN)
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
-  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials, x-access-token')
-  res.header('Access-Control-Expose-Headers', 'x-access-token')
-  res.header('Access-Control-Allow-Credentials', 'true')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, x-access-token')
   next()
 })
 
 // Connecting to database
 mongoose.Promise = global.Promise
-mongoose.connect(config.database)
+if (process.env.NODE_ENV === 'production') {
+  mongoose.connect(process.env.DATABASE)
+} else {
+  mongoose.connect(process.env.DATABASE_DEBUG)
+}
 /* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
-  mongoose.openUri(config.database, {
+  mongoose.openUri(process.env.DATABASE, {
   useMongoClient: true,
   ssl: true
   })
   */
 mongoose.set('debug', true)
 
-app.use(helmet()) // Only enabled during production
+app.use(helmet())
 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {

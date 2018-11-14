@@ -47,9 +47,9 @@ const AttendanceSchema = new Schema({
     required: true
   }
 },
-  {
-    timestamps: true,
-    minimize: false
-  })
+{
+  timestamps: true,
+  minimize: false
+})
 
 module.exports = mongoose.model('Attendance', AttendanceSchema)

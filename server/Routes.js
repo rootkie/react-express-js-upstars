@@ -15,6 +15,7 @@ module.exports = app => {
   app.get('/api/class/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), classControl.getClassById)
   app.post('/api/class', hasRole(['SuperAdmin']), classControl.addClass)
   app.put('/api/class', hasRole(['SuperAdmin']), classControl.editClass)
+  // More like stopping a class
   app.delete('/api/class', hasRole(['SuperAdmin']), classControl.deleteClass)
 
   // Students
@@ -39,11 +40,6 @@ module.exports = app => {
   app.post('/api/users/class', hasRole(['Admin', 'SuperAdmin']), classControl.addUsersToClass)
   app.delete('/api/users', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), userControl.deleteUser) //  Personal account deletion
   app.delete('/api/users/class', hasRole(['Admin', 'SuperAdmin']), classControl.deleteUsersFromClass)
-
-  // External
-  app.get('/api/external/:id', hasRole(['Admin', 'SuperAdmin']), userControl.getExternal)
-  app.post('/api/external/class', hasRole(['SuperAdmin']), classControl.assignExternalPersonnelToClass)
-  app.delete('/api/external/class', hasRole(['SuperAdmin']), classControl.removeExternalPersonnelFromClass)
 
   // Attendance controls
   app.get('/api/attendance/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), attendanceControl.getAttendanceById)

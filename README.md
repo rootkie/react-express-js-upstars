@@ -27,11 +27,16 @@ Type these commands into the shell:
 |/server            |Express.js stuff |
 |/server/controllers|All the application backend logic |
 |/server/models     |Schemas and database operations |
+|/dump              |A mongoDB template pre-created for testing purposes |
 
 
 ## Resources
 
 All API documentation is in the [wiki](https://github.com/rootkie/react-express-js-upstars/wiki).
+
+## Testing
+
+All tests could be ran manually by following the steps in the [testing guide](https://github.com/rootkie/react-express-js-upstars/wiki/Testing-Guide)
 
 ## Troubleshoot
 ```

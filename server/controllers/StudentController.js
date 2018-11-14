@@ -2,17 +2,20 @@ const axios = require('axios')
 const querystring = require('querystring')
 const Student = require('../models/student')
 const Class = require('../models/class')
-const config = require('../config/constConfig')
 
 // Add student function works for everyone
 module.exports.addStudent = (req, res, next) => {
   let edited = {}
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
+  let {captchaCode} = req.body
 
+  // Special addition for development, may remove during deployment / production
+  let secret = process.env.CAPTCHA_SECRET
+  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: config.captchaSecret,
-      response: req.body.captchaCode
+      secret,
+      response: captchaCode
     }))
     .then(async response => {
       console.log(response.data)
@@ -64,10 +67,14 @@ module.exports.addStudent = (req, res, next) => {
 module.exports.adminAddStudent = (req, res, next) => {
   let edited = {}
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
+  let {captchaCode} = req.body
+  // Special addition for development, may remove during deployment / production
+  let secret = process.env.CAPTCHA_SECRET
+  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: config.captchaSecret,
-      response: req.body.captchaCode
+      secret,
+      response: captchaCode
     }))
     .then(async response => {
       console.log(response.data)

@@ -15,8 +15,10 @@ import FourZeroThree from './Error/403'
 import FourZeroFour from './Error/404'
 import FiveHundred from './Error/500'
 
-axios.defaults.baseURL = 'https://test.rootkiddie.com/api/'
-// axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
+// For development
+axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
+// For production
+// axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
@@ -95,6 +97,10 @@ class MainCtrl extends Component {
                 if (response.data.status === true) {
                   window.localStorage.setItem('token', response.data.token)
                   axios.defaults.headers.common['x-access-token'] = response.data.token
+                } else {
+                  window.localStorage.removeItem('token')
+                  window.localStorage.removeItem('refreshToken')
+                  this.setState({ isLoggedIn: false })
                 }
               })
               .catch(err => {

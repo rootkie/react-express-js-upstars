@@ -1,7 +1,6 @@
 const User = require('../models/user')
 const util = require('../util.js')
 const { generateToken, generateRefresh } = util
-const config = require('../config/constConfig')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
 const nodemailer = require('nodemailer')
@@ -34,8 +33,8 @@ module.exports.login = async (req, res, next) => {
     // Checks if user exists
     if (!user) {
       throw ({
-        status: 404,
-        error: 'Wrong email. Please sign up for an account here'
+        status: 401,
+        error: 'Wrong email or password'
       })
     }
     // compare password
@@ -90,13 +89,14 @@ module.exports.changePassword = async (req, res, next) => {
     // Search for any users whose accounts are not yet deleted
     const user = await User.findOne({
       email,
+      'profile.nric': nric,
       status: {
         $ne: 'Deleted'
       }
     })
 
     // Checks if user exists
-    if (!user || user.profile.nric !== nric) {
+    if (!user) {
       throw ({
         status: 403,
         error: 'Wrong email or nric. Please try again'
@@ -109,9 +109,12 @@ module.exports.changePassword = async (req, res, next) => {
       })
     }
     // Fix plaintext security flaw: using encoded jwt to send as link for password change.
-    // Currently using the same password to sign jwt. Expires in 30 minutes
+    // Random 15 bit char saved in DB and part of token of auth
     let userName = user.profile.name
     let random = crypto.randomBytes(15).toString('hex')
+    if (process.env.NODE_ENV === 'development') {
+      random = process.env.RESET_PASSWORD_RANDOM
+    }
     user.resetPasswordToken = random
     user.save()
 
@@ -120,24 +123,40 @@ module.exports.changePassword = async (req, res, next) => {
       _id: user._id,
       random
     }
-    let encodedString = jwt.sign(objectToEncode, config.secret, {
+    let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
       expiresIn: 60 * 30
     })
-    let transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        type: 'OAuth2',
-        user: config.user,
-        clientId: config.clientId,
-        clientSecret: config.clientSecret,
-        refreshToken: config.refreshToken
+    let mailConfig
+    if (process.env.NODE_ENV === 'production') {
+      // all emails delivered to real address
+      mailConfig = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
+        }
       }
-    })
-    let link = `${config.domainName}/resetpassword/${encodedString}`
+    } else {
+      // all emails caught by nodemailer in house ethereal.email service
+      // Login with the user and pass in https://ethereal.email/login to view the message
+      mailConfig = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: process.env.TEST_EMAIL,
+          pass: process.env.TEST_EMAIL_PW
+        }
+      }
+    }
+    let transporter = nodemailer.createTransport(mailConfig)
+    let link = `${process.env.DOMAIN_NAME}/resetpassword/${encodedString}`
     let message = {
-      from: config.user,
+      from: process.env.USER,
       to: email,
       subject: 'Password Request for UPStars',
       html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b> If you have no idea what this message is about, please ignore it.</b></p>
@@ -151,7 +170,7 @@ module.exports.changePassword = async (req, res, next) => {
           error: 'An error has occurred. That is all we know.'
         })
       }
-      console.log('Message sent: ' + info.response)
+      console.log('Message sent')
       res.status(200).json({
         success: true
       })
@@ -177,9 +196,14 @@ module.exports.resetPassword = async (req, res, next) => {
         status: 400,
         error: 'There\'s something wrong, please try again.'
       })
+    } else if (password.length < 6) {
+      throw ({
+        status: 400,
+        error: 'Please provide a password that is at least 6 characters long.'
+      })
     }
 
-    jwt.verify(token, config.secret, async (err, decoded) => {
+    jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
       try {
         if (err) {
           throw ({
@@ -191,12 +215,13 @@ module.exports.resetPassword = async (req, res, next) => {
         const user = await User.findOne({
           email,
           _id,
+          resetPasswordToken: random,
           status: {
             $ne: 'Deleted'
           }
         })
         // Checks if user exists
-        if (!user || user.resetPasswordToken !== random) {
+        if (!user) {
           throw ({
             status: 403,
             error: 'Something went wrong, please try again.'
@@ -245,21 +270,22 @@ module.exports.register = async (req, res, next) => {
     preferredTimeSlot,
     captchaCode
   } = req.body
-
+  // Special addition for development, may remove during deployment / production
+  let secret = process.env.CAPTCHA_SECRET
+  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
   axios.post('https://www.google.com/recaptcha/api/siteverify',
     querystring.stringify({
-      secret: config.captchaSecret,
+      secret,
       response: captchaCode
     }))
     .then(async response => {
-      console.log(response.data)
-      if (response.data.success === false) {
-        throw ({
-          status: 401,
-          error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-        })
-      }
       try {
+        if (response.data.success === false) {
+          throw ({
+            status: 401,
+            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+          })
+        }
         // Return error if no password or email provided
         if (!email || !password || password.length < 6) {
           throw ({
@@ -298,13 +324,6 @@ module.exports.register = async (req, res, next) => {
           existingUser.status = 'PermaDeleted'
           await existingUser.save()
         }
-        // Case 4: User have not confirmed email
-        if (existingUser && existingUser.status === 'Unverified') {
-          throw {
-            status: 401,
-            error: 'Your account has yet to be verified. Please confirm your email address by checking your email inbox'
-          }
-        }
 
         // Create a new user after validating and making sure everything is right
         const user = new User({
@@ -337,22 +356,38 @@ module.exports.register = async (req, res, next) => {
         let objectToEncode = {
           _id: userObject._id
         }
-        let encodedString = jwt.sign(objectToEncode, config.secret)
-        let transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
-          auth: {
-            type: 'OAuth2',
-            user: config.user,
-            clientId: config.clientId,
-            clientSecret: config.clientSecret,
-            refreshToken: config.refreshToken
+        let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL)
+        let mailConfig
+        if (process.env.NODE_ENV === 'production') {
+          // all emails delivered to real address
+          mailConfig = {
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+              type: 'OAuth2',
+              user: process.env.USER,
+              clientId: process.env.CLIENT_ID,
+              clientSecret: process.env.CLIENT_SECRET,
+              refreshToken: process.env.REFRESH_TOKEN
+            }
           }
-        })
-        let link = `${config.domainName}/verifyaccount/${encodedString}`
+        } else {
+          // all emails caught by nodemailer in house ethereal.email service
+          // Login with the user and pass in https://ethereal.email/login to view the message
+          mailConfig = {
+            host: 'smtp.ethereal.email',
+            port: 587,
+            auth: {
+              user: process.env.TEST_EMAIL,
+              pass: process.env.TEST_EMAIL_PW
+            }
+          }
+        }
+        let transporter = nodemailer.createTransport(mailConfig)
+        let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
         let message = {
-          from: config.user,
+          from: process.env.USER,
           to: email,
           subject: 'Thanks for joining UPStars!',
           html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
@@ -367,13 +402,10 @@ module.exports.register = async (req, res, next) => {
               error: 'An error has occurred. That is all we know.'
             })
           }
-          console.log('Message sent: ' + info.response)
-          res.status(200).json({
-            success: true
+          console.log('Message sent')
+          res.status(201).json({
+            success: 'true'
           })
-        })
-        res.status(201).json({
-          success: 'true'
         })
       } catch (err) {
         console.log(err)
@@ -388,7 +420,7 @@ module.exports.register = async (req, res, next) => {
 
 module.exports.verifyEmail = async (req, res, next) => {
   let {token} = req.body
-  jwt.verify(token, config.secret, async (err, decoded) => {
+  jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
     try {
       if (err) {
         throw ({
@@ -443,7 +475,7 @@ module.exports.check = async (req, res, next) => {
     if (!token) return result(false, null, null, null, null)
 
     // Start token verification for expiry and integrity
-    jwt.verify(token, config.secret, (err, decoded) => {
+    jwt.verify(token, process.env.SECRET, (err, decoded) => {
       // Default error handling for expired jwt token: notify front end to call for refresh api
       // Similarly, expiring tokens will also be send in for a refresh to enjoy uninterrupted usage
       if (err) {
@@ -478,7 +510,7 @@ module.exports.refreshToken = async (req, res, next) => {
     }
     // The response comes with both status (true or false) and the token (null if status is false)
     if (!refreshToken) return result(false, null)
-    jwt.verify(refreshToken, config.secret, async (err, decoded) => {
+    jwt.verify(refreshToken, process.env.SECRET_REFRESH, async (err, decoded) => {
       if (err) {
         return result(false, null)
       } else {
