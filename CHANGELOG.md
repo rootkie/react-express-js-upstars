@@ -1,4 +1,47 @@
 # Change Log
+## [v0.3.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.3.1-beta) (November 11, 2018, 4.03pm)
+- [Security] Standardised wrong email / password response
+- [Feature] Utilised .env for security considerations, allowing different configurations on different machines
+- [Added] Files for integration and unit testing
+- [Trial] Cut down on CORS headers to reduce bandwidth
+- [Added] AuthController.test.js
+- [Added] More .env variables for security purposes
+- [Changed] MongoDB dumps for new test data
+- [Fixed] Debug mode now toggles properly
+- [Security] Changed expiry of refresh tokens from 1000d to 90d
+- [Added] Emails sent to user after initating a successful passwd change
+- [Security] Prompt user to login despite having correct access token but wrong refresh tokens
+- [Temp] Added Captcha bypass in debug mode under certain circumstances
+- [Fixed] Clean up some unncessary code in AuthController
+- [Added] Tests for check, register, login, verifyEmail and refresh
+- [Added] More process.env variables
+- [Changed] Debug to NODE_ENV
+- [Fixed] Better coding practices
+- [Tests] More testing features
+- [Added] Routed emails to ethereal.mail for development
+- [Removed] Multiple tests files for backend and combined
+- [Reason] Integration testing requires serial tests only possible in a single file
+- [Removed] BASE_URL in .env because front-end don't support env
+- [Bump] Version no. to v0.3.1-beta
+- [Clean] Jest config file to check wildcard tests
+- [Removed] Only allow headers to hold x-access-token
+- [Removed] External-personnel is officially deprecated
+- [Changed] README.md for tests
+- [Added] Class API e2e testing
+- [Improved] Better comments for reference
+- [Added] User based API e2e tests
+- [Fixed] UserController getUser returns more params for front-end
+- [Fixed] Security allowing only admin to edit admin fields
+- [Added] e2e test for student related api
+- [Fixed] Errors response if adding students to non existent class
+- [Trial] Captcha bypass in development mode for student
+- [Added] E2E tests on attendance APIs
+- [Changed] Status code returns for creation
+- [Fixed] Dates timing due to regional difference affects comparison
+- [Changed] Better attendance code documentation
+- [Remove] Unimportant functions like dateFormat
+- [Added] Native command line function to reset DB back after the whole backend test
+
 ## [v0.3.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.3.0-beta) (September 15, 2018, 3.15pm)
 - [Fixed] Image stretching that only occur in chrome (logo)
 - [Added] New dependencies for production

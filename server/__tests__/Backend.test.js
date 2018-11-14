@@ -2,6 +2,7 @@ const request = require('supertest')
 const app = request('http://localhost:3000/api')
 const util = require('../util.js')
 const { generateRefresh } = util
+const { exec } = require('child_process')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -12,6 +13,11 @@ beforeAll(async () => {
   const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
   userToken = response.body.token
 })
+
+afterAll((done) => {
+  exec('mongorestore --drop -d tests dump/tests')
+  done()
+}, 7000)
 
 describe('testing auth related API mostly without token', () => {
   describe('login testing', () => {
