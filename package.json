@@ -42,7 +42,7 @@
     "supertest": "^3.2.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
     "unit": "jest -c __tests__/jest.config.unit.js",
     "integration": "jest -c __tests__/jest.config.integration.js",
