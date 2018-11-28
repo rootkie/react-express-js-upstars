@@ -1,5 +1,5 @@
 # Setting up build dependencies
-FROM node:8 as build-deps
+FROM node:8.13-alpine as build-deps
 
 ADD package.json /package.json
 ADD package-lock.json /package-lock.json
@@ -12,10 +12,10 @@ RUN npm install
 
 # Building frontend
 WORKDIR /app
-ADD src/ /app/src
-ADD package.json /app/package.json
-ADD package-lock.json /app/package-lock.json
-ADD public/ /app/public
+COPY src/ /app/src
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+COPY public/ /app/public
 
 RUN npm run build
 
