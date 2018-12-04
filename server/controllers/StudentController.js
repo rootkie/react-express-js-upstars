@@ -145,19 +145,19 @@ module.exports.editStudentById = async (req, res, next) => {
       }
     }
 
-    // Update student based on studentId
-    const editedStudent = await Student.findByIdAndUpdate(req.body.studentId, edited, {
-      new: true,
-      setDefaultsOnInsert: true,
-      runValidators: true,
-      runSettersOnQuery: true
-    })
-    if (!editedStudent) {
+    const studentFound = await Student.findById(req.body.studentId)
+    studentFound.set(edited)
+    console.log(edited)
+    const editedStudent = await studentFound.save()
+    console.log(editedStudent)
+
+    if (!studentFound) {
       throw ({
         status: 404,
         error: 'The student you requested to edit does not exist.'
       })
     }
+
     // Repopulate the classes if the status of the student is changed back to Active
     if (editedStudent.status === 'Active' && editedStudent.classes) {
       await Class.update({

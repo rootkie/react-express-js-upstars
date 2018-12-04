@@ -121,22 +121,24 @@ module.exports.editUserParticulars = async (req, res, next) => {
       edited.admin = await req.body.admin
     }
 
-    // Update user based on the new values
-    const user = await User.findByIdAndUpdate(userId, edited, {
-      new: true,
-      runValidators: true,
-      runSettersOnQuery: true
-    }).select('-password -updatedAt -createdAt -admin')
-
+    let user = await User.findById(userId)
+    user.set(edited)
+    const rawUser = await user.save()
+    // ES7 Spread for Object destructuring
+    let { password, createdAt, updatedAt, __v, resetPasswordToken, email, ...editedUser } = rawUser.toObject()
+    if (approved.privilege !== true) {
+      delete editedUser.admin
+    }
     if (!user) {
       throw ({
         status: 404,
         error: 'The user you requested to edit does not exist.'
       })
     }
-
+    // console.log(editedUser)
     return res.status(200).json({
-      success: true
+      success: true,
+      user: editedUser
     })
   } catch (err) {
     console.log(err)
