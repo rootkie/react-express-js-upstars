@@ -15,6 +15,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
       students,
       type
     } = req.body
+    let newAttendance
 
     // Check if classId is provided
     if (!classId) {
@@ -48,16 +49,19 @@ module.exports.addEditAttendance = async (req, res, next) => {
       students,
       type
     }
-    // Find attendance based on class and date. If exist, update; else create a new one.
-    let newAttendance = await Attendance.findOneAndUpdate({
+
+    let attendanceFound = await Attendance.findOne({
       class: classId,
       date
-    }, attendance1, {
-      upsert: true,
-      new: true,
-      runValidators: true
     })
-
+    if (!attendanceFound) {
+      const unsavedAttendance = new Attendance(attendance1)
+      newAttendance = await unsavedAttendance.save()
+    }
+    else {
+      attendanceFound.set(attendance1)
+      newAttendance = await attendanceFound.save()
+    }
     res.status(201).json({
       success: true,
       attendanceId: newAttendance._id
