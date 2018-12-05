@@ -113,91 +113,113 @@ const UserSchema = new Schema({
 
     formalEducation: [{
       _id: false,
-      dateFrom: { // MMYYYY
-        type: Date
+      dateFrom: {
+        type: Date,
+        required: true
       },
       dateTo: {
-        type: Date
+        type: Date,
+        required: true
       },
       school: {
-        type: String
+        type: String,
+        required: true
       },
       highestLevel: {
-        type: String
+        type: String,
+        required: true
       }
     }],
 
     coursesSeminar: [{
       _id: false,
       year: { // YYYY only
-        type: Date
+        type: Date,
+        required: true
       },
       courseAndObjective: {
-        type: String
+        type: String,
+        required: true
       }
     }],
 
     achievements: [{
       _id: false,
       dateFrom: { // MMYYYY
-        type: Date
+        type: Date,
+        required: true
       },
       dateTo: {
-        type: Date
+        type: Date,
+        required: true
       },
       organisation: {
-        type: String
+        type: String,
+        required: true
       },
       description: {
-        type: String
+        type: String,
+        required: true
       }
     }],
 
     cca: [{
       _id: false,
       dateFrom: { // MMYYYY
-        type: Date
+        type: Date,
+        required: true
       },
       dateTo: {
-        type: Date
+        type: Date,
+        required: true
       },
       organisation: {
-        type: String
+        type: String,
+        required: true
       },
       rolePosition: {
-        type: String
+        type: String,
+        required: true
       }
     }],
 
     cip: [{
       _id: false,
       dateFrom: { // MMYYYY
-        type: Date
+        type: Date,
+        required: true
       },
       dateTo: {
-        type: Date
+        type: Date,
+        required: true
       },
       organisation: {
-        type: String
+        type: String,
+        required: true
       },
       rolePosition: {
-        type: String
+        type: String,
+        required: true
       }
     }],
 
     workInternExp: [{
       _id: false,
       dateFrom: { // MMYYYY
-        type: Date
+        type: Date,
+        required: true
       },
       dateTo: {
-        type: Date
+        type: Date,
+        required: true
       },
       organisation: {
-        type: String
+        type: String,
+        required: true
       },
       rolePosition: {
-        type: String
+        type: String,
+        required: true
       }
     }],
 
@@ -234,7 +256,8 @@ const UserSchema = new Schema({
   },
 
   preferredTimeSlot: [{
-    type: String
+    type: String,
+    required: true
   }],
 
   status: {
