@@ -63,7 +63,6 @@ module.exports.addEditAttendance = async (req, res, next) => {
       newAttendance = await attendanceFound.save()
     }
     res.status(201).json({
-      success: true,
       attendanceId: newAttendance._id
     })
   } catch (err) {
@@ -114,9 +113,7 @@ module.exports.deleteAttendance = async (req, res, next) => {
       }
     })
 
-    res.status(200).json({
-      success: true
-    })
+    res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -157,7 +154,6 @@ module.exports.getAttendance = async (req, res, next) => {
     const foundAttendances = await attendances.exec()
 
     res.status(200).json({
-      status: 'success',
       foundAttendances
     })
   } catch (err) {
@@ -254,7 +250,6 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
       }) // Final command to filter stuff to show
 
     res.status(200).json({
-      status: 'success',
       attendances
     })
   } catch (err) {
@@ -338,7 +333,6 @@ module.exports.getAttendanceByStudent = async (req, res, next) => {
       }) // Final command to filter stuff to show
 
     res.status(200).json({
-      status: 'success',
       attendances
     })
   } catch (err) {
@@ -501,7 +495,6 @@ module.exports.getClassAttendanceSummary = async (req, res, next) => {
     })
     // Returns necessary stuff like the dates and the corrosponding edited student and user particulars according to the docs.
     res.status(200).json({
-      status: 'success',
       studentNumber,
       tutorNumber,
       studentTutorRatio,

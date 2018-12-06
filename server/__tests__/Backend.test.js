@@ -14,10 +14,9 @@ beforeAll(async () => {
   userToken = response.body.token
 })
 
-afterAll((done) => {
+afterAll(() => {
   exec('mongorestore --drop -d tests dump/tests')
-  done()
-}, 7000)
+})
 
 describe('testing auth related API mostly without token', () => {
   describe('login testing', () => {
@@ -250,10 +249,9 @@ describe('testing auth related API mostly without token', () => {
       }
 
       test('registration working', async () => {
-        expect.assertions(2)
+        expect.assertions(1)
         const response = await app.post('/register').send(userData)
         expect(response.statusCode).toBe(201)
-        expect(response.body).toEqual({'success': 'true'})
       }, 8000)
 
       test('duplicate email', async () => {
@@ -312,14 +310,13 @@ describe('testing auth related API mostly without token', () => {
       // The test(s) to check if the new account is really created and old account randomised is to be done in
       // UserController.test.js under searching for user via ID
       test('Recreating new account for deleted users', async () => {
-        expect.assertions(2)
+        expect.assertions(1)
         const response = await app.post('/register').send({
           ...missingUserInfo,
           email: 'testuser6@upstars.com',
           password: 'password'
         })
         expect(response.statusCode).toBe(201)
-        expect(response.body).toEqual({'success': 'true'})
       }, 10000)
     })
   })
@@ -356,10 +353,9 @@ describe('testing auth related API mostly without token', () => {
     })
 
     test('verify email using a valid token', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const response = await app.post('/verifyEmail').send({token: encodedString})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
     })
   })
 
@@ -407,10 +403,9 @@ describe('testing auth related API mostly without token', () => {
     })
 
     test('proper requests returns success', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
     })
   })
 
@@ -457,10 +452,9 @@ describe('testing auth related API mostly without token', () => {
     })
 
     test('proper reset password returns success', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const response = await app.post('/resetpassword').send({password: 'password123', token})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
     })
   })
 })
@@ -550,10 +544,9 @@ describe('testing admin related APIs', async () => {
     })
 
     test('deleting current users', async () => {
-      expect.assertions(6)
+      expect.assertions(5)
       const response = await app.delete('/admin/user').send({userId: ['5b912ba72b9ec042a58f88a4']})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user.status).toBe('Deleted')
@@ -600,7 +593,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true, 'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
+      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')
@@ -630,7 +623,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin', 'Tutor']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true, 'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
+      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')
@@ -676,13 +669,12 @@ describe('testing class related APIs', async () => {
     })
 
     test('correct fields successfully add class', async () => {
-      expect.assertions(11)
+      expect.assertions(10)
       const response = await app.post('/class').send({
         ...classDetail,
         venue: 'Ulu Pandan Room 3'
       })
       expect(response.statusCode).toBe(201)
-      expect(response.body.success).toBe(true)
       expect(response.body.newClass).toHaveProperty('students', [])
       expect(response.body.newClass).toHaveProperty('users', [])
       expect(response.body.newClass).toHaveProperty('status', 'Active')
@@ -837,10 +829,9 @@ describe('testing class related APIs', async () => {
     })
 
     test('stopping a class using valid Ids returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.delete('/class').send({classId: ['5b97b8f2adfb2e018c64d372']})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class).toHaveProperty('status', 'Stopped')
     })
@@ -884,14 +875,13 @@ describe('testing class related APIs', async () => {
     })
 
     test('editing a class with correct ID returns success', async () => {
-      expect.assertions(5)
+      expect.assertions(4)
       const response = await app.put('/class').send({
         ...classDetail,
         classId: '5b97b8f2adfb2e018c64d372',
         status: 'Active'
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       // The 3 tests below only verify that these 3 fields are edited as intended
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class).toHaveProperty('status', 'Active')
@@ -1233,10 +1223,9 @@ describe('testing user side APIs', () => {
     })
 
     test('changing password properly returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'password'})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
       const user = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password'})
       expect(user.body).toHaveProperty('token')
     })
@@ -1357,19 +1346,18 @@ describe('testing user side APIs', () => {
     })
 
     test('non-admin editing own account returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/users').set('x-access-token', lowPrivUserToken).send({
         ...incompleteUserDetails,
         userId: '5b9255700333773af993ae9c'})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', lowPrivUserToken)
       // Instead of Class 3-3
       expect(userData.body).toHaveProperty('user.profile.schoolClass', 'Sec 3-4')
     })
 
     test('admin editing other account returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/users').set('x-access-token', userToken).send({
         ...incompleteUserDetails,
         userId: '5b9255700333773af993ae9c',
@@ -1381,7 +1369,6 @@ describe('testing user side APIs', () => {
         }
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
       expect(userData.body.user.admin).toEqual({
         'interviewDate': '2018-09-06T16:00:00.000Z',
@@ -1539,13 +1526,12 @@ describe('testing user side APIs', () => {
     })
 
     test('non-admin deleting own account succeed', async () => {
-      expect.assertions(4)
+      expect.assertions(3)
       const response = await app.delete('/users')
         .set('x-access-token', lowPrivUserToken)
         .send({userId: '5b9255700333773af993ae9c'
         })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
       const user = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
       // Also make sure class has the user list updated
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
@@ -2020,10 +2006,9 @@ describe('testing student side APIs', () => {
     })
 
     test('deleting mass number of studentId returns success', async () => {
-      expect.assertions()
+      expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677008', '5b9674ef22deaf1ee1aa4dc1']})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
 
       // Check if the respective classes have already removed them from the class list
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
@@ -2135,13 +2120,12 @@ describe('testing student side APIs', () => {
     })
 
     test('proper edit changes classes and students', async () => {
-      expect.assertions(4)
+      expect.assertions(3)
       const response = await app.put('/students').send({
         ...editStudentData,
         studentId: '5b936ce7defc1a592d677008'
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
 
       // Check class and personal details
       const userData = await app.get('/students/5b936ce7defc1a592d677008')
@@ -2274,34 +2258,30 @@ describe('testing attendance related APIs', () => {
       }
     ]
     test('no filters returns all attendance', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual(foundAttendances)
     })
 
     test('class filter returns attendance from that class', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/5b97b8f2adfb2e018c64d372/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual(foundAttendances)
     })
 
     test('bad class ID returns null', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/5b97b8f2adfb2e018c64d312/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual([])
     })
 
     test('filter returns attendance from non existenent class returns empty', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/5b97bdc5058d1e1e64d232f3/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual([])
     })
 
@@ -2407,10 +2387,9 @@ describe('testing attendance related APIs', () => {
     })
 
     test('bad date filter returns attendance empty', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/dateStart/20180926/dateEnd/20180919')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual([])
     })
   })
@@ -2903,7 +2882,7 @@ describe('testing attendance related APIs', () => {
     })
 
     test('all fields present returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/attendance')
         .set('x-access-token', userToken)
         .send({
@@ -2912,12 +2891,11 @@ describe('testing attendance related APIs', () => {
           date: '2018-10-17T16:00:00.000Z'
         })
       expect(response.statusCode).toBe(201)
-      expect(response.body.success).toBe(true)
       expect(response.body).toHaveProperty('attendanceId')
     })
 
     test('editing an attendance works', async () => {
-      expect.assertions(4)
+      expect.assertions(3)
       const response = await app.post('/attendance')
         .set('x-access-token', userToken)
         .send({
@@ -2927,7 +2905,6 @@ describe('testing attendance related APIs', () => {
           date: '2018-10-17T16:00:00.000Z'
         })
       expect(response.statusCode).toBe(201)
-      expect(response.body.success).toBe(true)
       expect(response.body).toHaveProperty('attendanceId')
 
       const attendanceData = await app.get(`/attendance/${response.body.attendanceId}`)
@@ -2979,7 +2956,7 @@ describe('testing attendance related APIs', () => {
     })
 
     test('proper token returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.delete('/attendance')
         .set('x-access-token', userToken)
         .send({
@@ -2987,7 +2964,6 @@ describe('testing attendance related APIs', () => {
           attendanceId: '5b990729cef48424966ed0de'
         })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
 
       const attendanceData = await app.get('/attendance/5b990729cef48424966ed0de')
       expect(attendanceData.body.attendances).toBe(null)

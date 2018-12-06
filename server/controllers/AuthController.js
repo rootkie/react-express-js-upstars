@@ -170,10 +170,7 @@ module.exports.changePassword = async (req, res, next) => {
           error: 'An error has occurred. That is all we know.'
         })
       }
-      console.log('Message sent')
-      res.status(200).json({
-        success: true
-      })
+      res.status(200).send()
     })
   } catch (err) {
     console.log(err)
@@ -237,9 +234,7 @@ module.exports.resetPassword = async (req, res, next) => {
         user.resetPasswordToken = ''
         const pwChanged = await user.save()
         if (pwChanged) {
-          return res.status(200).json({
-            status: 'success'
-          })
+          return res.status(200).send()
         }
       } catch (err) {
         console.log(err)
@@ -403,9 +398,7 @@ module.exports.register = async (req, res, next) => {
             })
           }
           console.log('Message sent')
-          res.status(201).json({
-            success: 'true'
-          })
+          res.status(201).send()
         })
       } catch (err) {
         console.log(err)
@@ -445,9 +438,7 @@ module.exports.verifyEmail = async (req, res, next) => {
       user.status = 'Pending'
       const newuser = await user.save()
       if (newuser) {
-        return res.status(200).json({
-          status: 'success'
-        })
+        return res.status(200).send()
       }
     } catch (err) {
       console.log(err)

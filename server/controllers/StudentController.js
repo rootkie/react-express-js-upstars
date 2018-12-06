@@ -145,18 +145,16 @@ module.exports.editStudentById = async (req, res, next) => {
       }
     }
 
-    const studentFound = await Student.findById(req.body.studentId)
-    studentFound.set(edited)
-    console.log(edited)
-    const editedStudent = await studentFound.save()
-    console.log(editedStudent)
-
+    let studentFound = await Student.findById(req.body.studentId)
     if (!studentFound) {
       throw ({
         status: 404,
         error: 'The student you requested to edit does not exist.'
       })
     }
+
+    studentFound.set(edited)
+    const editedStudent = await studentFound.save()
 
     // Repopulate the classes if the status of the student is changed back to Active
     if (editedStudent.status === 'Active' && editedStudent.classes) {
@@ -187,9 +185,7 @@ module.exports.editStudentById = async (req, res, next) => {
         multi: true
       })
     }
-    res.status(200).json({
-      success: true
-    })
+    res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.name === 'ValidationError') {
@@ -318,9 +314,7 @@ module.exports.deleteStudent = async (req, res, next) => {
         }
       }
     }
-    return res.status(200).json({
-      success: true
-    })
+    return res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {

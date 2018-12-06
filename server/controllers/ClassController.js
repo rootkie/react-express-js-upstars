@@ -51,7 +51,6 @@ module.exports.addClass = async (req, res, next) => {
     const newClassCreated = await newClass.save()
 
     res.status(201).json({
-      success: true,
       newClass: newClassCreated
     })
   } catch (err) {
@@ -100,9 +99,7 @@ module.exports.editClass = async (req, res, next) => {
       })
     }
 
-    res.status(200).json({
-      success: true
-    })
+    res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.name === 'ValidationError') {
@@ -214,9 +211,7 @@ module.exports.deleteClass = async (req, res, next) => {
         error: 'Class not found'
       })
     }
-    return res.status(200).json({
-      success: true
-    })
+    return res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {

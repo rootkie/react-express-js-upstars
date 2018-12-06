@@ -137,7 +137,6 @@ module.exports.editUserParticulars = async (req, res, next) => {
     }
     // console.log(editedUser)
     return res.status(200).json({
-      success: true,
       user: editedUser
     })
   } catch (err) {
@@ -212,9 +211,7 @@ module.exports.deleteUser = async (req, res, next) => {
         multi: true
       })
     }
-    return res.status(200).json({
-      status: 'success'
-    })
+    return res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -305,9 +302,7 @@ module.exports.changePassword = async (req, res, next) => {
           })
         }
         console.log('Message sent')
-        return res.status(200).json({
-          status: 'success'
-        })
+        return res.status(200).send()
       })
     }
   } catch (err) {

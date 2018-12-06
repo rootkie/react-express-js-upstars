@@ -8,7 +8,6 @@ const Schema = mongoose.Schema
 const AttendanceSchema = new Schema({
   date: {
     type: Date,
-    default: Date.now,
     required: true
   },
   hours: {

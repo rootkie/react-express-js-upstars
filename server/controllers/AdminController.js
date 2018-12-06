@@ -60,7 +60,6 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
 
     // Returns token and necessary information
     return res.status(200).json({
-      success: true,
       editedClass
     })
   } catch (err) {
@@ -83,7 +82,7 @@ module.exports.getPendingUsers = async (req, res, next) => {
     const users = await User.find({
       'status': 'Pending'
     }).select('profile.name roles status').sort('profile.name')
-    res.json({
+    res.status(200).json({
       users
     })
   } catch (err) {
@@ -98,7 +97,7 @@ module.exports.getSuspendedPeople = async (req, res, next) => {
     const users = await User.find({
       'status': 'Suspended'
     }).select('profile.name roles status').sort('profile.name')
-    res.json({
+    res.status(200).json({
       users
     })
   } catch (err) {
@@ -113,7 +112,7 @@ module.exports.getDeletedPeople = async (req, res, next) => {
     const users = await User.find({
       'status': 'Deleted'
     }).select('profile.name roles status').sort('profile.name')
-    res.json({
+    res.status(200).json({
       users
     })
   } catch (err) {
@@ -176,9 +175,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
         }
       }
     }
-    return res.status(200).json({
-      status: 'success'
-    })
+    return res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -213,7 +210,7 @@ module.exports.responsiveSearch = async (req, res, next) => {
       'profile.name': new RegExp(name, 'i')
     }).select('profile.name roles status').sort('profile.name')
 
-    res.json({
+    res.status(200).json({
       pendingMatched,
       activeMatched,
       suspendedMatched,
