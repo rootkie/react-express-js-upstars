@@ -53,9 +53,9 @@ class MainCtrl extends Component {
     axios.get('/check')
       .then(response => {
         // If expired or malformed, we check if refresh token is available (refresh token is king)
-        // If it is, send it in to get a new x-access-token (a faulty refresh token will return an empty string as access token)
+        // If it is, send it in to get a new x-access-token (a faulty refresh token will return null as access token)
         // isLoggedIn() is then called again to ensure access token is valid
-        // Else if there are any errors anywhere regardless, default auth is false.
+        // Else if there are any errors anywhere, default auth is false.
         if (response.data.auth === false) {
           let refreshToken = window.localStorage.refreshToken
           if (!refreshToken) {
