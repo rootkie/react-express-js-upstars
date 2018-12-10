@@ -308,11 +308,11 @@ class Home extends Component {
             >Enrichments Programmes</Divider>
 
             <Header as='h3' style={{ fontSize: '2em' }}>
-          New UP Stars Enrichment Program Launched
+          New <i>UP Stars</i> Enrichment Program Launched
             </Header>
             <p style={{ fontSize: '1.2em', textAlign: 'justify' }}>
         22 children from the Ulu Pandan neighbourhood excitedly gathered on the 4th June 2009 afternoon, at UP Study Centre to participate in
-        the inaugural UP Stars Enrichment program. <br /><br />
+        the inaugural <i>UP Stars</i> Enrichment program. <br /><br />
         Themed <b>“Fox and Hounds”</b>, the children learnt lifeskills on defending themselves from beingbullied and also to correct themselves when
          they occasionally are the bully. The enrichment program hopes to instill values, to positively affect children’s lives.
             </p>
@@ -340,7 +340,7 @@ class Home extends Component {
 
                   <Accordion.Title active={activeIndex === 1} index={1} onClick={this.handleClick} style={{ fontSize: '1.5em', color: 'white' }}>
                     <Icon name='dropdown' />
-                    2. How do I sign up for the respective UPStars services?
+                    2. How do I sign up for the respective UP Stars services?
                   </Accordion.Title>
                   <Accordion.Content active={activeIndex === 1}>
                     <h2 style={{ fontSize: '1.3em' }}>
@@ -420,7 +420,7 @@ class Home extends Component {
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
-          &copy; UPStars 2018 | R3:C0D3. All Rights Reserved.
+          &copy; UP Stars 2018 | R3:C0D3. All Rights Reserved.
               </Grid.Row>
             </Grid>
           </Container>
