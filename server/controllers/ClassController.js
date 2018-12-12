@@ -22,7 +22,7 @@ module.exports.addClass = async (req, res, next) => {
     // Check if the class already exist and prevent duplicate creation
     const classExist = await Class.findOne({
       className
-    })
+    }).lean()
 
     if (classExist) {
       throw ({
@@ -77,7 +77,7 @@ module.exports.editClass = async (req, res, next) => {
     } = req.body
 
     // Create a class instance
-    const class1 = {
+    const newClassData = {
       className,
       classType,
       venue,
@@ -86,7 +86,7 @@ module.exports.editClass = async (req, res, next) => {
       status
     }
     // Find and update class
-    const newClass = await Class.findByIdAndUpdate(classId, class1, {
+    const newClass = await Class.findByIdAndUpdate(classId, newClassData, {
       new: true,
       runValidators: true
     })
@@ -120,10 +120,10 @@ module.exports.getAll = async (req, res, next) => {
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
-    }).select('-createdAt -students -users -updatedAt -startDate')
+    }).select('-createdAt -students -users -updatedAt -startDate').limit(100).lean()
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
-    }).select('-createdAt -students -users -updatedAt -startDate')
+    }).select('-createdAt -students -users -updatedAt -startDate').limit(200).lean()
     // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
     if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
       console.log(classes)
@@ -158,17 +158,17 @@ module.exports.getClassById = async (req, res, next) => {
     }
 
     // Find a class and populate the students, users to get their name. Using class1 because class is a reserved word
-    const class1 = await Class.findById(classId).populate('students users', 'profile.name')
-      .select('-updatedAt -createdAt')
+    const classData = await Class.findById(classId).populate('students users', 'profile.name')
+      .select('-updatedAt -createdAt').lean()
     // If class does not exist, throw an error
-    if (!class1) {
+    if (!classData) {
       throw ({
         status: 404,
         error: 'This class does not exist'
       })
     }
     return res.status(200).json({
-      class: class1
+      class: classData
     })
   } catch (err) {
     console.log(err)

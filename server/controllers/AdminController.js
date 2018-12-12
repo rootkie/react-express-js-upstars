@@ -58,7 +58,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
       })
     }
 
-    // Returns token and necessary information
+    // Returns necessary information
     return res.status(200).json({
       editedClass
     })
@@ -81,7 +81,7 @@ module.exports.getPendingUsers = async (req, res, next) => {
     // Find all users with status as Pending
     const users = await User.find({
       'status': 'Pending'
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(100).select('profile.name roles status').sort('profile.name').lean()
     res.status(200).json({
       users
     })
@@ -96,7 +96,7 @@ module.exports.getSuspendedPeople = async (req, res, next) => {
     // Find all people with status as Suspended
     const users = await User.find({
       'status': 'Suspended'
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(100).select('profile.name roles status').sort('profile.name').lean()
     res.status(200).json({
       users
     })
@@ -111,7 +111,7 @@ module.exports.getDeletedPeople = async (req, res, next) => {
     // Find all people with status as Suspended
     const users = await User.find({
       'status': 'Deleted'
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(100).select('profile.name roles status').sort('profile.name').lean()
     res.status(200).json({
       users
     })
@@ -193,22 +193,22 @@ module.exports.responsiveSearch = async (req, res, next) => {
     const pendingMatched = await User.find({
       'status': 'Pending',
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(50).select('profile.name roles status').sort('profile.name').lean()
 
     const activeMatched = await User.find({
       'status': 'Active',
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(50).select('profile.name roles status').sort('profile.name').lean()
 
     const suspendedMatched = await User.find({
       'status': 'Suspended',
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(50).select('profile.name roles status').sort('profile.name').lean()
 
     const deletedMatched = await User.find({
       'status': 'Deleted',
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name roles status').sort('profile.name')
+    }).limit(50).select('profile.name roles status').sort('profile.name').lean()
 
     res.status(200).json({
       pendingMatched,

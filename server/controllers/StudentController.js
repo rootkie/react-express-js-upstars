@@ -210,7 +210,7 @@ module.exports.getAll = async (req, res, next) => {
     // Find all students from database
     const students = await Student.find({
       status: 'Active'
-    }).select('profile.name profile.icNumber profile.dob profile.gender')
+    }).select('profile.name profile.icNumber profile.dob profile.gender').limit(500).lean()
     return res.status(200).json({
       students
     })
@@ -227,7 +227,7 @@ module.exports.getOtherStudents = async (req, res, next) => {
       status: {
         $ne: 'Active'
       }
-    }).select('profile.name profile.icNumber profile.dob profile.gender status')
+    }).select('profile.name profile.icNumber profile.dob profile.gender status').limit(500).lean()
       .sort('status profile.name')
     return res.status(200).json({
       students
@@ -244,7 +244,7 @@ module.exports.getStudentById = async (req, res, next) => {
     let studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt')
+    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt').lean()
     if (!student) {
       throw ({
         status: 404,
@@ -333,7 +333,7 @@ module.exports.getStudentByName = async (req, res, next) => {
     const studentsFiltered = await Student.find({
       status: 'Active',
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name')
+    }).select('profile.name').limit(30).lean()
     return res.status(200).json({
       studentsFiltered
     })
@@ -353,7 +353,7 @@ module.exports.getOtherStudentByName = async (req, res, next) => {
         $ne: 'Active'
       },
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name')
+    }).select('profile.name').limit(30).lean()
     return res.status(200).json({
       studentsFiltered
     })

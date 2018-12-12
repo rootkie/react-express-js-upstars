@@ -7,7 +7,8 @@ const ClassSchema = new Schema({
   // Class information
   className: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   classType: {
     type: String,

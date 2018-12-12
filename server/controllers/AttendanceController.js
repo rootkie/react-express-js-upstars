@@ -57,8 +57,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
     if (!attendanceFound) {
       const unsavedAttendance = new Attendance(attendance1)
       newAttendance = await unsavedAttendance.save()
-    }
-    else {
+    } else {
       attendanceFound.set(attendance1)
       newAttendance = await attendanceFound.save()
     }
@@ -138,6 +137,7 @@ module.exports.getAttendance = async (req, res, next) => {
       .populate('class', ['className'])
       .select('-users -students -updatedAt -createdAt')
       .sort('class.className -date')
+      .lean()
 
     if (classId) {
       attendances = attendances.where('class').equals(classId)
@@ -170,6 +170,8 @@ module.exports.getAttendanceById = async (req, res, next) => {
       .select('-updatedAt -createdAt')
       .populate('class', ['className'])
       .populate('students.list users.list', 'profile.name')
+      .lean()
+
     return res.status(200).json({
       attendances
     })
@@ -202,6 +204,8 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
 
     const attendances = await Attendance.aggregate()
       .match(user)
+      .limit(100)
+      .project('-updatedAt -createdAt -__v')
       .unwind('users') // Break the array of users into individual slots
       .match({
         'users.list': mongoose.Types.ObjectId(userId)
@@ -285,6 +289,8 @@ module.exports.getAttendanceByStudent = async (req, res, next) => {
 
     const attendances = await Attendance.aggregate()
       .match(student)
+      .limit(100)
+      .project('-updatedAt -createdAt -__v')
       .unwind('students') // Break the array of students into individual slots
       .match({
         'students.list': mongoose.Types.ObjectId(studentId)
@@ -352,6 +358,7 @@ module.exports.getClassAttendanceSummary = async (req, res, next) => {
       .match({
         'class': mongoose.Types.ObjectId(classId)
       }) // Find a class with that ID
+      .limit(150) // Hopefully a class ends at 150 classes max / year. It is recommended that a class is recreated for every year.
       .project('-updatedAt -createdAt -__v') // Only show relevant fields so that the unwind process is faster
       .unwind('users') // Within each attendance, break array of users up into individual slots
       .sort('-date') // Sort newest to oldest
@@ -515,6 +522,7 @@ module.exports.getAllClassAttendanceSummary = async (req, res, next) => {
       .match({
         'type': 'Class'
       })
+      // There is no upper limit, because estimation is difficult at this stage.
       // In this case, we only leave the students and class fields so that the unwind process can take place faster especially with
       // a large database of 200+ people. Since the unwind process has a max limit of 100MB of RAM unless otherwise coded.
       .project({
@@ -569,7 +577,7 @@ module.exports.getAllClassAttendanceSummary = async (req, res, next) => {
     // Calls another API to get all classes that are currently Active and filter the output to only relevant ones.
     let activeClasses = await Class.find({
       'status': 'Active'
-    }).select('className classType dayAndTime students users')
+    }).select('className classType dayAndTime students users').lean()
 
     // This process generates the JSON in the way the most ideal for displaying on the front-end.
     // The classes array is mapped, using the classID, search for the ID from the previously created students (studentsPart) and users (usersPart) array.
