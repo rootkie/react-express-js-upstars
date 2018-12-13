@@ -252,7 +252,7 @@ describe('testing auth related API mostly without token', () => {
         expect.assertions(1)
         const response = await app.post('/register').send(userData)
         expect(response.statusCode).toBe(201)
-      }, 8000)
+      }, 10000)
 
       test('duplicate email', async () => {
         expect.assertions(2)
@@ -365,7 +365,7 @@ describe('testing auth related API mostly without token', () => {
       const response = await app.post('/changepassword')
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
-    }, 10000)
+    })
 
     test('no email prompts errors', async () => {
       expect.assertions(2)
@@ -406,7 +406,7 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(1)
       const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
       expect(response.statusCode).toBe(200)
-    })
+    }, 8000)
   })
 
   describe('reset password tests', () => {
@@ -467,7 +467,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/pendingUsers')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Lai Ta Toh'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'profile': {'name': 'Mr. Ho Jin He'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
+      expect(response.body).toEqual([{'profile': {'name': 'Lai Ta Toh'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'profile': {'name': 'Mr. Ho Jin He'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}])
     })
   })
 
@@ -476,7 +476,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/suspended')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
+      expect(response.body).toEqual([{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
     })
   })
 
@@ -485,7 +485,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/deleted')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}]})
+      expect(response.body).toEqual([{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}])
     })
   })
 

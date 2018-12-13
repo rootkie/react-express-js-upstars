@@ -296,12 +296,7 @@ module.exports.changePassword = async (req, res, next) => {
       transporter.sendMail(message, (error, info) => {
         if (error) {
           console.log(error)
-          throw ({
-            status: 400,
-            error: 'An error has occurred. That is all we know.'
-          })
         }
-        console.log('Message sent')
         return res.status(200).send()
       })
     }

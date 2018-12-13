@@ -116,7 +116,6 @@ module.exports.changePassword = async (req, res, next) => {
       random = process.env.RESET_PASSWORD_RANDOM
     }
     user.resetPasswordToken = random
-    user.save()
 
     let objectToEncode = {
       email,
@@ -162,14 +161,15 @@ module.exports.changePassword = async (req, res, next) => {
       html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b> If you have no idea what this message is about, please ignore it.</b></p>
        <p>Reset your password by clicking at this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UPStars Team</p>`
     }
-    transporter.sendMail(message, function (error, info) {
+    transporter.sendMail(message, (error, info) => {
       if (error) {
         console.log(error)
-        throw ({
-          status: 400,
-          error: 'An error has occurred. That is all we know.'
+        throw({
+          status: 500,
+          error: 'There is something wrong with our mail servers, please contact the administrators for support.'
         })
       }
+      user.save()
       res.status(200).send()
     })
   } catch (err) {
@@ -389,16 +389,18 @@ module.exports.register = async (req, res, next) => {
            <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
            <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UPStars Team</p>`
         }
-        transporter.sendMail(message, function (error, info) {
+        transporter.sendMail(message, async (error, info) => {
           if (error) {
             console.log(error)
-            throw ({
-              status: 400,
-              error: 'An error has occurred. That is all we know.'
+            await User.deleteOne({ _id: userObject._id })
+            throw({
+              status: 500,
+              error: 'There is something wrong with our mail servers, please contact the administrators for support.'
             })
+          } else {
+            console.log('Message sent')
+            res.status(201).send()
           }
-          console.log('Message sent')
-          res.status(201).send()
         })
       } catch (err) {
         console.log(err)
