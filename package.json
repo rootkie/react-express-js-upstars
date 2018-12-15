@@ -1,6 +1,6 @@
 {
   "name": "react-express-js-upstars",
-  "version": "0.3.1beta",
+  "version": "0.4.0beta",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",

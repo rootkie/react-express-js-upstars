@@ -5,7 +5,7 @@ const Home = () => (
   <Grid stackable stretched>
     <Grid.Row>
       <Grid.Column>
-        <h2>Welcome to UPStars HOME page!</h2>
+        <h2>Welcome to UP Stars HOME page!</h2>
         <Message
           compact
           success

@@ -145,19 +145,17 @@ module.exports.editStudentById = async (req, res, next) => {
       }
     }
 
-    // Update student based on studentId
-    const editedStudent = await Student.findByIdAndUpdate(req.body.studentId, edited, {
-      new: true,
-      setDefaultsOnInsert: true,
-      runValidators: true,
-      runSettersOnQuery: true
-    })
-    if (!editedStudent) {
+    let studentFound = await Student.findById(req.body.studentId)
+    if (!studentFound) {
       throw ({
         status: 404,
         error: 'The student you requested to edit does not exist.'
       })
     }
+
+    studentFound.set(edited)
+    const editedStudent = await studentFound.save()
+
     // Repopulate the classes if the status of the student is changed back to Active
     if (editedStudent.status === 'Active' && editedStudent.classes) {
       await Class.update({
@@ -187,9 +185,7 @@ module.exports.editStudentById = async (req, res, next) => {
         multi: true
       })
     }
-    res.status(200).json({
-      success: true
-    })
+    res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.name === 'ValidationError') {
@@ -214,7 +210,7 @@ module.exports.getAll = async (req, res, next) => {
     // Find all students from database
     const students = await Student.find({
       status: 'Active'
-    }).select('profile.name profile.icNumber profile.dob profile.gender')
+    }).select('profile.name profile.icNumber profile.dob profile.gender').limit(500).lean()
     return res.status(200).json({
       students
     })
@@ -231,7 +227,7 @@ module.exports.getOtherStudents = async (req, res, next) => {
       status: {
         $ne: 'Active'
       }
-    }).select('profile.name profile.icNumber profile.dob profile.gender status')
+    }).select('profile.name profile.icNumber profile.dob profile.gender status').limit(500).lean()
       .sort('status profile.name')
     return res.status(200).json({
       students
@@ -248,7 +244,7 @@ module.exports.getStudentById = async (req, res, next) => {
     let studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt')
+    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt').lean()
     if (!student) {
       throw ({
         status: 404,
@@ -318,9 +314,7 @@ module.exports.deleteStudent = async (req, res, next) => {
         }
       }
     }
-    return res.status(200).json({
-      success: true
-    })
+    return res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -339,7 +333,7 @@ module.exports.getStudentByName = async (req, res, next) => {
     const studentsFiltered = await Student.find({
       status: 'Active',
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name')
+    }).select('profile.name').limit(30).lean()
     return res.status(200).json({
       studentsFiltered
     })
@@ -359,7 +353,7 @@ module.exports.getOtherStudentByName = async (req, res, next) => {
         $ne: 'Active'
       },
       'profile.name': new RegExp(name, 'i')
-    }).select('profile.name')
+    }).select('profile.name').limit(30).lean()
     return res.status(200).json({
       studentsFiltered
     })

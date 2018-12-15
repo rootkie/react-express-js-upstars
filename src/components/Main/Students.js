@@ -254,7 +254,7 @@ class Student extends Component {
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-          &copy; UPStars 2018 | R3:C0D3. All Rights Reserved.
+          &copy; UP Stars 2018 | R3:C0D3. All Rights Reserved.
                 </Grid.Row>
               </Grid>
             </Container>

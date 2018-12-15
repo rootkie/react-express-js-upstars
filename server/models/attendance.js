@@ -4,10 +4,10 @@ const Schema = mongoose.Schema
 // ================================
 // Attendance Schema
 // ================================
+
 const AttendanceSchema = new Schema({
   date: {
     type: Date,
-    default: Date.now,
     required: true
   },
   hours: {
@@ -23,7 +23,8 @@ const AttendanceSchema = new Schema({
   users: [{
     list: {
       type: Schema.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     },
     status: {
       type: Number,
@@ -34,10 +35,12 @@ const AttendanceSchema = new Schema({
   students: [{
     list: {
       type: Schema.ObjectId,
-      ref: 'Student'
+      ref: 'Student',
+      required: true
     },
     status: {
-      type: Number
+      type: Number,
+      required: true
     },
     _id: false
   }],

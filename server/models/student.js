@@ -106,13 +106,16 @@ const StudentSchema = new Schema({
   otherFamily: [{
     _id: false,
     name: {
-      type: String
+      type: String,
+      required: true
     },
     relationship: {
-      type: String
+      type: String,
+      required: true
     },
     age: {
-      type: Number
+      type: Number,
+      required: true
     }
   }],
 
@@ -136,25 +139,32 @@ const StudentSchema = new Schema({
     academicInfo: [{
       _id: false,
       year: {
-        type: Number
+        type: Number,
+        required: true
       },
       term: {
-        type: Number
+        type: Number,
+        required: true
       },
       english: {
-        type: Number
+        type: Number,
+        required: true
       },
       math: {
-        type: Number
+        type: Number,
+        required: true
       },
       motherTongue: {
-        type: Number
+        type: Number,
+        required: true
       },
       science: {
-        type: Number
+        type: Number,
+        required: true
       },
       overall: {
-        type: Number
+        type: Number,
+        required: true
       }
     }]
   },

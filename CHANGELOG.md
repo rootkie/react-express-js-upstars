@@ -1,4 +1,18 @@
 # Change Log
+## [v0.4.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.4.0-beta) (December 15, 2018, 2.33pm)
+- [Changed] Update process is changed so that mongoose validation works properly
+- [Added] Stricter schema validation in Users and Students
+- [Removed] Unnecessary responses from API calls
+- [Changed] Backend tests
+- [Removed] Success: true from most API responses
+- [Bumped] Version to 0.4.0beta
+- [Changed] Backend tests are edited to fit new API calls
+- [Changed] Standardisation of UP Stars instead of UPStars
+- [Added] Optimisation to multiple APIs involving queries
+- [Added] Indexing to important fields used regularly
+- [Removed] Unnecessary function in Users Model.
+- [Fixed] Mailing issues
+
 ## [v0.3.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.3.1-beta) (November 11, 2018, 4.03pm)
 - [Security] Standardised wrong email / password response
 - [Feature] Utilised .env for security considerations, allowing different configurations on different machines

@@ -17,7 +17,8 @@ class AttendanceClass extends Component {
       basicStats: {
         'studentNumber': 0,
         'tutorNumber': 0,
-        'studentTutorRatio': 0
+        'studentTutorRatio': 0,
+        'attendanceDates': []
       },
       totalPages: 1,
       activePage: 1,
@@ -63,7 +64,6 @@ class AttendanceClass extends Component {
       studentNumber: rawData.studentNumber,
       tutorNumber: rawData.tutorNumber,
       studentTutorRatio: rawData.studentTutorRatio,
-      status: rawData.status,
       attendanceDates
     }
     let studentAttendance = rawData.compiledStudentAttendance.map((user) => {
@@ -185,14 +185,14 @@ class AttendanceClass extends Component {
                   <Table.HeaderCell>No. attendeed</Table.HeaderCell>
                   <Table.HeaderCell>Percentage</Table.HeaderCell>
                   {/* Display attendance dates (6 sets per page) */}
-                  {basicStats.status === 'success' && basicStats.attendanceDates.map((date) => (
+                  {basicStats.attendanceDates.map((date) => (
                     <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
                   ))}
                 </Table.Row>
               </Table.Header>
               <Table.Body>
                 {/* nested maps allow the various details to be displayed out in order */}
-                {basicStats.status === 'success' && studentAttendance.map((attendance) => (
+                {studentAttendance.map((attendance) => (
                   <Table.Row key={`attendanceStudent-${attendance.studentName}`}>
                     <Table.Cell>{attendance.studentName}</Table.Cell>
                     <Table.Cell>Student</Table.Cell>
@@ -204,7 +204,7 @@ class AttendanceClass extends Component {
                     ))}
                   </Table.Row>
                 ))}
-                {basicStats.status === 'success' && tutorAttendance.map((attendance) => (
+                {tutorAttendance.map((attendance) => (
                   <Table.Row key={`attendanceUser-${attendance.userName}`} positive>
                     <Table.Cell>{attendance.userName}</Table.Cell>
                     <Table.Cell>Tutor</Table.Cell>

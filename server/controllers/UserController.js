@@ -121,22 +121,23 @@ module.exports.editUserParticulars = async (req, res, next) => {
       edited.admin = await req.body.admin
     }
 
-    // Update user based on the new values
-    const user = await User.findByIdAndUpdate(userId, edited, {
-      new: true,
-      runValidators: true,
-      runSettersOnQuery: true
-    }).select('-password -updatedAt -createdAt -admin')
-
+    let user = await User.findById(userId)
+    user.set(edited)
+    const rawUser = await user.save()
+    // ES7 Spread for Object destructuring
+    let { password, createdAt, updatedAt, __v, resetPasswordToken, email, ...editedUser } = rawUser.toObject()
+    if (approved.privilege !== true) {
+      delete editedUser.admin
+    }
     if (!user) {
       throw ({
         status: 404,
         error: 'The user you requested to edit does not exist.'
       })
     }
-
+    // console.log(editedUser)
     return res.status(200).json({
-      success: true
+      user: editedUser
     })
   } catch (err) {
     console.log(err)
@@ -210,9 +211,7 @@ module.exports.deleteUser = async (req, res, next) => {
         multi: true
       })
     }
-    return res.status(200).json({
-      status: 'success'
-    })
+    return res.status(200).send()
   } catch (err) {
     console.log(err)
     if (err.status) {
@@ -297,15 +296,8 @@ module.exports.changePassword = async (req, res, next) => {
       transporter.sendMail(message, (error, info) => {
         if (error) {
           console.log(error)
-          throw ({
-            status: 400,
-            error: 'An error has occurred. That is all we know.'
-          })
         }
-        console.log('Message sent')
-        return res.status(200).json({
-          status: 'success'
-        })
+        return res.status(200).send()
       })
     }
   } catch (err) {
