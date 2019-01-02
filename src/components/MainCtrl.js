@@ -11,9 +11,10 @@ import VolunteerWrap from './Volunteer/VolunteerWrap'
 import AttendanceWrap from './Attendance/AttendanceWrap'
 import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
-import FourZeroThree from './Error/403'
-import FourZeroFour from './Error/404'
-import FiveHundred from './Error/500'
+import ErrorPage from './Error/ErrorPage'
+// import FourZeroThree from './Error/403'
+// import FourZeroFour from './Error/404'
+// import FiveHundred from './Error/500'
 
 // For development
 axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
@@ -171,17 +172,17 @@ class MainCtrl extends Component {
 
     if (errorCode === 403) {
       return (
-        <FourZeroThree />
+        <ErrorPage statusCode={'403 FORBIDDEN'} errorMessage={'Your client does not have the permission to access this! That\'s all we know.'} />
       )
     }
     if (errorCode === 404) {
       return (
-        <FourZeroFour />
+        <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />
       )
     }
     if (errorCode === 500) {
       return (
-        <FiveHundred />
+        <ErrorPage statusCode={'500 INTERNAL SERVER ERROR'} errorMessage={'The server encountered an error and could not complete your request. Please try again later.'} />
       )
     } else if (isLoggedIn && this.state.confirm) {
       return (
@@ -200,7 +201,7 @@ class MainCtrl extends Component {
                 <Route exact path={`${path}/volunteer/:op/:sid?`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
                 <Route exact path={`${path}/attendance/:op/:sid?`} render={props => <AttendanceWrap roles={roles} {...props} />} />
                 <Route exact path={`${path}/admin/:op`} render={(props) => <AdminWrap {...props} />} />
-                <Route component={FourZeroFour} />
+                <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
               </Switch>
             </Grid.Column>
           </Grid>

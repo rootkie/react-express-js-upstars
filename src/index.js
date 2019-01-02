@@ -13,7 +13,7 @@ import 'semantic-ui-css/semantic.min.css'
 import './index.css'
 import Student from './components/Main/Students'
 import Volunteer from './components/Main/Tutors'
-import FourZeroFour from './components/Error/404'
+import ErrorPage from './components/Error/ErrorPage'
 
 const Root = () => (
   <Router>
@@ -29,7 +29,7 @@ const Root = () => (
         <Route exact path='/resetpassword/:token' component={ResetPassword} />
         <Route exact path='/verifyaccount/:token' component={EmailVerify} />
         <Route path='/dashboard' component={MainCtrl} />
-        <Route component={FourZeroFour} />
+        <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} /> } /> 
       </Switch>
     </div>
   </Router>
