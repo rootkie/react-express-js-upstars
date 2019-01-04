@@ -213,17 +213,17 @@ const StudentForm = () => {
       const {
         studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
       } = state
-      const requriedSchema = object({
+      const requiredSchema = object({
         studentSchoolName: string().required('Please provide your school name'),
         studentClassLevel: string().required('Please provide your class and level'),
         studentNationality: string().required('Please provide your nationality'),
         studentGender: string().required('Please provide your gender'),
         studentAddress: string().required('Please provide a valid address'),
         studentDob: date('Please provide a valid date'),
-        studentIcNumber: string().required().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+        studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
         studentName: string().required('Please provide your name')
       })
-      requriedSchema.validate({
+      requiredSchema.validate({
         studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
       }, {abortEarly: true}).then(valid => {
         dispatch({type: 'updateField', name: 'activeItem', value: 'Family Details'})
@@ -247,7 +247,7 @@ const StudentForm = () => {
     // Validate the important details
     const requriedSchema = object({
       studentName: string().required('Please provide your name'),
-      studentIcNumber: string().required().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+      studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
       studentDob: date('Please provide a valid date'),
       studentAddress: string().required('Please provide a valid address'),
       studentGender: string().required('Please provide your gender'),
@@ -372,7 +372,7 @@ const StudentForm = () => {
         <Grid.Row>
           <Form>
             <Message
-              hidden={errorMessage.length === 0}
+              hidden={errorMessage.length === 0 || !errorMessage}
               negative
               content={errorMessage}
             />

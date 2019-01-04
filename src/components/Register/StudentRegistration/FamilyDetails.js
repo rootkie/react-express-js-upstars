@@ -128,7 +128,7 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
         <Modal.Content>
           <Modal.Description>
             <Header>Welcome to Ulu Pandan STARS</Header>
-            <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS ("UPSTARS"), located at Block 3 Ghim Moh Road, Singapore.
+            <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS (&quot;UPSTARS&quot;), located at Block 3 Ghim Moh Road, Singapore.
      By signing up as a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
             <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
      or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import MainCtrl from './components/MainCtrl'
 import StudentRegister from './components/Register/StudentRegistration/StudentRegisterForm'
-import VolunteerRegister from './components/Register/VolunteerRegisterForm'
+import VolunteerRegister from './components/Register/VolunteerRegistration/VolunteerRegisterForm'
 import Login from './components/Login'
 import ForgetPassword from './components/ForgetPassword'
 import ResetPassword from './components/ResetPassword'
@@ -29,7 +29,7 @@ const Root = () => (
         <Route exact path='/resetpassword/:token' component={ResetPassword} />
         <Route exact path='/verifyaccount/:token' component={EmailVerify} />
         <Route path='/dashboard' component={MainCtrl} />
-        <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} /> } /> 
+        <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
       </Switch>
     </div>
   </Router>
