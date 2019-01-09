@@ -313,6 +313,8 @@ const StudentForm = () => {
         })
         .catch(error => {
           console.log(error.response)
+          recaptchaRef.current.reset()
+          dispatch({type: 'updateField', name: 'terms', value: false})
           dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})
         })
     }).catch(err => {

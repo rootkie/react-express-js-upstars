@@ -4,123 +4,127 @@ const Student = require('../models/student')
 const Class = require('../models/class')
 
 // Add student function works for everyone
-module.exports.addStudent = (req, res, next) => {
-  let edited = {}
+module.exports.addStudent = async (req, res, next) => {
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
   let {captchaCode} = req.body
+  let edited = {}
 
-  // Special addition for development, may remove during deployment / production
-  let secret = process.env.CAPTCHA_SECRET
-  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
-  axios.post('https://www.google.com/recaptcha/api/siteverify',
-    querystring.stringify({
-      secret,
-      response: captchaCode
-    }))
-    .then(async response => {
-      console.log(response.data)
-      try {
-        if (response.data.success === false) {
-          throw ({
-            status: 401,
-            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-          })
-        }
-        // Use a loop to populate edited if field is present
-        for (let checkChanged of list) {
-          if (req.body[checkChanged]) {
-            edited[checkChanged] = await req.body[checkChanged]
-          }
-        }
+  // Use a loop to populate edited if field is present
+  for (let checkChanged of list) {
+    if (req.body[checkChanged]) {
+      edited[checkChanged] = await req.body[checkChanged]
+    }
+  }
 
-        // Update student based on IC Number and validate it
-        const newStudent = new Student(edited)
-        const error = await newStudent.validateSync()
+  const newStudent = new Student(edited)
+  try {
+    const error = await newStudent.validateSync()
 
-        if (error) {
-          console.error(error)
-          throw ({
-            status: 400,
-            error: 'There is something wrong with the client input. That is all we know.'
-          })
-        }
+    if (error) {
+      console.error(error)
+      throw ({
+        status: 400,
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
 
-        const successStudentSignup = await newStudent.save()
-        res.status(201).json({
-          newStudent: successStudentSignup._id
-        })
-      } catch (err) {
-        console.log(err)
-        if (err.code === 11000) {
-          return res.status(400).send({
-            error: 'Account already exist. If this is a mistake please contact our system admin.'
-          })
-        } else if (err.status) {
-          res.status(err.status).send({
-            error: err.error
-          })
-        } else next(err)
-      }
+    let secret
+    if (process.env.NODE_ENV === 'development') {
+      secret = process.env.CAPTCHA_SECRET_DEV
+    } else {
+      secret = process.env.CAPTCHA_SECRET_PROD
+    }
+
+    const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
+      querystring.stringify({
+        secret,
+        response: captchaCode
+      }))
+
+    if (response.data.success === false) {
+      throw ({
+        status: 401,
+        error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+      })
+    }
+
+    const successStudentSignup = await newStudent.save()
+    res.status(201).json({
+      newStudent: successStudentSignup._id
     })
+  } catch (err) {
+    console.log(err)
+    if (err.code === 11000) {
+      return res.status(400).send({
+        error: 'Account already exist. If this is a mistake please contact our system admin.'
+      })
+    } else if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
 }
 
-module.exports.adminAddStudent = (req, res, next) => {
+module.exports.adminAddStudent = async (req, res, next) => {
   let edited = {}
   const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
   let {captchaCode} = req.body
-  // Special addition for development, may remove during deployment / production
-  let secret = process.env.CAPTCHA_SECRET
-  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
-  axios.post('https://www.google.com/recaptcha/api/siteverify',
-    querystring.stringify({
-      secret,
-      response: captchaCode
-    }))
-    .then(async response => {
-      console.log(response.data)
-      try {
-        if (response.data.success === false) {
-          throw ({
-            status: 401,
-            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-          })
-        }
-        // Use a loop to populate edited if field is present
-        for (let checkChanged of list) {
-          if (req.body[checkChanged]) {
-            edited[checkChanged] = await req.body[checkChanged]
-          }
-        }
+  let secret
 
-        // Update student based on IC Number and validate it
-        const newStudent = new Student(edited)
-        const error = await newStudent.validateSync()
-
-        if (error) {
-          console.error(error)
-          throw ({
-            status: 400,
-            error: 'There is something wrong with the client input. That is all we know.'
-          })
-        }
-
-        const successStudentSignup = await newStudent.save()
-        res.status(201).json({
-          newStudentId: successStudentSignup._id
-        })
-      } catch (err) {
-        console.log(err)
-        if (err.code === 11000) {
-          return res.status(400).send({
-            error: 'Account already exist. If this is a mistake please contact our system admin.'
-          })
-        } else if (err.status) {
-          res.status(err.status).send({
-            error: err.error
-          })
-        } else next(err)
+  try {
+    // Use a loop to populate edited if field is present
+    for (let checkChanged of list) {
+      if (req.body[checkChanged]) {
+        edited[checkChanged] = await req.body[checkChanged]
       }
+    }
+
+    // Update student based on IC Number and validate it
+    const newStudent = new Student(edited)
+    const error = await newStudent.validateSync()
+
+    if (error) {
+      console.error(error)
+      throw ({
+        status: 400,
+        error: 'There is something wrong with the client input. That is all we know.'
+      })
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      secret = process.env.CAPTCHA_SECRET_DEV
+    } else {
+      secret = process.env.CAPTCHA_SECRET_PROD
+    }
+    const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
+      querystring.stringify({
+        secret,
+        response: captchaCode
+      }))
+
+    if (response.data.success === false) {
+      throw ({
+        status: 401,
+        error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+      })
+    }
+    const successStudentSignup = await newStudent.save()
+    res.status(201).json({
+      newStudentId: successStudentSignup._id
     })
+  } catch (err) {
+    console.log(err)
+    if (err.code === 11000) {
+      return res.status(400).send({
+        error: 'Account already exist. If this is a mistake please contact our system admin.'
+      })
+    } else if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
 }
 
 // Mentor / Admin / SuperAdmin only
@@ -158,7 +162,7 @@ module.exports.editStudentById = async (req, res, next) => {
 
     // Repopulate the classes if the status of the student is changed back to Active
     if (editedStudent.status === 'Active' && editedStudent.classes) {
-      await Class.update({
+      await Class.updateMany({
         _id: {
           $in: editedStudent.classes
         }
@@ -172,7 +176,7 @@ module.exports.editStudentById = async (req, res, next) => {
       })
     } else if (editedStudent.classes) {
       // If status if changed to anything other than Active, we will delete their IDs from the classes instead
-      await Class.update({
+      await Class.updateMany({
         _id: {
           $in: editedStudent.classes
         }
@@ -277,7 +281,7 @@ module.exports.deleteStudent = async (req, res, next) => {
     }
 
     // Find and delete student from database
-    const studentDeleted = await Student.update({
+    const studentDeleted = await Student.updateMany({
       '_id': {
         '$in': studentId
       },
@@ -299,7 +303,7 @@ module.exports.deleteStudent = async (req, res, next) => {
         let studentDetails = await Student.findById(studentId[number], 'classes')
         console.log(studentDetails)
         if (studentDetails.classes) {
-          await Class.update({
+          await Class.updateMany({
             _id: {
               $in: studentDetails.classes
             }

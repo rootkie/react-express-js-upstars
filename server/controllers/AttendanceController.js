@@ -106,7 +106,7 @@ module.exports.deleteAttendance = async (req, res, next) => {
     }
 
     // Remove it from database
-    await Attendance.remove({
+    await Attendance.deleteMany({
       '_id': {
         '$in': attendanceId
       }

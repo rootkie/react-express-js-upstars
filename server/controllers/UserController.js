@@ -198,7 +198,7 @@ module.exports.deleteUser = async (req, res, next) => {
     // If the user is in any classes, delete the user from the class so that the population would not fail. Upon restoring of their status (if necessary)
     // their classes would be re populated.
     if (userDeleted.classes) {
-      await Class.update({
+      await Class.updateMany({
         _id: {
           $in: userDeleted.classes
         }

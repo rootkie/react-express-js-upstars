@@ -83,7 +83,7 @@ const reducer = (state, action) => {
     case 'captchaExpired':
       return {
         ...state,
-        activeItem: 'Family Details',
+        activeItem: 'Personal Info',
         terms: false,
         errorMessage: 'Timeout, please review and accept the terms again.'
       }
@@ -196,6 +196,8 @@ const VolunteerRegister = () => {
           })
           .catch((err) => {
             dispatch({type: 'updateField', name: 'loading', value: false})
+            dispatch({type: 'updateField', name: 'terms', value: false})
+            recaptchaRef.current.reset()
             if (err.response.data) dispatch({type: 'updateField', name: 'errorMessage', value: err.response.data.error})
           })
       }).catch(err => {

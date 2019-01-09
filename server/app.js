@@ -37,6 +37,9 @@ if (process.env.NODE_ENV === 'production') {
   })
   */
 mongoose.set('debug', true)
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
 
 app.use(helmet())
 
