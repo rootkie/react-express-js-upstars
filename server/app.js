@@ -23,6 +23,11 @@ app.use(function (req, res, next) {
   next()
 })
 
+mongoose.set('debug', true)
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
+
 // Connecting to database
 mongoose.Promise = global.Promise
 if (process.env.NODE_ENV === 'production') {
@@ -36,10 +41,6 @@ if (process.env.NODE_ENV === 'production') {
   ssl: true
   })
   */
-mongoose.set('debug', true)
-mongoose.set('useNewUrlParser', true)
-mongoose.set('useFindAndModify', false)
-mongoose.set('useCreateIndex', true)
 
 app.use(helmet())
 
