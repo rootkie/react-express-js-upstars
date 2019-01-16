@@ -160,7 +160,7 @@ module.exports.deleteUser = async (req, res, next) => {
   } = req.body
   try {
     // Check userId is provided
-    if (!userId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(userId)) {
       throw ({
         status: 400,
         error: 'Please provide a userId and ensure input is correct'
@@ -232,7 +232,7 @@ module.exports.changePassword = async (req, res, next) => {
     } = req.body
 
     // Check userId or passwords are provided
-    if (!userId || !oldPassword || !newPassword || newPassword.length < 6) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(userId) || !oldPassword || !newPassword || newPassword.length < 6) {
       throw ({
         status: 400,
         error: 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'
@@ -258,6 +258,8 @@ module.exports.changePassword = async (req, res, next) => {
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
+      // Send back to confirm first. Email comes later.
+      res.status(200).send()
       let mailConfig
       if (process.env.NODE_ENV === 'production') {
       // all emails delivered to real address
@@ -297,7 +299,6 @@ module.exports.changePassword = async (req, res, next) => {
         if (error) {
           console.log(error)
         }
-        return res.status(200).send()
       })
     }
   } catch (err) {

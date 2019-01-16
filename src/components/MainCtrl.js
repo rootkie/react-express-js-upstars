@@ -12,9 +12,6 @@ import AttendanceWrap from './Attendance/AttendanceWrap'
 import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
 import ErrorPage from './Error/ErrorPage'
-// import FourZeroThree from './Error/403'
-// import FourZeroFour from './Error/404'
-// import FiveHundred from './Error/500'
 
 // For development
 axios.defaults.baseURL = 'http://127.0.0.1:3000/api'

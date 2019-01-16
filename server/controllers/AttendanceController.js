@@ -18,7 +18,7 @@ module.exports.addEditAttendance = async (req, res, next) => {
     let newAttendance
 
     // Check if classId is provided
-    if (!classId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide a classId'
@@ -85,7 +85,7 @@ module.exports.deleteAttendance = async (req, res, next) => {
       classId
     } = req.body
     // Check if classId and date are provided
-    if (!attendanceId || !classId) {
+    if (!attendanceId || attendanceId.length === 0 || !(/^[0-9a-fA-F]{24}$/).test(attendanceId) || !(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide at least 1 attendanceId, classId and ensure input is correct'

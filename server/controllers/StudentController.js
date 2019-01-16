@@ -131,7 +131,7 @@ module.exports.adminAddStudent = async (req, res, next) => {
 module.exports.editStudentById = async (req, res, next) => {
   try {
     // Check if studentId exists
-    if (!req.body.studentId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(req.body.studentId)) {
       throw ({
         status: 400,
         error: 'Please provide a studentId'
@@ -273,7 +273,7 @@ module.exports.deleteStudent = async (req, res, next) => {
     studentId
   } = req.body
   try {
-    if (!studentId) {
+    if (!studentId || studentId.length === 0 || !studentId.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
       throw ({
         status: 400,
         error: 'Please provide a studentId and ensure input is correct'

@@ -4,6 +4,7 @@ const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const userControl = require('./controllers/UserController.js')
 const adminControl = require('./controllers/AdminController.js')
+const statisticsControl = require('./controllers/statisticsController')
 const hasRole = require('./routeMiddleware').hasRole
 
 // ==============Serving api======================
@@ -13,6 +14,7 @@ module.exports = app => {
   // Classes
   app.get('/api/class', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), classControl.getAll)
   app.get('/api/class/:id', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), classControl.getClassById)
+  app.get('/api/class/clone/:id', hasRole(['SuperAdmin']), classControl.cloneClass)
   app.post('/api/class', hasRole(['SuperAdmin']), classControl.addClass)
   app.put('/api/class', hasRole(['SuperAdmin']), classControl.editClass)
   // More like stopping a class
@@ -67,4 +69,7 @@ module.exports = app => {
   app.post('/api/resetpassword', authControl.resetPassword)
   app.post('/api/verifyEmail', authControl.verifyEmail)
   app.post('/api/refresh', authControl.refreshToken) // Getting refresh tokens if valid
+
+  // Statistics which require a token but not any special privilege
+  app.get('/api/stats/dashboard', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), statisticsControl.getDashboardStats)
 }

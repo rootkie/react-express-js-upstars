@@ -733,8 +733,8 @@ describe('testing class related APIs', async () => {
     test('invalid ObjectId used for classId throws error', async () => {
       expect.assertions(2)
       const response = await app.get('/class/123')
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('valid but wrong ObjectId used for classId throws error', async () => {
@@ -795,8 +795,8 @@ describe('testing class related APIs', async () => {
     test('stopping a class with empty classId', async () => {
       expect.assertions(2)
       const response = await app.delete('/class').send({classId: []})
-      expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Class not found'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure input is correct.'})
     })
 
     test('stopping a class using wrong Ids throws error', async () => {
@@ -1375,8 +1375,8 @@ describe('testing user side APIs', () => {
     test('Bad classId throws error', async () => {
       expect.assertions(2)
       const response = await app.delete('/users/class').send({userIds: [], classId: '123'})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('correct classId and empty userId succeed', async () => {
@@ -1427,8 +1427,8 @@ describe('testing user side APIs', () => {
     test('Bad classId throws error', async () => {
       expect.assertions(2)
       const response = await app.post('/users/class').send({userIds: [], classId: '123'})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('correct classId returns success', async () => {
@@ -1945,8 +1945,8 @@ describe('testing student side APIs', () => {
     test('deleting without proper studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: []})
-      expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
     })
 
     test('deleting with wrong studentId', async () => {
@@ -1959,8 +1959,8 @@ describe('testing student side APIs', () => {
     test('deleting with malfunctioned studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d6770021']})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
     })
 
     test('deleting mass number of studentId returns success', async () => {
@@ -2925,6 +2925,44 @@ describe('testing attendance related APIs', () => {
 
       const attendanceData = await app.get('/attendance/5b990729cef48424966ed0de')
       expect(attendanceData.body.attendances).toBe(null)
+    })
+  })
+})
+
+describe('testing stats and misc related APIs', () => {
+  test('stats should be working', async () => {
+    expect.assertions(8)
+    const response = await app.get('/stats/dashboard')
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toHaveProperty('totalUserEstimate', 9)
+    expect(response.body).toHaveProperty('newUserJoined', 2)
+    expect(response.body).toHaveProperty('totalClassesEstimate', 3)
+    expect(response.body).toHaveProperty('totalClassesHeldEstimate', 5)
+    expect(response.body).toHaveProperty('newClassesHeld', 0)
+    expect(response.body).toHaveProperty('totalStudentEstimate', 5)
+    expect(response.body).toHaveProperty('newStudentJoined', 2)
+  })
+
+  describe('cloning a new class', () => {
+    test('bad classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/123')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a proper classId'})
+    })
+
+    test('non-existent classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/5b97b8f2adfb2e018c64d123')
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'Class not found, please try again'})
+    })
+
+    test('proper classId returns success', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/5b97bdc5058d1e1e64d232f3')
+      expect(response.statusCode).toBe(201)
+      expect(response.body).toHaveProperty('newClassId', expect.any(String))
     })
   })
 })
