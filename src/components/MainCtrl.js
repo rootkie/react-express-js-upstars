@@ -192,12 +192,12 @@ class MainCtrl extends Component {
               {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
               <Switch>
-                <Route exact path={`${path}/home`} render={() => <Home />} />
-                <Route exact path={`${path}/students/:op/:sid?`} render={(props) => <StudentWrap roles={roles} {...props} />} />
+                <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
+                <Route exact path={`${path}/students/:op/:sid?`} render={props => <StudentWrap roles={roles} {...props} />} />
                 <Route exact path={`${path}/classes/:op/:sid?`} render={props => <ClassWrap roles={roles} {...props} />} />
                 <Route exact path={`${path}/volunteer/:op/:sid?`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
                 <Route exact path={`${path}/attendance/:op/:sid?`} render={props => <AttendanceWrap roles={roles} {...props} />} />
-                <Route exact path={`${path}/admin/:op`} render={(props) => <AdminWrap {...props} />} />
+                <Route exact path={`${path}/admin/:op`} render={props => <AdminWrap {...props} />} />
                 <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
               </Switch>
             </Grid.Column>
