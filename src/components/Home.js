@@ -44,7 +44,7 @@ const Home = ({roles}) => {
             </Statistic>
             <Statistic color='green' size='mini'>
               <Statistic.Value><Icon.Group><Icon name='user' /><Icon corner='bottom right' name='add' /></Icon.Group>{newUserJoined}</Statistic.Value>
-              <Statistic.Label>Users Joined</Statistic.Label>
+              <Statistic.Label>Users Joined<br />(Last 30 Days)</Statistic.Label>
             </Statistic>
             <Statistic size='large'>
               <Statistic.Value>{totalStudentEstimate}</Statistic.Value>
@@ -52,7 +52,7 @@ const Home = ({roles}) => {
             </Statistic>
             <Statistic color='green' size='mini'>
               <Statistic.Value><Icon.Group><Icon name='student' /><Icon corner='bottom right' name='add' /></Icon.Group>{newStudentJoined}</Statistic.Value>
-              <Statistic.Label>Students Joined</Statistic.Label>
+              <Statistic.Label>Students Joined<br />(Last 30 Days)</Statistic.Label>
             </Statistic>
             <Statistic size='large'>
               <Statistic.Value>{totalClassesHeldEstimate}</Statistic.Value>
@@ -60,7 +60,7 @@ const Home = ({roles}) => {
             </Statistic>
             <Statistic color='green' size='mini'>
               <Statistic.Value><Icon.Group><Icon name='book' /><Icon corner='bottom right' name='add' /></Icon.Group>{newClassesHeld}</Statistic.Value>
-              <Statistic.Label>New Lessons Held</Statistic.Label>
+              <Statistic.Label>New Lessons Held<br />(Last 30 Days)</Statistic.Label>
             </Statistic>
             <Statistic size='large'>
               <Statistic.Value>{totalClassesEstimate}</Statistic.Value>

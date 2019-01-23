@@ -188,13 +188,13 @@ class MainCtrl extends Component {
           <Grid style={GridStyle} stackable>
             <SideMenu roles={roles} />
             <Grid.Column width={13} style={MainContentStyle}>
-              {/* OP is for type of OPeration (Add / Delete etc) while SID is for the unique ID allocated for the job */}
+              {/* Path in this case refers to /dashboard that is inherited */}
               {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
               <Switch>
                 <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
                 <Route exact path={`${path}/students/:op/:sid?`} render={props => <StudentWrap roles={roles} {...props} />} />
-                <Route exact path={`${path}/classes/:op/:sid?`} render={props => <ClassWrap roles={roles} {...props} />} />
+                <Route path={`${path}/classes`} render={props => <ClassWrap roles={roles} {...props} />} />
                 <Route exact path={`${path}/volunteer/:op/:sid?`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
                 <Route exact path={`${path}/attendance/:op/:sid?`} render={props => <AttendanceWrap roles={roles} {...props} />} />
                 <Route exact path={`${path}/admin/:op`} render={props => <AdminWrap {...props} />} />

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Form, Message, Header, Table, Checkbox, Button, Icon, Dropdown, Dimmer, Loader, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { func, string, array } from 'prop-types'
+import { func, object, array } from 'prop-types'
 import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
@@ -41,7 +41,7 @@ const initialState = {
 class ClassEdit extends Component {
   static propTypes = {
     editClass: func,
-    id: string,
+    match: object.isRequired,
     roles: array.isRequired
   }
 
@@ -51,7 +51,8 @@ class ClassEdit extends Component {
   }
   // Before the component mounts, call the getClass function to retrieve everything about the class.
   componentWillMount () {
-    this.getClass(this.props.id)
+    console.log(this.props)
+    this.getClass(this.props.match.params.sid)
   }
 
   getClass = (classId) => {
@@ -182,11 +183,11 @@ class ClassEdit extends Component {
   addUser = async e => {
     e.preventDefault()
     axios.post('users/class', {
-      classId: this.props.id,
+      classId: this.props.match.params.sid,
       userIds: this.state.usersValue
     })
       .then(response => {
-        this.getClass(this.props.id)
+        this.getClass(this.props.match.params.sid)
         this.setState({ isLoading: false, submitSuccess: true, usersValue: [] })
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
       })
@@ -198,11 +199,11 @@ class ClassEdit extends Component {
   addStudent = async e => {
     e.preventDefault()
     axios.post('students/class', {
-      classId: this.props.id,
+      classId: this.props.match.params.sid,
       studentIds: this.state.studentsValue
     })
       .then(response => {
-        this.getClass(this.props.id)
+        this.getClass(this.props.match.params.sid)
         this.setState({ isLoading: false, submitSuccess: true, studentsValue: [] })
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
       })
@@ -216,12 +217,12 @@ class ClassEdit extends Component {
     e.preventDefault()
     axios.delete('users/class', {
       data: {
-        classId: this.props.id,
+        classId: this.props.match.params.sid,
         userIds: this.state.userSelected
       }
     })
       .then(response => {
-        this.getClass(this.props.id)
+        this.getClass(this.props.match.params.sid)
         this.setState({ isLoading: false, submitSuccess: true, userSelected: [] })
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
       })
@@ -234,12 +235,12 @@ class ClassEdit extends Component {
   deleteStudent = async e => {
     axios.delete('students/class', {
       data: {
-        classId: this.props.id,
+        classId: this.props.match.params.sid,
         studentIds: this.state.studentSelected
       }
     })
       .then(response => {
-        this.getClass(this.props.id)
+        this.getClass(this.props.match.params.sid)
         this.setState({ isLoading: false, submitSuccess: true, studentSelected: [] })
         setTimeout(() => { this.setState({submitSuccess: false}) }, 5000)
       })
@@ -268,7 +269,7 @@ class ClassEdit extends Component {
     } else {
       return (
         <Grid stackable stretched>
-          {serverErrorMessage.length === 0 &&
+          {serverErrorMessage.length !== 0 &&
           <Grid.Row>
             <Grid.Column>
               <Message
