@@ -102,110 +102,112 @@ const reducer = (state, action) => {
   }
 }
 
+const submitPageOne = (dispatch, state) => e => {
+  e.preventDefault()
+  dispatch({type: 'clearError'})
+
+  if (state.activeItem === 'Personal Info') {
+    dispatch({type: 'updateField', name: 'activeItem', value: 'Login Details'})
+  } else {
+    const { email, password, passwordcfm } = state
+    const requiredFieldForLogin = object({
+      passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
+      password: string().required('Please provide a password').min(6, 'Please provide a password that has at least 6 characters'),
+      email: string().required('Please provide an email address').email('Please provide a valid email')
+    })
+    requiredFieldForLogin.validate({
+      email,
+      password,
+      passwordcfm
+    }, {abortEarly: true}).then(valid => {
+      dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
+    }).catch(err => {
+      dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+    })
+  }
+}
+
+const submitEntry = (dispatch, state) => e => {
+  e.preventDefault()
+  dispatch({type: 'clearError'})
+  dispatch({type: 'updateField', name: 'loading', value: true})
+  const { email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric,
+    preferredTimeSlot, commencementDate, exitDate, terms, captchaCode } = state
+
+  const requiredFieldsForSubmit = object({
+    captchaCode: string().required('Please accept the terms again to refresh your reCaptcha verification'),
+    terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
+    exitDate: date().required('Please enter a valid exit date'),
+    commencementDate: date().required('Please enter a valid commencement date'),
+    preferredTimeSlot: object().required('Please provide your preferred time slots'),
+    nric: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+    nationality: string().required('Please provide your nationality'),
+    gender: string().required('Please provide your gender'),
+    dob: date().required('Please enter a valid date of birth'),
+    homephone: string().matches(/^6\d{7}/, 'Please provide a valid homephone number').required('Please provide a homephone number'),
+    handphone: string().matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number').required('Please provide a handphone number'),
+    schoolLevel: string().required('Please provide your schooling level'),
+    schoolClass: string().required('Please provide your school class'),
+    postalCode: string().matches(/\d{6}/, 'Please provide a valid postal code').required('Please provide a postal code'),
+    address: string().required('Please provide an address'),
+    name: string().required('Please provide your name'),
+    passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
+    password: string().required('Please provide a password').min(6, 'Please provide a password that has at least 6 characters'),
+    email: string().required('Please provide an email address').email('Please provide a valid email')
+  }, {abortEarly: true})
+
+  // Validate the object against the params written above
+  requiredFieldsForSubmit
+    .validate({email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric, preferredTimeSlot, commencementDate, exitDate, terms, captchaCode})
+    .then(valid => {
+      const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
+      const volunteerData = {
+        email,
+        password,
+        commencementDate,
+        exitDate,
+        preferredTimeSlot: timeSlot,
+        profile: {
+          name,
+          dob,
+          gender,
+          nationality,
+          nric,
+          address,
+          postalCode,
+          handphone,
+          homephone,
+          schoolClass,
+          schoolLevel
+        },
+        captchaCode
+      }
+
+      axios.post('/register', volunteerData)
+        .then(response => {
+          recaptchaRef.current.reset()
+          dispatch({type: 'submitSuccess'})
+        })
+        .catch((err) => {
+          dispatch({type: 'updateField', name: 'loading', value: false})
+          dispatch({type: 'updateField', name: 'terms', value: false})
+          recaptchaRef.current.reset()
+          if (err.response.data) dispatch({type: 'updateField', name: 'errorMessage', value: err.response.data.error})
+        })
+    }).catch(err => {
+      if (err.name === 'ValidationError') {
+        dispatch({type: 'updateField', name: 'loading', value: false})
+        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+      }
+    })
+}
+
 const VolunteerRegister = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { activeItem, errorMessage, success, loading } = state
 
   const handleChange = (e, {name, value}) => {
     dispatch({type: 'updateField', name, value})
-  }
-
-  const submitPageOne = e => {
-    e.preventDefault()
-    dispatch({type: 'clearError'})
-
-    if (activeItem === 'Personal Info') {
-      dispatch({type: 'updateField', name: 'activeItem', value: 'Login Details'})
-    } else {
-      const { email, password, passwordcfm } = state
-      const requiredFieldForLogin = object({
-        passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
-        password: string().required('Please provide a password').min(6, 'Please provide a password that has at least 6 characters'),
-        email: string().required('Please provide an email address').email('Please provide a valid email')
-      })
-      requiredFieldForLogin.validate({
-        email,
-        password,
-        passwordcfm
-      }, {abortEarly: true}).then(valid => {
-        dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
-      }).catch(err => {
-        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
-      })
-    }
-  }
-
-  const submitEntry = e => {
-    e.preventDefault()
-    dispatch({type: 'clearError'})
-    dispatch({type: 'updateField', name: 'loading', value: true})
-    const { email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric,
-      preferredTimeSlot, commencementDate, exitDate, terms, captchaCode } = state
-
-    const requiredFieldsForSubmit = object({
-      captchaCode: string().required('Please accept the terms again to refresh your reCaptcha verification'),
-      terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
-      exitDate: date().required('Please enter a valid exit date'),
-      commencementDate: date().required('Please enter a valid commencement date'),
-      preferredTimeSlot: object().required('Please provide your preferred time slots'),
-      nric: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
-      nationality: string().required('Please provide your nationality'),
-      gender: string().required('Please provide your gender'),
-      dob: date().required('Please enter a valid date of birth'),
-      homephone: string().matches(/^6\d{7}/, 'Please provide a valid homephone number').required('Please provide a homephone number'),
-      handphone: string().matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number').required('Please provide a handphone number'),
-      schoolLevel: string().required('Please provide your schooling level'),
-      schoolClass: string().required('Please provide your school class'),
-      postalCode: string().matches(/\d{6}/, 'Please provide a valid postal code').required('Please provide a postal code'),
-      address: string().required('Please provide an address'),
-      name: string().required('Please provide your name'),
-      passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
-      password: string().required('Please provide a password').min(6, 'Please provide a password that has at least 6 characters'),
-      email: string().required('Please provide an email address').email('Please provide a valid email')
-    }, {abortEarly: true})
-
-    requiredFieldsForSubmit
-      .validate({email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric, preferredTimeSlot, commencementDate, exitDate, terms, captchaCode})
-      .then(valid => {
-        const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
-        const volunteerData = {
-          email,
-          password,
-          commencementDate,
-          exitDate,
-          preferredTimeSlot: timeSlot,
-          profile: {
-            name,
-            dob,
-            gender,
-            nationality,
-            nric,
-            address,
-            postalCode,
-            handphone,
-            homephone,
-            schoolClass,
-            schoolLevel
-          },
-          captchaCode
-        }
-
-        axios.post('/register', volunteerData)
-          .then(response => {
-            dispatch({type: 'submitSuccess'})
-          })
-          .catch((err) => {
-            dispatch({type: 'updateField', name: 'loading', value: false})
-            dispatch({type: 'updateField', name: 'terms', value: false})
-            recaptchaRef.current.reset()
-            if (err.response.data) dispatch({type: 'updateField', name: 'errorMessage', value: err.response.data.error})
-          })
-      }).catch(err => {
-        if (err.name === 'ValidationError') {
-          dispatch({type: 'updateField', name: 'loading', value: false})
-          dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
-        }
-      })
   }
 
   return (
@@ -275,8 +277,8 @@ const VolunteerRegister = () => {
               content={errorMessage}
             />
             <Form.Group>
-              <Form.Button primary type='button' onClick={submitPageOne}>{activeItem === 'Login Details' ? 'Continue' : 'Back'}</Form.Button>
-              <Form.Button disabled={activeItem !== 'Personal Info'} onClick={submitEntry}>Register as volunteer</Form.Button>
+              <Form.Button primary type='button' onClick={submitPageOne(dispatch, state)}>{activeItem === 'Login Details' ? 'Continue' : 'Back'}</Form.Button>
+              <Form.Button disabled={activeItem !== 'Personal Info'} onClick={submitEntry(dispatch, state)}>Register as volunteer</Form.Button>
             </Form.Group>
             <ReCAPTCHA
               ref={recaptchaRef}

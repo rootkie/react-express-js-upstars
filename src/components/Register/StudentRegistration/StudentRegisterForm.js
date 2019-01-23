@@ -164,7 +164,6 @@ const reducer = (state, action) => {
       return {
         ...state,
         terms: false,
-        activeItem: 'Family Details',
         captchaCode: '',
         errorMessage: 'Timeout, please review and accept the terms again.'
       }
@@ -181,6 +180,129 @@ const reducer = (state, action) => {
     default:
       return state
   }
+}
+
+const submitPersonal = (dispatch, state) => e => {
+  e.preventDefault()
+  dispatch({type: 'clearError'})
+  if (state.activeItem === 'Family Details') {
+    dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
+  } else {
+    const {
+      studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
+    } = state
+    const requiredSchema = object({
+      studentSchoolName: string().required('Please provide your school name'),
+      studentClassLevel: string().required('Please provide your class and level'),
+      studentNationality: string().required('Please provide your nationality'),
+      studentGender: string().required('Please provide your gender'),
+      studentAddress: string().required('Please provide a valid address'),
+      studentDob: date('Please provide a valid date'),
+      studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+      studentName: string().required('Please provide your name')
+    })
+    requiredSchema.validate({
+      studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
+    }, {abortEarly: true}).then(valid => {
+      dispatch({type: 'updateField', name: 'activeItem', value: 'Family Details'})
+    }).catch(err => {
+      if (err.name === 'ValidationError') {
+        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+      }
+    })
+  }
+}
+
+const submitAll = (dispatch, state) => e => {
+  e.preventDefault()
+  dispatch({type: 'clearError'})
+
+  const {
+    studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, terms,
+    fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
+    motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome, otherFamily, fas, fsc, academicInfo, tuitionChoices, captchaCode
+  } = state
+
+  // Validate the important details
+  const requriedSchema = object({
+    studentName: string().required('Please provide your name'),
+    studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+    studentDob: date('Please provide a valid date'),
+    studentAddress: string().required('Please provide a valid address'),
+    studentGender: string().required('Please provide your gender'),
+    studentNationality: string().required('Please provide your nationality'),
+    studentClassLevel: string().required('Please provide your class and level'),
+    studentSchoolName: string().required('Please provide your school name'),
+    terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
+    captchaCode: string().required('There is an error with the CaptchaCode, please try again')
+  })
+
+  requriedSchema.validate({
+    studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, terms, captchaCode
+  }).then(valid => {
+    let studentDataToSubmit = {
+      profile: {
+        name: studentName,
+        icNumber: studentIcNumber,
+        dob: studentDob,
+        address: studentAddress,
+        gender: studentGender,
+        nationality: studentNationality,
+        classLevel: studentClassLevel,
+        schoolName: studentSchoolName
+      },
+      father: {
+        name: fatherName,
+        icNumber: fatherIcNumber,
+        nationality: fatherNationality,
+        contactNumber: fatherContactNumber,
+        email: fatherEmail,
+        occupation: fatherOccupation,
+        income: fatherIncome
+      },
+      mother: {
+        name: motherName,
+        icNumber: motherIcNumber,
+        nationality: motherNationality,
+        contactNumber: motherContactNumber,
+        email: motherEmail,
+        occupation: motherOccupation,
+        income: motherIncome
+      },
+      otherFamily,
+      misc: {
+        fas,
+        fsc,
+        academicInfo
+      },
+      captchaCode
+    }
+    // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
+    // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
+    // else if that option is not checked (false), the list will remain the same as before (nothing added)
+    const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
+    ), [])
+
+    studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
+
+    axios.post('/students', studentDataToSubmit)
+      .then(response => {
+        console.log('success')
+        // The reset is so that the timeout error will not appear after successful submission
+        recaptchaRef.current.reset()
+        dispatch({type: 'showSuccess'})
+      })
+      .catch(error => {
+        console.log(error.response)
+        recaptchaRef.current.reset()
+        dispatch({type: 'updateField', name: 'terms', value: false})
+        dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})
+      })
+  }).catch(err => {
+    if (err.name === 'ValidationError') {
+      dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+    }
+  })
 }
 
 // Main Functional Component to be rendered in the React App.
@@ -202,126 +324,6 @@ const StudentForm = () => {
   const updateFamilyMember = (index, property) => (e, {value}) => {
     e.preventDefault()
     dispatch({type: 'updateFamilyMember', index, property, value})
-  }
-
-  const submitPersonal = e => {
-    e.preventDefault()
-    dispatch({type: 'clearError'})
-    if (activeItem === 'Family Details') {
-      dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
-    } else {
-      const {
-        studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
-      } = state
-      const requiredSchema = object({
-        studentSchoolName: string().required('Please provide your school name'),
-        studentClassLevel: string().required('Please provide your class and level'),
-        studentNationality: string().required('Please provide your nationality'),
-        studentGender: string().required('Please provide your gender'),
-        studentAddress: string().required('Please provide a valid address'),
-        studentDob: date('Please provide a valid date'),
-        studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
-        studentName: string().required('Please provide your name')
-      })
-      requiredSchema.validate({
-        studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
-      }, {abortEarly: true}).then(valid => {
-        dispatch({type: 'updateField', name: 'activeItem', value: 'Family Details'})
-      }).catch(err => {
-        if (err.name === 'ValidationError') {
-          dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
-        }
-      })
-    }
-  }
-  const submitAll = e => {
-    e.preventDefault()
-    dispatch({type: 'clearError'})
-
-    const {
-      studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, terms,
-      fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
-      motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome, otherFamily, fas, fsc, academicInfo, tuitionChoices, captchaCode
-    } = state
-
-    // Validate the important details
-    const requriedSchema = object({
-      studentName: string().required('Please provide your name'),
-      studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
-      studentDob: date('Please provide a valid date'),
-      studentAddress: string().required('Please provide a valid address'),
-      studentGender: string().required('Please provide your gender'),
-      studentNationality: string().required('Please provide your nationality'),
-      studentClassLevel: string().required('Please provide your class and level'),
-      studentSchoolName: string().required('Please provide your school name'),
-      terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
-      captchaCode: string().required('There is an error with the CaptchaCode, please try again')
-    })
-
-    requriedSchema.validate({
-      studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, terms, captchaCode
-    }).then(valid => {
-      let studentDataToSubmit = {
-        profile: {
-          name: studentName,
-          icNumber: studentIcNumber,
-          dob: studentDob,
-          address: studentAddress,
-          gender: studentGender,
-          nationality: studentNationality,
-          classLevel: studentClassLevel,
-          schoolName: studentSchoolName
-        },
-        father: {
-          name: fatherName,
-          icNumber: fatherIcNumber,
-          nationality: fatherNationality,
-          contactNumber: fatherContactNumber,
-          email: fatherEmail,
-          occupation: fatherOccupation,
-          income: fatherIncome
-        },
-        mother: {
-          name: motherName,
-          icNumber: motherIcNumber,
-          nationality: motherNationality,
-          contactNumber: motherContactNumber,
-          email: motherEmail,
-          occupation: motherOccupation,
-          income: motherIncome
-        },
-        otherFamily,
-        misc: {
-          fas,
-          fsc,
-          academicInfo
-        },
-        captchaCode
-      }
-      // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
-      // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
-      // else if that option is not checked (false), the list will remain the same as before (nothing added)
-      const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
-      ), [])
-
-      studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
-
-      axios.post('/students', studentDataToSubmit)
-        .then(response => {
-          console.log('success')
-          dispatch({type: 'showSuccess'})
-        })
-        .catch(error => {
-          console.log(error.response)
-          recaptchaRef.current.reset()
-          dispatch({type: 'updateField', name: 'terms', value: false})
-          dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})
-        })
-    }).catch(err => {
-      if (err.name === 'ValidationError') {
-        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
-      }
-    })
   }
 
   return (
@@ -384,8 +386,8 @@ const StudentForm = () => {
               content='Successfully Submitted and saved'
             />
             <Form.Group>
-              <Form.Button primary onClick={submitPersonal}>{activeItem === 'Personal Info' ? 'Continue' : 'Back'}</Form.Button>
-              <Form.Button disabled={activeItem !== 'Family Details'} onClick={submitAll}>Register as student</Form.Button>
+              <Form.Button primary onClick={submitPersonal(dispatch, state)}>{activeItem === 'Personal Info' ? 'Continue' : 'Back'}</Form.Button>
+              <Form.Button disabled={activeItem !== 'Family Details'} onClick={submitAll(dispatch, state)}>Register as student</Form.Button>
             </Form.Group>
             <ReCAPTCHA
               ref={recaptchaRef}

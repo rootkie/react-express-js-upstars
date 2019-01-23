@@ -26,14 +26,7 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
     fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome,
     motherName, motherIcNumber, motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome
   } = state
-  // Special CSS to fix the modal bug
-  const inlineStyle = {
-    modal: {
-      marginTop: '1rem auto !important',
-      margin: '1rem auto',
-      position: 'relative'
-    }
-  }
+
   return (
     <Segment attached='bottom' color='blue'>
       {/* Father's information */}
@@ -123,28 +116,34 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
         recaptchaRef.current.execute()
         dispatch({type: 'handleTermsOpen'})
       }}>I agree to the Terms and Conditions</label>} name='terms' required checked={terms} />
-      <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='fullscreen' style={inlineStyle.modal}>
+
+      <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='large'>
         <Modal.Header>Terms and conditions</Modal.Header>
-        <Modal.Content>
+        <Modal.Content scrolling>
           <Modal.Description>
             <Header>Welcome to Ulu Pandan STARS</Header>
-            <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS (&quot;UPSTARS&quot;), located at Block 3 Ghim Moh Road, Singapore.
-     By signing up as a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
+            <p>Thanks for choosing Ulu Pandan STARS. This service is provided by Ulu Pandan STARS (&quot;UP STARS&quot;), located at Block 3 Ghim Moh Road, Singapore.
+                By signing up as a student, you are agreeing to these terms. <b>Please read them carefully.</b></p>
             <p>1. The UP Stars programme is committed to organizing tuition services of good standards by matching suitably qualified tutors from Secondary 3 / Junior Colleges with primary
-     or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
+                  or lower secondary students who need assistance with academic subjects but lack the funding to secure help. </p>
             <p>2. Students are expected to care about their learning outcomes and behaviour, attend the tuition sessions punctually and regularly. In the event that the student will be absent from tuition, or unable to make it on time,
-   he/she should inform fellow tutors or relevant personnel(s) in advance. The programme organizer reserves the right to request the Student to leave the programme in the event that he/she exhibits inappropriate behaviour(s). </p>
+                  he/she should inform fellow tutors or relevant personnel(s) in advance. The programme organizer reserves the right to request the Student to leave the programme in the event that he/she exhibits inappropriate behaviour(s). </p>
             <p>3. Students are required to achieve a minimum of 80% attendance within the period of tuition.</p>
             <p>4. The programme organizer reserves the right to amend the terms and conditions of tuition service including cessation of the program.</p>
-            <p>5. Don’t misuse our Services. For example, don’t interfere with our Services or try to access them using a method other than the interface and the instructions that we provide.
-      You may use our Services only as permitted by law. We may suspend or stop providing our Services to you if you do not comply with our terms or policies or if we are investigating suspected misconduct.</p>
-            <p>6. Users provide their real names and information, and we need your help to keep it that way. Here are some commitments you make to us relating to registering and maintaining the security of your account:</p>
+            <p>5. Users provide their real names and information, and we need your help to keep it that way. Here are some commitments you make to us relating to registering and maintaining the security of your account:</p>
             <p>&emsp; a. You will not provide any false personal information, or create an account for anyone other than yourself without permission.</p>
             <p>&emsp; b. You will not create more than one personal account.</p>
             <p>&emsp; c. If we disable your account, you will not create another one without our permission.</p>
-            <p>&emsp; d. I To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
-            <Header>Terms and Conditions</Header>
-            <p>Last modified: July 17, 2018</p>
+            <p>&emsp; d. To the best of my knowledge, the information contained herein is accurate and reliable as of the date of submission.</p>
+            <p>6. Don’t misuse our Services. For example, don’t interfere with our Services or try to access them using a method other than the interface and the instructions that we provide.
+                  You may use our Services only as permitted by law. We may suspend or stop providing our Services to you if you do not comply with our terms or policies or if we are investigating suspected misconduct.</p>
+            <p>7. When accessing or using our Services, you will not:</p>
+            <p>&emsp; a. Attempt to gain unauthorized access to another user’s Account or to the Services (or to other computer systems or networks connected to or used together with the Services)</p>
+            <p>&emsp; b. Upload, transmit, or distribute to or through the Services any computer viruses, worms, or other software intended to interfere with the intended operation of a computer system or data</p>
+            <p>8. PDPA Singapore. Consent to provide Personal Data. By indicating your consent to provide your personal data in this form, you agree to receive updates and important announcements from UP STARS by email and phone. You also agree to
+               allow your personal information to be passed to anyone related to UP STARS. All personal information will be kept confidential and used for the purpose(s) required for the operation of UP STARS only.</p>
+            <Header>Revisions</Header>
+            <p>Last modified: 1st February, 2019</p>
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
