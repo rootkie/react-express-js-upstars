@@ -214,7 +214,7 @@ const VolunteerRegister = () => {
     <Segment style={{ padding: '3em 0em' }} vertical>
       <Grid container stackable verticalAlign='middle'>
         <Grid.Row>
-          <Image size='small' centered src={require('../../logo.png')} style={{height: '100%'}} />
+          <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
         </Grid.Row>
         <Grid.Row>
           <Grid.Column textAlign='center'>

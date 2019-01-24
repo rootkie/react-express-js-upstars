@@ -16,7 +16,7 @@ const ErrorPage = ({statusCode, errorMessage}) => (
       style={{ height: '100%' }}
       verticalAlign='middle'>
       <Grid.Column style={{ maxWidth: 550 }}>
-        <Image size='medium' centered src={require('./../logo.png')} />
+        <Image size='medium' centered src={require('./../Misc/logo.png')} />
         <Statistic color='red'>
           <Statistic.Value>{statusCode}</Statistic.Value>
           <Statistic.Label>Error</Statistic.Label>
