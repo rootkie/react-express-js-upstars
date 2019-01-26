@@ -31,7 +31,7 @@ const reducer = (state, action) => {
   }
 }
 
-const ForgetPassword = () => {
+const RequestLink = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
@@ -42,11 +42,10 @@ const ForgetPassword = () => {
     e.preventDefault()
     const { email, nric } = state
     dispatch({type: 'updateField', name: 'message', value: 'Processing in progress...'})
-    axios.post('/changepassword', { email, nric })
+    axios.post('/link', { email, nric })
       .then(response => {
-        dispatch({type: 'success', message: 'A password reset link has been sent to your email. Please allow for 5 minutes before requesting for a new link if you did not receive any email.'})
+        dispatch({type: 'success', message: 'Your request has been successful. If the details match, an email will be sent to you.'})
       })
-      // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
         console.log(error)
         if (error.response.data.error) {
@@ -60,11 +59,11 @@ const ForgetPassword = () => {
   const { email, nric, message } = state
 
   return (
-    <div className='forgetpassword-form'>
+    <div className='requestlink-form'>
       <style>{`
           body > div,
           body > div > div,
-          body > div > div > div.forgetpassword-form {
+          body > div > div > div.requestlink-form {
             height: 100%;
           }
     `}</style>
@@ -75,7 +74,7 @@ const ForgetPassword = () => {
         <Grid.Column style={{ maxWidth: 550 }}>
           <Image size='big' centered src={require('./logo.png')} />
           <Header as='h2' color='teal' textAlign='center'>
-              Reset your account password
+              Request for new email verification link
           </Header>
           <Form size='large' onSubmit={handleSubmit}>
             <Segment stacked>
@@ -92,7 +91,7 @@ const ForgetPassword = () => {
                 placeholder='NRIC number'
                 type='text' name='nric' value={nric} onChange={handleChange} required />
 
-              <Button color='teal' fluid size='large' type='submit'>Request for password reset</Button>
+              <Button color='teal' fluid size='large' type='submit'>Request for new link</Button>
               <Message hidden={message === ''} negative>
                 {message}
               </Message>
@@ -107,4 +106,4 @@ const ForgetPassword = () => {
   )
 }
 
-export default ForgetPassword
+export default RequestLink

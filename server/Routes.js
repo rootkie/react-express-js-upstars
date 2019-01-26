@@ -69,6 +69,7 @@ module.exports = app => {
   app.post('/api/resetpassword', authControl.resetPassword)
   app.post('/api/verifyEmail', authControl.verifyEmail)
   app.post('/api/refresh', authControl.refreshToken) // Getting refresh tokens if valid
+  app.post('/api/link', authControl.newLink)
 
   // Statistics which require a token but not any special privilege
   app.get('/api/stats/dashboard', hasRole(['Tutor', 'Mentor', 'SuperVisor', 'Admin', 'SuperAdmin']), statisticsControl.getDashboardStats)

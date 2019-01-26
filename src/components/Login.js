@@ -8,7 +8,8 @@ const initialState = {
   password: '',
   message: '',
   isLoading: true,
-  redirect: false
+  redirect: false,
+  showLink: false
 }
 
 const isLoggedIn = async (dispatch) => {
@@ -74,6 +75,11 @@ const reducer = (state, action) => {
         ...state,
         message: action.message
       }
+    case 'showLink':
+      return {
+        ...state,
+        showLink: true
+      }
     default:
       return state
   }
@@ -106,10 +112,14 @@ const Login = () => {
       })
       .catch(error => {
         dispatch({type: 'showError', message: error.response.data.error})
+        dispatch({type: 'updateField', name: 'showLink', value: false})
+        if (error.response.data.error === 'Your account has yet to be verified, please verify your email by checking your email account') {
+          dispatch({type: 'showLink'})
+        }
       })
   }
 
-  const { email, password, message, redirect, isLoading } = state
+  const { email, password, message, redirect, isLoading, showLink } = state
 
   if (redirect) {
     return <Redirect to='/dashboard/home' />
@@ -160,6 +170,9 @@ const Login = () => {
               <Button color='teal' fluid size='large' type='submit'>Login</Button>
               <Message hidden={message === ''} negative>
                 {message}.<Link to='/forgetpassword'> Forget password?</Link>
+              </Message>
+              <Message hidden={!showLink} positive>
+                <Link to='/requestlink'>Need a new email verification link?</Link>
               </Message>
             </Segment>
           </Form>

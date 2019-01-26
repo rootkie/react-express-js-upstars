@@ -291,9 +291,9 @@ module.exports.changePassword = async (req, res, next) => {
       let message = {
         from: process.env.USER,
         to: user.email,
-        subject: 'UPStars Password Changed',
+        subject: 'UP Stars Password Changed',
         html: `<p>What's up ${user.profile.name}!</p><p>You've asked us to update your password and we want to let you know that it has been
-          updated. You can use your new password to log in now!</p><p>If you didn't ask us to change it, please let us know.</p><p>Thanks,<br />The UPStars Team</p>`
+          updated. You can use your new password to log in now!</p><p>If you didn't ask us to change it, please let us know.</p><p>Thanks,<br />The UP Stars Team</p>`
       }
       transporter.sendMail(message, (error, info) => {
         if (error) {

@@ -232,7 +232,7 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(1)
       const response = await app.post('/register').send(userData)
       expect(response.statusCode).toBe(201)
-    }, 10000)
+    })
 
     test('duplicate email', async () => {
       expect.assertions(2)
@@ -296,7 +296,7 @@ describe('testing auth related API mostly without token', () => {
         captchaCode: 'anyRandomString'
       })
       expect(response.statusCode).toBe(201)
-    }, 10000)
+    })
   })
 
   describe('verify email address exist using links', () => {
@@ -384,7 +384,7 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(1)
       const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
       expect(response.statusCode).toBe(200)
-    }, 8000)
+    })
   })
 
   describe('reset password tests', () => {
@@ -1522,6 +1522,29 @@ describe('testing user side APIs', () => {
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
+    })
+  })
+
+  describe('send new verify email links', () => {
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('no nric throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({nric: 'S9237776F'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('normal email returns empty', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser5@upstars.com', nric: 'S9237776F'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
     })
   })
 })
