@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Header, Table, Checkbox, Modal, Dimmer, Loader, Icon, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { string, object, array } from 'prop-types'
+import { object, array } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -40,7 +40,7 @@ const inlineStyle = {
 
 class AttendanceView extends Component {
   static propTypes = {
-    attendanceId: string.isRequired,
+    match: object.isRequired,
     classData: array.isRequired,
     roles: array.isRequired
   }
@@ -51,7 +51,7 @@ class AttendanceView extends Component {
   // Handles the getAttendance part: attendanceId from AttendanceWrap as the sid of the URI
   constructor (props) {
     super(props)
-    let attendanceId = props.attendanceId
+    let attendanceId = props.match.params.attendanceId
 
     this.state = {
       ...initialState,
@@ -190,7 +190,7 @@ class AttendanceView extends Component {
 
   delete = e => {
     e.preventDefault()
-    const { attendanceId } = this.props
+    const { attendanceId } = this.props.match.params
     const { classId } = this.state
     this.setState({isLoading: true, deleteConfirm: false})
     axios.delete('attendance', {
