@@ -14,7 +14,6 @@ const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
 
   return (
     <Segment attached='bottom' color='red'>
-      {/* <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='name' value={name} onChange={(e, {value, name}) => dispatch({type: 'updateProfile', value, name})} required /> */}
       <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='studentName' value={studentName} onChange={handleChange} required />
       <Form.Group widths='equal'>
         <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='studentIcNumber' value={studentIcNumber} onChange={handleChange} required />

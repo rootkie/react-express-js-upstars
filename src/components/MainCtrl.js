@@ -145,7 +145,6 @@ const MainCtrl = ({match}) => {
   // Runs every time props change, similar to componentDidUpdate
   // Refer to https://reactjs.org/docs/hooks-effect.html#detailed-explanation for more information
   useEffect(() => {
-    console.log('check')
     isUserLoggedIn(dispatch)
   }, [match])
 
@@ -163,7 +162,7 @@ const MainCtrl = ({match}) => {
       return Promise.reject(error)
     })
     return () => {
-      //  Once unmount, remove the axios interceptors so that there might not be unintended effects to other pages etc
+      //  Once unmount, remove the axios interceptors so that there will not be unintended effects to other pages etc
       axios.interceptors.request.eject(myInterceptor)
     }
   }, [match])
