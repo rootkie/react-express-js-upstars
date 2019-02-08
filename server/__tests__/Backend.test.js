@@ -186,7 +186,7 @@ describe('testing auth related API mostly without token', () => {
     // This allows the test to bypass the captcha validation
     const userData =
     {
-      // Best to replace the email with your own personal email to test the response.
+      // Best to log into ethereal email account to check the email is really sent out
       email: 'testuser10@upstars.com',
       profile: {
         name: 'Test User',
@@ -204,120 +204,98 @@ describe('testing auth related API mostly without token', () => {
       password: 'password',
       commencementDate: '2018-09-25T12:53:52+00:00',
       exitDate: '2018-10-25T12:53:52+00:00',
+      preferredTimeSlot: ['Tuesday 7-9.30pm'],
+      captchaCode: 'anyRandomString'
+    }
+
+    // Missing email and password
+    const missingUserInfo = {
+      profile: {
+        name: 'Test User',
+        gender: 'M',
+        dob: '2004-03-09T16:00:00.000Z',
+        nationality: 'singaporean',
+        nric: 'T0423783D',
+        address: 'Upstars Block 999 #13-902',
+        postalCode: 654999,
+        homephone: 63846358,
+        handphone: 94562395,
+        schoolClass: 'Sec 2-5',
+        schoolLevel: 'Upstars Secondary'
+      },
+      commencementDate: '2018-09-25T12:53:52+00:00',
+      exitDate: '2018-10-25T12:53:52+00:00',
       preferredTimeSlot: ['Tuesday 7-9.30pm']
     }
 
-    test('empty captcha, registration not working', async () => {
-      expect.assertions(2)
-      const response = await app.post('/register').send({
-        userData,
-        captchaCode: ''
-      })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
+    test('registration working', async () => {
+      expect.assertions(1)
+      const response = await app.post('/register').send(userData)
+      expect(response.statusCode).toBe(201)
     })
 
-    test('wrong captcha, registration not working', async () => {
+    test('duplicate email', async () => {
       expect.assertions(2)
       const response = await app.post('/register').send({
-        ...userData,
-        captchaCode: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+        ...missingUserInfo,
+        email: 'testuser@upstars.com',
+        password: 'password'
       })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
+      expect(response.statusCode).toBe(409)
+      expect(response.body).toEqual({'error': 'Email already exists.'})
     })
 
-    describe('bypass captcha in these tests', () => {
-      // Missing email and password
-      const missingUserInfo = {
-        profile: {
-          name: 'Test User',
-          gender: 'M',
-          dob: '2004-03-09T16:00:00.000Z',
-          nationality: 'singaporean',
-          nric: 'T0423783D',
-          address: 'Upstars Block 999 #13-902',
-          postalCode: 654999,
-          homephone: 63846358,
-          handphone: 94562395,
-          schoolClass: 'Sec 2-5',
-          schoolLevel: 'Upstars Secondary'
-        },
-        commencementDate: '2018-09-25T12:53:52+00:00',
-        exitDate: '2018-10-25T12:53:52+00:00',
-        preferredTimeSlot: ['Tuesday 7-9.30pm']
-      }
-
-      test('registration working', async () => {
-        expect.assertions(1)
-        const response = await app.post('/register').send(userData)
-        expect(response.statusCode).toBe(201)
-      }, 10000)
-
-      test('duplicate email', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser@upstars.com',
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(409)
-        expect(response.body).toEqual({'error': 'Email already exists.'})
+    test('missing email', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        password: 'password'
       })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    })
 
-      test('missing email', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    test('missing password', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser10@upstars.com'
       })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    })
 
-      test('missing password', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser10@upstars.com'
-        })
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    test('Bad Password', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser10@upstars.com',
+        password: 'pass'
       })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    })
 
-      test('Bad Password', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser10@upstars.com',
-          password: 'pass'
-        })
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    test('Suspended User attempting to register', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser2@upstars.com',
+        password: 'password'
       })
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your account has been suspended. Please contact the administrator for follow up actions'})
+    })
 
-      test('Suspended User attempting to register', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser2@upstars.com',
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(403)
-        expect(response.body).toEqual({'error': 'Your account has been suspended. Please contact the administrator for follow up actions'})
+    test('Recreating new account for deleted users', async () => {
+      expect.assertions(1)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser6@upstars.com',
+        password: 'password',
+        captchaCode: 'anyRandomString'
       })
-
-      // The test(s) to check if the new account is really created and old account randomised is to be done in
-      // UserController.test.js under searching for user via ID
-      test('Recreating new account for deleted users', async () => {
-        expect.assertions(1)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser6@upstars.com',
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(201)
-      }, 10000)
+      expect(response.statusCode).toBe(201)
     })
   })
 
@@ -406,7 +384,7 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(1)
       const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
       expect(response.statusCode).toBe(200)
-    }, 8000)
+    })
   })
 
   describe('reset password tests', () => {
@@ -467,7 +445,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/pendingUsers')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual([{'profile': {'name': 'Lai Ta Toh'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'profile': {'name': 'Mr. Ho Jin He'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}])
+      expect(response.body).toEqual({'users': [{'profile': {'name': 'Lai Ta Toh'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'profile': {'name': 'Mr. Ho Jin He'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
     })
   })
 
@@ -476,7 +454,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/suspended')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual([{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
+      expect(response.body).toEqual({'users': [{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
     })
   })
 
@@ -485,7 +463,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/deleted')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual([{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}])
+      expect(response.body).toEqual({'users': [{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}]})
     })
   })
 
@@ -755,8 +733,8 @@ describe('testing class related APIs', async () => {
     test('invalid ObjectId used for classId throws error', async () => {
       expect.assertions(2)
       const response = await app.get('/class/123')
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('valid but wrong ObjectId used for classId throws error', async () => {
@@ -817,8 +795,8 @@ describe('testing class related APIs', async () => {
     test('stopping a class with empty classId', async () => {
       expect.assertions(2)
       const response = await app.delete('/class').send({classId: []})
-      expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Class not found'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure input is correct.'})
     })
 
     test('stopping a class using wrong Ids throws error', async () => {
@@ -1397,8 +1375,8 @@ describe('testing user side APIs', () => {
     test('Bad classId throws error', async () => {
       expect.assertions(2)
       const response = await app.delete('/users/class').send({userIds: [], classId: '123'})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('correct classId and empty userId succeed', async () => {
@@ -1449,8 +1427,8 @@ describe('testing user side APIs', () => {
     test('Bad classId throws error', async () => {
       expect.assertions(2)
       const response = await app.post('/users/class').send({userIds: [], classId: '123'})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('correct classId returns success', async () => {
@@ -1546,6 +1524,29 @@ describe('testing user side APIs', () => {
       ])
     })
   })
+
+  describe('send new verify email links', () => {
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('no nric throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({nric: 'S9237776F'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('normal email returns empty', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser5@upstars.com', nric: 'S9237776F'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
+    })
+  })
 })
 
 describe('testing student side APIs', () => {
@@ -1622,8 +1623,8 @@ describe('testing student side APIs', () => {
           'overall': '62'
         }
       ]
-    }
-    // 'captchaCode': '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
+    },
+    'captchaCode': '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
   }
   describe('get all active students', () => {
     test('everyone should retrieve all students profile', async () => {
@@ -1739,17 +1740,7 @@ describe('testing student side APIs', () => {
   })
 
   describe('adding student API', () => {
-    test('wrong captcha code throws error', async () => {
-      expect.assertions(2)
-      const response = await app.post('/students').send({
-        ...studentBasicData,
-        captchaCode: '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
-      })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
-    })
-
-    test('bypass captcha, missing fields throw error', async () => {
+    test('missing fields throw error', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData
@@ -1758,7 +1749,7 @@ describe('testing student side APIs', () => {
       expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
     })
 
-    test('bypass captcha, registration success', async () => {
+    test('registration success', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
@@ -1806,18 +1797,8 @@ describe('testing student side APIs', () => {
       exitDate: '',
       exitReason: ''
     }
-    test('wrong captcha code throws error', async () => {
-      expect.assertions(2)
-      const response = await app.post('/admin/students').send({
-        ...studentBasicData,
-        admin,
-        captchaCode: '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
-      })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
-    })
 
-    test('bypass captcha, missing fields throw error', async () => {
+    test('missing fields throw error', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
@@ -1827,7 +1808,7 @@ describe('testing student side APIs', () => {
       expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
     })
 
-    test('bypass captcha, registration success', async () => {
+    test('registration success', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
@@ -1987,8 +1968,8 @@ describe('testing student side APIs', () => {
     test('deleting without proper studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: []})
-      expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
     })
 
     test('deleting with wrong studentId', async () => {
@@ -2001,8 +1982,8 @@ describe('testing student side APIs', () => {
     test('deleting with malfunctioned studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d6770021']})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
     })
 
     test('deleting mass number of studentId returns success', async () => {
@@ -2967,6 +2948,44 @@ describe('testing attendance related APIs', () => {
 
       const attendanceData = await app.get('/attendance/5b990729cef48424966ed0de')
       expect(attendanceData.body.attendances).toBe(null)
+    })
+  })
+})
+
+describe('testing stats and misc related APIs', () => {
+  test('stats should be working', async () => {
+    expect.assertions(8)
+    const response = await app.get('/stats/dashboard')
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toHaveProperty('totalUserEstimate', 9)
+    expect(response.body).toHaveProperty('newUserJoined', 2)
+    expect(response.body).toHaveProperty('totalClassesEstimate', 3)
+    expect(response.body).toHaveProperty('totalClassesHeldEstimate', 5)
+    expect(response.body).toHaveProperty('newClassesHeld', 0)
+    expect(response.body).toHaveProperty('totalStudentEstimate', 5)
+    expect(response.body).toHaveProperty('newStudentJoined', 2)
+  })
+
+  describe('cloning a new class', () => {
+    test('bad classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/123')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a proper classId'})
+    })
+
+    test('non-existent classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/5b97b8f2adfb2e018c64d123')
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'Class not found, please try again'})
+    })
+
+    test('proper classId returns success', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/5b97bdc5058d1e1e64d232f3')
+      expect(response.statusCode).toBe(201)
+      expect(response.body).toHaveProperty('newClassId', expect.any(String))
     })
   })
 })

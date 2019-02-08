@@ -112,6 +112,7 @@ module.exports.changePassword = async (req, res, next) => {
     // Random 15 bit char saved in DB and part of token of auth
     let userName = user.profile.name
     let random = crypto.randomBytes(15).toString('hex')
+    // This part is for aiding tests to create change password tokens so they can pass without issue.
     if (process.env.NODE_ENV === 'development') {
       random = process.env.RESET_PASSWORD_RANDOM
     }
@@ -125,6 +126,10 @@ module.exports.changePassword = async (req, res, next) => {
     let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
       expiresIn: 60 * 30
     })
+
+    user.save()
+    res.status(200).send()
+
     let mailConfig
     if (process.env.NODE_ENV === 'production') {
       // all emails delivered to real address
@@ -157,20 +162,14 @@ module.exports.changePassword = async (req, res, next) => {
     let message = {
       from: process.env.USER,
       to: email,
-      subject: 'Password Request for UPStars',
+      subject: 'Password Request for UP Stars',
       html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b> If you have no idea what this message is about, please ignore it.</b></p>
-       <p>Reset your password by clicking at this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UPStars Team</p>`
+       <p>Reset your password by clicking at this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, (error, info) => {
       if (error) {
         console.log(error)
-        throw({
-          status: 500,
-          error: 'There is something wrong with our mail servers, please contact the administrators for support.'
-        })
       }
-      user.save()
-      res.status(200).send()
     })
   } catch (err) {
     console.log(err)
@@ -265,152 +264,154 @@ module.exports.register = async (req, res, next) => {
     preferredTimeSlot,
     captchaCode
   } = req.body
-  // Special addition for development, may remove during deployment / production
-  let secret = process.env.CAPTCHA_SECRET
-  if (process.env.NODE_ENV === 'development' && typeof (captchaCode) === 'undefined') secret = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
-  axios.post('https://www.google.com/recaptcha/api/siteverify',
-    querystring.stringify({
-      secret,
-      response: captchaCode
-    }))
-    .then(async response => {
-      try {
-        if (response.data.success === false) {
-          throw ({
-            status: 401,
-            error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-          })
-        }
-        // Return error if no password or email provided
-        if (!email || !password || password.length < 6) {
-          throw ({
-            status: 400,
-            error: 'Please provide an email and password that is also at least 6 characters long.'
-          })
-        }
 
-        // Find the user based on email
-        const existingUser = await User.findOne({
-          email
-        })
-        // 3 cases:
-        // case 1: Email exists and user is legitimate
-        if (existingUser && existingUser.status !== 'Deleted' && existingUser.status !== 'Suspended') {
-          throw {
-            status: 409,
-            error: 'Email already exists.'
-          }
-        }
-        // case 2: user has a bad record and is suspended
-        if (existingUser && existingUser.status === 'Suspended') {
-          throw {
-            status: 403,
-            error: 'Your account has been suspended. Please contact the administrator for follow up actions'
-          }
-        }
-        // case 3: user is deleted by admin or by oneself
-        // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
-        // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
-        // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
-        // Using the native crypto package, we generate true random strings to add to email and password so they are really gone.
-        if (existingUser && existingUser.status === 'Deleted') {
-          existingUser.email = crypto.randomBytes(4).toString('hex') + 'deleted' + existingUser._id + '@upstars.com'
-          existingUser.password = existingUser._id + crypto.randomBytes(5).toString('hex')
-          existingUser.status = 'PermaDeleted'
-          await existingUser.save()
-        }
+  try {
+  // Return error if no password or email provided
+    if (!email || !password || password.length < 6) {
+      throw ({
+        status: 400,
+        error: 'Please provide an email and password that is also at least 6 characters long.'
+      })
+    }
 
-        // Create a new user after validating and making sure everything is right
-        const user = new User({
-          email,
-          password,
-          profile,
-          commencementDate,
-          exitDate,
-          preferredTimeSlot,
-          misc: {
-            competence: [{
-              languages: [''],
-              subjects: [''],
-              interests: ['']
-            }]
-          },
-          roles: ['Tutor']
-        })
-        const error = await user.validateSync()
-        if (error) {
-          console.log(error)
-          throw {
-            status: 400,
-            error: 'There is something wrong with the client input. That is all we know.'
-          }
-        }
-        const userObject = await user.save()
+    // Find the user based on email
+    const existingUser = await User.findOne({
+      email
+    })
+    // 3 cases:
+    // case 1: Email exists and user is legitimate
+    if (existingUser && existingUser.status !== 'Deleted' && existingUser.status !== 'Suspended') {
+      throw {
+        status: 409,
+        error: 'Email already exists.'
+      }
+    }
+    // case 2: user has a bad record and is suspended
+    if (existingUser && existingUser.status === 'Suspended') {
+      throw {
+        status: 403,
+        error: 'Your account has been suspended. Please contact the administrator for follow up actions'
+      }
+    }
 
-        // Send verification email: (3 days expiry just to be sure)
-        let objectToEncode = {
-          _id: userObject._id
+    // Create a new user after validating and making sure everything is right
+    const user = new User({
+      email,
+      password,
+      profile,
+      commencementDate,
+      exitDate,
+      preferredTimeSlot,
+      misc: {
+        competence: [{
+          languages: [''],
+          subjects: [''],
+          interests: ['']
+        }]
+      },
+      roles: ['Tutor']
+    })
+
+    // Special addition for development, may remove during deployment / production
+    let secret
+    if (process.env.NODE_ENV === 'development') {
+      secret = process.env.CAPTCHA_SECRET_DEV
+    } else {
+      secret = process.env.CAPTCHA_SECRET_PROD
+    }
+    const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
+      querystring.stringify({
+        secret,
+        response: captchaCode
+      }))
+
+    if (response.data.success === false) {
+      throw ({
+        status: 401,
+        error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+      })
+    }
+
+    // case 3: user is deleted by admin or by oneself
+    // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
+    // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
+    // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
+    // Using the native crypto package, we generate true random strings to add to email and password so they are really gone.
+    if (existingUser && existingUser.status === 'Deleted') {
+      existingUser.email = crypto.randomBytes(4).toString('hex') + 'deleted' + existingUser._id + '@upstars.com'
+      existingUser.password = existingUser._id + crypto.randomBytes(5).toString('hex')
+      existingUser.status = 'PermaDeleted'
+      await existingUser.save()
+    }
+
+    const error = await user.validateSync()
+    if (error) {
+      console.log(error)
+      throw {
+        status: 400,
+        error: 'There is something wrong with the client input. That is all we know.'
+      }
+    }
+    const userObject = await user.save()
+    res.status(201).send()
+
+    // Send verification email: (3 days expiry just to be sure)
+    let objectToEncode = {
+      _id: userObject._id
+    }
+    let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
+    let mailConfig
+    if (process.env.NODE_ENV === 'production') {
+      // all emails delivered to real address
+      mailConfig = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
         }
-        let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL)
-        let mailConfig
-        if (process.env.NODE_ENV === 'production') {
-          // all emails delivered to real address
-          mailConfig = {
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-              type: 'OAuth2',
-              user: process.env.USER,
-              clientId: process.env.CLIENT_ID,
-              clientSecret: process.env.CLIENT_SECRET,
-              refreshToken: process.env.REFRESH_TOKEN
-            }
-          }
-        } else {
-          // all emails caught by nodemailer in house ethereal.email service
-          // Login with the user and pass in https://ethereal.email/login to view the message
-          mailConfig = {
-            host: 'smtp.ethereal.email',
-            port: 587,
-            auth: {
-              user: process.env.TEST_EMAIL,
-              pass: process.env.TEST_EMAIL_PW
-            }
-          }
+      }
+    } else {
+      // all emails caught by nodemailer in house ethereal.email service
+      // Login with the user and pass in https://ethereal.email/login to view the message
+      mailConfig = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: process.env.TEST_EMAIL,
+          pass: process.env.TEST_EMAIL_PW
         }
-        let transporter = nodemailer.createTransport(mailConfig)
-        let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
-        let message = {
-          from: process.env.USER,
-          to: email,
-          subject: 'Thanks for joining UPStars!',
-          html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
+      }
+    }
+    let transporter = nodemailer.createTransport(mailConfig)
+    let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
+    let message = {
+      from: process.env.USER,
+      to: email,
+      subject: 'Thanks for joining UP Stars!',
+      html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
            <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
-           <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UPStars Team</p>`
-        }
-        transporter.sendMail(message, async (error, info) => {
-          if (error) {
-            console.log(error)
-            await User.deleteOne({ _id: userObject._id })
-            throw({
-              status: 500,
-              error: 'There is something wrong with our mail servers, please contact the administrators for support.'
-            })
-          } else {
-            console.log('Message sent')
-            res.status(201).send()
-          }
-        })
-      } catch (err) {
-        console.log(err)
-        if (err.status) {
-          res.status(err.status).send({
-            error: err.error
-          })
-        } else next(err)
+           <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
+    }
+    transporter.sendMail(message, async (error, info) => {
+      if (error) {
+        console.log(error)
+      } else {
+        console.log('Message sent')
       }
     })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
 }
 
 module.exports.verifyEmail = async (req, res, next) => {
@@ -518,6 +519,85 @@ module.exports.refreshToken = async (req, res, next) => {
           return result(false, null)
         }
         return result(true, generateToken(user))
+      }
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
+module.exports.newLink = async (req, res, next) => {
+  try {
+    const { email, nric } = req.body
+    if (!email || !nric) {
+      throw ({
+        status: 400,
+        error: 'Please provide an email address and nric'
+      })
+    }
+    let rawUser = await User.findOne({
+      email,
+      'profile.nric': nric
+    })
+    if (!rawUser || rawUser.status !== 'Unverified') {
+      // Not to reveal if the email address is actually registered
+      return res.status(200).send()
+    }
+    // This is for the scenario which the user exists, then the email will be sent.
+    res.status(200).send()
+    let objectToEncode = {
+      _id: rawUser._id
+    }
+    let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
+    let mailConfig
+    if (process.env.NODE_ENV === 'production') {
+      // all emails delivered to real address
+      mailConfig = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
+        }
+      }
+    } else {
+      // all emails caught by nodemailer in house ethereal.email service
+      // Login with the user and pass in https://ethereal.email/login to view the message
+      mailConfig = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+          user: process.env.TEST_EMAIL,
+          pass: process.env.TEST_EMAIL_PW
+        }
+      }
+    }
+    let transporter = nodemailer.createTransport(mailConfig)
+    let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
+    let message = {
+      from: process.env.USER,
+      to: email,
+      subject: 'Thanks for joining UP Stars!',
+      html: `<p>Welcome, ${rawUser.profile.name}!</p><p>Thanks for joining UP Stars as a volunteer. We would love to have you on board.</p>
+            <p>You have requested for a new link to verify your account. If you did not made this request, please contact our administrator(s).</p>
+            <p>We would like you to verify your account by clicking on the following link:</p>
+           <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${rawUser.email}</p>
+           <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
+    }
+    transporter.sendMail(message, async (error, info) => {
+      if (error) {
+        console.log(error)
+      } else {
+        console.log('Message sent')
       }
     })
   } catch (err) {

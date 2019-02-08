@@ -1,6 +1,7 @@
 const Class = require('../models/class')
 const Student = require('../models/student')
 const User = require('../models/user')
+const mongoose = require('mongoose')
 
 // SuperAdmin
 module.exports.addClass = async (req, res, next) => {
@@ -52,6 +53,45 @@ module.exports.addClass = async (req, res, next) => {
 
     res.status(201).json({
       newClass: newClassCreated
+    })
+  } catch (err) {
+    console.log(err)
+    if (err.status) {
+      res.status(err.status).send({
+        error: err.error
+      })
+    } else next(err)
+  }
+}
+
+// SuperAdmin
+module.exports.cloneClass = async (req, res, next) => {
+  const classId = req.params.id
+  try {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
+      throw ({
+        status: 400,
+        error: 'Please provide a proper classId'
+      })
+    }
+    const oldClassData = await Class.findById(classId)
+    if (!oldClassData) {
+      throw({
+        status: 404,
+        error: 'Class not found, please try again'
+      })
+    }
+    oldClassData._id = mongoose.Types.ObjectId()
+    oldClassData.className = oldClassData.className + ' Clone'
+    oldClassData.status = 'Active'
+    oldClassData.startDate = new Date()
+    oldClassData.createdAt = new Date()
+    oldClassData.updatedAt = new Date()
+    oldClassData.isNew = true
+    const newClassData = await oldClassData.save()
+
+    res.status(201).json({
+      newClassId: newClassData._id
     })
   } catch (err) {
     console.log(err)
@@ -150,7 +190,7 @@ module.exports.getClassById = async (req, res, next) => {
     let classId = req.params.id
 
     // Check if classId is given
-    if (!classId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide a classId'
@@ -186,7 +226,7 @@ module.exports.deleteClass = async (req, res, next) => {
     classId
   } = req.body
   try {
-    if (!classId) {
+    if (!classId || classId.length === 0 || !(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide at least 1 classId and ensure input is correct.'
@@ -231,7 +271,7 @@ module.exports.addStudentsToClass = async (req, res, next) => {
     } = req.body
 
     // Check that classId exist
-    if (!classId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide a classId'
@@ -292,7 +332,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
     } = req.body
 
     // Check that classId exist
-    if (!classId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide a classId'
@@ -345,7 +385,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
     } = req.body
 
     // Check that classId exist
-    if (!classId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide a classId'
@@ -401,7 +441,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
     } = req.body
 
     // Check that classId exist
-    if (!classId) {
+    if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
       throw ({
         status: 400,
         error: 'Please provide a classId'

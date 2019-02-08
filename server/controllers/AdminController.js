@@ -127,7 +127,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
   } = req.body
   try {
     // Check userId is provided
-    if (!userId) {
+    if (!userId || userId.length === 0 || !(/^[0-9a-fA-F]{24}$/).test(userId)) {
       throw ({
         status: 400,
         error: 'Please provide a userId and ensure input is correct'

@@ -1,19 +1,17 @@
-import React, { Component } from 'react'
+import React, { useReducer, useEffect } from 'react'
 import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
 import axios from 'axios'
-import Topbar from './Topbar'
-import SideMenu from './SideMenu'
+import Topbar from './Misc/Topbar'
+import SideMenu from './Misc/SideMenu'
 import ClassWrap from './Class/ClassWrap'
-import Home from './Home'
-import { object } from 'prop-types'
+import Home from './Home/Home'
+import PropTypes from 'prop-types'
 import VolunteerWrap from './Volunteer/VolunteerWrap'
 import AttendanceWrap from './Attendance/AttendanceWrap'
 import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
-import FourZeroThree from './Error/403'
-import FourZeroFour from './Error/404'
-import FiveHundred from './Error/500'
+import ErrorPage from './Error/ErrorPage'
 
 // For development
 axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
@@ -22,6 +20,7 @@ axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
+// CSS Stuff for the dashboard page
 const GridStyle = {
   paddingTop: '4em',
   height: '100vh',
@@ -33,187 +32,201 @@ const MainContentStyle = {
   overflow: 'auto'
 }
 
+// Global Functions
 let forceRefresh
-let myInterceptor
 
-class MainCtrl extends Component {
-  static propTypes = {
-    match: object
+const initialState = {
+  isLoggedIn: true,
+  confirm: false,
+  roles: [],
+  name: '',
+  _id: '',
+  errorCode: false
+}
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'success':
+      const { roles, _id, name } = action
+      return {
+        ...state,
+        roles,
+        name,
+        _id,
+        confirm: true
+      }
+    case 'redirectLogin':
+      return {
+        ...state,
+        isLoggedIn: false
+      }
+    case 'showError':
+      return {
+        ...state,
+        errorCode: action.errorCode
+      }
+    default:
+      return state
   }
+}
 
-  state = {
-    isLoggedIn: true,
-    confirm: false,
-    name: '',
-    id: '',
-    errorCode: false
+const isUserLoggedIn = async (dispatch) => {
+  try {
+    const response = await axios.get('/check')
+    // If expired or malformed, we check if refresh token is available
+    // If it is, send it in to get a new x-access-token (a faulty refresh token will return null as access token)
+    // isLoggedIn() is then called again to ensure access token is valid
+    // Else if there are any errors anywhere, auth status default to false.
+    if (response.data.auth === false) {
+      let refreshToken = window.localStorage.refreshToken
+      if (!refreshToken) {
+        // Redirect them to Login Page if they don't even if a refresh token.
+        dispatch({type: 'redirectLogin'})
+      } else {
+        let rawRefreshResponse = await axios.post('/refresh', { refreshToken })
+        if (rawRefreshResponse.data.status === true) {
+          const { token } = rawRefreshResponse.data
+          window.localStorage.setItem('token', token)
+          axios.defaults.headers.common['x-access-token'] = token
+          return isUserLoggedIn(dispatch)
+        } else {
+          // If refresh token is invalid, remove both and redirect them to Login for security.
+          window.localStorage.removeItem('token')
+          window.localStorage.removeItem('refreshToken')
+          dispatch({type: 'redirectLogin'})
+        }
+      }
+    }
+    if (response.data.auth === true) {
+      let { name, _id, roles } = response.data
+      dispatch({type: 'success', name, _id, roles})
+      return
+    }
+    // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
+    // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
+    if (response.data.auth === 'expiring') {
+      let { name, _id, roles } = response.data
+      dispatch({type: 'success', name, _id, roles})
+      let refreshToken = window.localStorage.refreshToken
+      if (refreshToken) {
+        const rawRefreshResponse = await axios.post('/refresh', { refreshToken })
+        const { token, status } = rawRefreshResponse.data
+        if (status === true) {
+          window.localStorage.setItem('token', token)
+          axios.defaults.headers.common['x-access-token'] = token
+          return
+        } else {
+          window.localStorage.removeItem('token')
+          window.localStorage.removeItem('refreshToken')
+          dispatch({type: 'redirectLogin'})
+        }
+      }
+    }
+  } catch (err) {
+    console.log(err)
+    dispatch({type: 'redirectLogin'})
   }
+}
 
-  isLoggedIn = () => {
-    axios.get('/check')
-      .then(response => {
-        // If expired or malformed, we check if refresh token is available (refresh token is king)
-        // If it is, send it in to get a new x-access-token (a faulty refresh token will return null as access token)
-        // isLoggedIn() is then called again to ensure access token is valid
-        // Else if there are any errors anywhere, default auth is false.
-        if (response.data.auth === false) {
-          let refreshToken = window.localStorage.refreshToken
-          if (!refreshToken) {
-            // Redirect them to Login Page if they don't even if a refresh token.
-            this.setState({ isLoggedIn: false })
-          } else {
-            axios.post('/refresh', { refreshToken })
-              .then(response => {
-                if (response.data.status === true) {
-                  window.localStorage.setItem('token', response.data.token)
-                  axios.defaults.headers.common['x-access-token'] = response.data.token
-                  this.isLoggedIn()
-                } else {
-                  // Well if refresh token is invalid, remove both to make stuff easier and redirect them to Login.
-                  window.localStorage.removeItem('token')
-                  window.localStorage.removeItem('refreshToken')
-                  this.setState({ isLoggedIn: false })
-                }
-              })
-              .catch(err => {
-                console.log(err)
-                this.setState({ isLoggedIn: false })
-              })
-          }
-        }
-        if (response.data.auth === true) {
-          let { name, _id, roles } = response.data
-          this.setState({ name, _id, roles, confirm: true })
-        }
-        // Silently change access token in the background, everything will continue. Even if refresh is invalid, simply ignore.
-        // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
-        if (response.data.auth === 'expiring') {
-          let { name, _id, roles } = response.data
-          this.setState({ name, _id, roles, confirm: true })
-          let refreshToken = window.localStorage.refreshToken
-          if (refreshToken) {
-            axios.post('/refresh', { refreshToken })
-              .then(response => {
-                if (response.data.status === true) {
-                  window.localStorage.setItem('token', response.data.token)
-                  axios.defaults.headers.common['x-access-token'] = response.data.token
-                } else {
-                  window.localStorage.removeItem('token')
-                  window.localStorage.removeItem('refreshToken')
-                  this.setState({ isLoggedIn: false })
-                }
-              })
-              .catch(err => {
-                console.log(err)
-                this.setState({ isLoggedIn: false })
-              })
-          }
-        }
-      }).catch((err) => {
-        this.setState({ isLoggedIn: false })
-        console.log(err)
-      })
-  }
+const setTimeInterval = (dispatch) => {
+  //  Force a token refresh every 10 mins
+  forceRefresh = window.setInterval(() => {
+    isUserLoggedIn(dispatch)
+  }, 600000)
+}
 
-  constructor () {
-    super()
-    this.isLoggedIn()
-    this.setTimeInterval()
-    // Catch all 403 /404 / 500 errors that occur in the dashboard. Login is not affected.
-    myInterceptor = axios.interceptors.response.use(response => {
+const clearTimeInterval = () => {
+  window.clearInterval(forceRefresh)
+}
+
+const MainCtrl = ({match}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  // Runs every time props change, similar to componentDidUpdate
+  // Refer to https://reactjs.org/docs/hooks-effect.html#detailed-explanation for more information
+  useEffect(() => {
+    console.log('check')
+    isUserLoggedIn(dispatch)
+  }, [match])
+
+  // seperate useEffect Hook to allow ease of cleanup
+  useEffect(() => {
+    // Catch all non 2xx responses that occur in the dashboard. Login is not affected.
+    const myInterceptor = axios.interceptors.response.use(response => {
       return response
     }, error => {
       if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
         let errorCode = error.response.status
-        this.setState({errorCode})
-        return true
+        dispatch({type: 'showError', errorCode})
       }
-      // Error catches in the local code are ignored.
+      // Error such as 400 || 401 are handled locally.
       return Promise.reject(error)
     })
-  }
-  // Deprecated function as of React 16 and above.. > https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
-  // Thus replacing componentWillReceiveProps with componentDidUpdate. Initial testing seems good to go.
-  componentDidUpdate (prevProps) {
-    if (this.props !== prevProps) {
-      this.clearTimeInterval()
-      // Force confirm state of "confirm" every 10 minutes so there wont be issues that the main() renders after token expire
-      // While the state of "confirm" is still true as the user afk for 30 minutes. (Token will be refreshed but calls are made with old tokens)
-      this.isLoggedIn()
-      this.setTimeInterval()
+    return () => {
+      //  Once unmount, remove the axios interceptors so that there might not be unintended effects to other pages etc
+      axios.interceptors.request.eject(myInterceptor)
     }
-  }
+  }, [match])
 
-  componentWillUnmount () {
-    // Once unmount, remove the axios interceptors so that there might not be unintended effects to other pages etc
-    axios.interceptors.request.eject(myInterceptor)
-    this.clearTimeInterval()
-  }
-
-  setTimeInterval = () => {
-    forceRefresh = window.setInterval(this.changeState, 600000)
-  }
-
-  clearTimeInterval = () => {
-    window.clearInterval(forceRefresh)
-  }
-  changeState = () => {
-    this.isLoggedIn()
-  }
-
-  render () {
-    const { path } = this.props.match
-    const { name, _id, roles, errorCode, isLoggedIn } = this.state
-
-    if (!isLoggedIn) {
-      return <Redirect to='/login' />
+  useEffect(() => {
+    setTimeInterval(dispatch)
+    // Clean-up automatically when props changes.
+    return () => {
+      clearTimeInterval()
     }
+  }, [match])
 
-    if (errorCode === 403) {
-      return (
-        <FourZeroThree />
-      )
-    }
-    if (errorCode === 404) {
-      return (
-        <FourZeroFour />
-      )
-    }
-    if (errorCode === 500) {
-      return (
-        <FiveHundred />
-      )
-    } else if (isLoggedIn && this.state.confirm) {
-      return (
-        <Container fluid>
-          <Topbar name={name} _id={_id} />
-          <Grid style={GridStyle} stackable>
-            <SideMenu roles={roles} />
-            <Grid.Column width={13} style={MainContentStyle}>
-              {/* OP is for type of OPeration (Add / Delete etc) while SID is for the unique ID allocated for the job */}
-              {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
+  const { path } = match
+  const { name, _id, roles, errorCode, isLoggedIn, confirm } = state
+
+  if (!isLoggedIn) {
+    return <Redirect to='/login' />
+  } if (errorCode === 404) {
+    return (
+      <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />
+    )
+  } if (errorCode === 403) {
+    return (
+      <ErrorPage statusCode={'403 FORBIDDEN'} errorMessage={'Your client does not have the permission to access this! That\'s all we know.'} />
+    )
+  } if (errorCode === 500) {
+    return (
+      <ErrorPage statusCode={'500 INTERNAL SERVER ERROR'} errorMessage={'The server encountered an error and could not complete your request. Please try again later.'} />
+    )
+  } else if (isLoggedIn && confirm) {
+    return (
+      <Container fluid>
+        <Topbar name={name} _id={_id} />
+        <Grid style={GridStyle} stackable>
+          <SideMenu roles={roles} />
+          <Grid.Column width={13} style={MainContentStyle}>
+            {/* Path in this case refers to /dashboard that is inherited */}
+            {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
-              <Switch>
-                <Route exact path={`${path}/home`} render={() => <Home />} />
-                <Route exact path={`${path}/students/:op/:sid?`} render={(props) => <StudentWrap roles={roles} {...props} />} />
-                <Route exact path={`${path}/classes/:op/:sid?`} render={props => <ClassWrap roles={roles} {...props} />} />
-                <Route exact path={`${path}/volunteer/:op/:sid?`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
-                <Route exact path={`${path}/attendance/:op/:sid?`} render={props => <AttendanceWrap roles={roles} {...props} />} />
-                <Route exact path={`${path}/admin/:op`} render={(props) => <AdminWrap {...props} />} />
-                <Route component={FourZeroFour} />
-              </Switch>
-            </Grid.Column>
-          </Grid>
-        </Container>
-      )
-    } else {
-      return (
-        <Dimmer active>
-          <Loader>Loading</Loader>
-        </Dimmer>
-      )
-    }
+            <Switch>
+              <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
+              <Route path={`${path}/students`} render={props => <StudentWrap roles={roles} {...props} />} />
+              <Route path={`${path}/classes`} render={props => <ClassWrap roles={roles} {...props} />} />
+              <Route path={`${path}/volunteer`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
+              <Route path={`${path}/attendance`} render={props => <AttendanceWrap roles={roles} {...props} />} />
+              <Route path={`${path}/admin`} render={props => <AdminWrap {...props} />} />
+              <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
+            </Switch>
+          </Grid.Column>
+        </Grid>
+      </Container>
+    )
+  } else {
+    return (
+      <Dimmer active>
+        <Loader>Loading</Loader>
+      </Dimmer>
+    )
   }
 }
 
-export default (MainCtrl)
+MainCtrl.propTypes = {
+  match: PropTypes.object.isRequired
+}
+
+export default MainCtrl

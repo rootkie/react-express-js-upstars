@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Route, Switch } from 'react-router-dom'
 import { array, object } from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
@@ -6,6 +7,7 @@ import StudentEdit from './StudentEdit'
 import StudentViewOthers from './StudentViewOthers'
 import axios from 'axios'
 import { filterData } from '../../utils'
+import ErrorPage from '../Error/ErrorPage'
 
 class StudentWrap extends Component {
   static propTypes = {
@@ -102,13 +104,15 @@ class StudentWrap extends Component {
   render () {
     const { studentData, otherStudentData, filteredData, isLoading, filteredDataOthers } = this.state
     const { roles, match } = this.props
-    const { op, sid } = match.params
     return (
       <div>
-        {op === 'add' && <StudentForm addStudent={this.addStudent} /> }
-        {op === 'edit' && <StudentEdit id={sid} editStudent={this.editStudent} roles={roles} />}
-        {op === 'view' && <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} roles={roles} />}
-        {op === 'viewOthers' && <StudentViewOthers studentData={filteredDataOthers || otherStudentData} searchFilter={this.searchFilterOthers} isLoading={isLoading} />}
+        <Switch>
+          <Route exact path={`${match.path}/add`} render={() => <StudentForm addStudent={this.addStudent} />} />
+          <Route exact path={`${match.path}/edit/:id`} render={props => <StudentEdit editStudent={this.editStudent} roles={roles} {...props} />} />
+          <Route exact path={`${match.path}/view`} render={() => <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} roles={roles} />} />
+          <Route exact path={`${match.path}/viewOthers`} render={() => <StudentViewOthers studentData={filteredDataOthers || otherStudentData} searchFilter={this.searchFilterOthers} isLoading={isLoading} />} />
+          <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
+        </Switch>
       </div>
     )
   }

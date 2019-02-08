@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Form, Button, Header, Table, Icon, Menu, Segment, Message, Dimmer, Loader, Modal, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
-import { string, array, object } from 'prop-types'
+import { array, object } from 'prop-types'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -80,7 +80,7 @@ const inlineStyle = {
 
 class VolunteerEdit extends Component {
   static propTypes = {
-    userId: string,
+    match: object.isRequired,
     roles: array.isRequired
   }
   static contextTypes = {
@@ -91,7 +91,7 @@ class VolunteerEdit extends Component {
   }
 
   componentWillMount () {
-    this.getProfile(this.props.userId)
+    this.getProfile(this.props.match.params.userId)
   }
 
   getProfile = (userId) => {
@@ -200,7 +200,7 @@ class VolunteerEdit extends Component {
 
     if (error.length === 0) {
       let volunteerData = {
-        userId: this.props.userId,
+        userId: this.props.match.params.userId,
         exitDate,
         preferredTimeSlot,
         profile: {
@@ -250,7 +250,7 @@ class VolunteerEdit extends Component {
 
       axios.post('/users', volunteerData)
         .then(response => {
-          this.getProfile(this.props.userId)
+          this.getProfile(this.props.match.params.userId)
           this.setState({ isLoading: false, buttonContent: 'Toggle Edit Mode', edit: false })
         })
         .catch((err) => {
@@ -336,7 +336,7 @@ class VolunteerEdit extends Component {
   }
 
   handleDeactivate = (e) => {
-    let { userId } = this.props
+    let { userId } = this.props.match.params
     axios.delete('users', { data: {
       userId
     }

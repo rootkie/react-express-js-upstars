@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
+import { Route, Switch } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import VolunteerView from './VolunteerView'
 import VolunteerEdit from './VolunteerEdit'
 import VolunteerChangePassword from './VolunteerChangePassword'
 import axios from 'axios'
+import ErrorPage from '../Error/ErrorPage'
 
 class VolunteerWrap extends Component {
   static propTypes = {
@@ -31,12 +33,14 @@ class VolunteerWrap extends Component {
 
   render () {
     const { match, _id, roles } = this.props
-    const { op, sid } = match.params
     return (
       <div>
-        {op === 'changepassword' && <VolunteerChangePassword _id={_id} /> }
-        {op === 'profile' && <VolunteerEdit userId={sid} roles={roles} />}
-        {op === 'view' && <VolunteerView deleteUser={this.deleteUser} roles={roles} />}
+        <Switch>
+          <Route exact path={`${match.path}/changepassword`} render={() => <VolunteerChangePassword _id={_id} />} />
+          <Route exact path={`${match.path}/profile/:userId`} render={props => <VolunteerEdit roles={roles} {...props} />} />
+          <Route exact path={`${match.path}/view`} render={() => <VolunteerView deleteUser={this.deleteUser} roles={roles} />} />
+          <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
+        </Switch>
       </div>
     )
   }

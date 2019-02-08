@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Message, Button, Table, Icon, Menu, Segment, Dimmer, Loader, Header, Grid } from 'semantic-ui-react'
-import { func, string, array } from 'prop-types'
+import { func, object, array } from 'prop-types'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import axios from 'axios'
@@ -103,7 +103,7 @@ const initialState = {
 class StudentEdit extends Component {
   static propTypes = {
     editStudent: func,
-    id: string,
+    match: object,
     roles: array.isRequired
   }
 
@@ -125,7 +125,7 @@ class StudentEdit extends Component {
   // But since reacts runs it async, it is likely the API call is only completed after the rendering starts, thus the initial state declares them to
   // be blank fields, users will however be unable to see because of the loading screen.
   componentWillMount () {
-    this.getStudent(this.props.id)
+    this.getStudent(this.props.match.params.id)
   }
 
   getStudent = (studentId) => {

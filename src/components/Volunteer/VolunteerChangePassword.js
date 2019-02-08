@@ -57,7 +57,7 @@ class VolunteerChangePassword extends Component {
           style={{ height: '100%' }}
           verticalAlign='middle'>
           <Grid.Column style={{ maxWidth: 700 }}>
-            <Image size='medium' centered src={require('./../logo.png')} />
+            <Image size='medium' centered src={require('./../Misc/logo.png')} />
             <Header as='h2' color='teal' textAlign='center'>
               Change User Password
             </Header>
