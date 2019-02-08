@@ -21,7 +21,7 @@ const AttendanceSchema = new Schema({
     required: true
   },
   users: [{
-    list: {
+    user: {
       type: Schema.ObjectId,
       ref: 'User',
       required: true
@@ -33,7 +33,7 @@ const AttendanceSchema = new Schema({
     _id: false
   }],
   students: [{
-    list: {
+    student: {
       type: Schema.ObjectId,
       ref: 'Student',
       required: true
