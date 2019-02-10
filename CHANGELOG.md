@@ -1,4 +1,42 @@
 # Change Log
+## [v0.5.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.5.0-beta) (February 8, 2019, 5.20pm)
+- [Trial] React Hooks in v.16.7.0-alpha2
+- [Changed] Classes to React functional components in StudentRegister
+- [Added] React Hooks for useReducer to mimick Redux without boilerplate
+- [Removed] Individual error pages
+- [Added] Single Error Page with props
+- [Changed] Route function from component to render
+- [Changed] Classes are changed to functions for Main related pages.
+- [Changed] Moved VolunteerRegistration to hooks
+- [Changed] UI for better sign up experience
+- [Changed] File Structures to break up functions to smaller ones.
+- [Changed] SideMenu
+- [Changed] Login to React Hooks
+- [Removed] Unnecessary filler page
+- [Fixed] ReCaptcha validation issue on server for Student and User Registration purposes
+- [Changed] Backend tests for the various APIs changed
+- [Added] More env variables to suit new code changes
+- [Reverted] ReCaptcha validation to clicking on terms , not accepting
+- [Fixed] User directed wrong page when timeout in register
+- [Changed] Hooks for EmailVerify.js
+- [Changed] ForgetPass to Hooks
+- [Changed] ResetPass to Hooks
+- [Fixed] Mongoose Deprecation issues and warnings
+- [Added] APIs for class cloning and overall stats
+- [Added] Backend tests for these 2 APIs
+- [Fixed] Basic Mongoose ID validation
+- [Added] Home page
+- [Hooks] #71 (Home Page)
+- [Added] Privacy policies to T&C
+- [Edited] Move function blocks out from main block
+- [Fixed] React Recaptcha timeout after submit
+- [Changed] Files organisation
+- [Added] Send email verification link
+- [Fixed] Fixed #74
+- [Changed] MainCtrl.js to Hooks
+- [Changed] All routes to be clearer
+- [Added] ErrorPage link to every wrapper
+
 ## [v0.4.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.4.0-beta) (December 15, 2018, 2.33pm)
 - [Changed] Update process is changed so that mongoose validation works properly
 - [Added] Stricter schema validation in Users and Students
