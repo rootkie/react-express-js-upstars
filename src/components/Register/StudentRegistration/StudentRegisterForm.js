@@ -392,7 +392,7 @@ const StudentForm = () => {
             <ReCAPTCHA
               ref={recaptchaRef}
               size='invisible'
-              sitekey='6LdCS1IUAAAAAHaYU_yJyFimpPuJShH-i80kFj3F' // Dev key under Ying Keat's account (yingkeatwon@gmail.com)
+              sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
               onChange={() => dispatch({type: 'captchaChange'})}
               onExpired={() => dispatch({type: 'captchaExpired'})}
             />

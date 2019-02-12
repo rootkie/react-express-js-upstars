@@ -16,10 +16,11 @@ module.exports.login = async (req, res, next) => {
       email
     } = req.body
     if (!email || !password) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide an email address and password.'
-      })
+      }
+      throw error
     }
 
     // Search for any users whose accounts are not yet deleted
@@ -32,31 +33,35 @@ module.exports.login = async (req, res, next) => {
 
     // Checks if user exists
     if (!user) {
-      throw ({
+      const error = {
         status: 401,
         error: 'Wrong email or password'
-      })
+      }
+      throw error
     }
     // compare password
     const isMatch = await user.comparePasswordPromise(password)
     if (!isMatch) {
-      throw ({
+      const error = {
         status: 401,
         error: 'Wrong email or password'
-      })
+      }
+      throw error
     }
     if (user.status === 'Suspended') {
-      throw ({
+      const error = {
         status: 403,
         error: 'Your account has been suspended, please contact the administrator for follow up actions'
-      })
+      }
+      throw error
     }
 
     if (user.status === 'Unverified') {
-      throw ({
+      const error = {
         status: 403,
         error: 'Your account has yet to be verified, please verify your email by checking your email account'
-      })
+      }
+      throw error
     }
 
     res.json({
@@ -64,7 +69,7 @@ module.exports.login = async (req, res, next) => {
       refresh: generateRefresh(user._id)
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -80,16 +85,17 @@ module.exports.changePassword = async (req, res, next) => {
       nric
     } = req.body
     if (!email || !nric) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide an email address and your NRIC number.'
-      })
+      }
+      throw error
     }
 
     // Search for any users whose accounts are not yet deleted
     const user = await User.findOne({
       email,
-      'profile.nric': nric,
+      nric,
       status: {
         $ne: 'Deleted'
       }
@@ -97,22 +103,24 @@ module.exports.changePassword = async (req, res, next) => {
 
     // Checks if user exists
     if (!user) {
-      throw ({
+      const error = {
         status: 403,
         error: 'Wrong email or nric. Please try again'
-      })
+      }
+      throw error
     }
     if (user.status === 'Suspended') {
-      throw ({
+      const error = {
         status: 403,
         error: 'Your account has been suspended, please contact the administrator for follow up actions'
-      })
+      }
+      throw error
     }
     // Fix plaintext security flaw: using encoded jwt to send as link for password change.
     // Random 15 bit char saved in DB and part of token of auth
-    let userName = user.profile.name
+    let userName = user.name
     let random = crypto.randomBytes(15).toString('hex')
-    // This part is for aiding tests to create change password tokens so they can pass without issue.
+    // This part is for aiding tests to create the same tokens so they can pass successfully.
     if (process.env.NODE_ENV === 'development') {
       random = process.env.RESET_PASSWORD_RANDOM
     }
@@ -130,6 +138,7 @@ module.exports.changePassword = async (req, res, next) => {
     user.save()
     res.status(200).send()
 
+    // The email is sent after the user data is successfully saved and a 200 reply is returned
     let mailConfig
     if (process.env.NODE_ENV === 'production') {
       // all emails delivered to real address
@@ -157,14 +166,14 @@ module.exports.changePassword = async (req, res, next) => {
         }
       }
     }
-    let transporter = nodemailer.createTransport(mailConfig)
-    let link = `${process.env.DOMAIN_NAME}/resetpassword/${encodedString}`
-    let message = {
+    const transporter = nodemailer.createTransport(mailConfig)
+    const link = `${process.env.DOMAIN_NAME}/resetpassword/${encodedString}`
+    const message = {
       from: process.env.USER,
       to: email,
       subject: 'Password Request for UP Stars',
       html: `<p>Hello ${userName},</p><p>A user has requested a password retrieval for this email at ${email}.<b> If you have no idea what this message is about, please ignore it.</b></p>
-       <p>Reset your password by clicking at this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UP Stars Team</p>`
+       <p>Reset your password by clicking this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, (error, info) => {
       if (error) {
@@ -172,7 +181,7 @@ module.exports.changePassword = async (req, res, next) => {
       }
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -188,90 +197,78 @@ module.exports.resetPassword = async (req, res, next) => {
       token
     } = req.body
     if (!password || !token) {
-      throw ({
+      const error = {
         status: 400,
         error: 'There\'s something wrong, please try again.'
-      })
+      }
+      throw error
     } else if (password.length < 6) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a password that is at least 6 characters long.'
-      })
+      }
+      throw error
     }
-
-    jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
-      try {
-        if (err) {
-          throw ({
-            status: 403,
-            error: 'Something went wrong, please try again.'
-          })
-        }
-        let { email, _id, random } = decoded
-        const user = await User.findOne({
-          email,
-          _id,
-          resetPasswordToken: random,
-          status: {
-            $ne: 'Deleted'
-          }
-        })
-        // Checks if user exists
-        if (!user) {
-          throw ({
-            status: 403,
-            error: 'Something went wrong, please try again.'
-          })
-        }
-        if (user.status === 'Suspended') {
-          throw ({
-            status: 403,
-            error: 'Your account has been suspended, please contact the administrator for follow up actions'
-          })
-        }
-        user.password = password
-        user.resetPasswordToken = ''
-        const pwChanged = await user.save()
-        if (pwChanged) {
-          return res.status(200).send()
-        }
-      } catch (err) {
-        console.log(err)
-        if (err.status) {
-          res.status(err.status).send({
-            error: err.error
-          })
-        } else next(err)
+    const decoded = await jwt.verify(token, process.env.SECRET_EMAIL)
+    const { email, _id, random } = decoded
+    const user = await User.findOne({
+      email,
+      _id,
+      resetPasswordToken: random,
+      status: {
+        $ne: 'Deleted'
       }
     })
+    // Checks if user exists
+    if (!user) {
+      const error = {
+        status: 403,
+        error: 'Something went wrong, please try again.'
+      }
+      throw error
+    }
+    if (user.status === 'Suspended') {
+      const error = {
+        status: 403,
+        error: 'Your account has been suspended, please contact the administrator for follow up actions'
+      }
+      throw error
+    }
+    // The code below runs if user does not fail in any of the scenerio above.
+    user.password = password
+    user.resetPasswordToken = ''
+    const pwChanged = await user.save()
+    if (pwChanged) {
+      return res.status(200).send()
+    }
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
+      })
+    }
+    if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError' || err.name === 'NotBeforeError') {
+      res.status(403).send({
+        error: 'An error occurred concerning your tokens, please try again.'
       })
     } else next(err)
   }
 }
 
 module.exports.register = async (req, res, next) => {
-  let {
-    email,
-    password,
-    profile,
-    commencementDate,
-    exitDate,
-    preferredTimeSlot,
-    captchaCode
+  const {
+    email, password, name, dob, gender, nationality, nric, address, postalCode, handphone, homephone, schoolLevel, schoolClass, fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, languages, subjects, interests, purposeObjectives, developmentGoals, commencementDate, exitDate, preferredTimeSlot, captchaCode
   } = req.body
 
   try {
   // Return error if no password or email provided
     if (!email || !password || password.length < 6) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide an email and password that is also at least 6 characters long.'
-      })
+      }
+      throw error
     }
 
     // Find the user based on email
@@ -281,43 +278,65 @@ module.exports.register = async (req, res, next) => {
     // 3 cases:
     // case 1: Email exists and user is legitimate
     if (existingUser && existingUser.status !== 'Deleted' && existingUser.status !== 'Suspended') {
-      throw {
+      const error = {
         status: 409,
         error: 'Email already exists.'
       }
+      throw error
     }
-    // case 2: user has a bad record and is suspended
+    // case 2: user is suspended
     if (existingUser && existingUser.status === 'Suspended') {
-      throw {
+      const error = {
         status: 403,
         error: 'Your account has been suspended. Please contact the administrator for follow up actions'
       }
+      throw error
     }
 
     // Create a new user after validating and making sure everything is right
     const user = new User({
       email,
       password,
-      profile,
+      name,
+      dob,
+      gender,
+      nationality,
+      nric,
+      address,
+      postalCode,
+      handphone,
+      homephone,
+      schoolLevel,
+      schoolClass,
+      fatherName,
+      fatherOccupation,
+      fatherEmail,
+      motherName,
+      motherOccupation,
+      motherEmail,
+      hobbies,
+      careerGoal,
+      formalEducation,
+      coursesSeminar,
+      achievements,
+      cca,
+      cip,
+      workInternExp,
+      languages,
+      subjects,
+      interests,
+      purposeObjectives,
+      developmentGoals,
       commencementDate,
       exitDate,
       preferredTimeSlot,
-      misc: {
-        competence: [{
-          languages: [''],
-          subjects: [''],
-          interests: ['']
-        }]
-      },
       roles: ['Tutor']
     })
 
     // Special addition for development, may remove during deployment / production
-    let secret
+    let secret = process.env.CAPTCHA_SECRET_PROD
     if (process.env.NODE_ENV === 'development') {
       secret = process.env.CAPTCHA_SECRET_DEV
-    } else {
-      secret = process.env.CAPTCHA_SECRET_PROD
     }
     const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
       querystring.stringify({
@@ -326,17 +345,18 @@ module.exports.register = async (req, res, next) => {
       }))
 
     if (response.data.success === false) {
-      throw ({
+      const error = {
         status: 401,
         error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-      })
+      }
+      throw error
     }
 
     // case 3: user is deleted by admin or by oneself
     // If user choose to create a new account after deleting, the old records preserved will be changed while the ID remains and
-    // a new account would be made. Else the user always have the ability to ask the admin to restore their account.
-    // This case, the passwords and emails are changed to follow a unique string. It is not restorable but nonetheless traceable in past attendance records.
-    // Using the native crypto package, we generate true random strings to add to email and password so they are really gone.
+    // a new account would be made. This way, the user always have the ability to ask the admin to restore their deleted account.
+    // Passwords and emails are changed to generate a unique string. It is not for restoration but traceability in past attendance records.
+    // Using the native crypto package, it generates true random strings.
     if (existingUser && existingUser.status === 'Deleted') {
       existingUser.email = crypto.randomBytes(4).toString('hex') + 'deleted' + existingUser._id + '@upstars.com'
       existingUser.password = existingUser._id + crypto.randomBytes(5).toString('hex')
@@ -344,22 +364,23 @@ module.exports.register = async (req, res, next) => {
       await existingUser.save()
     }
 
-    const error = await user.validateSync()
-    if (error) {
-      console.log(error)
-      throw {
+    const userError = await user.validateSync()
+    if (userError) {
+      console.error(userError)
+      const error = {
         status: 400,
         error: 'There is something wrong with the client input. That is all we know.'
       }
+      throw error
     }
     const userObject = await user.save()
     res.status(201).send()
 
     // Send verification email: (3 days expiry just to be sure)
-    let objectToEncode = {
+    const objectToEncode = {
       _id: userObject._id
     }
-    let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
+    const encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
     let mailConfig
     if (process.env.NODE_ENV === 'production') {
       // all emails delivered to real address
@@ -387,25 +408,25 @@ module.exports.register = async (req, res, next) => {
         }
       }
     }
-    let transporter = nodemailer.createTransport(mailConfig)
-    let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
-    let message = {
+    const transporter = nodemailer.createTransport(mailConfig)
+    const link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
+    const message = {
       from: process.env.USER,
       to: email,
       subject: 'Thanks for joining UP Stars!',
-      html: `<p>Welcome, ${userObject.profile.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
+      html: `<p>Welcome, ${userObject.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
            <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
            <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, async (error, info) => {
       if (error) {
-        console.log(error)
+        console.error(error)
       } else {
         console.log('Message sent')
       }
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -415,16 +436,17 @@ module.exports.register = async (req, res, next) => {
 }
 
 module.exports.verifyEmail = async (req, res, next) => {
-  let {token} = req.body
+  const {token} = req.body
   jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
     try {
       if (err) {
-        throw ({
+        const error = {
           status: 403,
           error: 'Something went wrong, please try again.'
-        })
+        }
+        throw error
       }
-      let { _id } = decoded
+      const { _id } = decoded
       const user = await User.findOne({
         _id,
         status: {
@@ -433,10 +455,11 @@ module.exports.verifyEmail = async (req, res, next) => {
       })
       // Checks if user exists
       if (!user) {
-        throw ({
+        const error = {
           status: 403,
           error: 'Something went wrong, please try again.'
-        })
+        }
+        throw error
       }
       user.status = 'Pending'
       const newuser = await user.save()
@@ -444,7 +467,7 @@ module.exports.verifyEmail = async (req, res, next) => {
         return res.status(200).send()
       }
     } catch (err) {
-      console.log(err)
+      console.error(err)
       if (err.status) {
         res.status(err.status).send({
           error: err.error
@@ -456,8 +479,8 @@ module.exports.verifyEmail = async (req, res, next) => {
 
 module.exports.check = async (req, res, next) => {
   try {
-    let token = req.headers['x-access-token']
-    let result = (auth, name, _id, classes, roles) => {
+    const token = req.headers['x-access-token']
+    const result = (auth, name, _id, classes, roles) => {
       return res.status(200).json({
         auth,
         name,
@@ -475,8 +498,8 @@ module.exports.check = async (req, res, next) => {
       if (err) {
         return result(false, null, null, null, null)
       } else {
-        // Expiring tokens will be refreshed before hand: (in minutes)
-        let timeLeft = Math.floor(decoded.exp - (Date.now() / 1000)) / 60
+        // Expiring tokens will be refreshed before hand: (timeLeft is calculated in terms of minutes)
+        const timeLeft = Math.floor(decoded.exp - (Date.now() / 1000)) / 60
         if (timeLeft <= 10) {
           return result('expiring', decoded.name, decoded._id, decoded.classes, decoded.roles)
         }
@@ -484,7 +507,7 @@ module.exports.check = async (req, res, next) => {
       }
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -508,7 +531,7 @@ module.exports.refreshToken = async (req, res, next) => {
       if (err) {
         return result(false, null)
       } else {
-        let { _id } = decoded
+        const { _id } = decoded
         const user = await User.findOne({
           _id,
           status: {
@@ -522,7 +545,7 @@ module.exports.refreshToken = async (req, res, next) => {
       }
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -535,14 +558,15 @@ module.exports.newLink = async (req, res, next) => {
   try {
     const { email, nric } = req.body
     if (!email || !nric) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide an email address and nric'
-      })
+      }
+      throw error
     }
-    let rawUser = await User.findOne({
+    const rawUser = await User.findOne({
       email,
-      'profile.nric': nric
+      nric
     })
     if (!rawUser || rawUser.status !== 'Unverified') {
       // Not to reveal if the email address is actually registered
@@ -550,10 +574,10 @@ module.exports.newLink = async (req, res, next) => {
     }
     // This is for the scenario which the user exists, then the email will be sent.
     res.status(200).send()
-    let objectToEncode = {
+    const objectToEncode = {
       _id: rawUser._id
     }
-    let encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
+    const encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
     let mailConfig
     if (process.env.NODE_ENV === 'production') {
       // all emails delivered to real address
@@ -581,13 +605,13 @@ module.exports.newLink = async (req, res, next) => {
         }
       }
     }
-    let transporter = nodemailer.createTransport(mailConfig)
-    let link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
-    let message = {
+    const transporter = nodemailer.createTransport(mailConfig)
+    const link = `${process.env.DOMAIN_NAME}/verifyaccount/${encodedString}`
+    const message = {
       from: process.env.USER,
       to: email,
       subject: 'Thanks for joining UP Stars!',
-      html: `<p>Welcome, ${rawUser.profile.name}!</p><p>Thanks for joining UP Stars as a volunteer. We would love to have you on board.</p>
+      html: `<p>Welcome, ${rawUser.name}!</p><p>Thanks for joining UP Stars as a volunteer. We would love to have you on board.</p>
             <p>You have requested for a new link to verify your account. If you did not made this request, please contact our administrator(s).</p>
             <p>We would like you to verify your account by clicking on the following link:</p>
            <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${rawUser.email}</p>
@@ -601,7 +625,7 @@ module.exports.newLink = async (req, res, next) => {
       }
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error

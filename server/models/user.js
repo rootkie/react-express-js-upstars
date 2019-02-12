@@ -97,8 +97,8 @@ const UserSchema = new Schema({
     trim: true
   },
 
-  hobbies: { // array of hobbies
-    type: [String]
+  hobbies: {
+    type: String
   },
 
   careerGoal: {
@@ -217,17 +217,17 @@ const UserSchema = new Schema({
     }
   }],
 
-  languages: [{
+  languages: {
     type: String
-  }],
+  },
 
-  subjects: [{
+  subjects: {
     type: String
-  }],
+  },
 
-  interests: [{
+  interests: {
     type: String
-  }],
+  },
 
   purposeObjectives: {
     type: String
@@ -247,10 +247,10 @@ const UserSchema = new Schema({
     required: true
   },
 
-  preferredTimeSlot: [{
+  preferredTimeSlot: {
     type: String,
     required: true
-  }],
+  },
 
   status: {
     type: String,
