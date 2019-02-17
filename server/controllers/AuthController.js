@@ -139,22 +139,20 @@ module.exports.changePassword = async (req, res, next) => {
     res.status(200).send()
 
     // The email is sent after the user data is successfully saved and a 200 reply is returned
-    let mailConfig
-    if (process.env.NODE_ENV === 'production') {
-      // all emails delivered to real address
-      mailConfig = {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          type: 'OAuth2',
-          user: process.env.USER,
-          clientId: process.env.CLIENT_ID,
-          clientSecret: process.env.CLIENT_SECRET,
-          refreshToken: process.env.REFRESH_TOKEN
-        }
+    // all emails delivered to real address
+    let mailConfig = {
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        type: 'OAuth2',
+        user: process.env.USER,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN
       }
-    } else {
+    }
+    if (process.env.NODE_ENV === 'development') {
       // all emails caught by nodemailer in house ethereal.email service
       // Login with the user and pass in https://ethereal.email/login to view the message
       mailConfig = {
@@ -347,7 +345,7 @@ module.exports.register = async (req, res, next) => {
     if (response.data.success === false) {
       const error = {
         status: 401,
-        error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
+        error: 'There is something wrong with the client Captcha. That is all we know.'
       }
       throw error
     }
@@ -381,22 +379,20 @@ module.exports.register = async (req, res, next) => {
       _id: userObject._id
     }
     const encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
-    let mailConfig
-    if (process.env.NODE_ENV === 'production') {
-      // all emails delivered to real address
-      mailConfig = {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          type: 'OAuth2',
-          user: process.env.USER,
-          clientId: process.env.CLIENT_ID,
-          clientSecret: process.env.CLIENT_SECRET,
-          refreshToken: process.env.REFRESH_TOKEN
-        }
+    // all emails delivered to real address
+    let mailConfig = {
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        type: 'OAuth2',
+        user: process.env.USER,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN
       }
-    } else {
+    }
+    if (process.env.NODE_ENV === 'development') {
       // all emails caught by nodemailer in house ethereal.email service
       // Login with the user and pass in https://ethereal.email/login to view the message
       mailConfig = {
@@ -508,11 +504,7 @@ module.exports.check = async (req, res, next) => {
     })
   } catch (err) {
     console.error(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
+    next(err)
   }
 }
 
@@ -546,11 +538,7 @@ module.exports.refreshToken = async (req, res, next) => {
     })
   } catch (err) {
     console.error(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
+    next(err)
   }
 }
 
@@ -578,23 +566,21 @@ module.exports.newLink = async (req, res, next) => {
       _id: rawUser._id
     }
     const encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
-    let mailConfig
-    if (process.env.NODE_ENV === 'production') {
-      // all emails delivered to real address
-      mailConfig = {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          type: 'OAuth2',
-          user: process.env.USER,
-          clientId: process.env.CLIENT_ID,
-          clientSecret: process.env.CLIENT_SECRET,
-          refreshToken: process.env.REFRESH_TOKEN
-        }
+    // all emails delivered to real address
+    let mailConfig = {
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        type: 'OAuth2',
+        user: process.env.USER,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN
       }
-    } else {
-      // all emails caught by nodemailer in house ethereal.email service
+    }
+    if (process.env.NODE_ENV === 'development') {
+      // all emails caught by nodemailer in-house ethereal.email service
       // Login with the user and pass in https://ethereal.email/login to view the message
       mailConfig = {
         host: 'smtp.ethereal.email',

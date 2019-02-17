@@ -6,72 +6,67 @@ const nodemailer = require('nodemailer')
 // All
 module.exports.getAllUsers = async (req, res, next) => {
   try {
-    let { roles, _id } = req.decoded
+    const { roles, _id } = req.decoded
     // Retrieve all users in the system based on roles and permissions
     if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || roles.indexOf('Mentor') !== -1) {
       const users = await User.find({
         'status': 'Active'
-      }).select('profile.name profile.nric profile.gender profile.dob roles status').sort('profile.name')
+      }).select('name nric gender dob roles status').sort('name')
 
       return res.status(200).json({
         users
       })
     } else {
       const users = await User.find({
-        '_id': _id,
+        _id,
         'status': 'Active'
-      }).select('profile.name profile.nric profile.gender profile.dob roles status').sort('profile.name')
+      }).select('name nric gender dob roles status')
 
       return res.status(200).json({
         users
       })
     }
   } catch (err) {
-    console.log(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
+    console.error(err)
+    next(err)
   }
 }
 
-// Everyone but restricted to their own profile checked using token. Only Admin and above can view all.
+// Everyone but restricted to their own profile, verified using token. Only Admin and above can view all.
 module.exports.getUser = async (req, res, next) => {
   try {
-    let user
-    let approved = await util.checkRole({
+    const approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
       params: req.params.id,
       decoded: req.decoded
     })
-    // Check if user has admin rights and is only querying their own particulars
+    // Check if user is only accessing their own particulars. Admin and above always returns a true.
     if (approved.auth === false) {
-      throw ({
+      const error = {
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
-      })
+      }
+      throw error
     }
 
-    // Find user based on ID and retrieve its className. Restrict based on the need to view admin
-    // The first check on top is to make sure the user has permission to view the profile of that ID at all
-    // This next check is to ensure that a non-admin viewing his personal profile won't get to edit / view admin matters
-    if (approved.privilege === false) {
-      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -admin -commencementDate -email -resetPasswordToken')
-    } else {
-      user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -commencementDate -email -resetPasswordToken')
-    }
+    // Find user based on ID and retrieve its className. Restricted based on the need to view admin
+    // Since the auth check above already confirmed the user can view this profile, the privilege checks if the user can see (and edit) admin field
+    let user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -commencementDate -email -resetPasswordToken')
     if (!user) {
-      throw ({
+      const error = {
         status: 404,
         error: 'User does not exist. Please try again'
-      })
+      }
+      throw error
+    }
+    if (approved.privilege === false) {
+      delete user.admin
     }
     return res.status(200).json({
       user
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -80,43 +75,43 @@ module.exports.getUser = async (req, res, next) => {
   }
 }
 
-// Same logic, everyone can access their own stuff
+// Everyone can only access their own stuff
 module.exports.editUserParticulars = async (req, res, next) => {
   try {
-    let {
-      userId
-    } = req.body
+    const { userId } = req.body
     // Check userId is provided
-    if (!userId) {
-      throw ({
+    if (!(/^[0-9a-fA-F]{24}$/).test(userId)) {
+      const error = {
         status: 400,
         error: 'Please provide a userId'
-      })
+      }
+      throw error
     }
 
     let edited = {}
-    let approved = await util.checkRole({
+    const approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
       params: userId,
       decoded: req.decoded
     })
-    // Check if user has admin rights and is only querying their own particulars
+    // Check if user is only querying their own particulars. Admin and above always return true.
     if (approved.auth === false) {
-      throw ({
+      const error = {
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
-      })
+      }
+      throw error
     }
 
-    const list = ['profile', 'father', 'mother', 'misc', 'exitDate', 'preferredTimeSlot']
+    const properties = ['email', 'name', 'password', 'dob', 'gender', 'nationality', 'nric', 'address', 'postalCode', 'handphone', 'homephone', 'schoolLevel', 'schoolClass', 'fatherName', 'fatherOccupation', 'fatherEmail', 'motherName', 'motherOccupation', 'motherEmail', 'hobbies', 'careerGoal', 'formalEducation', 'coursesSeminar', 'achievements', 'cca', 'cip', 'workInternExp', 'languages', 'subjects', 'interests', 'purposeObjectives', 'developmentGoals', 'commencementDate', 'exitDate', 'preferredTimeSlot']
 
     // Go through list
-    for (let checkChanged of list) {
-      if (req.body[checkChanged]) {
-        edited[checkChanged] = await req.body[checkChanged]
-      }
+    for (let checkChanged of properties) {
+      // if (req.body[checkChanged]) {
+      edited[checkChanged] = req.body[checkChanged]
+      // }
     }
-
+    // Provilege is to check if user can view and edit admin related fields
     if (approved.privilege === true) {
       edited.admin = await req.body.admin
     }
@@ -124,23 +119,25 @@ module.exports.editUserParticulars = async (req, res, next) => {
     let user = await User.findById(userId)
     user.set(edited)
     const rawUser = await user.save()
+
+    if (!user) {
+      const error = {
+        status: 404,
+        error: 'The user you requested to edit does not exist.'
+      }
+      throw error
+    }
     // ES7 Spread for Object destructuring
     let { password, createdAt, updatedAt, __v, resetPasswordToken, email, ...editedUser } = rawUser.toObject()
     if (approved.privilege !== true) {
       delete editedUser.admin
     }
-    if (!user) {
-      throw ({
-        status: 404,
-        error: 'The user you requested to edit does not exist.'
-      })
-    }
-    // console.log(editedUser)
+
     return res.status(200).json({
       user: editedUser
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.name === 'ValidationError') {
       res.status(400).send({
         error: 'There is something wrong with the client input. That is all we know.'
@@ -155,32 +152,31 @@ module.exports.editUserParticulars = async (req, res, next) => {
 
 // Everyone
 module.exports.deleteUser = async (req, res, next) => {
-  let {
-    userId
-  } = req.body
+  const { userId } = req.body
   try {
     // Check userId is provided
     if (!(/^[0-9a-fA-F]{24}$/).test(userId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a userId and ensure input is correct'
-      })
+      }
+      throw error
     }
-    let approved = await util.checkRole({
+    const approved = await util.checkRole({
       roles: ['SuperAdmin'],
       params: userId,
       decoded: req.decoded
     })
-    // Check if user has admin rights and is only querying their own particulars
+    // Check if user has either admin rights or is only querying their own particulars
     if (approved.auth === false) {
-      throw ({
+      const error = {
         status: 403,
         error: 'Your client does not have the permissions to access this function.'
-      })
+      }
+      throw error
     }
 
-    // Delete user from database
-    // Find a user whose status is not previously deleted to change it to delete (Note: $ne == not equals)
+    // Find a user whose status is not previously deleted and change it to delete (Note: $ne == not equals)
     const userDeleted = await User.findOneAndUpdate({
       '_id': userId,
       status: {
@@ -188,15 +184,16 @@ module.exports.deleteUser = async (req, res, next) => {
       }
     }, {
       status: 'Deleted'
-    }).select('profile.name classes')
+    }).select('name classes')
     if (!userDeleted) {
-      throw ({
+      const error = {
         status: 404,
         error: 'The user you requested to delete does not exist.'
-      })
+      }
+      throw error
     }
-    // If the user is in any classes, delete the user from the class so that the population would not fail. Upon restoring of their status (if necessary)
-    // their classes would be re populated.
+    // If the user is in any classes, delete the user from the class so that the population would not fail.
+    // Upon restoring of their status (if necessary), their classes would be re populated.
     if (userDeleted.classes) {
       await Class.updateMany({
         _id: {
@@ -211,9 +208,9 @@ module.exports.deleteUser = async (req, res, next) => {
         multi: true
       })
     }
-    return res.status(200).send()
+    res.status(200).send()
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -225,58 +222,56 @@ module.exports.deleteUser = async (req, res, next) => {
 // Change your own password
 module.exports.changePassword = async (req, res, next) => {
   try {
-    let {
-      userId,
-      oldPassword,
-      newPassword
-    } = req.body
+    const { userId, oldPassword, newPassword } = req.body
 
     // Check userId or passwords are provided
     if (!(/^[0-9a-fA-F]{24}$/).test(userId) || !oldPassword || !newPassword || newPassword.length < 6) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'
-      })
+      }
+      throw error
     }
 
     // Find the user and match his password hash
     const user = await User.findById(userId)
     if (!user) {
-      throw ({
+      const error = {
         status: 400,
         error: 'User does not exist!'
-      })
+      }
+      throw error
     }
     const isMatch = await user.comparePasswordPromise(oldPassword)
     if (!isMatch) {
-      throw ({
+      const error = {
         status: 401,
-        error: 'Old password does not match. Please try again'
-      })
+        error: 'Your old password does not match. Please try again'
+      }
+      throw error
     }
-    // Save the new user password
+    // Save the new user password if no errors are thrown. save() will initiate a hook to automatically hash the password
     user.password = newPassword
     const pwChanged = await user.save()
     if (pwChanged) {
       // Send back to confirm first. Email comes later.
       res.status(200).send()
-      let mailConfig
-      if (process.env.NODE_ENV === 'production') {
+      // Assume PRODUCTION first. Will change only if it is a production server
       // all emails delivered to real address
-        mailConfig = {
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
-          auth: {
-            type: 'OAuth2',
-            user: process.env.USER,
-            clientId: process.env.CLIENT_ID,
-            clientSecret: process.env.CLIENT_SECRET,
-            refreshToken: process.env.REFRESH_TOKEN
-          }
+      let mailConfig = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          user: process.env.USER,
+          clientId: process.env.CLIENT_ID,
+          clientSecret: process.env.CLIENT_SECRET,
+          refreshToken: process.env.REFRESH_TOKEN
         }
-      } else {
-      // all emails caught by nodemailer in house ethereal.email service
+      }
+      if (process.env.NODE_ENV === 'development') {
+      // all emails caught by nodemailer in-house ethereal.email service
       // Login with the user and pass in https://ethereal.email/login to view the message
         mailConfig = {
           host: 'smtp.ethereal.email',
@@ -287,12 +282,12 @@ module.exports.changePassword = async (req, res, next) => {
           }
         }
       }
-      let transporter = nodemailer.createTransport(mailConfig)
-      let message = {
+      const transporter = nodemailer.createTransport(mailConfig)
+      const message = {
         from: process.env.USER,
         to: user.email,
         subject: 'UP Stars Password Changed',
-        html: `<p>What's up ${user.profile.name}!</p><p>You've asked us to update your password and we want to let you know that it has been
+        html: `<p>What's up ${user.name}!</p><p>You've asked us to update your password and we want to let you know that it has been
           updated. You can use your new password to log in now!</p><p>If you didn't ask us to change it, please let us know.</p><p>Thanks,<br />The UP Stars Team</p>`
       }
       transporter.sendMail(message, (error, info) => {
@@ -302,7 +297,7 @@ module.exports.changePassword = async (req, res, next) => {
       })
     }
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -314,34 +309,31 @@ module.exports.changePassword = async (req, res, next) => {
 // All
 module.exports.getUsersByName = async (req, res, next) => {
   try {
-    let { roles, _id } = req.decoded
-    let { name } = req.params
+    const { roles, _id } = req.decoded
+    const { name } = req.params
     // Retrieve users in the system based on roles and permissions
     if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || roles.indexOf('Mentor') !== -1) {
       const users = await User.find({
         'status': 'Active',
-        'profile.name': new RegExp(name, 'i')
-      }).select('profile.name').sort('profile.name')
+        'name': new RegExp(name, 'i')
+      }).select('name').sort('name')
 
       return res.status(200).json({
         users
       })
+      // For non-admin or mentor, this API only returns themselves in the search to prevent data leak.
     } else {
       const users = await User.find({
         '_id': _id,
         'status': 'Active'
-      }).select('profile.name').sort('profile.name')
+      }).select('name').sort('name')
 
-      return res.status(200).json({
+      res.status(200).json({
         users
       })
     }
   } catch (err) {
-    console.log(err)
-    if (err.status) {
-      res.status(err.status).send({
-        error: err.error
-      })
-    } else next(err)
+    console.error(err)
+    next(err)
   }
 }
