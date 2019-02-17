@@ -5,15 +5,15 @@ const Class = require('../models/class')
 
 // Add student function works for everyone
 module.exports.addStudent = async (req, res, next) => {
-  const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status']
-  let {captchaCode} = req.body
+  const list = ['name', 'icNumber', 'dob', 'address', 'gender', 'nationality', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo']
+  const {captchaCode} = req.body
   let edited = {}
 
   // Use a loop to populate edited if field is present
   for (let checkChanged of list) {
-    if (req.body[checkChanged]) {
-      edited[checkChanged] = await req.body[checkChanged]
-    }
+    // if (req.body[checkChanged]) {
+    edited[checkChanged] = req.body[checkChanged]
+    // }
   }
 
   const newStudent = new Student(edited)
@@ -21,18 +21,16 @@ module.exports.addStudent = async (req, res, next) => {
     const error = await newStudent.validateSync()
 
     if (error) {
-      console.error(error)
-      throw ({
+      const error = {
         status: 400,
         error: 'There is something wrong with the client input. That is all we know.'
-      })
+      }
+      throw error
     }
 
-    let secret
+    let secret = process.env.CAPTCHA_SECRET_PROD
     if (process.env.NODE_ENV === 'development') {
       secret = process.env.CAPTCHA_SECRET_DEV
-    } else {
-      secret = process.env.CAPTCHA_SECRET_PROD
     }
 
     const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
@@ -42,10 +40,11 @@ module.exports.addStudent = async (req, res, next) => {
       }))
 
     if (response.data.success === false) {
-      throw ({
+      const error = {
         status: 401,
-        error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-      })
+        error: 'There is something wrong with the client Captcha. That is all we know.'
+      }
+      throw error
     }
 
     const successStudentSignup = await newStudent.save()
@@ -53,7 +52,7 @@ module.exports.addStudent = async (req, res, next) => {
       newStudent: successStudentSignup._id
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.code === 11000) {
       return res.status(400).send({
         error: 'Account already exist. If this is a mistake please contact our system admin.'
@@ -68,16 +67,15 @@ module.exports.addStudent = async (req, res, next) => {
 
 module.exports.adminAddStudent = async (req, res, next) => {
   let edited = {}
-  const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
-  let {captchaCode} = req.body
-  let secret
+  const list = ['name', 'icNumber', 'dob', 'address', 'gender', 'nationality', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'admin']
+  const {captchaCode} = req.body
 
   try {
     // Use a loop to populate edited if field is present
     for (let checkChanged of list) {
-      if (req.body[checkChanged]) {
-        edited[checkChanged] = await req.body[checkChanged]
-      }
+      // if (req.body[checkChanged]) {
+      edited[checkChanged] = req.body[checkChanged]
+      // }
     }
 
     // Update student based on IC Number and validate it
@@ -85,18 +83,18 @@ module.exports.adminAddStudent = async (req, res, next) => {
     const error = await newStudent.validateSync()
 
     if (error) {
-      console.error(error)
-      throw ({
+      const error = {
         status: 400,
         error: 'There is something wrong with the client input. That is all we know.'
-      })
+      }
+      throw error
     }
 
+    let secret = process.env.CAPTCHA_SECRET_PROD
     if (process.env.NODE_ENV === 'development') {
       secret = process.env.CAPTCHA_SECRET_DEV
-    } else {
-      secret = process.env.CAPTCHA_SECRET_PROD
     }
+
     const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
       querystring.stringify({
         secret,
@@ -104,17 +102,18 @@ module.exports.adminAddStudent = async (req, res, next) => {
       }))
 
     if (response.data.success === false) {
-      throw ({
+      const error = {
         status: 401,
-        error: 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'
-      })
+        error: 'There is something wrong with the client Captcha. That is all we know.'
+      }
+      throw error
     }
     const successStudentSignup = await newStudent.save()
     res.status(201).json({
       newStudentId: successStudentSignup._id
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.code === 11000) {
       return res.status(400).send({
         error: 'Account already exist. If this is a mistake please contact our system admin.'
@@ -129,73 +128,80 @@ module.exports.adminAddStudent = async (req, res, next) => {
 
 // Mentor / Admin / SuperAdmin only
 module.exports.editStudentById = async (req, res, next) => {
+  const {studentId} = req.body
   try {
     // Check if studentId exists
-    if (!(/^[0-9a-fA-F]{24}$/).test(req.body.studentId)) {
-      throw ({
+    if (!(/^[0-9a-fA-F]{24}$/).test(studentId)) {
+      const error = {
         status: 400,
         error: 'Please provide a studentId'
-      })
+      }
+      throw error
     }
 
     let edited = {}
-
-    const list = ['profile', 'father', 'mother', 'misc', 'otherFamily', 'status', 'admin']
+    const list = ['name', 'address', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'status', 'admin']
 
     // Use a loop to populate edited if field is present according to the `list` array
     for (let checkChanged of list) {
-      if (req.body[checkChanged]) {
-        edited[checkChanged] = await req.body[checkChanged]
-      }
+      // if (req.body[checkChanged]) {
+      edited[checkChanged] = req.body[checkChanged]
+      // }
     }
 
-    let studentFound = await Student.findById(req.body.studentId)
+    const studentFound = await Student.findById(studentId)
     if (!studentFound) {
-      throw ({
+      const error = {
         status: 404,
         error: 'The student you requested to edit does not exist.'
-      })
+      }
+      throw error
     }
+    // Record the old student Status so that later changes to classes can be done. Shallow copy is done here.
+    let oldStatus = {...studentFound.status}
 
     studentFound.set(edited)
     const editedStudent = await studentFound.save()
 
     // Repopulate the classes if the status of the student is changed back to Active
-    if (editedStudent.status === 'Active' && editedStudent.classes) {
-      await Class.updateMany({
-        _id: {
-          $in: editedStudent.classes
-        }
-      }, {
-        $addToSet: {
-          students: editedStudent._id
-        }
-      }, {
-        new: true,
-        multi: true
-      })
-    } else if (editedStudent.classes) {
+    if (oldStatus !== editedStudent.status) {
+      if (editedStudent.status === 'Active' && editedStudent.classes) {
+        await Class.updateMany({
+          _id: {
+            $in: editedStudent.classes
+          }
+        }, {
+          $addToSet: {
+            students: editedStudent._id
+          }
+        }, {
+          new: true,
+          multi: true
+        })
+      } else if (editedStudent.status !== 'Active' && editedStudent.classes) {
       // If status if changed to anything other than Active, we will delete their IDs from the classes instead
-      await Class.updateMany({
-        _id: {
-          $in: editedStudent.classes
-        }
-      }, {
-        $pull: {
-          students: editedStudent._id
-        }
-      }, {
-        new: true,
-        multi: true
-      })
+        await Class.updateMany({
+          _id: {
+            $in: editedStudent.classes
+          }
+        }, {
+          $pull: {
+            students: editedStudent._id
+          }
+        }, {
+          new: true,
+          multi: true
+        })
+      }
     }
     res.status(200).send()
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.name === 'ValidationError') {
       return res.status(400).send({
         error: 'Our server had issues validating your inputs. Please fill in using proper values'
       })
+      // Duplication error code by MongoDB
     } else if (err.code === 11000) {
       return res.status(400).send({
         error: 'You have already signed up an account. If this is a mistake please contact our system admin.'
@@ -214,12 +220,12 @@ module.exports.getAll = async (req, res, next) => {
     // Find all students from database
     const students = await Student.find({
       status: 'Active'
-    }).select('profile.name profile.icNumber profile.dob profile.gender').limit(500).lean()
+    }).select('name icNumber dob gender').limit(500).lean()
     return res.status(200).json({
       students
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     next(err)
   }
 }
@@ -231,13 +237,13 @@ module.exports.getOtherStudents = async (req, res, next) => {
       status: {
         $ne: 'Active'
       }
-    }).select('profile.name profile.icNumber profile.dob profile.gender status').limit(500).lean()
-      .sort('status profile.name')
+    }).select('name icNumber dob gender status').limit(500).lean()
+      .sort('status name')
     return res.status(200).json({
       students
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     next(err)
   }
 }
@@ -245,21 +251,22 @@ module.exports.getOtherStudents = async (req, res, next) => {
 // Everyone with token
 module.exports.getStudentById = async (req, res, next) => {
   try {
-    let studentId = req.params.id
+    const studentId = req.params.id
 
     // Find student based on ID and retrieve className
     const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt').lean()
     if (!student) {
-      throw ({
+      const error = {
         status: 404,
         error: 'Student does not exist. Please try again'
-      })
+      }
+      throw error
     }
     return res.status(200).json({
       student
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -269,15 +276,15 @@ module.exports.getStudentById = async (req, res, next) => {
 }
 // SuperAdmin only
 module.exports.deleteStudent = async (req, res, next) => {
-  let {
-    studentId
-  } = req.body
+  const { studentId } = req.body
   try {
+    // StudentId is an array, thus a regex is used to test every value in the array
     if (!studentId || studentId.length === 0 || !studentId.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
-      throw ({
+      const error = {
         status: 400,
-        error: 'Please provide a studentId and ensure input is correct'
-      })
+        error: 'Please provide a studentId and ensure all values are correct'
+      }
+      throw error
     }
 
     // Find and delete student from database
@@ -294,14 +301,14 @@ module.exports.deleteStudent = async (req, res, next) => {
       multi: true
     })
     if (studentDeleted.n === 0) {
-      throw ({
+      const error = {
         status: 404,
-        error: 'The student you requested to delete does not exist.'
-      })
+        error: 'The student(s) you requested to delete does not exist.'
+      }
+      throw error
     } else {
       for (let number = 0; number < studentId.length; number++) {
-        let studentDetails = await Student.findById(studentId[number], 'classes')
-        console.log(studentDetails)
+        const studentDetails = await Student.findById(studentId[number], 'classes')
         if (studentDetails.classes) {
           await Class.updateMany({
             _id: {
@@ -320,7 +327,7 @@ module.exports.deleteStudent = async (req, res, next) => {
     }
     return res.status(200).send()
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -331,38 +338,38 @@ module.exports.deleteStudent = async (req, res, next) => {
 
 // Everyone
 module.exports.getStudentByName = async (req, res, next) => {
-  let {name} = req.params
+  const {name} = req.params
   try {
     // Find students from database real-time using name
     const studentsFiltered = await Student.find({
       status: 'Active',
-      'profile.name': new RegExp(name, 'i')
-    }).select('profile.name').limit(30).lean()
+      'name': new RegExp(name, 'i')
+    }).select('name').limit(30).lean()
     return res.status(200).json({
       studentsFiltered
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     next(err)
   }
 }
 
 // Admin only
 module.exports.getOtherStudentByName = async (req, res, next) => {
-  let {name} = req.params
+  const {name} = req.params
   try {
     // Find other students from database real-time using name
     const studentsFiltered = await Student.find({
       status: {
         $ne: 'Active'
       },
-      'profile.name': new RegExp(name, 'i')
-    }).select('profile.name').limit(30).lean()
+      'name': new RegExp(name, 'i')
+    }).select('name').limit(30).lean()
     return res.status(200).json({
       studentsFiltered
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     next(err)
   }
 }
