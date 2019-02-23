@@ -25,7 +25,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
       throw error
     }
     // Only if there is a change in status we then call the API to update the classes
-    if (newStatus) {
+    if (updatedUser.isModified('status')) {
       if (updatedUser.status === 'Active' && updatedUser.classes) {
         editedClass = await Class.update({
           _id: {

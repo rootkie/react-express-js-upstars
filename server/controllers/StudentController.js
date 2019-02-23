@@ -157,14 +157,11 @@ module.exports.editStudentById = async (req, res, next) => {
       }
       throw error
     }
-    // Record the old student Status so that later changes to classes can be done. Shallow copy is done here.
-    let oldStatus = {...studentFound.status}
-
     studentFound.set(edited)
     const editedStudent = await studentFound.save()
 
     // Repopulate the classes if the status of the student is changed back to Active
-    if (oldStatus !== editedStudent.status) {
+    if (editedStudent.isModified('status')) {
       if (editedStudent.status === 'Active' && editedStudent.classes) {
         await Class.updateMany({
           _id: {
@@ -254,7 +251,9 @@ module.exports.getStudentById = async (req, res, next) => {
     const studentId = req.params.id
 
     // Find student based on ID and retrieve className
-    const student = await Student.findById(studentId).populate('classes', 'className status').select('-createdAt -updatedAt').lean()
+    const student = await Student.findById(studentId).populate('classes', 'className status')
+      // .select('-createdAt -updatedAt')
+      .lean()
     if (!student) {
       const error = {
         status: 404,

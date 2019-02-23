@@ -51,7 +51,8 @@ module.exports.getUser = async (req, res, next) => {
 
     // Find user based on ID and retrieve its className. Restricted based on the need to view admin
     // Since the auth check above already confirmed the user can view this profile, the privilege checks if the user can see (and edit) admin field
-    let user = await User.findById(req.params.id).populate('classes', 'className status').select('-password -updatedAt -createdAt -commencementDate -email -resetPasswordToken')
+    let user = await User.findById(req.params.id).populate('classes', 'className status')
+      .select('-password -commencementDate -email -resetPasswordToken')
     if (!user) {
       const error = {
         status: 404,
@@ -103,7 +104,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       throw error
     }
 
-    const properties = ['email', 'name', 'password', 'dob', 'gender', 'nationality', 'nric', 'address', 'postalCode', 'handphone', 'homephone', 'schoolLevel', 'schoolClass', 'fatherName', 'fatherOccupation', 'fatherEmail', 'motherName', 'motherOccupation', 'motherEmail', 'hobbies', 'careerGoal', 'formalEducation', 'coursesSeminar', 'achievements', 'cca', 'cip', 'workInternExp', 'languages', 'subjects', 'interests', 'purposeObjectives', 'developmentGoals', 'commencementDate', 'exitDate', 'preferredTimeSlot']
+    const properties = ['address', 'postalCode', 'handphone', 'homephone', 'schoolLevel', 'schoolClass', 'fatherName', 'fatherOccupation', 'fatherEmail', 'motherName', 'motherOccupation', 'motherEmail', 'hobbies', 'careerGoal', 'formalEducation', 'coursesSeminar', 'achievements', 'cca', 'cip', 'workInternExp', 'languages', 'subjects', 'interests', 'purposeObjectives', 'developmentGoals', 'exitDate', 'preferredTimeSlot']
 
     // Go through list
     for (let checkChanged of properties) {
@@ -117,6 +118,11 @@ module.exports.editUserParticulars = async (req, res, next) => {
     }
 
     let user = await User.findById(userId)
+    // const userDetails = {
+    //   ...user,
+    //   edited
+    // }
+    // console.log(userDetails)
     user.set(edited)
     const rawUser = await user.save()
 
@@ -128,7 +134,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       throw error
     }
     // ES7 Spread for Object destructuring
-    let { password, createdAt, updatedAt, __v, resetPasswordToken, email, ...editedUser } = rawUser.toObject()
+    let { password, resetPasswordToken, email, ...editedUser } = rawUser.toObject()
     if (approved.privilege !== true) {
       delete editedUser.admin
     }

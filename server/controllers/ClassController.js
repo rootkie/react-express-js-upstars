@@ -47,10 +47,11 @@ module.exports.addClass = async (req, res, next) => {
       throw error
     }
     const newClassCreated = await newClass.save()
-    const {createdAt, updatedAt, __v, ...newClassInfo} = newClassCreated
+    // const {createdAt, updatedAt, __v, ...newClassInfo} = newClassCreated
 
     res.status(201).json({
-      newClass: newClassInfo
+      // newClass: newClassInfo
+      newClass: newClassCreated
     })
   } catch (err) {
     console.error(err)
@@ -196,7 +197,8 @@ module.exports.getClassById = async (req, res, next) => {
 
     // Find a class and populate the students and users to get their name.
     const classData = await Class.findById(classId).populate('students users', 'name')
-      .select('-updatedAt -createdAt').lean()
+      // .select('-updatedAt -createdAt')
+      .lean()
     // If class does not exist, throw an error
     if (!classData) {
       const error = {

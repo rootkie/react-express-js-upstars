@@ -298,7 +298,7 @@ const UserSchema = new Schema({
 UserSchema.pre('save', function (next) {
   const user = this
   const SALT_FACTOR = 5
-
+  this.increment()
   if (!user.isModified('password')) return next()
 
   bcrypt.genSalt(SALT_FACTOR, (err, salt) => {
@@ -310,6 +310,10 @@ UserSchema.pre('save', function (next) {
       next()
     })
   })
+})
+
+UserSchema.pre('update', function (next) {
+  this.update({}, { $inc: { __v: 1 } }, next)
 })
 
 UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Coz of lexical this

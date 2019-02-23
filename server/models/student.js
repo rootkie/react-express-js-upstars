@@ -198,4 +198,13 @@ const StudentSchema = new Schema({
   minimize: false
 })
 
+StudentSchema.pre('save', function (next) {
+  this.increment()
+  return next()
+})
+
+StudentSchema.pre('update', function (next) {
+  this.update({}, { $inc: { __v: 1 } }, next)
+})
+
 module.exports = mongoose.model('Student', StudentSchema)
