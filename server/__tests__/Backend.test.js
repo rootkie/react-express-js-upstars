@@ -14,11 +14,11 @@ beforeAll(async () => {
   userToken = response.body.token
 })
 
-afterAll(() => {
-  exec('mongorestore --drop -d tests dump/tests')
-})
+// afterAll(() => {
+//   exec('mongorestore --drop -d tests dump/tests')
+// })
 
-describe('testing auth related API mostly without token', () => {
+describe.only('testing auth related API mostly without token', () => {
   describe('login testing', () => {
     test('login with no credentials', async () => {
       expect.assertions(2)
@@ -95,7 +95,7 @@ describe('testing auth related API mostly without token', () => {
         classes: ['5b97b8f2adfb2e018c64d372'],
         status: 'Active',
         roles: ['Tutor', 'SuperAdmin', 'Admin'],
-        name: 'Wuying  Kong'
+        name: 'Wuying Kong'
       }
       expiringAccessToken = await jwt.sign(user, process.env.SECRET, {
         expiresIn: '9m'
@@ -128,7 +128,7 @@ describe('testing auth related API mostly without token', () => {
       const response = await app.get('/check').set('x-access-token', accessToken)
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('auth', true)
-      expect(response.body).toHaveProperty('name', 'Wuying  Kong')
+      expect(response.body).toHaveProperty('name', 'Wuying Kong')
       expect(response.body).toHaveProperty('_id', '5b912ba72b9ec042a58f88a4')
       expect(response.body).toHaveProperty('classes', ['5b97b8f2adfb2e018c64d372'])
       expect(response.body).toHaveProperty('roles', ['Tutor', 'SuperAdmin', 'Admin'])
@@ -139,7 +139,7 @@ describe('testing auth related API mostly without token', () => {
       const response = await app.get('/check').set('x-access-token', expiringAccessToken)
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('auth', 'expiring')
-      expect(response.body).toHaveProperty('name', 'Wuying  Kong')
+      expect(response.body).toHaveProperty('name', 'Wuying Kong')
       expect(response.body).toHaveProperty('_id', '5b912ba72b9ec042a58f88a4')
       expect(response.body).toHaveProperty('classes', ['5b97b8f2adfb2e018c64d372'])
       expect(response.body).toHaveProperty('roles', ['Tutor', 'SuperAdmin', 'Admin'])
@@ -188,19 +188,17 @@ describe('testing auth related API mostly without token', () => {
     {
       // Best to log into ethereal email account to check the email is really sent out
       email: 'testuser10@upstars.com',
-      profile: {
-        name: 'Test User',
-        gender: 'M',
-        dob: '2004-03-09T16:00:00.000Z',
-        nationality: 'singaporean',
-        nric: 'T0423783D',
-        address: 'Upstars Block 999 #13-902',
-        postalCode: 654999,
-        homephone: 63846358,
-        handphone: 94562395,
-        schoolClass: 'Sec 2-5',
-        schoolLevel: 'Upstars Secondary'
-      },
+      name: 'Test User',
+      gender: 'M',
+      dob: '2004-03-09T16:00:00.000Z',
+      nationality: 'singaporean',
+      nric: 'T0423783D',
+      address: 'Upstars Block 999 #13-902',
+      postalCode: 654999,
+      homephone: 63846358,
+      handphone: 94562395,
+      schoolClass: 'Sec 2-5',
+      schoolLevel: 'Upstars Secondary',
       password: 'password',
       commencementDate: '2018-09-25T12:53:52+00:00',
       exitDate: '2018-10-25T12:53:52+00:00',
@@ -210,19 +208,17 @@ describe('testing auth related API mostly without token', () => {
 
     // Missing email and password
     const missingUserInfo = {
-      profile: {
-        name: 'Test User',
-        gender: 'M',
-        dob: '2004-03-09T16:00:00.000Z',
-        nationality: 'singaporean',
-        nric: 'T0423783D',
-        address: 'Upstars Block 999 #13-902',
-        postalCode: 654999,
-        homephone: 63846358,
-        handphone: 94562395,
-        schoolClass: 'Sec 2-5',
-        schoolLevel: 'Upstars Secondary'
-      },
+      name: 'Test User',
+      gender: 'M',
+      dob: '2004-03-09T16:00:00.000Z',
+      nationality: 'singaporean',
+      nric: 'T0423783D',
+      address: 'Upstars Block 999 #13-902',
+      postalCode: 654999,
+      homephone: 63846358,
+      handphone: 94562395,
+      schoolClass: 'Sec 2-5',
+      schoolLevel: 'Upstars Secondary',
       commencementDate: '2018-09-25T12:53:52+00:00',
       exitDate: '2018-10-25T12:53:52+00:00',
       preferredTimeSlot: ['Tuesday 7-9.30pm']
@@ -433,6 +429,45 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(1)
       const response = await app.post('/resetpassword').send({password: 'password123', token})
       expect(response.statusCode).toBe(200)
+    })
+  })
+
+  describe('send new email verification link', () => {
+    test('no input fields throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('no nric throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser10@upstars.com'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('wrong nric causes empty response', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser10@upstars.com', nric: 'T0423783E'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
+    })
+
+    test('wrong email causes empty response', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser3@upstars.com', nric: 'T0423783D'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
+    })
+
+    test('correct fields also return empty but have email sent with link', async () => {
+      // Either check nodemon to see if the 'message sent' log is written or go to
+      // ethereal email to check if it is really sent
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser10@upstars.com', nric: 'T0423783D'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
     })
   })
 })

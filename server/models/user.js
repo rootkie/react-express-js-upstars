@@ -248,7 +248,7 @@ const UserSchema = new Schema({
   },
 
   preferredTimeSlot: {
-    type: String,
+    type: Array,
     required: true
   },
 

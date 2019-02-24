@@ -118,7 +118,7 @@ module.exports.changePassword = async (req, res, next) => {
     }
     // Fix plaintext security flaw: using encoded jwt to send as link for password change.
     // Random 15 bit char saved in DB and part of token of auth
-    let userName = user.name
+    const userName = user.name
     let random = crypto.randomBytes(15).toString('hex')
     // This part is for aiding tests to create the same tokens so they can pass successfully.
     if (process.env.NODE_ENV === 'development') {
@@ -174,6 +174,7 @@ module.exports.changePassword = async (req, res, next) => {
        <p>Reset your password by clicking this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, (error, info) => {
+      console.log(user.name)
       if (error) {
         console.log(error)
       }
@@ -256,7 +257,7 @@ module.exports.resetPassword = async (req, res, next) => {
 
 module.exports.register = async (req, res, next) => {
   const {
-    email, password, name, dob, gender, nationality, nric, address, postalCode, handphone, homephone, schoolLevel, schoolClass, fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, languages, subjects, interests, purposeObjectives, developmentGoals, commencementDate, exitDate, preferredTimeSlot, captchaCode
+    email, password, name, dob, gender, nationality, nric, address, postalCode, handphone, homephone, schoolLevel, schoolClass, commencementDate, exitDate, preferredTimeSlot, captchaCode
   } = req.body
 
   try {
@@ -306,25 +307,19 @@ module.exports.register = async (req, res, next) => {
       homephone,
       schoolLevel,
       schoolClass,
-      fatherName,
-      fatherOccupation,
-      fatherEmail,
-      motherName,
-      motherOccupation,
-      motherEmail,
-      hobbies,
-      careerGoal,
-      formalEducation,
-      coursesSeminar,
-      achievements,
-      cca,
-      cip,
-      workInternExp,
-      languages,
-      subjects,
-      interests,
-      purposeObjectives,
-      developmentGoals,
+      fatherName: '',
+      fatherOccupation: '',
+      fatherEmail: '',
+      motherName: '',
+      motherOccupation: '',
+      motherEmail: '',
+      hobbies: '',
+      careerGoal: '',
+      languages: '',
+      subjects: '',
+      interests: '',
+      purposeObjectives: '',
+      developmentGoals: '',
       commencementDate,
       exitDate,
       preferredTimeSlot,
@@ -596,7 +591,7 @@ module.exports.newLink = async (req, res, next) => {
     const message = {
       from: process.env.USER,
       to: email,
-      subject: 'Thanks for joining UP Stars!',
+      subject: 'Thanks for joining UP Stars - New Verification Link',
       html: `<p>Welcome, ${rawUser.name}!</p><p>Thanks for joining UP Stars as a volunteer. We would love to have you on board.</p>
             <p>You have requested for a new link to verify your account. If you did not made this request, please contact our administrator(s).</p>
             <p>We would like you to verify your account by clicking on the following link:</p>
