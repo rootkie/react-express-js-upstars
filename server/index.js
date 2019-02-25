@@ -1,5 +1,3 @@
-'use strict'
-
 // Replace the commented code with the old code to test HTTPS
 /*
 const https = require('https')

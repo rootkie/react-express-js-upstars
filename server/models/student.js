@@ -203,8 +203,9 @@ StudentSchema.pre('save', function (next) {
   return next()
 })
 
-StudentSchema.pre('update', function (next) {
-  this.update({}, { $inc: { __v: 1 } }, next)
+StudentSchema.pre('updateMany', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
 })
 
 module.exports = mongoose.model('Student', StudentSchema)

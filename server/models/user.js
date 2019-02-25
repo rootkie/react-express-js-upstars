@@ -312,8 +312,14 @@ UserSchema.pre('save', function (next) {
   })
 })
 
-UserSchema.pre('update', function (next) {
-  this.update({}, { $inc: { __v: 1 } }, next)
+UserSchema.pre('findOneAndUpdate', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
+})
+
+UserSchema.pre('updateMany', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
 })
 
 UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Coz of lexical this

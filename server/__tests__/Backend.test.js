@@ -18,7 +18,7 @@ beforeAll(async () => {
 //   exec('mongorestore --drop -d tests dump/tests')
 // })
 
-describe.only('testing auth related API mostly without token', () => {
+describe('testing auth related API mostly without token', () => {
   describe('login testing', () => {
     test('login with no credentials', async () => {
       expect.assertions(2)
@@ -480,7 +480,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/pendingUsers')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Lai Ta Toh'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'profile': {'name': 'Mr. Ho Jin He'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
+      expect(response.body).toEqual({'users': [{'name': 'Lai Ta Toh', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'name': 'Mr. Ho Jin He', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
     })
   })
 
@@ -489,7 +489,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/suspended')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
+      expect(response.body).toEqual({'users': [{'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
     })
   })
 
@@ -498,7 +498,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/deleted')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}]})
+      expect(response.body).toEqual({'users': [{'_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor']}]})
     })
   })
 
@@ -508,7 +508,7 @@ describe('testing admin related APIs', async () => {
       const response = await app.get('/admin/search/cRIs')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
-      expect(response.body).toHaveProperty('activeMatched', [{'profile': {'name': 'Mr. Cristian Bartell'}, 'status': 'Active', 'roles': ['Tutor'], '_id': '5b9255700333773af993ae9c'}])
+      expect(response.body).toHaveProperty('activeMatched', [{'name': 'Mr. Cristian Bartell', 'status': 'Active', 'roles': ['Tutor'], '_id': '5b9255700333773af993ae9c'}])
       expect(response.body).toHaveProperty('suspendedMatched', [])
       expect(response.body).toHaveProperty('deletedMatched', [])
     })
@@ -518,19 +518,19 @@ describe('testing admin related APIs', async () => {
       const response = await app.get('/admin/search/G')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
-      expect(response.body).toHaveProperty('activeMatched', [{'profile': {'name': 'Wuying  Kong'}, 'status': 'Active', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b912ba72b9ec042a58f88a4'}])
-      expect(response.body).toHaveProperty('suspendedMatched', [{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
-      expect(response.body).toHaveProperty('deletedMatched', [])
+      expect(response.body).toHaveProperty('activeMatched', [{'name': 'Wuying Kong', 'status': 'Active', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b912ba72b9ec042a58f88a4'}])
+      expect(response.body).toHaveProperty('suspendedMatched', [{'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
+      expect(response.body).toHaveProperty('deletedMatched', [{'_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor']}])
     })
 
-    test('deleted match', async () => {
+    test('none match', async () => {
       expect.assertions(5)
       const response = await app.get('/admin/search/admin')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
       expect(response.body).toHaveProperty('activeMatched', [])
       expect(response.body).toHaveProperty('suspendedMatched', [])
-      expect(response.body).toHaveProperty('deletedMatched', [{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}])
+      expect(response.body).toHaveProperty('deletedMatched', [])
     })
   })
 
@@ -539,7 +539,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.delete('/admin/user')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a userId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide working userId(s)'})
     })
 
     test('deleting non-existing user', async () => {
@@ -551,7 +551,7 @@ describe('testing admin related APIs', async () => {
 
     test('deleting already deleted user', async () => {
       expect.assertions(2)
-      const response = await app.delete('/admin/user').send({userId: ['5a1111574f52053930820a42']})
+      const response = await app.delete('/admin/user').send({userId: ['5c73acb2afcab33a4012ac29']})
       expect(response.statusCode).toBe(404)
       expect(response.body).toEqual({'error': 'The user you requested to delete does not exist.'})
     })
@@ -565,7 +565,8 @@ describe('testing admin related APIs', async () => {
       expect(userData.body.user.status).toBe('Deleted')
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372').set('x-access-token', userToken)
       expect(classData.statusCode).toBe(200)
-      expect(classData.body.class.users).toEqual([{'_id': '5b9255700333773af993ae9c', 'profile': {'name': 'Mr. Cristian Bartell'}}])
+      // The class started with 2 people, leaving with one after the deletion of the user above.
+      expect(classData.body.class.users).toEqual([{'_id': '5b9255700333773af993ae9c', 'name': 'Mr. Cristian Bartell'}])
     })
   })
 
@@ -615,15 +616,11 @@ describe('testing admin related APIs', async () => {
       expect(classData.statusCode).toBe(200)
       expect(classData.body.class.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         },
         {
-          'profile': {
-            'name': 'Wuying  Kong'
-          },
+          'name': 'Wuying Kong',
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
@@ -636,7 +633,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin', 'Tutor']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
+      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 0, 'ok': 1}})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')

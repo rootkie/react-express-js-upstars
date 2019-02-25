@@ -234,7 +234,7 @@ module.exports.deleteClass = async (req, res, next) => {
     }
 
     // Remove class from database
-    const classDeleted = await Class.update({
+    const classDeleted = await Class.updateMany({
       '_id': {
         '$in': classId
       },
@@ -243,8 +243,6 @@ module.exports.deleteClass = async (req, res, next) => {
       }
     }, {
       'status': 'Stopped'
-    }, {
-      multi: true
     })
     if (classDeleted.n === 0) {
       return res.status(404).json({
@@ -301,7 +299,7 @@ module.exports.addStudentsToClass = async (req, res, next) => {
       throw error
     }
     // For every student in the array, add the class added into their class field
-    const students = await Student.update({
+    const students = await Student.updateMany({
       _id: {
         $in: studentIds
       }
@@ -310,8 +308,7 @@ module.exports.addStudentsToClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -358,7 +355,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
     })
 
     // Delete the class in student's class field
-    const students = await Student.update({
+    const students = await Student.updateMany({
       _id: {
         $in: studentIds
       }
@@ -367,8 +364,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -422,7 +418,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
     })
 
     // Add class into users' list of classes
-    const users = await User.update({
+    const users = await User.updateMany({
       _id: {
         $in: userIds
       }
@@ -431,8 +427,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -479,7 +474,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
     })
 
     // Delete class from users' list of classes
-    const users = await User.update({
+    const users = await User.updateMany({
       _id: {
         $in: userIds
       }
@@ -488,8 +483,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({

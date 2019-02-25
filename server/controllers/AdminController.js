@@ -25,9 +25,9 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
       throw error
     }
     // Only if there is a change in status we then call the API to update the classes
-    if (updatedUser.isModified('status')) {
+    if (newStatus) {
       if (updatedUser.status === 'Active' && updatedUser.classes) {
-        editedClass = await Class.update({
+        editedClass = await Class.updateMany({
           _id: {
             $in: updatedUser.classes
           }
@@ -36,11 +36,10 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
             users: updatedUser._id
           }
         }, {
-          new: true,
-          multi: true
+          new: true
         })
       } else if (updatedUser.status !== 'Active' && updatedUser.classes) {
-        editedClass = await Class.update({
+        editedClass = await Class.updateMany({
           _id: {
             $in: updatedUser.classes
           }
@@ -49,10 +48,11 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
             users: updatedUser._id
           }
         }, {
-          new: true,
-          multi: true
+          new: true
         })
       }
+    } else {
+      editedClass = {'n': 1, 'nModified': 0, 'ok': 1}
     }
 
     // Returns necessary information
@@ -130,7 +130,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
       throw error
     }
 
-    const userDeleted = await User.update({
+    const userDeleted = await User.updateMany({
       '_id': {
         '$in': userId
       },
@@ -139,8 +139,6 @@ module.exports.multipleUserDelete = async (req, res, next) => {
       }
     }, {
       status: 'Deleted'
-    }, {
-      multi: true
     })
     // If theres actually someone deleted, loop through and delete the userId from the classes each user is in
     if (userDeleted.n === 0) {
@@ -153,7 +151,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
     for (let number = 0; number < userId.length; number++) {
       const userDetails = await User.findById(userId[number], 'classes')
       if (userDetails.classes) {
-        await Class.update({
+        await Class.updateMany({
           _id: {
             $in: userDetails.classes
           }
@@ -162,8 +160,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
             users: userDetails._id
           }
         }, {
-          new: true,
-          multi: true
+          new: true
         })
       }
     }
