@@ -47,11 +47,9 @@ module.exports.addClass = async (req, res, next) => {
       throw error
     }
     const newClassCreated = await newClass.save()
-    // const {createdAt, updatedAt, __v, ...newClassInfo} = newClassCreated
 
     res.status(201).json({
-      // newClass: newClassInfo
-      newClass: newClassCreated
+      newClassId: newClassCreated._id
     })
   } catch (err) {
     console.error(err)
@@ -158,10 +156,10 @@ module.exports.getAll = async (req, res, next) => {
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
-    }).select('-createdAt -students -users -updatedAt -startDate').limit(100).lean()
+    }).select('-createdAt -students -users -updatedAt -startDate -__v').limit(100).lean()
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
-    }).select('-createdAt -students -users -updatedAt -startDate').limit(200).lean()
+    }).select('-createdAt -students -users -updatedAt -startDate -__v').limit(200).lean()
     // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
     if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
       const filteredActive = activeClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)

@@ -679,21 +679,25 @@ describe('testing class related APIs', async () => {
     })
 
     test('correct fields successfully add class', async () => {
-      expect.assertions(10)
+      expect.assertions(13)
       const response = await app.post('/class').send({
         ...classDetail,
         venue: 'Ulu Pandan Room 3'
       })
       expect(response.statusCode).toBe(201)
-      expect(response.body.newClass).toHaveProperty('students', [])
-      expect(response.body.newClass).toHaveProperty('users', [])
-      expect(response.body.newClass).toHaveProperty('status', 'Active')
-      expect(response.body.newClass).toHaveProperty('className', 'Upstars Class B')
-      expect(response.body.newClass).toHaveProperty('classType', 'Tuition')
-      expect(response.body.newClass).toHaveProperty('venue', 'Ulu Pandan Room 3')
-      expect(response.body.newClass).toHaveProperty('dayAndTime', 'Friday 9PM')
-      expect(response.body.newClass).toHaveProperty('startDate', '2018-10-14T06:59:06.643Z')
-      expect(response.body.newClass).toHaveProperty('_id')
+      expect(response.body.newClassId).toEqual(expect.any(String))
+      const classDetails = await app.get(`/class/${response.body.newClassId}`)
+      expect(classDetails.body.class).toHaveProperty('students', [])
+      expect(classDetails.body.class).toHaveProperty('users', [])
+      expect(classDetails.body.class).toHaveProperty('status', 'Active')
+      expect(classDetails.body.class).toHaveProperty('className', 'Upstars Class B')
+      expect(classDetails.body.class).toHaveProperty('classType', 'Tuition')
+      expect(classDetails.body.class).toHaveProperty('venue', 'Ulu Pandan Room 3')
+      expect(classDetails.body.class).toHaveProperty('dayAndTime', 'Friday 9PM')
+      expect(classDetails.body.class).toHaveProperty('startDate', '2018-10-14T06:59:06.643Z')
+      expect(classDetails.body.class).toHaveProperty('createdAt')
+      expect(classDetails.body.class).toHaveProperty('updatedAt')
+      expect(classDetails.body.class).toHaveProperty('__v')
     })
   })
 
@@ -716,8 +720,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Class A',
           'classType': 'Tuition',
           'venue': 'Upstars Classroom 1',
-          'dayAndTime': 'Wednesday, 3pm',
-          '__v': 0
+          'dayAndTime': 'Wednesday, 3pm'
         },
         {
           'status': 'Active',
@@ -725,8 +728,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Class B',
           'classType': 'Tuition',
           'venue': 'Ulu Pandan Room 3',
-          'dayAndTime': 'Friday 9PM',
-          '__v': 0
+          'dayAndTime': 'Friday 9PM'
         }
       ])
       expect(response.body.stoppedClasses).toEqual([
@@ -736,8 +738,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Stopped Class',
           'classType': 'Enrichment',
           'venue': 'Upstars Level 3',
-          'dayAndTime': 'nil',
-          '__v': 0
+          'dayAndTime': 'nil'
         }
       ])
     })
@@ -753,8 +754,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Class A',
           'classType': 'Tuition',
           'venue': 'Upstars Classroom 1',
-          'dayAndTime': 'Wednesday, 3pm',
-          '__v': 0
+          'dayAndTime': 'Wednesday, 3pm'
         }
       ])
       expect(response.body.stoppedClasses).toEqual([])
@@ -780,23 +780,17 @@ describe('testing class related APIs', async () => {
       const classObject = {
         'students': [
           {
-            'profile': {
-              'name': 'Lingxin  Long'
-            },
+            'name': 'Lingxin  Long',
             '_id': '5b936ce7defc1a592d677008'
           }
         ],
         'users': [
           {
-            'profile': {
-              'name': 'Mr. Cristian Bartell'
-            },
+            'name': 'Mr. Cristian Bartell',
             '_id': '5b9255700333773af993ae9c'
           },
           {
-            'profile': {
-              'name': 'Wuying  Kong'
-            },
+            'name': 'Wuying Kong',
             '_id': '5b912ba72b9ec042a58f88a4'
           }
         ],
@@ -807,7 +801,9 @@ describe('testing class related APIs', async () => {
         'venue': 'Upstars Classroom 1',
         'dayAndTime': 'Wednesday, 3pm',
         'startDate': '2018-10-03T12:36:07.000Z',
-        '__v': 0
+        '__v': 2,
+        'createdAt': expect.any(String),
+        'updatedAt': expect.any(String)
       }
       expect.assertions(2)
       const response = await app.get('/class/5b97b8f2adfb2e018c64d372')
@@ -821,14 +817,14 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.delete('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure input is correct.'})
+      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure all values are correct.'})
     })
 
     test('stopping a class with empty classId', async () => {
       expect.assertions(2)
       const response = await app.delete('/class').send({classId: []})
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure input is correct.'})
+      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure all values are correct.'})
     })
 
     test('stopping a class using wrong Ids throws error', async () => {
