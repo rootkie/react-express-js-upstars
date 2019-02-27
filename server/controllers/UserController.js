@@ -108,9 +108,9 @@ module.exports.editUserParticulars = async (req, res, next) => {
 
     // Go through list
     for (let checkChanged of properties) {
-      // if (req.body[checkChanged]) {
-      edited[checkChanged] = req.body[checkChanged]
-      // }
+      if (req.body[checkChanged]) {
+        edited[checkChanged] = req.body[checkChanged]
+      }
     }
     // Provilege is to check if user can view and edit admin related fields
     if (approved.privilege === true) {
@@ -118,14 +118,6 @@ module.exports.editUserParticulars = async (req, res, next) => {
     }
 
     let user = await User.findById(userId)
-    // const userDetails = {
-    //   ...user,
-    //   edited
-    // }
-    // console.log(userDetails)
-    user.set(edited)
-    const rawUser = await user.save()
-
     if (!user) {
       const error = {
         status: 404,
@@ -133,6 +125,14 @@ module.exports.editUserParticulars = async (req, res, next) => {
       }
       throw error
     }
+
+    const userDetails = {
+      ...user.toObject(),
+      ...edited
+    }
+    user.set(userDetails)
+    const rawUser = await user.save()
+
     // ES7 Spread for Object destructuring
     let { password, resetPasswordToken, email, ...editedUser } = rawUser.toObject()
     if (approved.privilege !== true) {

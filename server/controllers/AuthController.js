@@ -174,7 +174,6 @@ module.exports.changePassword = async (req, res, next) => {
        <p>Reset your password by clicking this link: ${link}</p><p>Please note that for security purposes, the link will expire in 30 minutes.</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, (error, info) => {
-      console.log(user.name)
       if (error) {
         console.log(error)
       }
@@ -246,8 +245,7 @@ module.exports.resetPassword = async (req, res, next) => {
       res.status(err.status).send({
         error: err.error
       })
-    }
-    if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError' || err.name === 'NotBeforeError') {
+    } else if (err.name === 'TokenExpiredError' || err.name === 'JsonWebTokenError' || err.name === 'NotBeforeError') {
       res.status(403).send({
         error: 'An error occurred concerning your tokens, please try again.'
       })
@@ -412,8 +410,6 @@ module.exports.register = async (req, res, next) => {
     transporter.sendMail(message, async (error, info) => {
       if (error) {
         console.error(error)
-      } else {
-        console.log('Message sent')
       }
     })
   } catch (err) {

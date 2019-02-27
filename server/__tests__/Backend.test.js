@@ -910,12 +910,10 @@ describe('testing user side APIs', () => {
       const userData = {
         'users': [
           {
-            'profile': {
-              'name': 'Mr. Cristian Bartell',
-              'gender': 'M',
-              'nric': 'S925556F',
-              'dob': '2004-03-09T16:00:00.000Z'
-            },
+            'name': 'Mr. Cristian Bartell',
+            'gender': 'M',
+            'nric': 'S925556F',
+            'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
               'Tutor'
@@ -934,12 +932,10 @@ describe('testing user side APIs', () => {
       const allUserData = {
         'users': [
           {
-            'profile': {
-              'name': 'Mr. Cristian Bartell',
-              'gender': 'M',
-              'nric': 'S925556F',
-              'dob': '2004-03-09T16:00:00.000Z'
-            },
+            'name': 'Mr. Cristian Bartell',
+            'gender': 'M',
+            'nric': 'S925556F',
+            'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
               'Tutor'
@@ -947,12 +943,10 @@ describe('testing user side APIs', () => {
             '_id': '5b9255700333773af993ae9c'
           },
           {
-            'profile': {
-              'name': 'Wuying  Kong',
-              'gender': 'M',
-              'nric': 'S923456F',
-              'dob': '2004-03-09T16:00:00.000Z'
-            },
+            'name': 'Wuying Kong',
+            'gender': 'M',
+            'nric': 'S923456F',
+            'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
               'SuperAdmin',
@@ -972,94 +966,74 @@ describe('testing user side APIs', () => {
 
   describe('viewing a single user data', () => {
     const userFullData = {
-      'profile': {
-        'name': 'Mr. Cristian Bartell',
-        'gender': 'M',
-        'nric': 'S925556F',
-        'nationality': 'singaporean',
-        'dob': '2004-03-09T16:00:00.000Z',
-        'address': '486 Schmitt Drive',
-        'postalCode': 623411,
-        'handphone': 84720133,
-        'homephone': 60437898,
-        'schoolClass': 'Sec 3-3',
-        'schoolLevel': 'UPStars Secondary'
-      },
-      'father': {
-        'name': 'Sam Kong',
-        'email': 'samkong@upstars.com',
-        'occupation': 'Manager'
-      },
-      'mother': {
-        'name': 'Yahui  Geng',
-        'occupation': 'Poultry cutter',
-        'email': 'yahuigeng@upstars.com'
-      },
-      'misc': {
-        'hobbies': [
-          'Running. Studying'
-        ],
-        'careerGoal': 'Economist',
-        'formalEducation': [
-          {
-            'dateFrom': '2014-12-31T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'school': 'Upstars Secondary',
-            'highestLevel': 'Sec 4'
-          }
-        ],
-        'coursesSeminar': [
-          {
-            'year': '2016-01-01T00:00:00.000Z',
-            'courseAndObjective': 'Upstars Institute'
-          }
-        ],
-        'achievements': [
-          {
-            'dateFrom': '2018-09-06T13:43:33.359Z',
-            'dateTo': '2018-09-06T13:43:33.359Z',
-            'organisation': 'Upstars',
-            'description': 'Great performance award'
-          }
-        ],
-        'cca': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'cip': [
-          {
-            'dateFrom': '2015-01-31T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:45:56.027Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'workInternExp': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:46:12.164Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'competence': [
-          {
-            'languages': [
-              'English, Chinese'
-            ],
-            'subjects': [
-              'Math, Science, English, Chinese'
-            ],
-            'interests': [
-              'Everything'
-            ]
-          }
-        ]
-      },
+      'name': 'Mr. Cristian Bartell',
+      'gender': 'M',
+      'nric': 'S925556F',
+      'nationality': 'singaporean',
+      'dob': '2004-03-09T16:00:00.000Z',
+      'address': '486 Schmitt Drive',
+      'postalCode': 623411,
+      'handphone': 84720133,
+      'homephone': 60437898,
+      'schoolClass': 'Sec 3-3',
+      'schoolLevel': 'UPStars Secondary',
+      'fatherName': 'Sam Kong',
+      'fatherEmail': 'samkong@upstars.com',
+      'fatherOccupation': 'Manager',
+      'motherName': 'Yahui Geng',
+      'motherOccupation': 'Poultry cutter',
+      'motherEmail': 'yahuigeng@upstars.com',
+      'hobbies': 'Running. Studying',
+      'careerGoal': 'Economist',
+      'formalEducation': [
+        {
+          'dateFrom': '2014-12-31T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'school': 'Upstars Secondary',
+          'highestLevel': 'Sec 4'
+        }
+      ],
+      'coursesSeminar': [
+        {
+          'year': 2016,
+          'courseAndObjective': 'Upstars Institute'
+        }
+      ],
+      'achievements': [
+        {
+          'dateFrom': '2018-09-06T13:43:33.359Z',
+          'dateTo': '2018-09-06T13:43:33.359Z',
+          'organisation': 'Upstars',
+          'description': 'Great performance award'
+        }
+      ],
+      'cca': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'cip': [
+        {
+          'dateFrom': '2015-01-31T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:45:56.027Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'workInternExp': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:46:12.164Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'languages': 'English, Chinese',
+      'subjects': 'Math, Science, English, Chinese',
+      'interests': 'Everything',
       'preferredTimeSlot': [
         'Tuesday 7-9.30pm',
         'Wednesday 7-9.30pm'
@@ -1077,7 +1051,7 @@ describe('testing user side APIs', () => {
       ],
       '_id': '5b9255700333773af993ae9c',
       'exitDate': '2018-12-27T16:00:00.000Z',
-      '__v': 0
+      '__v': 3
     }
 
     test('lowPriv user does not have auth to view other users', async () => {
@@ -1109,7 +1083,7 @@ describe('testing user side APIs', () => {
       })
     })
 
-    test('admin user simply cannot access non existent user', async () => {
+    test('admin user cannot access non existent user', async () => {
       expect.assertions(2)
       const response = await app.get('/users/5b9255700333773af993ae20').set('x-access-token', userToken)
       expect(response.statusCode).toBe(404)
@@ -1124,9 +1098,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         }
       ])
@@ -1138,9 +1110,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         }
       ])
@@ -1159,9 +1129,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         }
       ])
@@ -1173,15 +1141,11 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         },
         {
-          'profile': {
-            'name': 'Wuying  Kong'
-          },
+          'name': 'Wuying Kong',
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
@@ -1225,7 +1189,7 @@ describe('testing user side APIs', () => {
       // Actual is password123
       const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password12345', newPassword: 'password'})
       expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'Old password does not match. Please try again'})
+      expect(response.body).toEqual({'error': 'Your old password does not match. Please try again'})
     })
 
     test('changing password properly returns success', async () => {
@@ -1239,94 +1203,74 @@ describe('testing user side APIs', () => {
 
   describe('editing user particulars', () => {
     const incompleteUserDetails = {
-      'profile': {
-        'name': 'Mr. Cristian Bartell',
-        'gender': 'M',
-        'nric': 'S925556F',
-        'nationality': 'singaporean',
-        'dob': '2004-03-09T16:00:00.000Z',
-        'address': '486 Schmitt Drive',
-        'postalCode': 623411,
-        'handphone': 84720133,
-        'homephone': 60437898,
-        'schoolClass': 'Sec 3-4',
-        'schoolLevel': 'UPStars Secondary'
-      },
-      'father': {
-        'name': 'Sam Kong',
-        'email': 'samkong@upstars.com',
-        'occupation': 'Manager'
-      },
-      'mother': {
-        'name': 'Yahui  Geng',
-        'occupation': 'Poultry cutter',
-        'email': 'yahuigeng@upstars.com'
-      },
-      'misc': {
-        'hobbies': [
-          'Running. Studying'
-        ],
-        'careerGoal': 'Economist',
-        'formalEducation': [
-          {
-            'dateFrom': '2014-12-31T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'school': 'Upstars Secondary',
-            'highestLevel': 'Sec 4'
-          }
-        ],
-        'coursesSeminar': [
-          {
-            'year': '2016-01-01T00:00:00.000Z',
-            'courseAndObjective': 'Upstars Institute'
-          }
-        ],
-        'achievements': [
-          {
-            'dateFrom': '2018-09-06T13:43:33.359Z',
-            'dateTo': '2018-09-06T13:43:33.359Z',
-            'organisation': 'Upstars',
-            'description': 'Great performance award'
-          }
-        ],
-        'cca': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'cip': [
-          {
-            'dateFrom': '2015-01-31T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:45:56.027Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'workInternExp': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:46:12.164Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'competence': [
-          {
-            'languages': [
-              'English, Chinese'
-            ],
-            'subjects': [
-              'Math, Science, English, Chinese'
-            ],
-            'interests': [
-              'Everything'
-            ]
-          }
-        ]
-      },
+      'name': 'Mr. Cristian Bartell',
+      'gender': 'M',
+      'nric': 'S925556F',
+      'nationality': 'singaporean',
+      'dob': '2004-03-09T16:00:00.000Z',
+      'address': '486 Schmitt Drive',
+      'postalCode': 623411,
+      'handphone': 84720133,
+      'homephone': 60437898,
+      'schoolClass': 'Sec 3-4',
+      'schoolLevel': 'UPStars Secondary',
+      'fatherName': 'Sam Kong',
+      'fatherEmail': 'samkong@upstars.com',
+      'fatherOccupation': 'Manager',
+      'motherName': 'Yahui Geng',
+      'motherOccupation': 'Poultry cutter',
+      'motherEmail': 'yahuigeng@upstars.com',
+      'hobbies': 'Running. Studying',
+      'careerGoal': 'Economist',
+      'formalEducation': [
+        {
+          'dateFrom': '2014-12-31T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'school': 'Upstars Secondary',
+          'highestLevel': 'Sec 4'
+        }
+      ],
+      'coursesSeminar': [
+        {
+          'year': 2016,
+          'courseAndObjective': 'Upstars Institute'
+        }
+      ],
+      'achievements': [
+        {
+          'dateFrom': '2018-09-06T13:43:33.359Z',
+          'dateTo': '2018-09-06T13:43:33.359Z',
+          'organisation': 'Upstars',
+          'description': 'Great performance award'
+        }
+      ],
+      'cca': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'cip': [
+        {
+          'dateFrom': '2015-01-31T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:45:56.027Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'workInternExp': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:46:12.164Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'languages': 'English, Chinese',
+      'subjects': 'Math, Science, English, Chinese',
+      'interests': 'Everything',
       'preferredTimeSlot': [
         'Tuesday 7-9.30pm',
         'Wednesday 7-9.30pm'
@@ -1359,7 +1303,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', lowPrivUserToken)
       // Instead of Class 3-3
-      expect(userData.body).toHaveProperty('user.profile.schoolClass', 'Sec 3-4')
+      expect(userData.body).toHaveProperty('user.schoolClass', 'Sec 3-4')
     })
 
     test('admin editing other account returns success', async () => {
@@ -1544,9 +1488,7 @@ describe('testing user side APIs', () => {
       expect(user.body).toHaveProperty('user.status', 'Deleted')
       expect(classData.body.class.users).toEqual([
         {
-          'profile': {
-            'name': 'Wuying  Kong'
-          },
+          'name': 'Wuying Kong',
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
@@ -2154,10 +2096,9 @@ describe('testing student side APIs', () => {
 
 describe('testing attendance related APIs', () => {
   let lowPrivUserToken
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const response = await app.post('/login').send({email: 'testuser4@upstars.com', password: 'password'})
     lowPrivUserToken = response.body.token
-    done()
   })
   describe('get a single attendance by ID', () => {
     test('bad attendance ID throws error', async () => {
