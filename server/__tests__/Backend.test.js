@@ -1521,34 +1521,28 @@ describe('testing user side APIs', () => {
 
 describe('testing student side APIs', () => {
   const studentBasicData = {
-    'profile': {
-      'name': 'Laa Huu Min',
-      'icNumber': 'T0240435J',
-      'dob': '2002-04-18T16:00:00.000Z',
-      'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
-      // 'gender': 'F',
-      'nationality': 'Singaporean',
-      'classLevel': 'Secondary 4',
-      'schoolName': 'Upstars Secondary'
-    },
-    'father': {
-      'name': 'Lai Ming Yuan',
-      'icNumber': 'S7571632Z',
-      'nationality': 'citizen',
-      'contactNumber': '94623272',
-      'email': 'laimingyuan@upstars.com',
-      'occupation': 'Teacher',
-      'income': '4000'
-    },
-    'mother': {
-      'name': 'Jin Rui Tong',
-      'icNumber': 'S7904993Z',
-      'nationality': 'pr',
-      'contactNumber': '84722333',
-      'email': 'jinruitong@upstars.com',
-      'occupation': 'Housewife',
-      'income': '0'
-    },
+    'name': 'Laa Huu Min',
+    'icNumber': 'T0240435J',
+    'dob': '2002-04-18T16:00:00.000Z',
+    'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+    // 'gender': 'F',
+    'nationality': 'Singaporean',
+    'classLevel': 'Secondary 4',
+    'schoolName': 'Upstars Secondary',
+    'fatherName': 'Lai Ming Yuan',
+    'fatherIcNumber': 'S7571632Z',
+    'fatherNationality': 'citizen',
+    'fatherContactNumber': '94623272',
+    'fatherEmail': 'laimingyuan@upstars.com',
+    'fatherOccupation': 'Teacher',
+    'fatherIncome': 4000,
+    'motherName': 'Jin Rui Tong',
+    'motherIcNumber': 'S7904993Z',
+    'motherNationality': 'pr',
+    'motherContactNumber': '84722333',
+    'motherEmail': 'jinruitong@upstars.com',
+    'motherOccupation': 'Housewife',
+    'motherIncome': 0,
     'otherFamily': [
       {
         'name': 'Lai Ruu Meng',
@@ -1556,65 +1550,59 @@ describe('testing student side APIs', () => {
         'age': '12'
       }
     ],
-    'misc': {
-      'fas': [
-        'FSC'
-      ],
-      'fsc': 'Singapore FSC',
-      'tuition': [
-        'Private'
-      ],
-      'academicInfo': [
-        {
-          'year': '2018',
-          'term': '1',
-          'english': '78',
-          'math': '76',
-          'motherTongue': '78',
-          'science': '76',
-          'overall': '77'
-        },
-        {
-          'year': '2018',
-          'term': '2',
-          'english': '65',
-          'math': '66',
-          'motherTongue': '65',
-          'science': '66',
-          'overall': '66'
-        },
-        {
-          'year': '2018',
-          'term': '3',
-          'english': '61',
-          'math': '63',
-          'motherTongue': '63',
-          'science': '61',
-          'overall': '62'
-        }
-      ]
-    },
+    'fas': [
+      'FSC'
+    ],
+    'fsc': 'Singapore FSC',
+    'tuition': [
+      'Private'
+    ],
+    'academicInfo': [
+      {
+        'year': 2018,
+        'term': 1,
+        'english': 78,
+        'math': 76,
+        'motherTongue': 78,
+        'science': 76,
+        'overall': 77
+      },
+      {
+        'year': 2018,
+        'term': 2,
+        'english': 65,
+        'math': 66,
+        'motherTongue': 65,
+        'science': 66,
+        'overall': 66
+      },
+      {
+        'year': 2018,
+        'term': 3,
+        'english': 61,
+        'math': 63,
+        'motherTongue': 63,
+        'science': 61,
+        'overall': 62
+      }
+    ],
     'captchaCode': '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
   }
   describe('get all active students', () => {
     test('everyone should retrieve all students profile', async () => {
       const students = [
         {
-          'profile': {
-            'name': 'Lingxin  Long',
-            'icNumber': 'T0299228D',
-            'dob': '2002-09-04T16:00:00.000Z',
-            'gender': 'F'
-          },
+          'name': 'Lingxin  Long',
+          'icNumber': 'T0299228D',
+          'dob': '2002-09-04T16:00:00.000Z',
+          'gender': 'F',
           '_id': '5b936ce7defc1a592d677008'
         },
         {
-          'profile': {
-            'name': 'Yi Jia Yi',
-            'icNumber': 'T0416861A',
-            'dob': '2004-03-01T16:00:00.000Z',
-            'gender': 'F'
-          },
+          'name': 'Yi Jia Yi',
+          'icNumber': 'T0416861A',
+          'dob': '2004-03-01T16:00:00.000Z',
+          'gender': 'F',
           '_id': '5b9674ef22deaf1ee1aa4dc1'
         }
       ]
@@ -1630,12 +1618,10 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const students = [
         {
-          'profile': {
-            'name': 'Student Suspended',
-            'icNumber': 'T02994428D',
-            'dob': '2002-09-04T16:00:00.000Z',
-            'gender': 'F'
-          },
+          'name': 'Student Suspended',
+          'icNumber': 'T02994428D',
+          'dob': '2002-09-04T16:00:00.000Z',
+          'gender': 'F',
           'status': 'Suspended',
           '_id': '5b94e4ca97a4b26f4dbaf26e'
         }
@@ -1662,18 +1648,15 @@ describe('testing student side APIs', () => {
     })
 
     test('correct studentId returns all values', async () => {
-      expect.assertions(10)
+      expect.assertions(30)
       const response = await app.get('/students/5b936ce7defc1a592d677008')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toHaveProperty('student.profile')
-      expect(response.body).toHaveProperty('student.father')
-      expect(response.body).toHaveProperty('student.mother')
-      expect(response.body).toHaveProperty('student.misc')
-      expect(response.body).toHaveProperty('student.admin')
-      expect(response.body).toHaveProperty('student.classes')
+      const list = ['name', 'icNumber', 'dob', 'gender', 'address', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'classes', 'admin']
+      for (let property of list) {
+        expect(response.body).toHaveProperty(`student.${property}`)
+      }
       expect(response.body).toHaveProperty('student.status', 'Active')
       expect(response.body).toHaveProperty('student._id', '5b936ce7defc1a592d677008')
-      expect(response.body).toHaveProperty('student.otherFamily')
     })
   })
 
@@ -1689,7 +1672,7 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/studentsResponsive/NGx')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': [{'profile': {'name': 'Lingxin  Long'}, '_id': '5b936ce7defc1a592d677008'}]})
+      expect(response.body).toEqual({'studentsFiltered': [{'name': 'Lingxin  Long', '_id': '5b936ce7defc1a592d677008'}]})
     })
   })
 
@@ -1705,7 +1688,7 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/otherStudentsResponsive/uDEn')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': [{'profile': {'name': 'Student Suspended'}, '_id': '5b94e4ca97a4b26f4dbaf26e'}]})
+      expect(response.body).toEqual({'studentsFiltered': [{'name': 'Student Suspended', '_id': '5b94e4ca97a4b26f4dbaf26e'}]})
     })
   })
 
@@ -1723,16 +1706,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
-        'profile': {
-          'name': 'Laa Huu Min',
-          'icNumber': 'T0240435J',
-          'dob': '2002-04-18T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Secondary 4',
-          'schoolName': 'Upstars Secondary'
-        }
+        'name': 'Laa Huu Min',
+        'icNumber': 'T0240435J',
+        'dob': '2002-04-18T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Secondary 4',
+        'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(201)
       expect(response.body).toEqual({'newStudent': expect.any(String)})
@@ -1742,16 +1723,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
-        'profile': {
-          'name': 'Laa Huu Min',
-          'icNumber': 'T0240435J',
-          'dob': '2002-04-18T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Secondary 4',
-          'schoolName': 'Upstars Secondary'
-        }
+        'name': 'Laa Huu Min',
+        'icNumber': 'T0240435J',
+        'dob': '2002-04-18T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Secondary 4',
+        'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
@@ -1783,16 +1762,14 @@ describe('testing student side APIs', () => {
       const response = await app.post('/students').send({
         ...studentBasicData,
         admin,
-        'profile': {
-          'name': 'Lao Shu Min',
-          'icNumber': 'T0188435J',
-          'dob': '2001-11-10T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Sec 5-1',
-          'schoolName': 'Upstars Sec'
-        }
+        'name': 'Lao Shu Min',
+        'icNumber': 'T0188435J',
+        'dob': '2001-11-10T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Sec 5-1',
+        'schoolName': 'Upstars Sec'
       })
       expect(response.statusCode).toBe(201)
       expect(response.body).toEqual({'newStudent': expect.any(String)})
@@ -1802,16 +1779,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
-        'profile': {
-          'name': 'Lao Shu Min',
-          'icNumber': 'T0188435J',
-          'dob': '2001-11-10T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Sec 5-1',
-          'schoolName': 'Upstars Sec'
-        }
+        'name': 'Lao Shu Min',
+        'icNumber': 'T0188435J',
+        'dob': '2001-11-10T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Sec 5-1',
+        'schoolName': 'Upstars Sec'
       })
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
@@ -1932,28 +1907,28 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/students')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
     })
 
     test('deleting without proper studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: []})
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
     })
 
     test('deleting with wrong studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677001']})
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+      expect(response.body).toEqual({'error': 'The student(s) you requested to delete does not exist.'})
     })
 
     test('deleting with malfunctioned studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d6770021']})
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
     })
 
     test('deleting mass number of studentId returns success', async () => {
@@ -1969,66 +1944,61 @@ describe('testing student side APIs', () => {
 
   describe('edit a student data', () => {
     let editStudentData = {
-      'profile': {
-        'name': 'Lingxin  Long',
-        'icNumber': 'T0299228D',
-        'dob': '2002-09-04T16:00:00.000Z',
-        'address': 'Upstars Road 123',
-        'gender': 'F',
-        'nationality': 'Singaporean',
-        'classLevel': 'Primary 6',
-        // Edited the school name
-        'schoolName': 'Upstars Primary School'
-      },
-      'father': {
-        'name': 'Long Lai La',
-        'icNumber': 'S7382913D',
-        'nationality': 'citizen',
-        'email': 'longlaila@upstars.com',
-        'occupation': 'Manager',
-        'contactNumber': 91231234,
-        'income': 5000
-      },
-      'mother': {
-        'name': 'Foo Fa Hui',
-        'icNumber': 'S7892838F',
-        'nationality': 'citizen',
-        'email': 'foofahui@upstars.com',
-        'occupation': 'Housewife',
-        'contactNumber': 81231234,
-        'income': 0
-      },
-      'misc': {
-        'fas': [
-          'MOE'
-        ],
-        'tuition': [
-          'CDAC',
-          'Mendaki',
-          'Private'
-        ],
-        'academicInfo': [
-          {
-            'year': 2018,
-            'term': 3,
-            'english': 60,
-            'math': 60,
-            'motherTongue': 60,
-            'science': 60,
-            'overall': 60
-          },
-          {
-            'year': 2018,
-            'term': 2,
-            'english': 65,
-            'math': 65,
-            'motherTongue': 65,
-            'science': 65,
-            'overall': 65
-          }
-        ],
-        'fsc': 'ABC FSC'
-      },
+      'name': 'Lingxin  Long',
+      'icNumber': 'T0299228D',
+      'dob': '2002-09-04T16:00:00.000Z',
+      'address': 'Upstars Road 123',
+      'gender': 'F',
+      'nationality': 'Singaporean',
+      'classLevel': 'Primary 6',
+      // Edited the school name
+      'schoolName': 'Upstars Primary School',
+      'fatherName': 'Long Lai La',
+      'fatherIcNumber': 'S7382913D',
+      'fatherNationality': 'citizen',
+      'fatherEmail': 'longlaila@upstars.com',
+      'fatherOccupation': 'Manager',
+      'fatherContactNumber': 91231234,
+      'fatherIincome': 5000,
+
+      'motherName': 'Foo Fa Hui',
+      'motherIcNumber': 'S7892838F',
+      'motherNationality': 'citizen',
+      'motherEmail': 'foofahui@upstars.com',
+      'motherOccupation': 'Housewife',
+      'motherContactNumber': 81231234,
+      'motherIncome': 0,
+
+      'fas': [
+        'MOE'
+      ],
+      'tuition': [
+        'CDAC',
+        'Mendaki',
+        'Private'
+      ],
+      'academicInfo': [
+        {
+          'year': 2018,
+          'term': 3,
+          'english': 60,
+          'math': 60,
+          'motherTongue': 60,
+          'science': 60,
+          'overall': 60
+        },
+        {
+          'year': 2018,
+          'term': 2,
+          'english': 65,
+          'math': 65,
+          'motherTongue': 65,
+          'science': 65,
+          'overall': 65
+        }
+      ],
+      'fsc': 'ABC FSC',
+
       'admin': {
         'interviewNotes': 'Good!',
         'adminNotes': 'Good!',
@@ -2080,13 +2050,11 @@ describe('testing student side APIs', () => {
 
       // Check class and personal details
       const userData = await app.get('/students/5b936ce7defc1a592d677008')
-      expect(userData.body.student.profile).toHaveProperty('schoolName', 'Upstars Primary School')
+      expect(userData.body.student).toHaveProperty('schoolName', 'Upstars Primary School')
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class.students).toEqual([
         {
-          'profile': {
-            'name': 'Lingxin  Long'
-          },
+          'name': 'Lingxin  Long',
           '_id': '5b936ce7defc1a592d677008'
         }
       ])

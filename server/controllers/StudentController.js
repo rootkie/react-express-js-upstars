@@ -157,11 +157,12 @@ module.exports.editStudentById = async (req, res, next) => {
       }
       throw error
     }
+    const oldStatus = {...studentFound.status}
     studentFound.set(edited)
     const editedStudent = await studentFound.save()
 
     // Repopulate the classes if the status of the student is changed back to Active
-    if (editedStudent.isModified('status')) {
+    if (req.body.status !== oldStatus) {
       if (editedStudent.status === 'Active' && editedStudent.classes) {
         await Class.updateMany({
           _id: {
