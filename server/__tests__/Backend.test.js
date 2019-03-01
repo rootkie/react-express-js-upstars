@@ -2885,7 +2885,7 @@ describe('testing attendance related APIs', () => {
   })
 })
 
-describe('testing stats and misc related APIs', () => {
+describe.only('testing stats and misc related APIs', () => {
   test('stats should be working', async () => {
     expect.assertions(8)
     const response = await app.get('/stats/dashboard')

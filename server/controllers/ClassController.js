@@ -82,7 +82,7 @@ module.exports.cloneClass = async (req, res, next) => {
     }
     // Creates a shallow copy while editing the fields
     const clonedClass = {
-      ...oldClassData,
+      ...oldClassData.toObject(),
       _id: mongoose.Types.ObjectId(),
       status: 'Active',
       className: oldClassData + 'Clone',
