@@ -2094,10 +2094,8 @@ describe('testing attendance related APIs', () => {
       expect(response.body.attendances).toHaveProperty('hours', 4)
       expect(response.body.attendances.students).toEqual([
         {
-          'list': {
-            'profile': {
-              'name': 'Lingxin  Long'
-            },
+          'student': {
+            'name': 'Lingxin  Long',
             '_id': '5b936ce7defc1a592d677008'
           },
           'status': 0
@@ -2105,10 +2103,8 @@ describe('testing attendance related APIs', () => {
       ])
       expect(response.body.attendances.users).toEqual([
         {
-          'list': {
-            'profile': {
-              'name': 'Wuying  Kong'
-            },
+          'user': {
+            'name': 'Wuying Kong',
             '_id': '5b912ba72b9ec042a58f88a4'
           },
           'status': 1
@@ -2203,9 +2199,9 @@ describe('testing attendance related APIs', () => {
       expect(response.body.foundAttendances).toEqual([])
     })
 
-    test('filter returns attendance after date', async () => {
+    test('filter returns attendance after selected date', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/20180916/dateEnd')
+      const response = await app.get('/attendance/class/dateStart/16092018/dateEnd')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([
         {
@@ -2233,9 +2229,9 @@ describe('testing attendance related APIs', () => {
       ])
     })
 
-    test('filter returns attendance before date', async () => {
+    test('filter returns attendance before selected date', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/dateEnd/20180916')
+      const response = await app.get('/attendance/class/dateStart/dateEnd/16092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([
         {
@@ -2274,9 +2270,9 @@ describe('testing attendance related APIs', () => {
       ])
     })
 
-    test('filter returns attendance for both dates date', async () => {
+    test('filter returns attendance for both start and end dates', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/20180919/dateEnd/20180926')
+      const response = await app.get('/attendance/class/dateStart/19092018/dateEnd/26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([
         {
@@ -2304,9 +2300,9 @@ describe('testing attendance related APIs', () => {
       ])
     })
 
-    test('bad date filter returns attendance empty', async () => {
+    test('bad date filter returns attendance as empty', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/20180926/dateEnd/20180919')
+      const response = await app.get('/attendance/class/dateStart/26092018/dateEnd/19092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([])
     })
@@ -2315,7 +2311,7 @@ describe('testing attendance related APIs', () => {
   describe('get attendance by userId', () => {
     test('all fields are working', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180901-20180926')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/01092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 5)
       expect(response.body.attendances[0]).toHaveProperty('attended', 2)
@@ -2387,7 +2383,7 @@ describe('testing attendance related APIs', () => {
 
     test('all fields working 2', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/19092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2423,7 +2419,7 @@ describe('testing attendance related APIs', () => {
 
     test('adding class as a perimeter', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926/5b97b8f2adfb2e018c64d372')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/19092018-26092018/5b97b8f2adfb2e018c64d372')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2459,7 +2455,7 @@ describe('testing attendance related APIs', () => {
 
     test('non existent class returns empty', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926/5b97bdc5058d1e1e64d232f3')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/19092018-26092018/5b97bdc5058d1e1e64d232f3')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances).toEqual([])
     })
@@ -2468,7 +2464,7 @@ describe('testing attendance related APIs', () => {
   describe('get attendance by student ID', () => {
     test('all fields are working', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180901-20180926')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/01092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 5)
       expect(response.body.attendances[0]).toHaveProperty('attended', 2)
@@ -2540,7 +2536,7 @@ describe('testing attendance related APIs', () => {
 
     test('all fields working 2', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/19092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2576,7 +2572,7 @@ describe('testing attendance related APIs', () => {
 
     test('adding class as a perimeter', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926/5b97b8f2adfb2e018c64d372')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/19092018-26092018/5b97b8f2adfb2e018c64d372')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2612,7 +2608,7 @@ describe('testing attendance related APIs', () => {
 
     test('non existent class returns empty', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926/5b97bdc5058d1e1e64d232f3')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/19092018-26092018/5b97bdc5058d1e1e64d232f3')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances).toEqual([])
     })
@@ -2667,7 +2663,7 @@ describe('testing attendance related APIs', () => {
         {
           'userID': '5b912ba72b9ec042a58f88a4',
           'userName': [
-            'Wuying  Kong'
+            'Wuying Kong'
           ],
           'total': 3,
           'attended': 2,
@@ -2749,11 +2745,11 @@ describe('testing attendance related APIs', () => {
       'hours': 5,
       // 'classId': '5b97b8f2adfb2e018c64d372',
       'users': [{
-        'list': '5b912ba72b9ec042a58f88a4',
+        'user': '5b912ba72b9ec042a58f88a4',
         'status': 1
       }],
       'students': [{
-        'list': '5b936ce7defc1a592d677008',
+        'student': '5b936ce7defc1a592d677008',
         'status': 1
       }],
       'type': 'Class'
@@ -2835,7 +2831,7 @@ describe('testing attendance related APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/attendance').set('x-access-token', userToken)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide an existing attendanceId'})
     })
 
     test('no attendanceId throws error', async () => {
@@ -2846,7 +2842,7 @@ describe('testing attendance related APIs', () => {
           classId: '5b97b8f2adfb2e018c64d372'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide an existing attendanceId'})
     })
 
     test('no classId throws error', async () => {
@@ -2858,7 +2854,7 @@ describe('testing attendance related APIs', () => {
           attendanceId: '5b990729cef48424966ed0de'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide an existing classId'})
     })
 
     test('insufficient privilege throws error', async () => {

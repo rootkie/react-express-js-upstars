@@ -140,10 +140,10 @@ module.exports.getAttendance = async (req, res, next) => {
     }
     // Added the utc option to make the date earlier so comparison is valid
     if (dateStart) {
-      attendances = attendances.where('date').gte(new Date(moment(dateStart).utc().format('DD-MM-YYYY')))
+      attendances = attendances.where('date').gte(moment(dateStart, 'DDMMYYYY').utc().toDate())
     }
     if (dateEnd) {
-      attendances = attendances.where('date').lte(new Date(moment(dateEnd).format('DD-MM-YYYY')))
+      attendances = attendances.where('date').lte(moment(dateEnd, 'DDMMYYYY').toDate())
     }
     // else the query is empty and every single record from past till now is obtained, similar to a getAll function. Limit to 200 newest.
 
@@ -183,8 +183,8 @@ module.exports.getAttendanceByUser = async (req, res, next) => {
     // Init what factors to search in user later
     user['users.user'] = mongoose.Types.ObjectId(userId)
     user.date = {
-      $gte: new Date(moment(dateStart).utc().format('DD-MM-YYYY')),
-      $lte: new Date(moment(dateEnd).format('DD-MM-YYYY'))
+      $gte: moment(dateStart, 'DDMMYYYY').utc().toDate(),
+      $lte: moment(dateEnd, 'DDMMYYYY').toDate()
     }
 
     if (classId) {
@@ -258,8 +258,8 @@ module.exports.getAttendanceByStudent = async (req, res, next) => {
     // Init what factors to search in student later
     student['students.student'] = mongoose.Types.ObjectId(studentId)
     student.date = {
-      $gte: new Date(moment(dateStart).utc().format('DD-MM-YYYY')),
-      $lte: new Date(moment(dateEnd).format('DD-MM-YYYY'))
+      $gte: moment(dateStart, 'DDMMYYYY').utc().toDate(),
+      $lte: moment(dateEnd, 'DDMMYYYY').toDate()
     }
 
     if (classId) {
