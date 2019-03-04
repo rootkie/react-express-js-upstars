@@ -14,9 +14,9 @@ beforeAll(async () => {
   userToken = response.body.token
 })
 
-// afterAll(() => {
-//   exec('mongorestore --drop -d tests dump/tests')
-// })
+afterAll(() => {
+  exec('mongorestore --drop -d tests dump/tests')
+})
 
 describe('testing auth related API mostly without token', () => {
   describe('login testing', () => {
@@ -2885,7 +2885,7 @@ describe('testing attendance related APIs', () => {
   })
 })
 
-describe.only('testing stats and misc related APIs', () => {
+describe('testing stats and misc related APIs', () => {
   test('stats should be working', async () => {
     expect.assertions(8)
     const response = await app.get('/stats/dashboard')

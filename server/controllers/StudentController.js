@@ -253,7 +253,6 @@ module.exports.getStudentById = async (req, res, next) => {
 
     // Find student based on ID and retrieve className
     const student = await Student.findById(studentId).populate('classes', 'className status')
-      // .select('-createdAt -updatedAt')
       .lean()
     if (!student) {
       const error = {

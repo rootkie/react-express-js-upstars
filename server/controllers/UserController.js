@@ -11,7 +11,7 @@ module.exports.getAllUsers = async (req, res, next) => {
     if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || roles.indexOf('Mentor') !== -1) {
       const users = await User.find({
         'status': 'Active'
-      }).select('name nric gender dob roles status').sort('name')
+      }).select('name nric gender dob roles status').sort('name').limit(200).lean()
 
       return res.status(200).json({
         users
@@ -20,7 +20,7 @@ module.exports.getAllUsers = async (req, res, next) => {
       const users = await User.find({
         _id,
         'status': 'Active'
-      }).select('name nric gender dob roles status')
+      }).select('name nric gender dob roles status').lean()
 
       return res.status(200).json({
         users
@@ -52,7 +52,7 @@ module.exports.getUser = async (req, res, next) => {
     // Find user based on ID and retrieve its className. Restricted based on the need to view admin
     // Since the auth check above already confirmed the user can view this profile, the privilege checks if the user can see (and edit) admin field
     let user = await User.findById(req.params.id).populate('classes', 'className status')
-      .select('-password -commencementDate -email -resetPasswordToken')
+      .select('-password -commencementDate -email -resetPasswordToken').lean()
     if (!user) {
       const error = {
         status: 404,
@@ -126,11 +126,7 @@ module.exports.editUserParticulars = async (req, res, next) => {
       throw error
     }
 
-    const userDetails = {
-      ...user.toObject(),
-      ...edited
-    }
-    user.set(userDetails)
+    user.set(edited)
     const rawUser = await user.save()
 
     // ES7 Spread for Object destructuring
@@ -322,7 +318,7 @@ module.exports.getUsersByName = async (req, res, next) => {
       const users = await User.find({
         'status': 'Active',
         'name': new RegExp(name, 'i')
-      }).select('name').sort('name')
+      }).select('name').sort('name').limit(30).lean()
 
       return res.status(200).json({
         users
@@ -332,7 +328,7 @@ module.exports.getUsersByName = async (req, res, next) => {
       const users = await User.find({
         '_id': _id,
         'status': 'Active'
-      }).select('name').sort('name')
+      }).select('name').sort('name').lean()
 
       res.status(200).json({
         users
