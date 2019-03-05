@@ -9,14 +9,14 @@ const recaptchaRef = React.createRef()
 
 const initialState = {
   // Student Information
-  studentName: '',
-  studentIcNumber: '',
-  studentDob: undefined,
-  studentAddress: '',
-  studentGender: '',
-  studentNationality: '',
-  studentClassLevel: '',
-  studentSchoolName: '',
+  name: '',
+  icNumber: '',
+  dob: undefined,
+  address: '',
+  gender: '',
+  nationality: '',
+  classLevel: '',
+  schoolName: '',
 
   /* Family Information */
   fatherName: '',
@@ -66,7 +66,7 @@ const reducer = (state, action) => {
     case 'updateField':
       return {
         ...state,
-        [action.name]: action.value || action.checked
+        [action.name]: action.value
       }
     case 'updateAcademic': {
       let newAcademicInfo = [...state.academicInfo]
@@ -189,20 +189,20 @@ const submitPersonal = (dispatch, state) => e => {
     dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
   } else {
     const {
-      studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
+      name, icNumber, dob, address, gender, nationality, classLevel, schoolName
     } = state
     const requiredSchema = object({
-      studentSchoolName: string().required('Please provide your school name'),
-      studentClassLevel: string().required('Please provide your class and level'),
-      studentNationality: string().required('Please provide your nationality'),
-      studentGender: string().required('Please provide your gender'),
-      studentAddress: string().required('Please provide a valid address'),
-      studentDob: date('Please provide a valid date'),
-      studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
-      studentName: string().required('Please provide your name')
+      schoolName: string().required('Please provide your school name'),
+      classLevel: string().required('Please provide your class and level'),
+      nationality: string().required('Please provide your nationality'),
+      gender: string().required('Please provide your gender'),
+      address: string().required('Please provide a valid address'),
+      dob: date().required('Please provide a valid date of birth'),
+      icNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+      name: string().required('Please provide your name')
     })
     requiredSchema.validate({
-      studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName
+      name, icNumber, dob, address, gender, nationality, classLevel, schoolName
     }, {abortEarly: true}).then(valid => {
       dispatch({type: 'updateField', name: 'activeItem', value: 'Family Details'})
     }).catch(err => {
@@ -218,63 +218,55 @@ const submitAll = (dispatch, state) => e => {
   dispatch({type: 'clearError'})
 
   const {
-    studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, terms,
+    name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms,
     fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
     motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome, otherFamily, fas, fsc, academicInfo, tuitionChoices, captchaCode
   } = state
 
   // Validate the important details
   const requriedSchema = object({
-    studentName: string().required('Please provide your name'),
-    studentIcNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
-    studentDob: date('Please provide a valid date'),
-    studentAddress: string().required('Please provide a valid address'),
-    studentGender: string().required('Please provide your gender'),
-    studentNationality: string().required('Please provide your nationality'),
-    studentClassLevel: string().required('Please provide your class and level'),
-    studentSchoolName: string().required('Please provide your school name'),
+    name: string().required('Please provide your name'),
+    icNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+    dob: date('Please provide a valid date'),
+    address: string().required('Please provide a valid address'),
+    gender: string().required('Please provide your gender'),
+    nationality: string().required('Please provide your nationality'),
+    classLevel: string().required('Please provide your class and level'),
+    schoolName: string().required('Please provide your school name'),
     terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
     captchaCode: string().required('There is an error with the CaptchaCode, please try again')
   })
 
   requriedSchema.validate({
-    studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, terms, captchaCode
+    name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms, captchaCode
   }).then(valid => {
     let studentDataToSubmit = {
-      profile: {
-        name: studentName,
-        icNumber: studentIcNumber,
-        dob: studentDob,
-        address: studentAddress,
-        gender: studentGender,
-        nationality: studentNationality,
-        classLevel: studentClassLevel,
-        schoolName: studentSchoolName
-      },
-      father: {
-        name: fatherName,
-        icNumber: fatherIcNumber,
-        nationality: fatherNationality,
-        contactNumber: fatherContactNumber,
-        email: fatherEmail,
-        occupation: fatherOccupation,
-        income: fatherIncome
-      },
-      mother: {
-        name: motherName,
-        icNumber: motherIcNumber,
-        nationality: motherNationality,
-        contactNumber: motherContactNumber,
-        email: motherEmail,
-        occupation: motherOccupation,
-        income: motherIncome
-      },
+      name,
+      icNumber,
+      dob,
+      address,
+      gender,
+      nationality,
+      classLevel,
+      schoolName,
+      fatherName,
+      fatherIcNumber,
+      fatherNationality,
+      fatherContactNumber,
+      fatherEmail,
+      fatherOccupation,
+      fatherIncome,
+      motherName,
+      motherIcNumber,
+      motherNationality,
+      motherContactNumber,
+      motherEmail,
+      motherOccupation,
+      motherIncome,
       otherFamily,
-      misc: {
-        fas,
-        fsc,
-        academicInfo
-      },
+      fas,
+      fsc,
+      academicInfo,
       captchaCode
     }
     // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
@@ -283,7 +275,7 @@ const submitAll = (dispatch, state) => e => {
     const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
     ), [])
 
-    studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
+    studentDataToSubmit = {...studentDataToSubmit, tuition} // adding tuition info into misc
 
     axios.post('/students', studentDataToSubmit)
       .then(response => {
@@ -312,8 +304,8 @@ const StudentForm = () => {
   const { activeItem, errorMessage, submitSuccess } = state
 
   // Function to handle state change
-  const handleChange = (e, {name, value, checked}) => {
-    dispatch({type: 'updateField', name, value, checked})
+  const handleChange = (e, {name, value}) => {
+    dispatch({type: 'updateField', name, value})
   }
 
   const updateAcademic = (index, property) => (e, {value}) => {
@@ -363,40 +355,40 @@ const StudentForm = () => {
           <Grid.Column>
             <Form>
               { activeItem === 'Personal Info' && <PersonalInfo dispatch={dispatch} state={state} handleChange={handleChange} updateAcademic={updateAcademic} /> }
+              { activeItem === 'Family Details' && <FamilyDetails dispatch={dispatch} state={state} handleChange={handleChange} updateFamilyMember={updateFamilyMember} recaptchaRef={recaptchaRef} /> }
             </Form>
           </Grid.Column>
         </Grid.Row>
         <Grid.Row>
           <Grid.Column>
             <Form>
-              { activeItem === 'Family Details' && <FamilyDetails dispatch={dispatch} state={state} handleChange={handleChange} updateFamilyMember={updateFamilyMember} recaptchaRef={recaptchaRef} /> }
+              <Message
+                icon='exclamation triangle'
+                hidden={errorMessage.length === 0 || !errorMessage}
+                negative
+                header='Error!'
+                content={errorMessage}
+              />
+              <Message
+                icon='user plus'
+                hidden={!submitSuccess}
+                positive
+                header='Success!'
+                content='Successfully Submitted and saved'
+              />
+              <Form.Group>
+                <Form.Button primary onClick={submitPersonal(dispatch, state)}>{activeItem === 'Personal Info' ? 'Continue' : 'Back'}</Form.Button>
+                <Form.Button disabled={activeItem !== 'Family Details'} onClick={submitAll(dispatch, state)}>Register as student</Form.Button>
+              </Form.Group>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                size='invisible'
+                sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
+                onChange={() => dispatch({type: 'captchaChange'})}
+                onExpired={() => dispatch({type: 'captchaExpired'})}
+              />
             </Form>
           </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Form>
-            <Message
-              hidden={errorMessage.length === 0 || !errorMessage}
-              negative
-              content={errorMessage}
-            />
-            <Message
-              hidden={!submitSuccess}
-              positive
-              content='Successfully Submitted and saved'
-            />
-            <Form.Group>
-              <Form.Button primary onClick={submitPersonal(dispatch, state)}>{activeItem === 'Personal Info' ? 'Continue' : 'Back'}</Form.Button>
-              <Form.Button disabled={activeItem !== 'Family Details'} onClick={submitAll(dispatch, state)}>Register as student</Form.Button>
-            </Form.Group>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              size='invisible'
-              sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
-              onChange={() => dispatch({type: 'captchaChange'})}
-              onExpired={() => dispatch({type: 'captchaExpired'})}
-            />
-          </Form>
         </Grid.Row>
       </Grid>
     </Segment>

@@ -111,7 +111,7 @@ const submitPageOne = (dispatch, state) => e => {
   } else {
     const { email, password, passwordcfm } = state
     const requiredFieldForLogin = object({
-      passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
+      passwordcfm: string().required('Please provide the password confirmation').oneOf([ref('password'), null], 'Passwords do not match'),
       password: string().required('Please provide a password').min(6, 'Please provide a password that has at least 6 characters'),
       email: string().required('Please provide an email address').email('Please provide a valid email')
     })
@@ -144,11 +144,11 @@ const submitEntry = (dispatch, state) => e => {
     nationality: string().required('Please provide your nationality'),
     gender: string().required('Please provide your gender'),
     dob: date().required('Please enter a valid date of birth'),
-    homephone: string().matches(/^6\d{7}/, 'Please provide a valid homephone number').required('Please provide a homephone number'),
-    handphone: string().matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number').required('Please provide a handphone number'),
+    homephone: string().required('Please provide a homephone number').matches(/^6\d{7}/, 'Please provide a valid homephone number'),
+    handphone: string().required('Please provide a handphone number').matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number'),
     schoolLevel: string().required('Please provide your schooling level'),
     schoolClass: string().required('Please provide your school class'),
-    postalCode: string().matches(/\d{6}/, 'Please provide a valid postal code').required('Please provide a postal code'),
+    postalCode: string().required('Please provide a postal code').matches(/\d{6}/, 'Please provide a valid postal code'),
     address: string().required('Please provide an address'),
     name: string().required('Please provide your name'),
     passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
@@ -167,19 +167,17 @@ const submitEntry = (dispatch, state) => e => {
         commencementDate,
         exitDate,
         preferredTimeSlot: timeSlot,
-        profile: {
-          name,
-          dob,
-          gender,
-          nationality,
-          nric,
-          address,
-          postalCode,
-          handphone,
-          homephone,
-          schoolClass,
-          schoolLevel
-        },
+        name,
+        dob,
+        gender,
+        nationality,
+        nric,
+        address,
+        postalCode,
+        handphone,
+        homephone,
+        schoolClass,
+        schoolLevel,
         captchaCode
       }
 
@@ -247,47 +245,47 @@ const VolunteerRegister = () => {
           <Grid.Column>
             <Form>
               {activeItem === 'Login Details' && <LoginDetails state={state} handleChange={handleChange} />}
+              { activeItem === 'Personal Info' && <PersonalInfo dispatch={dispatch} state={state} handleChange={handleChange} recaptchaRef={recaptchaRef} />}
             </Form>
           </Grid.Column>
         </Grid.Row>
         <Grid.Row>
           <Grid.Column>
             <Form>
-              { activeItem === 'Personal Info' && <PersonalInfo dispatch={dispatch} state={state} handleChange={handleChange} recaptchaRef={recaptchaRef} />}
+              <Message icon hidden={!loading}>
+                <Icon name='circle notched' loading />
+                <Message.Content>
+                  <Message.Header>Just a moment</Message.Header>
+                  We are currently creating your account.
+                </Message.Content>
+              </Message>
+              <Message
+                hidden={success === false}
+                positive
+                icon='user plus'
+                header='Success!'
+                content='Success! Please check your email for verification link'
+              />
+              <Message
+                hidden={errorMessage.length === 0 || !errorMessage}
+                negative
+                icon='exclamation circle'
+                header='Error!'
+                content={errorMessage}
+              />
+              <Form.Group>
+                <Form.Button primary type='button' onClick={submitPageOne(dispatch, state)}>{activeItem === 'Login Details' ? 'Continue' : 'Back'}</Form.Button>
+                <Form.Button disabled={activeItem !== 'Personal Info'} onClick={submitEntry(dispatch, state)}>Register as volunteer</Form.Button>
+              </Form.Group>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                size='invisible'
+                sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
+                onChange={() => dispatch({type: 'captchaChange'})}
+                onExpired={() => dispatch({type: 'captchaExpired'})}
+              />
             </Form>
           </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Form>
-            <Message icon hidden={!loading}>
-              <Icon name='circle notched' loading />
-              <Message.Content>
-                <Message.Header>Just a moment</Message.Header>
-                  We are currently creating your account.
-              </Message.Content>
-            </Message>
-            <Message
-              hidden={success === false}
-              positive
-              content='Success! Please check your email for verification link'
-            />
-            <Message
-              hidden={errorMessage.length === 0 || !errorMessage}
-              negative
-              content={errorMessage}
-            />
-            <Form.Group>
-              <Form.Button primary type='button' onClick={submitPageOne(dispatch, state)}>{activeItem === 'Login Details' ? 'Continue' : 'Back'}</Form.Button>
-              <Form.Button disabled={activeItem !== 'Personal Info'} onClick={submitEntry(dispatch, state)}>Register as volunteer</Form.Button>
-            </Form.Group>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              size='invisible'
-              sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
-              onChange={() => dispatch({type: 'captchaChange'})}
-              onExpired={() => dispatch({type: 'captchaExpired'})}
-            />
-          </Form>
         </Grid.Row>
       </Grid>
     </Segment>

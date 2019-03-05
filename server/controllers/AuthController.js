@@ -405,7 +405,7 @@ module.exports.register = async (req, res, next) => {
       subject: 'Thanks for joining UP Stars!',
       html: `<p>Welcome, ${userObject.name}!</p><p>Thanks for joining UPStars as a volunteer. We would love to have you on board.</p><p>We would like you to verify your account by clicking on the following link:</p>
            <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${userObject.email}</p>
-           <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
+           <p>If you have any queries, feel free to email Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, async (error, info) => {
       if (error) {
@@ -592,7 +592,7 @@ module.exports.newLink = async (req, res, next) => {
             <p>You have requested for a new link to verify your account. If you did not made this request, please contact our administrator(s).</p>
             <p>We would like you to verify your account by clicking on the following link:</p>
            <p>${link}</p><p>Please note that for security purposes, please confirm your email within 3 days.</p><p>For reference, here's your log-in information:</p><p>Login email: ${rawUser.email}</p>
-           <p>If you have any queries, feel free to email the Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
+           <p>If you have any queries, feel free to email Mrs Hauw SH (volunteer.upstars@gmail.com)</p><p>Thanks,<br />The UP Stars Team</p>`
     }
     transporter.sendMail(message, async (error, info) => {
       if (error) {
