@@ -63,7 +63,7 @@ class StudentView extends Component {
         console.log(response)
         let studentList = response.data.studentsFiltered.map(student => {
           return {
-            title: student.profile.name,
+            title: student.name,
             id: student._id,
             key: student._id
           }
@@ -117,8 +117,8 @@ class StudentView extends Component {
     const { searchFilter } = this.props
     const { ageSelector, genderSelector } = this.state
     const options = []
-    ageSelector.length > 0 && options.push({field: 'profile-age', value: ageSelector})
-    genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
+    ageSelector.length > 0 && options.push({field: 'age', value: ageSelector})
+    genderSelector.length > 0 && options.push({field: 'gender', value: genderSelector})
     searchFilter(options)
   }
 
@@ -199,10 +199,10 @@ class StudentView extends Component {
                         <Checkbox name={student._id} onChange={this.handleCheckboxChange} checked={selected.includes(student._id)} />
                       </Table.Cell>
                       }
-                      <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
-                      <Table.Cell>{moment().diff(student.profile.dob, 'years')}</Table.Cell>
-                      <Table.Cell>{student.profile.icNumber}</Table.Cell>
-                      <Table.Cell>{student.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
+                      <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.name}</Link></Table.Cell>
+                      <Table.Cell>{moment().diff(student.dob, 'years')}</Table.Cell>
+                      <Table.Cell>{student.icNumber}</Table.Cell>
+                      <Table.Cell>{student.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
                 }
@@ -233,7 +233,7 @@ class StudentView extends Component {
                           open={deleteConfirmationVisibility}
                           header='Deleting the following students:'
                           content={selected.map((id) => (
-                            studentData.filter((student) => (student._id === id))[0].profile.name
+                            studentData.filter((student) => (student._id === id))[0].name
                           )).join(', ')}
                           onCancel={this.handleDeleteConfirmation('cancel')}
                           onConfirm={this.handleDeleteConfirmation('confirm')}

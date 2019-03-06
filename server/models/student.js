@@ -63,7 +63,7 @@ const StudentSchema = new Schema({
   fatherContactNumber: {
     type: Number
   },
-  FatherEmail: {
+  fatherEmail: {
     type: String,
     trim: true
   },
