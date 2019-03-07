@@ -64,7 +64,7 @@ class AttendanceStudent extends Component {
         console.log(response)
         let studentList = response.data.studentsFiltered.map(student => {
           return {
-            title: student.profile.name,
+            title: student.name,
             id: student._id,
             key: student._id
           }
@@ -110,8 +110,8 @@ class AttendanceStudent extends Component {
     if (!studentSelector) {
       this.setState({ error: 'Please provide a student to search for!', isLoading: false })
     } else {
-      startDate = moment(startDate).format('[/]YYYYMMDD')
-      endDate = moment(endDate).format('[-]YYYYMMDD')
+      startDate = moment(startDate).format('[/]DDMMYYYY')
+      endDate = moment(endDate).format('[-]DDMMYYYY')
       axios.get('attendance/student/' + studentSelector + startDate + endDate + '/' + classSelector)
         .then(response => {
         // If there are any records, else a default text is shown to inform the user.

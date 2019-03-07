@@ -72,9 +72,9 @@ class AttendanceView extends Component {
             if (data.users.length !== 0) {
               for (let [index, userData] of data.users.entries()) {
                 users[index] = {
-                  text: userData.list.profile.name,
-                  key: userData.list._id,
-                  list: userData.list._id,
+                  text: userData.user.name,
+                  key: userData.user._id,
+                  user: userData.user._id,
                   status: userData.status
                 }
               }
@@ -83,9 +83,9 @@ class AttendanceView extends Component {
             if (data.students.length !== 0) {
               for (let [index, studentData] of data.students.entries()) {
                 students[index] = {
-                  text: studentData.list.profile.name,
-                  key: studentData.list._id,
-                  list: studentData.list._id,
+                  text: studentData.student.name,
+                  key: studentData.student._id,
+                  student: studentData.student._id,
                   status: studentData.status
                 }
               }
@@ -118,7 +118,7 @@ class AttendanceView extends Component {
     let { users } = this.state
     // Map the users and check which array contains the ID involved. May have performance issues, we would trial that out later.
     // Edit the status accordingly.
-    let pos = users.map(usr => { return usr.list }).indexOf(name)
+    let pos = users.map(usr => { return usr.user }).indexOf(name)
     if (checked) {
       users[pos].status = 1
     } else {
@@ -130,7 +130,7 @@ class AttendanceView extends Component {
   // Similar code logic for students
   handleCheckboxChangeForStudent = (e, { name, checked }) => {
     let { students } = this.state
-    let pos = students.map(function (usr) { return usr.list }).indexOf(name)
+    let pos = students.map(function (std) { return std.student }).indexOf(name)
     if (checked) {
       students[pos].status = 1
     } else {
@@ -266,7 +266,7 @@ class AttendanceView extends Component {
                   {students.map((options, i) => (
                     <Table.Row key={`users-${i}`}>
                       <Table.Cell collapsing>
-                        <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
+                        <Checkbox name={options.student} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
                       </Table.Cell>
                       <Table.Cell>{options.text}</Table.Cell>
                     </Table.Row>))}
@@ -285,7 +285,7 @@ class AttendanceView extends Component {
                   {users.map((options, i) => (
                     <Table.Row key={`users-${i}`}>
                       <Table.Cell collapsing>
-                        <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
+                        <Checkbox name={options.user} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class' || edit === false} />
                       </Table.Cell>
                       <Table.Cell>{options.text}</Table.Cell>
                     </Table.Row>))}
