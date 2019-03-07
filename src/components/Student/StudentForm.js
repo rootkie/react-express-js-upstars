@@ -161,7 +161,7 @@ class StudentForm extends Component {
   handleSubmit = async e => {
     e.preventDefault()
     /* submit inputs in fields (stored in state) */
-    const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms,
+    const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName,
       fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
       motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome, otherFamily, fas, fsc, academicInfo, admin, tuitionChoices, captchaCode } = this.state
     const { addStudent } = this.props
