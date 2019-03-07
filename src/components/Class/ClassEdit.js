@@ -74,8 +74,8 @@ class ClassEdit extends Component {
         let students = []
         for (let [index, studentList] of response.data.students.entries()) {
           students[index] = {
-            key: studentList.profile.name,
-            text: studentList.profile.name,
+            key: studentList.name,
+            text: studentList.name,
             value: studentList._id
           }
         }
@@ -90,8 +90,8 @@ class ClassEdit extends Component {
         let users = []
         for (let [index, userList] of response.data.users.entries()) {
           users[index] = {
-            key: userList.profile.name,
-            text: userList.profile.name,
+            key: userList.name,
+            text: userList.name,
             value: userList._id
           }
         }
@@ -142,7 +142,7 @@ class ClassEdit extends Component {
       }
       try {
         // Calls the edit function and if successful change the button and page back to its original form.
-        await editClass(oneClassData)
+        await editClass(oneClassData, this.props.match.params.sid)
         this.showSuccess()
         this.setState({edit: false, ButtonContent: 'Edit Class Information'})
       } catch (error) {
@@ -334,7 +334,7 @@ class ClassEdit extends Component {
                       <Table.Cell collapsing>
                         <Checkbox name={Student._id} onChange={this.handleCheckBoxForStudent} checked={studentSelected.includes(Student._id)} />
                       </Table.Cell>
-                      <Table.Cell>{Student.profile.name}</Table.Cell>
+                      <Table.Cell>{Student.name}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
 
@@ -367,7 +367,7 @@ class ClassEdit extends Component {
                       <Table.Cell collapsing>
                         <Checkbox name={User._id} onChange={this.handleCheckBoxForUser} checked={userSelected.includes(User._id)} />
                       </Table.Cell>
-                      <Table.Cell>{User.profile.name}</Table.Cell>
+                      <Table.Cell>{User.name}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
 
@@ -406,7 +406,7 @@ class ClassEdit extends Component {
                   {oneClassData.students.map((Student, i) => (
                     <Table.Row key={`student-${i}`}>
                       <Table.Cell>{i + 1}</Table.Cell>
-                      <Table.Cell>{Student.profile.name}</Table.Cell>
+                      <Table.Cell>{Student.name}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
                 }
@@ -433,7 +433,7 @@ class ClassEdit extends Component {
                   {oneClassData.users.map((User, i) => (
                     <Table.Row key={`user-${i}`}>
                       <Table.Cell>{i + 1}</Table.Cell>
-                      <Table.Cell>{User.profile.name}</Table.Cell>
+                      <Table.Cell>{User.name}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
                 }
