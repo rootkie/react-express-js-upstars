@@ -201,7 +201,7 @@ class AttendanceView extends Component {
     }).then(response => {
       this.setState({ edit: false, buttonName: 'Edit', submitSuccess: true })
       this.setState({isLoading: false})
-      this.context.router.history.push('/attendance/search')
+      this.context.router.history.push('/dashboard/attendance/search')
     })
   }
 
