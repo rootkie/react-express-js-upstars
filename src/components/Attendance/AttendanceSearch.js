@@ -69,12 +69,12 @@ class AttendanceSearch extends Component {
     // Case 3: class is not given. '?' in the API means the field is optional.
     // So an API like '/attendance/class/dateStart/dateEnd/' will simply return every single attendance records of every class.
     if (startDate !== null) {
-      startDate = moment(startDate).format('[/]YYYYMMDD') //  From the moments docs, [] allows additional characters
+      startDate = moment(startDate).format('[/]DDMMYYYY') //  From the moments docs, [] allows additional characters
     } else {
       startDate = ''
     }
     if (endDate !== null) {
-      endDate = moment(endDate).format('[/]YYYYMMDD')
+      endDate = moment(endDate).format('[/]DDMMYYYY')
     } else {
       endDate = ''
     }

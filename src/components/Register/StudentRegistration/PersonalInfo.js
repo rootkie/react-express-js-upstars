@@ -10,22 +10,22 @@ const genderOptions = [
 ]
 
 const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
-  const { studentName, studentIcNumber, studentDob, studentAddress, studentGender, studentNationality, studentClassLevel, studentSchoolName, academicInfo } = state
+  const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName, academicInfo } = state
 
   return (
     <Segment attached='bottom' color='red'>
       {/* <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='name' value={name} onChange={(e, {value, name}) => dispatch({type: 'updateProfile', value, name})} required /> */}
-      <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='studentName' value={studentName} onChange={handleChange} required />
+      <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='name' value={name} onChange={handleChange} required />
       <Form.Group widths='equal'>
-        <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='studentIcNumber' value={studentIcNumber} onChange={handleChange} required />
+        <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='icNumber' value={icNumber} onChange={handleChange} required />
         <Form.Field required>
           <label>Date of Birth</label>
           <DatePicker
             placeholderText='Click to select a date'
             dateFormat='DD/MM/YYYY'
             maxDate={moment()}
-            selected={studentDob}
-            onChange={date => dispatch({type: 'updateField', name: 'studentDob', value: date})}
+            selected={dob}
+            onChange={date => dispatch({type: 'updateField', name: 'dob', value: date})}
             showMonthDropdown
             showYearDropdown
             dropdownMode='select'
@@ -33,13 +33,13 @@ const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
         </Form.Field>
       </Form.Group>
       <Form.Group widths='equal'>
-        <Form.Input label='Nationality' placeholder='Nationality' name='studentNationality' value={studentNationality} onChange={handleChange} required />
-        <Form.Select label='Gender' options={genderOptions} placeholder='Select Gender' name='studentGender' value={studentGender} onChange={handleChange} required />
+        <Form.Input label='Nationality' placeholder='Nationality' name='nationality' value={nationality} onChange={handleChange} required />
+        <Form.Select label='Gender' options={genderOptions} placeholder='Select Gender' name='gender' value={gender} onChange={handleChange} required />
       </Form.Group>
-      <Form.Input label='Residential address' placeholder='Residential address' name='studentAddress' value={studentAddress} onChange={handleChange} required />
+      <Form.Input label='Residential address' placeholder='Residential address' name='address' value={address} onChange={handleChange} required />
       <Form.Group widths='equal'>
-        <Form.Input label='Name of School' placeholder='Name of School' name='studentSchoolName' value={studentSchoolName} onChange={handleChange} required />
-        <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='studentClassLevel' value={studentClassLevel} onChange={handleChange} required />
+        <Form.Input label='Name of School' placeholder='Name of School' name='schoolName' value={schoolName} onChange={handleChange} required />
+        <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='classLevel' value={classLevel} onChange={handleChange} required />
       </Form.Group>
       <Table celled striped columns={7} fixed>
         <Table.Header>

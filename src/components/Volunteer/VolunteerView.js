@@ -46,8 +46,7 @@ class VolunteerView extends Component {
     axios.get('/users')
       .then(response => {
         let volunteerData = response.data.users
-        let editedData = response.data.users
-        console.log(volunteerData)
+        let editedData = [...response.data.users]
         this.setState({ isLoading: false, volunteerData, editedData })
       })
       .catch(err => {
@@ -63,10 +62,9 @@ class VolunteerView extends Component {
     if (value.length < 1) return this.resetComponent()
     axios.get(`usersResponsive/${value}`)
       .then(response => {
-        console.log(response)
         let volunteerList = response.data.users.map(user => {
           return {
-            title: user.profile.name,
+            title: user.name,
             id: user._id,
             key: user._id
           }
@@ -93,12 +91,12 @@ class VolunteerView extends Component {
 
   toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
 
-  handleDelete = () => {
+  handleDelete = async () => {
     const { selected } = this.state
     const { deleteUser } = this.props
     this.setState({ isLoading: true })
-    selected.length > 0 && deleteUser(selected)
-    setTimeout(this.getVolunteers(), 1500)
+    selected.length > 0 && await deleteUser(selected)
+    this.getVolunteers()
     this.setState({selected: []})
   }
 
@@ -121,7 +119,7 @@ class VolunteerView extends Component {
     e.preventDefault()
     const { genderSelector, volunteerData } = this.state
     const options = []
-    genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
+    genderSelector.length > 0 && options.push({field: 'gender', value: genderSelector})
     if (options.length === 0) {
       this.setState({ editedData: volunteerData })
     } else {
@@ -206,10 +204,10 @@ class VolunteerView extends Component {
                         <Checkbox name={user._id} onChange={this.handleCheckboxChange} checked={selected.includes(user._id)} />
                       </Table.Cell>
                       }
-                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.profile.name}</Link></Table.Cell>
-                      <Table.Cell>{moment().diff(user.profile.dob, 'years')}</Table.Cell>
-                      <Table.Cell>{user.profile.nric}</Table.Cell>
-                      <Table.Cell>{user.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
+                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.name}</Link></Table.Cell>
+                      <Table.Cell>{moment().diff(user.dob, 'years')}</Table.Cell>
+                      <Table.Cell>{user.nric}</Table.Cell>
+                      <Table.Cell>{user.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>
                 }
@@ -237,7 +235,7 @@ class VolunteerView extends Component {
                           open={deleteConfirmationVisibility}
                           header='Deleting the following students:'
                           content={selected.map((id) => (
-                            editedData.filter((user) => (user._id === id))[0].profile.name
+                            editedData.filter((user) => (user._id === id))[0].name
                           )).join(', ')}
                           onCancel={this.handleDeleteConfirmation('cancel')}
                           onConfirm={this.handleDeleteConfirmation('confirm')}

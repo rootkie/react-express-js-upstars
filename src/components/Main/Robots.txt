@@ -4,6 +4,7 @@ Disallow: /api
 Disallow: /forgetpassword
 Disallow: /resetpassword
 Disallow: /verifyaccount
+Disallow: /requestlink
 
 Sitemap: https://test.rootkiddie.com/sitemap.xml
 

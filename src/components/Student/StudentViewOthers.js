@@ -43,7 +43,7 @@ class StudentViewOthers extends Component {
         console.log(response)
         let studentList = response.data.studentsFiltered.map(student => {
           return {
-            title: student.profile.name,
+            title: student.name,
             id: student._id,
             key: student._id
           }
@@ -66,7 +66,7 @@ class StudentViewOthers extends Component {
     const { statusSelector, genderSelector } = this.state
     const options = []
     statusSelector.length > 0 && options.push({field: 'status', value: statusSelector})
-    genderSelector.length > 0 && options.push({field: 'profile-gender', value: genderSelector})
+    genderSelector.length > 0 && options.push({field: 'gender', value: genderSelector})
     searchFilter(options)
   }
 
@@ -138,8 +138,8 @@ class StudentViewOthers extends Component {
                 <Table.Body>
                   {studentData.map((student, i) => (
                     <Table.Row key={`student-${i}`}>
-                      <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.profile.name}</Link></Table.Cell>
-                      <Table.Cell>{student.profile.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
+                      <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.name}</Link></Table.Cell>
+                      <Table.Cell>{student.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
                       <Table.Cell>{student.status}</Table.Cell>
                     </Table.Row>))}
                 </Table.Body>

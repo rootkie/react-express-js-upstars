@@ -49,7 +49,7 @@ class AttendanceForm extends Component {
   // Same goes for Students checkbox
   handleCheckboxChangeForUser = (e, { name, checked }) => {
     let { users } = this.state
-    let pos = users.map(usr => { return usr.list }).indexOf(name)
+    let pos = users.map(usr => { return usr.user }).indexOf(name)
     if (checked) {
       users[pos].status = 1
     } else {
@@ -60,7 +60,7 @@ class AttendanceForm extends Component {
 
   handleCheckboxChangeForStudent = (e, { name, checked }) => {
     let { students } = this.state
-    let pos = students.map(usr => { return usr.list }).indexOf(name)
+    let pos = students.map(std => { return std.student }).indexOf(name)
     if (checked) {
       students[pos].status = 1
     } else {
@@ -85,16 +85,16 @@ class AttendanceForm extends Component {
         for (let [index, studentData] of response.data.class.students.entries()) {
           student[index] = {
             list: studentData._id,
-            text: studentData.profile.name,
-            key: studentData.profile.name,
+            text: studentData.name,
+            key: studentData.name,
             status: 1
           }
         }
 
         for (let [index, userData] of response.data.class.users.entries()) {
           user[index] = {
-            text: userData.profile.name,
-            key: userData.profile.name,
+            text: userData.name,
+            key: userData.name,
             list: userData._id,
             status: 1
           }
@@ -208,7 +208,7 @@ class AttendanceForm extends Component {
                     {students.map((options, i) => (
                       <Table.Row key={`users-${i}`}>
                         <Table.Cell collapsing>
-                          <Checkbox name={options.list} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class'} />
+                          <Checkbox name={options.student} onChange={this.handleCheckboxChangeForStudent} checked={options.status === 1} disabled={type !== 'Class'} />
                         </Table.Cell>
                         <Table.Cell>{options.text}</Table.Cell>
                       </Table.Row>))}
@@ -228,7 +228,7 @@ class AttendanceForm extends Component {
                     {users.map((options, i) => (
                       <Table.Row key={`users-${i}`}>
                         <Table.Cell collapsing>
-                          <Checkbox name={options.list} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class'} />
+                          <Checkbox name={options.user} onChange={this.handleCheckboxChangeForUser} checked={options.status === 1} disabled={type !== 'Class'} />
                         </Table.Cell>
                         <Table.Cell>{options.text}</Table.Cell>
                       </Table.Row>))}

@@ -52,27 +52,21 @@ class StudentWrap extends Component {
       })
   }
 
-  addStudent = (studentDataToSubmit) => {
-    return axios.post('admin/students', studentDataToSubmit)
-      .then(response => {
-        this.getStudents()
-        return response.data.newStudentId
-      })
+  addStudent = async (studentDataToSubmit) => {
+    const response = await axios.post('admin/students', studentDataToSubmit)
+    this.getStudents()
+    return response.data.newStudentId
   }
 
-  editStudent = (studentDataToSubmit) => {
-    const { sid } = this.props.match.params
+  editStudent = async (studentDataToSubmit) => {
     let { roles } = this.props
-    return axios.put('/students', {
-      ...studentDataToSubmit,
-      studentId: sid
+    await axios.put('/students', {
+      ...studentDataToSubmit
     })
-      .then(response => {
-        this.getStudents()
-        if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-          this.getOtherStudents()
-        }
-      })
+    this.getStudents()
+    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+      this.getOtherStudents()
+    }
   }
 
   // Calls getStudent to refresh the state
