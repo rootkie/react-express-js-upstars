@@ -46,7 +46,7 @@ module.exports.getDashboardStats = async (req, res, next) => {
       newStudentJoined
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     next(err)
   }
 }

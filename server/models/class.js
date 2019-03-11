@@ -46,4 +46,14 @@ const ClassSchema = new Schema({
   minimize: false
 })
 
+ClassSchema.pre('save', function (next) {
+  this.increment()
+  return next()
+})
+
+ClassSchema.pre('updateMany', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
+})
+
 module.exports = mongoose.model('Class', ClassSchema)

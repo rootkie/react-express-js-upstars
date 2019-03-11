@@ -142,7 +142,7 @@ const clearTimeInterval = () => {
 const MainCtrl = ({match}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // Runs every time props change, similar to componentDidUpdate
+  // Runs every time match props change, similar to componentDidUpdate
   // Refer to https://reactjs.org/docs/hooks-effect.html#detailed-explanation for more information
   useEffect(() => {
     isUserLoggedIn(dispatch)

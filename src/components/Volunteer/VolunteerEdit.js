@@ -45,11 +45,9 @@ const initialState = {
   cca: [],
   cip: [],
   workInternExp: [],
-  competence: [{
-    languages: [''],
-    subjects: [''],
-    interests: ['']
-  }],
+  languages: '',
+  subjects: '',
+  interests: '',
   exitDate: undefined,
   preferredTimeSlot: {
     'Monday 7-9.30pm': false,
@@ -99,36 +97,37 @@ class VolunteerEdit extends Component {
     axios.get(`/users/${userId}`)
       .then(response => {
         let userData = response.data.user
-        console.log(userData)
         this.setState({
-          name: userData.profile.name,
-          address: userData.profile.address,
-          handphone: userData.profile.handphone,
-          dob: userData.profile.dob,
-          gender: userData.profile.gender,
-          nric: userData.profile.nric,
-          nationality: userData.profile.nationality,
-          postalCode: userData.profile.postalCode,
-          homephone: userData.profile.homephone,
-          fatherName: userData.father.name,
-          fatherOccupation: userData.father.occupation,
-          fatherEmail: userData.father.email,
-          motherName: userData.mother.name,
-          motherOccupation: userData.mother.occupation,
-          motherEmail: userData.mother.email,
-          hobbies: userData.misc.hobbies,
-          careerGoal: userData.misc.careerGoal,
-          schoolClass: userData.profile.schoolClass,
-          schoolLevel: userData.profile.schoolLevel,
+          name: userData.name,
+          address: userData.address,
+          handphone: userData.handphone,
+          dob: userData.dob,
+          gender: userData.gender,
+          nric: userData.nric,
+          nationality: userData.nationality,
+          postalCode: userData.postalCode,
+          homephone: userData.homephone,
+          fatherName: userData.fatherName,
+          fatherOccupation: userData.fatherOccupation,
+          fatherEmail: userData.fatherEmail,
+          motherName: userData.motherName,
+          motherOccupation: userData.motherOccupation,
+          motherEmail: userData.motherEmail,
+          hobbies: userData.hobbies,
+          careerGoal: userData.careerGoal,
+          schoolClass: userData.schoolClass,
+          schoolLevel: userData.schoolLevel,
 
           /* Education / Training */
-          formalEducation: userData.misc.formalEducation,
-          coursesSeminar: userData.misc.coursesSeminar,
-          achievements: userData.misc.achievements,
-          cca: userData.misc.cca,
-          cip: userData.misc.cip,
-          workInternExp: userData.misc.workInternExp,
-          competence: userData.misc.competence,
+          formalEducation: userData.formalEducation,
+          coursesSeminar: userData.coursesSeminar,
+          achievements: userData.achievements,
+          cca: userData.cca,
+          cip: userData.cip,
+          workInternExp: userData.workInternExp,
+          languages: userData.languages,
+          subjects: userData.subjects,
+          interests: userData.interests,
           commencementDate: moment(userData.commencementDate),
           exitDate: moment(userData.exitDate),
           preferredTimeSlot: {
@@ -191,77 +190,64 @@ class VolunteerEdit extends Component {
       return
     }
     // check required fields
-    let error = this.checkRequired(['preferredTimeSlot', 'address', 'postalCode', 'handphone', 'homephone', 'schoolLevel', 'schoolClass', 'commencementDate', 'exitDate'])
 
     const { name, address, postalCode, handphone, homephone, dob, gender, nationality, nric, schoolLevel, schoolClass,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
-      hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
+      hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, languages, subjects, interests,
       exitDate, interviewDate, interviewNotes, adminNotes, realCommencementDate } = this.state
 
-    if (error.length === 0) {
-      let volunteerData = {
-        userId: this.props.match.params.userId,
-        exitDate,
-        preferredTimeSlot,
-        profile: {
-          name,
-          dob,
-          gender,
-          nationality,
-          nric,
-          address,
-          postalCode,
-          handphone,
-          homephone,
-          schoolClass,
-          schoolLevel
-        },
-        father: {
-          name: fatherName,
-          email: fatherEmail,
-          occupation: fatherOccupation
-        },
-        mother: {
-          name: motherName,
-          occupation: motherOccupation,
-          email: motherEmail
-        },
-        misc: {
-          hobbies,
-          careerGoal,
-          formalEducation,
-          coursesSeminar,
-          achievements,
-          cca,
-          cip,
-          workInternExp,
-          competence
-        },
-        admin: {
-          interviewDate,
-          interviewNotes,
-          adminNotes,
-          commencementDate: realCommencementDate
-        }
+    let volunteerData = {
+      userId: this.props.match.params.userId,
+      exitDate,
+      preferredTimeSlot,
+      name,
+      dob,
+      gender,
+      nationality,
+      nric,
+      address,
+      postalCode,
+      handphone,
+      homephone,
+      schoolClass,
+      schoolLevel,
+      fatherName,
+      fatherEmail,
+      fatherOccupation,
+      motherName,
+      motherOccupation,
+      motherEmail,
+      hobbies,
+      careerGoal,
+      formalEducation,
+      coursesSeminar,
+      achievements,
+      cca,
+      cip,
+      workInternExp,
+      languages,
+      interests,
+      subjects,
+      admin: {
+        interviewDate,
+        interviewNotes,
+        adminNotes,
+        commencementDate: realCommencementDate
       }
-
-      const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
-      volunteerData.preferredTimeSlot = timeSlot
-
-      axios.post('/users', volunteerData)
-        .then(response => {
-          this.getProfile(this.props.match.params.userId)
-          this.setState({ isLoading: false, buttonContent: 'Toggle Edit Mode', edit: false })
-        })
-        .catch((err) => {
-          console.log(err)
-          this.setState({errorMessage: err.response.data.error, isLoading: false})
-        })
-    } else {
-      console.log('error occured')
-      error = error.join(', ')
-      this.setState({error, isLoading: false})
     }
+
+    const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
+    volunteerData.preferredTimeSlot = timeSlot
+
+    axios.post('/users', volunteerData)
+      .then(response => {
+        this.getProfile(this.props.match.params.userId)
+        this.setState({ isLoading: false, buttonContent: 'Toggle Edit Mode', edit: false })
+      })
+      .catch((err) => {
+        console.log(err)
+        this.setState({errorMessage: err.response.data.error, isLoading: false})
+      })
   }
 
   handleDateChange = (dateType) => (date) => {
@@ -358,7 +344,7 @@ class VolunteerEdit extends Component {
   render () {
     const { name, address, postalCode, handphone, homephone, schoolLevel, schoolClass, buttonContent, classes, realCommencementDate, interviewDate,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot, interviewNotes, adminNotes,
-      hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, competence,
+      hobbies, careerGoal, formalEducation, coursesSeminar, achievements, cca, cip, workInternExp, languages, subjects, interests,
       commencementDate, exitDate, error, activeItem, errorMessage, isLoading, deactivate } = this.state // submitted version are used to display the info sent through POST (not necessary)
 
     const { roles } = this.props
@@ -499,7 +485,7 @@ class VolunteerEdit extends Component {
                     {coursesSeminar.map((year, i) => (
                       <Table.Row key={i}>
                         <Table.Cell>
-                          <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year ? moment(coursesSeminar[i].year).format('YYYY') : undefined} placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
+                          <Form.Input transparent key={`year-${i}`} name={`year-${i}`} value={coursesSeminar[i].year} placeholder='Year' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'year')} />
                         </Table.Cell>
                         <Table.Cell>
                           <Form.Input transparent key={`courseTitle-${i}`} name={`courseTitle-${i}`} value={coursesSeminar[i].courseAndObjective} placeholder='Name of Institution' onChange={this.updateRepeatableChange(i, 'coursesSeminar', 'courseAndObjective')} />
@@ -781,13 +767,13 @@ class VolunteerEdit extends Component {
                   <Table.Body>
                     <Table.Row>
                       <Table.Cell style={{ overflow: 'visible' }}>
-                        <Form.Input transparent key={`languages`} placeholder='Specific language' name={`languages`} value={competence[0].languages} onChange={this.updateRepeatableChange(0, 'competence', 'languages')} />
+                        <Form.Input transparent key={`languages`} placeholder='Specific language' name='languages' value={languages} onChange={this.handleChange} />
                       </Table.Cell>
                       <Table.Cell>
-                        <Form.Input transparent key={`subjects`} name={`subjects`} value={competence[0].subjects} placeholder='Specific subjects' onChange={this.updateRepeatableChange(0, 'competence', 'subjects')} />
+                        <Form.Input transparent key={`subjects`} name='subjects' value={subjects} placeholder='Specific subjects' onChange={this.handleChange} />
                       </Table.Cell>
                       <Table.Cell>
-                        <Form.Input transparent key={`interests`} name={`interests`} value={competence[0].interests} placeholder='Specific interests' onChange={this.updateRepeatableChange(0, 'competence', 'interests')} />
+                        <Form.Input transparent key={`interests`} name='interests' value={interests} placeholder='Specific interests' onChange={this.handleChange} />
                       </Table.Cell>
                     </Table.Row>
                   </Table.Body>

@@ -1,5 +1,5 @@
 ## React-Express-upstars
-![UPStars](src/components/logo.png "UPStars Project")
+![UPStars](src/components/Misc/logo.png "UPStars Project")
 
 This project is to build a student volunteer content management system using react.js as front-end and express.js as backend for the beneficiary UPStars.
 
@@ -10,14 +10,14 @@ This system is built using express.js as an API provider. The APIs are consumed 
 ### Getting Started
 1. Install Node >= v8.9.x
 2. `npm install`
-3. [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
+3. [Install MongoDB (v3.4 only)](https://docs.mongodb.com/manual/administration/install-community/)
 
 ### Start running
 Type these commands into the shell:
 
-1. `mongod --bind_ip=$IP`
+1. `mongod`
 2. `nodemon server/`
-3. `npm run start`
+3. `npm start`
 
 ### Directory
 
@@ -46,6 +46,8 @@ $ ./node_modules/.bin/nodemon server/
 Or use:
 $ export PATH=$PATH:`pwd`/node_modules/.bin/
 $ nodemon server/
+Or finally install nodemon as a global package:
+$ npm i nodemon -g
 ```
 
 ## Contributing
@@ -60,4 +62,7 @@ This repository is where we do development and there are many ways you can parti
 ## Licence
 
 Copyright &copy; R3:C0D3 | Ulu Pandan Stars. All rights reserved.
+
+Currently we do not have a plan to appoint any open-source licence at the moment. However, you are still free to use the code to
+develop and contribute freely as long as the code is public. 
 

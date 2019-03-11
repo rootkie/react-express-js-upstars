@@ -39,46 +39,37 @@ const tuitionOptions = [
 
 const initialState = {
   /* Student Information */
-  profile: {
-    name: '',
-    icNumber: '',
-    dob: undefined,
-    address: '',
-    gender: '',
-    nationality: '',
-    classLevel: '',
-    schoolName: ''
-  },
+  name: '',
+  icNumber: '',
+  dob: undefined,
+  address: '',
+  gender: '',
+  nationality: '',
+  classLevel: '',
+  schoolName: '',
 
   /* Family Information */
-  father: {
-    name: '',
-    icNumber: '',
-    nationality: '',
-    contactNumber: '',
-    email: '',
-    occupation: '',
-    income: ''
-  },
+  fatherName: '',
+  fatherIcNumber: '',
+  fatherNationality: '',
+  fatherContactNumber: undefined,
+  fatherEmail: '',
+  fatherOccupation: '',
+  fatherIncome: undefined,
 
-  mother: {
-    name: '',
-    icNumber: '',
-    nationality: '',
-    contactNumber: '',
-    email: '',
-    occupation: '',
-    income: ''
-  },
+  motherName: '',
+  motherIcNumber: '',
+  motherNationality: '',
+  motherContactNumber: undefined,
+  motherEmail: '',
+  motherOccupation: '',
+  motherIncome: undefined,
 
   otherFamily: [], // each object {name, relationship, age}
-
-  misc: {
-    fas: [],
-    fsc: '',
-    tuition: [],
-    academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
-  },
+  fas: [],
+  fscName: '',
+  tuition: [],
+  academicInfo: [], // {year, term, english, math, motherTongue, science, overall}
 
   /* Official use */
   admin: {
@@ -132,21 +123,46 @@ class StudentEdit extends Component {
     axios.get(`students/${studentId}`)
       .then(response => {
         let studentData = response.data.student
-        studentData.profile.dob = moment(studentData.profile.dob)
+        studentData.dob = moment(studentData.dob)
         if (studentData.admin.commencementDate) studentData.admin.commencementDate = moment(studentData.admin.commencementDate)
         if (studentData.admin.interviewDate) studentData.admin.interviewDate = moment(studentData.admin.interviewDate)
         if (studentData.admin.exitDate) studentData.admin.exitDate = moment(studentData.admin.exitDate)
+        const {name, icNumber, dob, address, gender, nationality, classLevel, schoolName,
+          fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
+          motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome, otherFamily, fas, fsc, academicInfo, admin, tuition} = studentData
         this.setState({
-          profile: studentData.profile,
-          father: studentData.father,
-          mother: studentData.mother,
-          misc: studentData.misc,
-          otherFamily: studentData.otherFamily,
+          name,
+          icNumber,
+          dob,
+          address,
+          gender,
+          nationality,
+          classLevel,
+          schoolName,
+          fatherName,
+          fatherIcNumber,
+          fatherNationality,
+          fatherContactNumber,
+          fatherEmail,
+          fatherOccupation,
+          fatherIncome,
+          motherName,
+          motherIcNumber,
+          motherNationality,
+          motherContactNumber,
+          motherEmail,
+          motherOccupation,
+          motherIncome,
+          otherFamily,
+          fas,
+          fsc,
+          academicInfo,
+          admin,
           status: studentData.status,
           tuitionChoices: {
-            CDAC: studentData.misc.tuition.includes('CDAC'),
-            Mendaki: studentData.misc.tuition.includes('Mendaki'),
-            Private: studentData.misc.tuition.includes('Private')
+            CDAC: tuition.includes('CDAC'),
+            Mendaki: tuition.includes('Mendaki'),
+            Private: tuition.includes('Private')
           },
           classes: studentData.classes,
           isLoading: false
@@ -195,12 +211,16 @@ class StudentEdit extends Component {
       const dateTypeArr = dateType.split('-')
       const parentProp = dateTypeArr[0]
       const childProp = dateTypeArr[1]
-      this.setState({
-        [parentProp]: {
-          ...this.state[parentProp],
-          [childProp]: date
-        }
-      })
+      if (childProp) {
+        this.setState({
+          [parentProp]: {
+            ...this.state[parentProp],
+            [childProp]: date
+          }
+        })
+      } else {
+        this.setState({ [parentProp]: date })
+      }
     }
   }
 
@@ -213,39 +233,60 @@ class StudentEdit extends Component {
     e.preventDefault()
     this.setState({ isLoading: true })
     /* submit inputs in fields (stored in state) */
-    const { profile, father, mother, otherFamily, misc, admin, tuitionChoices, edit, status } = this.state
+    const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName,
+      fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
+      motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome, otherFamily, fas, fsc, academicInfo, admin, tuitionChoices, edit, status } = this.state
     const { editStudent } = this.props
     if (!edit) {
       this.setState({ edit: true, isLoading: false, buttonContent: 'Save Edits' })
     } else {
-    // check required fields
-      let error = this.checkRequired(['profile-name', 'profile-icNumber', 'profile-dob', 'profile-nationality', 'profile-gender', 'profile-address'])
+      // Do some wizardry to format data here
+      let studentDataToSubmit = {
+        studentId: this.props.match.params.id,
+        name,
+        icNumber,
+        dob,
+        address,
+        gender,
+        nationality,
+        classLevel,
+        schoolName,
+        fatherName,
+        fatherIcNumber,
+        fatherNationality,
+        fatherContactNumber,
+        fatherEmail,
+        fatherOccupation,
+        fatherIncome,
+        motherName,
+        motherIcNumber,
+        motherNationality,
+        motherContactNumber,
+        motherEmail,
+        motherOccupation,
+        motherIncome,
+        otherFamily,
+        fas,
+        fsc,
+        academicInfo,
+        admin,
+        status
+      }
+      // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
+      // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
+      // else if that option is not checked (false), the list will remain the same (nothing added)
+      const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
+      ), [])
 
-      if (error.length === 0) {
-        // Do some wizardry to format data here
-        let studentDataToSubmit = {
-          profile, father, mother, otherFamily, misc, admin, status
-        }
-        // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
-        // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
-        // else if that option is not checked (false), the list will remain the same (nothing added)
-        const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
-        ), [])
+      studentDataToSubmit = {...studentDataToSubmit, tuition} // adding tuition info into misc
 
-        studentDataToSubmit.misc = {...studentDataToSubmit.misc, tuition} // adding tuition info into misc
-
-        try {
-          await editStudent(studentDataToSubmit)
-          this.showSuccess()
+      try {
+        await editStudent(studentDataToSubmit)
+        this.showSuccess()
         // Clear everything to show an empty page. Might change it though.
-        } catch (error) {
-          console.log(error)
-          this.setState({serverError: true})
-        }
-      } else { // incomplete Field
-        console.log('Incomplete Fields')
-        error = error.join(', ')
-        this.setState({error})
+      } catch (error) {
+        console.log(error)
+        this.setState({serverError: true})
       }
     }
   }
@@ -266,7 +307,7 @@ class StudentEdit extends Component {
           })
           this.setState({otherFamily: updatingArray})
         } else if (field === 'academicInfo') {
-          const updatingArray = this.state.misc.academicInfo
+          const updatingArray = this.state.academicInfo
           updatingArray.push({
             year: '',
             term: '',
@@ -276,16 +317,14 @@ class StudentEdit extends Component {
             science: '',
             overall: ''
           })
-          let misc = {...this.state.misc}
-          misc.academicInfo = updatingArray
-          this.setState({misc})
+          this.setState({academicInfo: updatingArray})
         }
       } else if (option === 'dec') { // remove last item
         if (field === 'otherFamily') this.setState({otherFamily: this.state.otherFamily.slice(0, this.state.otherFamily.length - 1)})
         else if (field === 'academicInfo') {
-          let misc = {...this.state.misc}
-          misc.academicInfo = misc.academicInfo.slice(0, misc.academicInfo.length - 1)
-          this.setState({misc})
+          let {academicInfo} = this.state
+          academicInfo = academicInfo.slice(0, academicInfo.length - 1)
+          this.setState({academicInfo})
         }
       }
     }
@@ -312,18 +351,17 @@ class StudentEdit extends Component {
   updateRepeatableChangeForAcademic = (index, property) => (e, {value}) => {
     let {edit} = this.state
     if (edit) {
-      let misc = {...this.state.misc}
-      misc.academicInfo[index][property] = value
-      this.setState({misc})
+      let academicInfo = this.state.academicInfo
+      academicInfo[index][property] = value
+      this.setState({academicInfo})
     }
   }
 
   render () {
-    const { isLoading, profile, father, mother, otherFamily, misc, admin, status, submitSuccess, tuitionChoices, error, serverError, activeItem, buttonContent, classes } = this.state
-
-    const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName } = profile
-
-    const { fas, fsc, academicInfo } = misc
+    const { isLoading, name, icNumber, dob, address, gender, nationality, classLevel, schoolName,
+      fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome, motherName, motherIcNumber,
+      motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome,
+      otherFamily, fas, fsc, academicInfo, admin, status, submitSuccess, tuitionChoices, error, serverError, activeItem, buttonContent, classes } = this.state
 
     const { adminNotes, interviewDate, interviewNotes, commencementDate, exitDate, exitReason } = admin
 
@@ -354,9 +392,9 @@ class StudentEdit extends Component {
             <Form onSubmit={this.handleSubmit}>
               { activeItem === 'Personal Info' &&
               <Segment attached='bottom'>
-                <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='profile-name' value={name} onChange={this.handleChange} required />
+                <Form.Input label='Name of Student' placeholder='as in Birth Certificate / Student card' name='name' value={name} onChange={this.handleChange} required />
                 <Form.Group widths='equal'>
-                  <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='profile-icNumber' value={icNumber} onChange={this.handleChange} required />
+                  <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='icNumber' value={icNumber} onChange={this.handleChange} required />
                   <Form.Field error={error.includes('dateOfBirth')} required>
                     <label>Date of Birth</label>
                     <DatePicker
@@ -367,18 +405,18 @@ class StudentEdit extends Component {
                       dropdownMode='select'
                       maxDate={moment()}
                       selected={dob}
-                      onChange={this.handleDateChange('profile-dob')}
+                      onChange={this.handleDateChange('dob')}
                       required />
                   </Form.Field>
                 </Form.Group>
                 <Form.Group widths='equal'>
-                  <Form.Input label='Nationality' placeholder='Nationality' name='profile-nationality' value={nationality} onChange={this.handleChange} required />
-                  <Form.Select label='Gender' options={genderOptions} placeholder='Select Gender' name='profile-gender' value={gender} onChange={this.handleChange} required />
+                  <Form.Input label='Nationality' placeholder='Nationality' name='nationality' value={nationality} onChange={this.handleChange} required />
+                  <Form.Select label='Gender' options={genderOptions} placeholder='Select Gender' name='gender' value={gender} onChange={this.handleChange} required />
                 </Form.Group>
-                <Form.Input label='Residential address' placeholder='Residential address' name='profile-address' value={address} onChange={this.handleChange} required />
+                <Form.Input label='Residential address' placeholder='Residential address' name='address' value={address} onChange={this.handleChange} required />
                 <Form.Group widths='equal'>
-                  <Form.Input label='Name of School' placeholder='Name of School' name='profile-schoolName' value={schoolName} onChange={this.handleChange} required />
-                  <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='profile-classLevel' value={classLevel} onChange={this.handleChange} required />
+                  <Form.Input label='Name of School' placeholder='Name of School' name='schoolName' value={schoolName} onChange={this.handleChange} required />
+                  <Form.Input label='Class Level' placeholder='e.g. Primary 1' name='classLevel' value={classLevel} onChange={this.handleChange} required />
                 </Form.Group>
                 <Table compact celled unstackable fixed>
                   <Table.Header>
@@ -437,33 +475,33 @@ class StudentEdit extends Component {
               { activeItem === 'Family Details' &&
               <Segment attached='bottom'>
                 {/* Father's information */}
-                <Form.Input label="Father's name" placeholder='as in IC card' name='father-name' value={father.name} onChange={this.handleChange} />
+                <Form.Input label="Father's name" placeholder='as in IC card' name='fatherName' value={fatherName} onChange={this.handleChange} />
                 <Form.Group widths='equal'>
-                  <Form.Input label='Identification Card Number' placeholder='IC number' name='father-icNumber' value={father.icNumber} onChange={this.handleChange} />
-                  <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='father-nationality' value={father.nationality} onChange={this.handleChange} />
+                  <Form.Input label='Identification Card Number' placeholder='IC number' name='fatherIcNumber' value={fatherIcNumber} onChange={this.handleChange} />
+                  <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='fatherNationality' value={fatherNationality} onChange={this.handleChange} />
                 </Form.Group>
                 <Form.Group widths='equal'>
-                  <Form.Input label='Email' placeholder='email' type='email' name='father-email' value={father.email} onChange={this.handleChange} />
-                  <Form.Input label='Mobile number' placeholder='Mobile number' name='father-contactNumber' value={father.contactNumber} onChange={this.handleChange} />
+                  <Form.Input label='Email' placeholder='email' type='email' name='fatherEmail' value={fatherEmail} onChange={this.handleChange} />
+                  <Form.Input label='Mobile number' placeholder='Mobile number' name='fatherContactNumber' value={fatherContactNumber} onChange={this.handleChange} />
                 </Form.Group>
                 <Form.Group widths='equal'>
-                  <Form.Input label='Occupation' placeholder='Occupation' name='father-occupation' value={father.occupation} onChange={this.handleChange} />
-                  <Form.Input label='Monthly Income' placeholder='Monthly Income' name='father-income' value={father.income} onChange={this.handleChange} />
+                  <Form.Input label='Occupation' placeholder='Occupation' name='fatherOccupation' value={fatherOccupation} onChange={this.handleChange} />
+                  <Form.Input label='Monthly Income' placeholder='Monthly Income' name='fatherIncome' value={fatherIncome} onChange={this.handleChange} />
                 </Form.Group>
 
                 {/* Mother's information */}
-                <Form.Input label="Mother's name" placeholder='as in IC card' name='mother-name' value={mother.name} onChange={this.handleChange} />
+                <Form.Input label="Mother's name" placeholder='as in IC card' name='motherName' value={motherName} onChange={this.handleChange} />
                 <Form.Group widths='equal'>
-                  <Form.Input label='Identification Card Number' placeholder='IC number' name='mother-icNumber' value={mother.icNumber} onChange={this.handleChange} />
-                  <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='mother-nationality' value={mother.nationality} onChange={this.handleChange} />
+                  <Form.Input label='Identification Card Number' placeholder='IC number' name='motherIcNumber' value={motherIcNumber} onChange={this.handleChange} />
+                  <Form.Select label='Citizenship' options={citizenshipOptions} placeholder='Select Citizenship' name='motherNationality' value={motherNationality} onChange={this.handleChange} />
                 </Form.Group>
                 <Form.Group widths='equal'>
-                  <Form.Input label='Email' placeholder='email' type='email' name='mother-email' value={mother.email} onChange={this.handleChange} />
-                  <Form.Input label='Mobile number' placeholder='Mobile number' name='mother-contactNumber' value={mother.contactNumber} onChange={this.handleChange} />
+                  <Form.Input label='Email' placeholder='email' type='email' name='motherEmail' value={motherEmail} onChange={this.handleChange} />
+                  <Form.Input label='Mobile number' placeholder='Mobile number' name='motherContactNumber' value={motherContactNumber} onChange={this.handleChange} />
                 </Form.Group>
                 <Form.Group widths='equal'>
-                  <Form.Input label='Occupation' placeholder='Occupation' name='mother-occupation' value={mother.occupation} onChange={this.handleChange} />
-                  <Form.Input label='Monthly Income' placeholder='Monthly Income' name='mother-income' value={mother.income} onChange={this.handleChange} />
+                  <Form.Input label='Occupation' placeholder='Occupation' name='motherOccupation' value={motherOccupation} onChange={this.handleChange} />
+                  <Form.Input label='Monthly Income' placeholder='Monthly Income' name='motherIncome' value={motherIncome} onChange={this.handleChange} />
                 </Form.Group>
 
                 {/* adding additional family members */}
@@ -507,7 +545,7 @@ class StudentEdit extends Component {
                   </Table.Footer>
                 </Table>
 
-                <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='misc-fas' value={fas} onChange={this.handleChange} multiple />
+                <Form.Select label='Financial Assistance Scheme' options={fasOptions} placeholder='FAS' name='fas' value={fas} onChange={this.handleChange} multiple />
                 {fas.includes('FSC') && <Form.Input label='Name of Family Service Centre' placeholder='name of FSC' name='misc-fsc' value={fsc} onChange={this.handleChange} /> }
                 <Form.Group inline>
                   <label>Other Learning Support</label>

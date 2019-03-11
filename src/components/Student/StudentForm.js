@@ -10,46 +10,37 @@ const recaptchaRef = React.createRef()
 
 const initialState = {
   /* Student Information */
-  profile: {
-    name: '',
-    icNumber: '',
-    dob: undefined,
-    address: '',
-    gender: '',
-    nationality: '',
-    classLevel: '',
-    schoolName: ''
-  },
+  name: '',
+  icNumber: '',
+  dob: undefined,
+  address: '',
+  gender: '',
+  nationality: '',
+  classLevel: '',
+  schoolName: '',
 
   /* Family Information */
-  father: {
-    name: '',
-    icNumber: '',
-    nationality: '',
-    contactNumber: undefined,
-    email: '',
-    occupation: '',
-    income: undefined
-  },
+  fatherName: '',
+  fatherIcNumber: '',
+  fatherNationality: '',
+  fatherContactNumber: undefined,
+  fatherEmail: '',
+  fatherOccupation: '',
+  fatherIncome: undefined,
 
-  mother: {
-    name: '',
-    icNumber: '',
-    nationality: '',
-    contactNumber: undefined,
-    email: '',
-    occupation: '',
-    income: undefined
-  },
+  motherName: '',
+  motherIcNumber: '',
+  motherNationality: '',
+  motherContactNumber: undefined,
+  motherEmail: '',
+  motherOccupation: '',
+  motherIncome: undefined,
 
   otherFamily: [], // each object {name, relationship, age}
-
-  misc: {
-    fas: [],
-    fscName: '',
-    tuition: [],
-    academicInfo: [] // {year, term, english, math, motherTongue, science, overall}
-  },
+  fas: [],
+  fscName: '',
+  tuition: [],
+  academicInfo: [], // {year, term, english, math, motherTongue, science, overall}
 
   /* Official use */
   admin: {

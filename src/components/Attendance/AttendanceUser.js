@@ -68,7 +68,7 @@ class AttendanceUser extends Component {
         console.log(response)
         let volunteerList = response.data.users.map(user => {
           return {
-            title: user.profile.name,
+            title: user.name,
             id: user._id,
             key: user._id
           }
@@ -117,9 +117,9 @@ class AttendanceUser extends Component {
       this.setState({ error: 'Please provide a user to search for!', isLoading: false })
     } else {
     // Adds a slash in front of the 8 digit to suit the API URI call
-      startDate = moment(startDate).format('[/]YYYYMMDD')
+      startDate = moment(startDate).format('[/]DDMMYYYY')
       // Adds a dash between the 2 dates
-      endDate = moment(endDate).format('[-]YYYYMMDD')
+      endDate = moment(endDate).format('[-]DDMMYYYY')
       axios.get('attendance/user/' + userSelector + startDate + endDate + '/' + classSelector)
         .then(response => {
           if (response.data.attendances.length > 0) this.setState({attendanceFormattedData: this.formatUserAttendance(response.data.attendances[0]), isLoading: false})

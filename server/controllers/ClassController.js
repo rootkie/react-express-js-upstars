@@ -6,19 +6,14 @@ const mongoose = require('mongoose')
 // SuperAdmin
 module.exports.addClass = async (req, res, next) => {
   try {
-    let {
-      className,
-      classType,
-      venue,
-      dayAndTime,
-      startDate
-    } = req.body
+    const { className, classType, venue, dayAndTime, startDate } = req.body
 
     if (!className || className.length === 0) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a className to search for'
-      })
+      }
+      throw error
     }
     // Check if the class already exist and prevent duplicate creation
     const classExist = await Class.findOne({
@@ -26,10 +21,11 @@ module.exports.addClass = async (req, res, next) => {
     }).lean()
 
     if (classExist) {
-      throw ({
+      const error = {
         status: 409,
         error: 'Class already exist. Create a new class or edit a current class.'
-      })
+      }
+      throw error
     }
 
     // Create a new class
@@ -44,18 +40,19 @@ module.exports.addClass = async (req, res, next) => {
     // Validate that all fields are filled in.
     const error = await newClass.validateSync()
     if (error) {
-      throw ({
+      const error = {
         status: 400,
         error: 'There is something wrong with the client input. That is all we know.'
-      })
+      }
+      throw error
     }
     const newClassCreated = await newClass.save()
 
     res.status(201).json({
-      newClass: newClassCreated
+      newClassId: newClassCreated._id
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -69,32 +66,38 @@ module.exports.cloneClass = async (req, res, next) => {
   const classId = req.params.id
   try {
     if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a proper classId'
-      })
+      }
+      throw error
     }
     const oldClassData = await Class.findById(classId)
     if (!oldClassData) {
-      throw({
+      const error = {
         status: 404,
         error: 'Class not found, please try again'
-      })
+      }
+      throw error
     }
-    oldClassData._id = mongoose.Types.ObjectId()
-    oldClassData.className = oldClassData.className + ' Clone'
-    oldClassData.status = 'Active'
-    oldClassData.startDate = new Date()
-    oldClassData.createdAt = new Date()
-    oldClassData.updatedAt = new Date()
-    oldClassData.isNew = true
-    const newClassData = await oldClassData.save()
+    // Creates a shallow copy while editing the fields
+    const clonedClass = {
+      ...oldClassData.toObject(),
+      _id: mongoose.Types.ObjectId(),
+      status: 'Active',
+      className: oldClassData + 'Clone',
+      startDate: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+    const clone = new Class(clonedClass)
+    const newClassData = await clone.save()
 
     res.status(201).json({
       newClassId: newClassData._id
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -106,17 +109,9 @@ module.exports.cloneClass = async (req, res, next) => {
 // SuperAdmin
 module.exports.editClass = async (req, res, next) => {
   try {
-    let {
-      classId,
-      className,
-      classType,
-      venue,
-      dayAndTime,
-      startDate,
-      status
-    } = req.body
+    const { classId, className, classType, venue, dayAndTime, startDate, status } = req.body
 
-    // Create a class instance
+    // Create a class instance using the newly provided fields
     const newClassData = {
       className,
       classType,
@@ -133,15 +128,16 @@ module.exports.editClass = async (req, res, next) => {
 
     // Check that class actually exist
     if (!newClass) {
-      throw ({
+      const error = {
         status: 404,
         error: 'Class not found. Please try again later'
-      })
+      }
+      throw error
     }
 
     res.status(200).send()
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.name === 'ValidationError') {
       res.status(400).send({error: 'Our server had issues validating your inputs. Please fill in using proper values'})
     } else if (err.status) {
@@ -153,22 +149,21 @@ module.exports.editClass = async (req, res, next) => {
 }
 
 // Everyone
-// The special thing about classes is they can be either stopped or active.
+// Classes are either Stopped or Active
 module.exports.getAll = async (req, res, next) => {
   try {
-    let { classes, roles } = req.decoded
+    const { classes, roles } = req.decoded
     // Find all classes
     const activeClasses = await Class.find({
       'status': 'Active'
-    }).select('-createdAt -students -users -updatedAt -startDate').limit(100).lean()
+    }).select('-createdAt -students -users -updatedAt -startDate -__v').limit(100).lean()
     const stoppedClasses = await Class.find({
       'status': 'Stopped'
-    }).select('-createdAt -students -users -updatedAt -startDate').limit(200).lean()
+    }).select('-createdAt -students -users -updatedAt -startDate -__v').limit(200).lean()
     // If they are not admin / superadmin, their view of classes is restricted to classes they belong in:
     if (roles.indexOf('SuperAdmin') === -1 && roles.indexOf('Admin') === -1) {
-      console.log(classes)
-      let filteredActive = activeClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
-      let filteredStop = stoppedClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
+      const filteredActive = activeClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
+      const filteredStop = stoppedClasses.filter(el => classes.indexOf(el._id.toString()) !== -1)
       return res.status(200).json({
         activeClasses: filteredActive,
         stoppedClasses: filteredStop
@@ -179,7 +174,7 @@ module.exports.getAll = async (req, res, next) => {
       stoppedClasses
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     next(err)
   }
 }
@@ -187,31 +182,34 @@ module.exports.getAll = async (req, res, next) => {
 // Everyone
 module.exports.getClassById = async (req, res, next) => {
   try {
-    let classId = req.params.id
+    const classId = req.params.id
 
     // Check if classId is given
     if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a classId'
-      })
+      }
+      throw error
     }
 
-    // Find a class and populate the students, users to get their name. Using class1 because class is a reserved word
-    const classData = await Class.findById(classId).populate('students users', 'profile.name')
-      .select('-updatedAt -createdAt').lean()
+    // Find a class and populate the students and users to get their name.
+    const classData = await Class.findById(classId).populate('students users', 'name')
+      // .select('-updatedAt -createdAt')
+      .lean()
     // If class does not exist, throw an error
     if (!classData) {
-      throw ({
+      const error = {
         status: 404,
         error: 'This class does not exist'
-      })
+      }
+      throw error
     }
     return res.status(200).json({
       class: classData
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -222,19 +220,19 @@ module.exports.getClassById = async (req, res, next) => {
 
 // SuperAdmin
 module.exports.deleteClass = async (req, res, next) => {
-  let {
-    classId
-  } = req.body
+  const { classId } = req.body
   try {
-    if (!classId || classId.length === 0 || !(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+    // classId is an array, thus we test all of the IDs within that array
+    if (!classId || classId.length === 0 || !classId.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
+      const error = {
         status: 400,
-        error: 'Please provide at least 1 classId and ensure input is correct.'
-      })
+        error: 'Please provide at least 1 classId and ensure all values are correct.'
+      }
+      throw error
     }
 
     // Remove class from database
-    const classDeleted = await Class.update({
+    const classDeleted = await Class.updateMany({
       '_id': {
         '$in': classId
       },
@@ -243,8 +241,6 @@ module.exports.deleteClass = async (req, res, next) => {
       }
     }, {
       'status': 'Stopped'
-    }, {
-      multi: true
     })
     if (classDeleted.n === 0) {
       return res.status(404).json({
@@ -253,7 +249,7 @@ module.exports.deleteClass = async (req, res, next) => {
     }
     return res.status(200).send()
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -264,18 +260,22 @@ module.exports.deleteClass = async (req, res, next) => {
 
 // Admin / SA
 module.exports.addStudentsToClass = async (req, res, next) => {
+  const { classId, studentIds } = req.body
   try {
-    let {
-      classId,
-      studentIds // Should be an array
-    } = req.body
-
     // Check that classId exist
     if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a classId'
-      })
+      }
+      throw error
+    }
+    if (!studentIds.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
+      const error = {
+        status: 400,
+        error: 'Please ensure all studentId are correct'
+      }
+      throw error
     }
 
     // Update the class by adding those array of students into the class student field
@@ -290,13 +290,14 @@ module.exports.addStudentsToClass = async (req, res, next) => {
       runValidators: true
     })
     if (!classes) {
-      throw ({
+      const error = {
         status: 404,
         error: 'Please provide an existing class'
-      })
+      }
+      throw error
     }
     // For every student in the array, add the class added into their class field
-    const students = await Student.update({
+    const students = await Student.updateMany({
       _id: {
         $in: studentIds
       }
@@ -305,8 +306,7 @@ module.exports.addStudentsToClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -314,7 +314,7 @@ module.exports.addStudentsToClass = async (req, res, next) => {
       students
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -325,18 +325,22 @@ module.exports.addStudentsToClass = async (req, res, next) => {
 
 // Admin / SA
 module.exports.deleteStudentsFromClass = async (req, res, next) => {
+  const { classId, studentIds } = req.body
   try {
-    let {
-      classId,
-      studentIds // Should be an array
-    } = req.body
-
     // Check that classId exist
     if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a classId'
-      })
+      }
+      throw error
+    }
+    if (!studentIds.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
+      const error = {
+        status: 400,
+        error: 'Please ensure all studentId are correct'
+      }
+      throw error
     }
 
     // Delete students from the class's student field
@@ -349,7 +353,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
     })
 
     // Delete the class in student's class field
-    const students = await Student.update({
+    const students = await Student.updateMany({
       _id: {
         $in: studentIds
       }
@@ -358,8 +362,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -367,7 +370,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
       studentsRemoved: students
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -386,10 +389,18 @@ module.exports.addUsersToClass = async (req, res, next) => {
 
     // Check that classId exist
     if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a classId'
-      })
+      }
+      throw error
+    }
+    if (!userIds.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
+      const error = {
+        status: 400,
+        error: 'Please ensure all userId are correct'
+      }
+      throw error
     }
 
     // Add users into class's lists of users
@@ -405,7 +416,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
     })
 
     // Add class into users' list of classes
-    const users = await User.update({
+    const users = await User.updateMany({
       _id: {
         $in: userIds
       }
@@ -414,8 +425,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -423,7 +433,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
       users
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -434,18 +444,22 @@ module.exports.addUsersToClass = async (req, res, next) => {
 
 // Admin / SA
 module.exports.deleteUsersFromClass = async (req, res, next) => {
+  const { classId, userIds } = req.body
   try {
-    let {
-      classId,
-      userIds
-    } = req.body
-
     // Check that classId exist
     if (!(/^[0-9a-fA-F]{24}$/).test(classId)) {
-      throw ({
+      const error = {
         status: 400,
         error: 'Please provide a classId'
-      })
+      }
+      throw error
+    }
+    if (!userIds.every(id => (/^[0-9a-fA-F]{24}$/).test(id))) {
+      const error = {
+        status: 400,
+        error: 'Please ensure all userId are correct'
+      }
+      throw error
     }
 
     // Delete users from class's list of users
@@ -458,7 +472,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
     })
 
     // Delete class from users' list of classes
-    const users = await User.update({
+    const users = await User.updateMany({
       _id: {
         $in: userIds
       }
@@ -467,8 +481,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true,
-      multi: true
+      new: true
     })
 
     return res.status(200).json({
@@ -476,7 +489,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
       users
     })
   } catch (err) {
-    console.log(err)
+    console.error(err)
     if (err.status) {
       res.status(err.status).send({
         error: err.error

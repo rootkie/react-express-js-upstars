@@ -1,6 +1,6 @@
 {
   "name": "react-express-js-upstars",
-  "version": "0.5.0beta",
+  "version": "0.6.0beta",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -16,10 +16,10 @@
     "morgan": "^1.8.1",
     "nodemailer": "^4.6.7",
     "prop-types": "^15.6.1",
-    "react": "^16.8.0-alpha.1",
+    "react": "^16.8.1",
     "react-async-script": "^0.9.1",
     "react-datepicker": "^1.5.0",
-    "react-dom": "^16.8.0-alpha.1",
+    "react-dom": "^16.8.1",
     "react-google-recaptcha": "^0.12.0",
     "react-router-dom": "^4.3.1",
     "semantic-ui-css": "^2.4.1",
@@ -38,7 +38,8 @@
     "eslint-plugin-react": "^7.9.1",
     "eslint-plugin-react-hooks": "0.0.0",
     "eslint-plugin-standard": "^3.1.0",
-    "jest": "^23.5.0",
+    "jest": "^24.1.0",
+    "jest-circus": "^24.1.0",
     "nodemon": "^1.17.5",
     "react-scripts": "^1.1.5",
     "supertest": "^3.2.0"
