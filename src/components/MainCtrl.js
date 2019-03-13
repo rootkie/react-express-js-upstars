@@ -70,6 +70,12 @@ const reducer = (state, action) => {
   }
 }
 
+/*
+=============
+FUNCTIONS
+=============
+*/
+
 const isUserLoggedIn = async (dispatch) => {
   try {
     const response = await axios.get('/check')
@@ -78,7 +84,7 @@ const isUserLoggedIn = async (dispatch) => {
     // isLoggedIn() is then called again to ensure access token is valid
     // Else if there are any errors anywhere, auth status default to false.
     if (response.data.auth === false) {
-      let refreshToken = window.localStorage.refreshToken
+      const refreshToken = window.localStorage.refreshToken
       if (!refreshToken) {
         // Redirect them to Login Page if they don't even if a refresh token.
         dispatch({type: 'redirectLogin'})
@@ -105,9 +111,9 @@ const isUserLoggedIn = async (dispatch) => {
     // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
     // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
     if (response.data.auth === 'expiring') {
-      let { name, _id, roles } = response.data
+      const { name, _id, roles } = response.data
       dispatch({type: 'success', name, _id, roles})
-      let refreshToken = window.localStorage.refreshToken
+      const refreshToken = window.localStorage.refreshToken
       if (refreshToken) {
         const rawRefreshResponse = await axios.post('/refresh', { refreshToken })
         const { token, status } = rawRefreshResponse.data
@@ -139,10 +145,16 @@ const clearTimeInterval = () => {
   window.clearInterval(forceRefresh)
 }
 
+/*
+================
+MAIN FUNCTION
+================
+*/
+
 const MainCtrl = ({match}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // Runs every time match props change, similar to componentDidUpdate
+  // Runs every time 'match' props change, similar to componentDidUpdate
   // Refer to https://reactjs.org/docs/hooks-effect.html#detailed-explanation for more information
   useEffect(() => {
     isUserLoggedIn(dispatch)
@@ -155,7 +167,7 @@ const MainCtrl = ({match}) => {
       return response
     }, error => {
       if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
-        let errorCode = error.response.status
+        const errorCode = error.response.status
         dispatch({type: 'showError', errorCode})
       }
       // Error such as 400 || 401 are handled locally.
@@ -174,6 +186,12 @@ const MainCtrl = ({match}) => {
       clearTimeInterval()
     }
   }, [match])
+
+  /*
+  ===============
+  RENDER
+  ===============
+  */
 
   const { path } = match
   const { name, _id, roles, errorCode, isLoggedIn, confirm } = state
@@ -199,7 +217,7 @@ const MainCtrl = ({match}) => {
         <Grid style={GridStyle} stackable>
           <SideMenu roles={roles} />
           <Grid.Column width={13} style={MainContentStyle}>
-            {/* Path in this case refers to /dashboard that is inherited */}
+            {/* Path refers to /dashboard that is inherited */}
             {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
             <Switch>

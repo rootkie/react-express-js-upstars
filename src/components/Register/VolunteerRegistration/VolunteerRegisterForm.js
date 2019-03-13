@@ -102,10 +102,17 @@ const reducer = (state, action) => {
   }
 }
 
+/*
+===================
+SUBMIT FUNCTIONS
+===================
+*/
+
 const submitPageOne = (dispatch, state) => e => {
   e.preventDefault()
   dispatch({type: 'clearError'})
 
+  // The function is binded to the same button that display 'next' and 'back'
   if (state.activeItem === 'Personal Info') {
     dispatch({type: 'updateField', name: 'activeItem', value: 'Login Details'})
   } else {
@@ -199,6 +206,12 @@ const submitEntry = (dispatch, state) => e => {
       }
     })
 }
+
+/*
+===================
+MAIN FUNCTION
+===================
+*/
 
 const VolunteerRegister = () => {
   const [state, dispatch] = useReducer(reducer, initialState)

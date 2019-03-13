@@ -57,9 +57,8 @@ const initialState = {
   activeItem: 'Personal Info'
 }
 
-// Reducers here contains all the actions to modify the state. It is a top Level function that
-// should not contain any API calls. Loops, conditions and API calls should be done before an action
-// is called for the reducer to initate a state change. State in this case is immutable.
+// Reducers here contains all the actions to modify the state.
+// State in this case is immutable.
 const reducer = (state, action) => {
   switch (action.type) {
     // Field Updates
@@ -182,9 +181,16 @@ const reducer = (state, action) => {
   }
 }
 
+/*
+=================
+SUBMIT FUNCTIONS
+=================
+*/
+
 const submitPersonal = (dispatch, state) => e => {
   e.preventDefault()
   dispatch({type: 'clearError'})
+  // This button is used as a 'next' and 'back' button while being binded to one function
   if (state.activeItem === 'Family Details') {
     dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
   } else {
@@ -224,9 +230,9 @@ const submitAll = (dispatch, state) => e => {
   } = state
 
   // Validate the important details
-  const requriedSchema = object({
+  const requiredSchema = object({
     name: string().required('Please provide your name'),
-    icNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
+    icNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number (Student)'),
     dob: date('Please provide a valid date'),
     address: string().required('Please provide a valid address'),
     gender: string().required('Please provide your gender'),
@@ -234,13 +240,23 @@ const submitAll = (dispatch, state) => e => {
     classLevel: string().required('Please provide your class and level'),
     schoolName: string().required('Please provide your school name'),
     terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
-    captchaCode: string().required('There is an error with the CaptchaCode, please try again')
+    captchaCode: string().required('There is an error with the CaptchaCode, please try again'),
+    fatherIcNumber: string().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number (father)'),
+    fatherEmail: string().email('Please provide a valid email (father)'),
+    motherIcNumber: string().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number (mother)'),
+    motherEmail: string().email('Please provide a valid email (mother)')
   })
 
-  requriedSchema.validate({
-    name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms, captchaCode
+  requiredSchema.validate({
+    name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms, captchaCode, fatherIcNumber, fatherEmail, motherIcNumber, motherEmail
   }).then(valid => {
-    let studentDataToSubmit = {
+    // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
+    // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
+    // else if that option is not checked (false), the list will remain the same as before (nothing added)
+    const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
+    ), [])
+
+    const studentDataToSubmit = {
       name,
       icNumber,
       dob,
@@ -267,15 +283,9 @@ const submitAll = (dispatch, state) => e => {
       fas,
       fsc,
       academicInfo,
-      captchaCode
+      captchaCode,
+      tuition
     }
-    // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
-    // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)
-    // else if that option is not checked (false), the list will remain the same as before (nothing added)
-    const tuition = Object.keys(tuitionChoices).reduce((last, current) => (tuitionChoices[current] ? last.concat(current) : last
-    ), [])
-
-    studentDataToSubmit = {...studentDataToSubmit, tuition} // adding tuition info into misc
 
     axios.post('/students', studentDataToSubmit)
       .then(response => {
@@ -297,10 +307,14 @@ const submitAll = (dispatch, state) => e => {
   })
 }
 
-// Main Functional Component to be rendered in the React App.
+/*
+================
+MAIN FUNCTION
+================
+*/
+
 const StudentForm = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
-  // New React Hooks. Refer to https://reactjs.org/docs/hooks-reference.html#usereducer for more details on useReducer hook.
   const { activeItem, errorMessage, submitSuccess } = state
 
   // Function to handle state change
@@ -317,6 +331,12 @@ const StudentForm = () => {
     e.preventDefault()
     dispatch({type: 'updateFamilyMember', index, property, value})
   }
+
+  /*
+  ==================
+  RENDER
+  ==================
+  */
 
   return (
     <Segment style={{ padding: '3em 0em' }} vertical>
