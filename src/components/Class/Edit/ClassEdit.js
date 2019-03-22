@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer } from 'react'
-import { Form, Message, Header, Dimmer, Loader, Grid } from 'semantic-ui-react'
+import { Form, Message, Header, Dimmer, Loader, Grid, Popup, List } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
@@ -7,7 +7,7 @@ import axios from 'axios'
 import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 import StudentList from './Student'
-import UserList from './Users'
+import UserList from './User'
 
 const typeOptions = [
   { key: 'tuition', text: 'Tuition', value: 'Tuition' },
@@ -94,7 +94,12 @@ const reducer = (state, action) => {
         ...state,
         edit: false,
         buttonContent: 'Edit Class Information',
-        submitSuccess: true
+        submitSuccess: true,
+        overallClassData: {
+          ...state.overallClassData,
+          updatedAt: moment(),
+          __v: state.overallClassData.__v + 1
+        }
       }
     case 'closeMessage':
       return {
@@ -324,6 +329,15 @@ const ClassEdit = ({editClass, roles, match}) => {
           <Grid.Column>
             <StudentList state={state} roles={roles} dispatch={dispatch} id={match.params.id} getClass={getClass} />
             <UserList state={state} roles={roles} dispatch={dispatch} id={match.params.id} getClass={getClass} />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <List size='mini' horizontal bulleted>
+              <List.Item><Popup size='mini' trigger={<div>Latest update {moment(overallClassData.updatedAt).fromNow()}</div>} content={moment(overallClassData.updatedAt).format('LLL')} /></List.Item>
+              <List.Item>Edited {overallClassData.__v} times</List.Item>
+              <List.Item><Popup size='mini' trigger={<div>Created {moment(overallClassData.createdAt).fromNow()}</div>} content={moment(overallClassData.createdAt).format('LLL')} /></List.Item>
+            </List>
           </Grid.Column>
         </Grid.Row>
       </Grid>

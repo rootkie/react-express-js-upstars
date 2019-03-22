@@ -51,6 +51,11 @@ ClassSchema.pre('save', function (next) {
   return next()
 })
 
+ClassSchema.pre('findOneAndUpdate', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
+})
+
 ClassSchema.pre('updateMany', function (next) {
   this.updateMany({ $inc: { __v: 1 } })
   next()
