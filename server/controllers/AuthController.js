@@ -521,7 +521,7 @@ module.exports.refreshToken = async (req, res, next) => {
             $ne: 'Deleted'
           }
         })
-        if (!user || user.status !== 'Active') {
+        if (!user || (user.status !== 'Active' && user.status !== 'Pending')) {
           return result(false, null)
         }
         return result(true, generateToken(user))

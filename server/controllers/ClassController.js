@@ -85,7 +85,7 @@ module.exports.cloneClass = async (req, res, next) => {
       ...oldClassData.toObject(),
       _id: mongoose.Types.ObjectId(),
       status: 'Active',
-      className: oldClassData + 'Clone',
+      className: oldClassData.className + ' Clone',
       startDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date()

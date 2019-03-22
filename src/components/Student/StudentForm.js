@@ -169,7 +169,7 @@ const StudentForm = () => {
         and will be edited accoringly. */}
       <Grid.Row>
         <Grid.Column>
-          <Form onSubmit={handleSubmit}>
+          <Form>
             { activeItem === 'Personal Info' &&
             <PersonalInfo profile={profile} academicInfo={academicInfo} dispatch={dispatch} handleChange={handleChange} />
             }

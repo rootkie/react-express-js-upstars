@@ -42,7 +42,7 @@ const EmailVerify = ({match}) => {
 
   useEffect(() => {
     verifyEmail(dispatch, match)
-  }, [])
+  }, [match.params.token])
 
   const { success, error } = state
 

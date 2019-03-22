@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
+import React, { useReducer } from 'react'
 import { Form, Message, Header, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { func } from 'prop-types'
+import PropTypes from 'prop-types'
 import moment from 'moment'
 import { Link } from 'react-router-dom'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -12,8 +12,6 @@ const typeOptions = [
   { key: 'enrichment', text: 'Enrichment', value: 'Enrichment' }
 ]
 
-// Initial State, everything is empty. Will fill it up next.
-// StartDate is set to default today.
 const initialState = {
   className: '',
   classType: 'Tuition',
@@ -22,113 +20,134 @@ const initialState = {
   classId: '',
   startDate: moment(),
   submitSuccess: false,
-  serverErrorMessage: ''
+  errorMessage: ''
 }
 
-// Import the functions declared in ClassWrap here as props to be called - for cleaner code
-class ClassForm extends Component {
-  static propTypes = {
-    addClass: func
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'updateField':
+      return {
+        ...state,
+        [action.name]: action.value
+      }
+    case 'updateDate':
+      const {startDate} = action
+      return {
+        ...state,
+        startDate
+      }
+    case 'submitSuccess':
+      return {
+        ...initialState,
+        submitSuccess: true,
+        classId: action.newClassId
+      }
+    case 'closeMessage':
+      return {
+        ...state,
+        submitSuccess: false
+      }
+    case 'handleError':
+      return {
+        ...state,
+        errorMessage: action.message
+      }
+    default:
+      return state
+  }
+}
+
+const handleSubmit = (state, dispatch, addClass) => async e => {
+  e.preventDefault()
+  const { className, classType, venue, dayAndTime, startDate } = state
+  const data = {
+    className,
+    classType,
+    venue,
+    dayAndTime: dayAndTime === 'Enrichment' ? 'nil' : dayAndTime,
+    startDate
   }
 
-  // Init the state
-  state = {...initialState}
+  try {
+    const newClassId = await addClass(data)
+    // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
+    dispatch({type: 'submitSuccess', newClassId})
+  } catch (err) {
+    console.log(err.response)
+    dispatch({type: 'handleError', message: err.response.data.error})
+  }
+}
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+const ClassForm = ({addClass}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
 
-  handleDateChange = (startDate) => this.setState({startDate})
-
-  // Calling functions when the submit button is clicked
-  handleSubmit = async e => {
-    e.preventDefault()
-    const { className, classType, venue, dayAndTime, startDate } = this.state
-    const { addClass } = this.props
-
-    const data = {
-      className,
-      classType,
-      venue,
-      dayAndTime,
-      startDate
-    }
-    if (classType === 'Enrichment') {
-      data.dayAndTime = 'nil'
-    }
-
-    try {
-      let classData = await addClass(data)
-      // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
-      this.setState({...initialState, classId: classData.data.newClass._id})
-      this.showSuccess()
-    } catch (err) {
-      console.log(err.response)
-      this.setState({serverErrorMessage: err.response.data.error})
-    }
+  const handleChange = (e, { name, value }) => {
+    dispatch({type: 'updateField', name, value})
   }
 
-  // Function called to show the success message for 5 seconds (UX component)
-  // There's still a 'x' button to close the message
-  // Remove timer to prevent memory leakage for changing state after unmounting
-  showSuccess = () => {
-    this.setState({submitSuccess: true})
+  const handleDateChange = (startDate) => {
+    dispatch({type: 'updateDate', startDate})
   }
 
-  closeMessage = () => {
-    this.setState({submitSuccess: false})
+  const closeMessage = () => {
+    dispatch({type: 'closeMessage'})
   }
 
-  render () {
-    const { className, classType, venue, dayAndTime, submitSuccess, classId, serverErrorMessage } = this.state // submitted version are used to display the info sent through POST (not necessary)
-    return (
-      <Grid stackable stretched>
-        {submitSuccess &&
+  const { className, classType, venue, dayAndTime, submitSuccess, classId, errorMessage, startDate } = state
+  return (
+    <Grid stackable stretched>
+      {submitSuccess &&
         <Grid.Row>
           <Grid.Column>
-            <Message positive onDismiss={this.closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message>
+            <Message positive onDismiss={closeMessage}>Class created. <Link to={'id/' + classId}>Click here to view it.</Link></Message>
           </Grid.Column>
         </Grid.Row>
-        }
-        {serverErrorMessage.length !== 0 &&
-          <Grid.Row>
-            <Grid.Column>
-              <Message
-                hidden={serverErrorMessage.length === 0}
-                negative
-                content={serverErrorMessage}
-              />
-            </Grid.Column>
-          </Grid.Row>
-        }
-        <Grid.Row>
-          <Grid.Column>
-            <Header as='h3' dividing>Class information</Header>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Form onSubmit={this.handleSubmit}>
-              <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={this.handleChange} required />
-              <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={this.handleChange} required />
-              <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={this.handleChange} required />
-              <Form.Field required>
-                <label>Starting Date</label>
-                <DatePicker
-                  inline
-                  fixedHeight
-                  showMonthDropdown
-                  dropdownMode='select'
-                  dateFormat='DD/MM/YYYY'
-                  selected={this.state.startDate}
-                  onChange={this.handleDateChange} required />
-              </Form.Field>
-              <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={this.handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
-              <Form.Button>Submit</Form.Button>
-            </Form>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    )
-  }
+      }
+      {errorMessage.length !== 0 &&
+      <Grid.Row>
+        <Grid.Column>
+          <Message
+            icon='exclamation triangle'
+            header='Error!'
+            negative
+            content={errorMessage}
+          />
+        </Grid.Column>
+      </Grid.Row>
+      }
+      <Grid.Row>
+        <Grid.Column>
+          <Header as='h3' dividing>Class information</Header>
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row>
+        <Grid.Column>
+          <Form onSubmit={handleSubmit(state, dispatch, addClass)}>
+            <Form.Input label='Name of Class' placeholder='Name of the class' name='className' value={className} onChange={handleChange} required />
+            <Form.Select label='Type' options={typeOptions} placeholder='Tuition' name='classType' value={classType} onChange={handleChange} required />
+            <Form.Input label='Venue' placeholder='Venue of the class' name='venue' value={venue} onChange={handleChange} required />
+            <Form.Field required>
+              <label>Starting Date</label>
+              <DatePicker
+                inline
+                fixedHeight
+                showMonthDropdown
+                dropdownMode='select'
+                dateFormat='DD/MM/YYYY'
+                selected={startDate}
+                onChange={handleDateChange} required />
+            </Form.Field>
+            <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
+            <Form.Button>Submit</Form.Button>
+          </Form>
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
+  )
+}
+
+ClassForm.propTypes = {
+  addClass: PropTypes.func.isRequired
 }
 
 export default ClassForm
