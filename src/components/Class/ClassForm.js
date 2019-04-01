@@ -138,7 +138,7 @@ const ClassForm = ({addClass}) => {
                 onChange={handleDateChange} required />
             </Form.Field>
             <Form.Input label='Day and Time' placeholder='Day time' name='dayAndTime' value={dayAndTime} onChange={handleChange} disabled={classType === 'Enrichment'} required={classType === 'Tuition'} />
-            <Form.Button>Submit</Form.Button>
+            <Form.Button icon='add' labelPosition='left' content='Submit' />
           </Form>
         </Grid.Column>
       </Grid.Row>

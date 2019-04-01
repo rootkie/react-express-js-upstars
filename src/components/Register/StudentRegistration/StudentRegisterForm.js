@@ -69,7 +69,7 @@ const reducer = (state, action) => {
       }
     case 'updateAcademic': {
       let newAcademicInfo = [...state.academicInfo]
-      let { index, property, value } = action
+      const { index, property, value } = action
       newAcademicInfo[index][property] = value
       return {
         ...state,
@@ -233,7 +233,7 @@ const submitAll = (dispatch, state) => e => {
   const requiredSchema = object({
     name: string().required('Please provide your name'),
     icNumber: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number (Student)'),
-    dob: date('Please provide a valid date'),
+    dob: date().required('Please provide a valid date'),
     address: string().required('Please provide a valid address'),
     gender: string().required('Please provide your gender'),
     nationality: string().required('Please provide your nationality'),
@@ -241,14 +241,18 @@ const submitAll = (dispatch, state) => e => {
     schoolName: string().required('Please provide your school name'),
     terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
     captchaCode: string().required('There is an error with the CaptchaCode, please try again'),
-    fatherIcNumber: string().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number (father)'),
+    fatherIcNumber: string().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, { message: 'Please provide a valid IC Number (father)', excludeEmptyString: true }),
     fatherEmail: string().email('Please provide a valid email (father)'),
-    motherIcNumber: string().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number (mother)'),
-    motherEmail: string().email('Please provide a valid email (mother)')
+    fatherIncome: string().matches(/[0-9]+/, { message: 'Please provide a valid income (Father)', excludeEmptyString: true }),
+    fatherContactNumber: string().matches(/^[8|9]\d{7}$/, { message: 'Please provide a valid handphone number (Father)', excludeEmptyString: true }),
+    motherIcNumber: string().uppercase().matches(/^[STFG]\d{7}[A-Z]$/, { message: 'Please provide a valid IC Number (mother)', excludeEmptyString: true }),
+    motherEmail: string().email('Please provide a valid email (mother)'),
+    motherContactNumber: string().matches(/^[8|9]\d{7}$/, { message: 'Please provide a valid handphone number (Mother)', excludeEmptyString: true }),
+    motherIncome: string().matches(/[0-9]+/, { message: 'Please provide a valid income (Mother)', excludeEmptyString: true })
   })
 
   requiredSchema.validate({
-    name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms, captchaCode, fatherIcNumber, fatherEmail, motherIcNumber, motherEmail
+    name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms, captchaCode, fatherIcNumber, fatherEmail, fatherContactNumber, fatherIncome, motherIcNumber, motherEmail, motherContactNumber, motherIncome
   }).then(valid => {
     // Simply put: Take the keys of tuitonChoices (CDAC, Mendaki, Private) and reduce it
     // if the current value is true, that choice (known as current) would be added to the list of total choices (known as last)

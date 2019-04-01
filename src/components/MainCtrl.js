@@ -13,6 +13,7 @@ import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
 import ErrorPage from './Error/ErrorPage'
 
+const signal = axios.CancelToken.source()
 // For development
 axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
 // For production
@@ -160,13 +161,29 @@ const MainCtrl = ({match}) => {
     isUserLoggedIn(dispatch)
   }, [match])
 
-  // seperate useEffect Hook to allow ease of cleanup
+  // Adds the cancelToken so that if any API returns 40x / 50x errors, the current API calls are cancelled,
+  // React will not call setState in useReducer, thus there is no memory leak.
+  useEffect(() => {
+    const requestInterceptor = axios.interceptors.request.use(config => {
+      return {
+        ...config,
+        cancelToken: signal.token
+      }
+    }, error => {
+      return Promise.reject(error)
+    })
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor)
+    }
+  }, [match])
+
   useEffect(() => {
     // Catch all non 2xx responses that occur in the dashboard. Login is not affected.
     const myInterceptor = axios.interceptors.response.use(response => {
       return response
     }, error => {
-      if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
+      if (error.response && (error.response.status === 500 || error.response.status === 404 || error.response.status === 403)) {
+        signal.cancel('API cancelled')
         const errorCode = error.response.status
         dispatch({type: 'showError', errorCode})
       }
@@ -175,13 +192,12 @@ const MainCtrl = ({match}) => {
     })
     return () => {
       //  Once unmount, remove the axios interceptors so that there will not be unintended effects to other pages etc
-      axios.interceptors.request.eject(myInterceptor)
+      axios.interceptors.response.eject(myInterceptor)
     }
   }, [match])
 
   useEffect(() => {
     setTimeInterval(dispatch)
-    // Clean-up automatically when props changes.
     return () => {
       clearTimeInterval()
     }

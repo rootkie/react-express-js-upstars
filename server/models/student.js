@@ -61,7 +61,7 @@ const StudentSchema = new Schema({
     type: String
   },
   fatherContactNumber: {
-    type: Number
+    type: String
   },
   fatherEmail: {
     type: String,
@@ -71,7 +71,7 @@ const StudentSchema = new Schema({
     type: String
   },
   fatherIncome: {
-    type: Number
+    type: String
   },
 
   motherName: {
@@ -84,7 +84,7 @@ const StudentSchema = new Schema({
     type: String
   },
   motherContactNumber: {
-    type: Number
+    type: String
   },
   motherEmail: {
     type: String,
@@ -94,7 +94,7 @@ const StudentSchema = new Schema({
     type: String
   },
   motherIncome: {
-    type: Number
+    type: String
   },
 
   otherFamily: [{

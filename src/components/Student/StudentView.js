@@ -5,13 +5,10 @@ import { Table, Checkbox, Button, Icon, Form, Confirm, Dimmer, Loader, Grid, Sea
 import moment from 'moment'
 import axios from 'axios'
 
-const inlineStyle = {
-  confirm: {
-    marginTop: '1rem auto !important',
-    margin: '1rem auto'
-  }
-}
-
+/*
+  @param {string} value - content of the search bar
+  @param {array} results - returned compiled matching student by the responsive API
+*/
 const initialState = {
   selected: [],
   deleteConfirmationVisibility: false,
@@ -22,18 +19,22 @@ const initialState = {
   redirect: false
 }
 
-// Below are all Misc functions to help the main function
-const resetComponent = dispatch => dispatch({type: 'resetSearch'})
+/*
+==================
+FUNCTIONS
+==================
+*/
+
+const resetSearch = dispatch => dispatch({type: 'resetSearch'})
 
 const handleSearchChange = dispatch => async (e, { value }) => {
+  if (value.length < 1) return resetSearch(dispatch)
   dispatch({type: 'startSearch', value})
-  // If no search string, do not call the API, just reset to default
-  if (value.length < 1) return resetComponent(dispatch)
   try {
     const response = await axios.get(`studentsResponsive/${value}`)
-    let studentList = response.data.studentsFiltered.map(student => {
+    const studentList = response.data.studentsFiltered.map(student => {
       return {
-        title: student.profile.name,
+        title: student.name,
         id: student._id,
         key: student._id
       }
@@ -102,21 +103,16 @@ const reducer = (state, action) => {
   }
 }
 
-// Main function to render the DOM
 const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // ===============================================
-  // Some Functions are better placed inside
-  // ===============================================
-  const handleCheckboxChange = (e, { name: _id, checked }) => { // name here is actually the ID of the student
+  /* =====================================================
+     FUNCTIONS THAT REQUIRE STATE AND DISPATCH MORE OFTEN
+     =====================================================
+  */
+  const handleCheckboxChange = (e, { name: _id, checked }) => {
     const { selected } = state
-    let newSelected
-    if (checked) {
-      newSelected = [...selected, _id]
-    } else {
-      newSelected = selected.filter(element => element !== _id)
-    }
+    const newSelected = checked ? [...selected, _id] : selected.filter(element => element !== _id)
     dispatch({type: 'handleCheckbox', newSelected})
   }
 
@@ -126,13 +122,13 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
     dispatch({type: 'resetSelected'})
   }
 
-  const handleDeleteConfirmation = (option) => () => {
+  const handleDeleteConfirmation = (option) => async () => {
     switch (option) {
       case 'show':
         dispatch({type: 'showConfirmMenu'})
         break
       case 'confirm':
-        handleDelete()
+        await handleDelete()
         break
       case 'cancel':
         dispatch({type: 'hideConfirmMenu'})
@@ -141,14 +137,17 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
     }
   }
 
+  /*
+  =============
+  RENDER
+  =============
+  */
   const { selected, results, id, deleteConfirmationVisibility, value, redirect, isLoadingSearch } = state
   if (isLoading) {
     return (
-      <div>
-        <Dimmer active>
-          <Loader indeterminate>Loading data</Loader>
-        </Dimmer>
-      </div>
+      <Dimmer active>
+        <Loader indeterminate>Loading data</Loader>
+      </Dimmer>
     )
   } else if (redirect && id.length !== 0) {
     return <Redirect push to={`/dashboard/students/edit/${id}`} />
@@ -187,20 +186,20 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
                 </Table.Row>
               </Table.Header>
               {studentData.length !== 0 &&
-                <Table.Body>
-                  {studentData.map((student, i) => (
-                    <Table.Row key={`student-${i}`}>
-                      {roles.indexOf('SuperAdmin') !== -1 && studentData.length !== 0 &&
+              <Table.Body>
+                {studentData.map((student, i) => (
+                  <Table.Row key={`student-${i}`}>
+                    {roles.indexOf('SuperAdmin') !== -1 &&
                       <Table.Cell collapsing>
                         <Checkbox name={student._id} onChange={handleCheckboxChange} checked={selected.includes(student._id)} />
                       </Table.Cell>
-                      }
-                      <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.name}</Link></Table.Cell>
-                      <Table.Cell>{moment().diff(student.dob, 'years')}</Table.Cell>
-                      <Table.Cell>{student.icNumber}</Table.Cell>
-                      <Table.Cell>{student.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
+                    }
+                    <Table.Cell><Link to={`/dashboard/students/edit/${student._id}`}>{student.name}</Link></Table.Cell>
+                    <Table.Cell>{moment().diff(student.dob, 'years')}</Table.Cell>
+                    <Table.Cell>{student.icNumber}</Table.Cell>
+                    <Table.Cell>{student.gender === 'F' ? 'Female' : 'Male'}</Table.Cell>
+                  </Table.Row>))}
+              </Table.Body>
               }
               {studentData.length === 0 &&
                 <Table.Body>
@@ -215,7 +214,9 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
 
               <Table.Footer fullWidth>
                 <Table.Row>
+                  {studentData.length !== 0 &&
                   <Table.HeaderCell />
+                  }
                   <Table.HeaderCell colSpan='4'>
                     {roles.indexOf('SuperAdmin') !== -1 &&
                       <div>
@@ -228,12 +229,11 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
                         <Confirm
                           open={deleteConfirmationVisibility}
                           header='Deleting the following students:'
-                          content={selected.map((id) => (
-                            studentData.filter((student) => (student._id === id))[0].name
+                          content={selected.map(id => (
+                            studentData.filter(student => (student._id === id))[0].name
                           )).join(', ')}
                           onCancel={handleDeleteConfirmation('cancel')}
                           onConfirm={handleDeleteConfirmation('confirm')}
-                          style={inlineStyle.confirm}
                         />
                       </div>
                     }

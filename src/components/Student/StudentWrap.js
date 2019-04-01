@@ -14,8 +14,28 @@ const initialState = {
   isLoading: true
 }
 
+/*
+  ============================================================================
+  Loading of initial Student data
+  ============================================================================
+*/
+const getStudents = async dispatch => {
+  const response = await axios.get('students')
+  dispatch({type: 'studentLoaded', studentData: response.data.students})
+}
+
+const getOtherStudents = async dispatch => {
+  const response = await axios.get('otherStudents')
+  dispatch({type: 'otherStudentLoaded', otherStudentData: response.data.students})
+}
+
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'startLoading':
+      return {
+        ...state,
+        isLoading: true
+      }
     case 'studentLoaded':
       return {
         ...state,
@@ -32,12 +52,9 @@ const reducer = (state, action) => {
   }
 }
 
-// Some functions are placed here to be ran on render only so that everytime the user changes pages within this wrap,
-// the data will not be reloaded and thus saving API calls and loading times.
 const StudentWrap = ({roles, match}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // Ran only during initial Mounting
   useEffect(() => {
     getStudents(dispatch)
     if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
@@ -45,40 +62,31 @@ const StudentWrap = ({roles, match}) => {
     }
   }, [])
 
-  /*
-  ============================================================================
-  Loading of initial Student data
-  ============================================================================
-  */
-  const getStudents = async () => {
-    try {
-      const response = await axios.get('students')
-      dispatch({type: 'studentLoaded', studentData: response.data.students})
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  const getOtherStudents = async () => {
-    try {
-      const response = await axios.get('otherStudents')
-      dispatch({type: 'otherStudentLoaded', otherStudentData: response.data.students})
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
   const deleteStudent = async (studentId) => {
-    try {
-      await axios.delete('/students',
-        {
-          data: {
-            studentId
-          }
-        })
-      getStudents()
-    } catch (err) {
-      console.log(err)
+    dispatch({type: 'startLoading'})
+    await axios.delete('/students',
+      {
+        data: {
+          studentId
+        }
+      })
+    getStudents(dispatch)
+    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+      getOtherStudents(dispatch)
+    }
+  }
+
+  const addStudent = async studentData => {
+    const response = await axios.post('/admin/students', studentData)
+    getStudents(dispatch)
+    return response.data.newStudentId
+  }
+
+  const editStudent = async (studentId, studentData) => {
+    await axios.put('/students', { ...studentData, studentId })
+    getStudents(dispatch)
+    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+      getOtherStudents(dispatch)
     }
   }
 
@@ -86,8 +94,8 @@ const StudentWrap = ({roles, match}) => {
   return (
     <div>
       <Switch>
-        <Route exact path={`${match.path}/add`} render={() => <StudentForm />} />
-        <Route exact path={`${match.path}/edit/:id`} render={props => <StudentEdit roles={roles} {...props} />} />
+        <Route exact path={`${match.path}/add`} render={() => <StudentForm addStudent={addStudent} />} />
+        <Route exact path={`${match.path}/edit/:id`} render={props => <StudentEdit roles={roles} editStudent={editStudent} {...props} />} />
         <Route exact path={`${match.path}/view`} render={() => <StudentView studentData={studentData} isLoading={isLoading} roles={roles} deleteStudent={deleteStudent} />} />
         <Route exact path={`${match.path}/viewOthers`} render={() => <StudentViewOthers studentData={otherStudentData} isLoading={isLoading} />} />
         <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
@@ -102,28 +110,3 @@ StudentWrap.propTypes = {
 }
 
 export default StudentWrap
-
-// const addStudent = async (studentDataToSubmit) => {
-//   try {
-//     const response = await axios.post('admin/students', studentDataToSubmit)
-//     getStudents()
-//     return response.data.newStudentId
-//   } catch (err) {
-//     console.log(err)
-//   }
-// }
-
-// const editStudent = async (studentDataToSubmit) => {
-//   const { sid } = match.params
-//   let { roles } = this.props
-//   return axios.put('/students', {
-//     ...studentDataToSubmit,
-//     studentId: sid
-//   })
-//     .then(response => {
-//       this.getStudents()
-//       if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-//         this.getOtherStudents()
-//       }
-//     })
-// }

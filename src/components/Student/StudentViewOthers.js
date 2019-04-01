@@ -45,13 +45,13 @@ const reducer = (state, action) => {
 }
 
 const handleSearchChange = dispatch => async (e, { value }) => {
-  dispatch({type: 'startSearch', value})
   if (value.length < 1) return resetComponent(dispatch)
+  dispatch({type: 'startSearch', value})
   try {
     const response = await axios.get(`otherStudentsResponsive/${value}`)
-    let studentList = response.data.studentsFiltered.map(student => {
+    const studentList = response.data.studentsFiltered.map(student => {
       return {
-        title: student.profile.name,
+        title: student.name,
         id: student._id,
         key: student._id
       }
@@ -68,10 +68,11 @@ const handleResultSelect = dispatch => (e, { result }) => {
   dispatch({type: 'redirect', result})
 }
 
-// ================================================================
-// Main rendering function
-// ================================================================
-
+/*
+==========
+RENDER
+==========
+*/
 const StudentViewOthers = ({studentData, isLoading}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 

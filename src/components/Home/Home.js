@@ -37,13 +37,13 @@ const Home = ({roles}) => {
       </Grid.Row>
       <Grid.Row>
         <Grid.Column>
-          <Statistic.Group>
+          <Statistic.Group widths='ten'>
             <Statistic size='large'>
               <Statistic.Value>{totalUserEstimate}</Statistic.Value>
               <Statistic.Label>Users</Statistic.Label>
             </Statistic>
             <Statistic color='green' size='mini'>
-              <Statistic.Value><Icon.Group><Icon name='user' /><Icon corner='bottom right' name='add' /></Icon.Group>{newUserJoined}</Statistic.Value>
+              <Statistic.Value><Icon.Group><Icon name='user' /><Icon corner='bottom right' name='add' /></Icon.Group> {newUserJoined}</Statistic.Value>
               <Statistic.Label>Users Joined<br />(Last 30 Days)</Statistic.Label>
             </Statistic>
             <Statistic size='large'>
@@ -51,7 +51,7 @@ const Home = ({roles}) => {
               <Statistic.Label>Students</Statistic.Label>
             </Statistic>
             <Statistic color='green' size='mini'>
-              <Statistic.Value><Icon.Group><Icon name='student' /><Icon corner='bottom right' name='add' /></Icon.Group>{newStudentJoined}</Statistic.Value>
+              <Statistic.Value><Icon.Group><Icon name='student' /><Icon corner='bottom right' name='add' /></Icon.Group> {newStudentJoined}</Statistic.Value>
               <Statistic.Label>Students Joined<br />(Last 30 Days)</Statistic.Label>
             </Statistic>
             <Statistic size='large'>
@@ -59,7 +59,7 @@ const Home = ({roles}) => {
               <Statistic.Label>Classes Held</Statistic.Label>
             </Statistic>
             <Statistic color='green' size='mini'>
-              <Statistic.Value><Icon.Group><Icon name='book' /><Icon corner='bottom right' name='add' /></Icon.Group>{newClassesHeld}</Statistic.Value>
+              <Statistic.Value><Icon.Group><Icon name='book' /><Icon corner='bottom right' name='add' /></Icon.Group> {newClassesHeld}</Statistic.Value>
               <Statistic.Label>New Lessons Held<br />(Last 30 Days)</Statistic.Label>
             </Statistic>
             <Statistic size='large'>

@@ -54,28 +54,28 @@ const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {academicInfo.map((year, i) => (
+          {academicInfo.map((info, i) => (
             <Table.Row key={i}>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`year-${i}`} name={`year-${i}`} value={academicInfo[i].year} placeholder='Year' onChange={updateAcademic(i, 'year')} />
+                <Form.Input type='number' transparent key={`year-${i}`} name={`year-${i}`} value={info.year} placeholder='Year' onChange={updateAcademic(i, 'year')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`term-${i}`} name={`term-${i}`} value={academicInfo[i].term} placeholder='Term' onChange={updateAcademic(i, 'term')} />
+                <Form.Input type='number' transparent key={`term-${i}`} name={`term-${i}`} value={info.term} placeholder='Term' onChange={updateAcademic(i, 'term')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`english-${i}`} name={`english-${i}`} value={academicInfo[i].english} placeholder='English' onChange={updateAcademic(i, 'english')} />
+                <Form.Input type='number' transparent key={`english-${i}`} name={`english-${i}`} value={info.english} placeholder='English' onChange={updateAcademic(i, 'english')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`math-${i}`} name={`math-${i}`} value={academicInfo[i].math} placeholder='Maths' onChange={updateAcademic(i, 'math')} />
+                <Form.Input type='number' transparent key={`math-${i}`} name={`math-${i}`} value={info.math} placeholder='Maths' onChange={updateAcademic(i, 'math')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={academicInfo[i].motherTongue} placeholder='MotherTongue' onChange={updateAcademic(i, 'motherTongue')} />
+                <Form.Input type='number' transparent key={`motherTongue-${i}`} name={`motherTongue-${i}`} value={info.motherTongue} placeholder='MotherTongue' onChange={updateAcademic(i, 'motherTongue')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`science-${i}`} name={`science-${i}`} value={academicInfo[i].science} placeholder='Science' onChange={updateAcademic(i, 'science')} />
+                <Form.Input type='number' transparent key={`science-${i}`} name={`science-${i}`} value={info.science} placeholder='Science' onChange={updateAcademic(i, 'science')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`overall-${i}`} name={`overall-${i}`} value={academicInfo[i].overall} placeholder='Overall' onChange={updateAcademic(i, 'overall')} />
+                <Form.Input type='number' transparent key={`overall-${i}`} name={`overall-${i}`} value={info.overall} placeholder='Overall' onChange={updateAcademic(i, 'overall')} />
               </Table.Cell>
             </Table.Row>
           ))}

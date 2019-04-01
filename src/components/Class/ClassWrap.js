@@ -27,9 +27,6 @@ const getClasses = (dispatch) => {
       const updatedClassData = activeClasses.concat(stoppedClasses)
       dispatch({type: 'setClass', updatedClassData})
     })
-    .catch((err) => {
-      console.error(err.response)
-    })
 }
 
 const reducer = (state, action) => {

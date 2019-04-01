@@ -153,7 +153,9 @@ const ClassView = ({classData, stopClass, isLoading, roles}) => {
                             <Icon name='group' />New Class
                           </Button>
                         </Link>
-                        <Button size='small' negative onClick={handleStoppingConfirmation('show')} disabled={selected.length === 0}>Stop</Button>
+                        <Button size='small' negative onClick={handleStoppingConfirmation('show')} disabled={selected.length === 0}>
+                        Stop
+                        </Button>
                         <Confirm
                           open={deleteConfirmationVisibility}
                           header='Stopping the following classes:'
