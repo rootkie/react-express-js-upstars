@@ -32,12 +32,7 @@ const PersonalInfo = ({state, dispatch, handleChange, edit, type}) => {
       <Form.Select label='Status' options={statusOptions} placeholder='change status of student' name='status' value={status} onChange={handleChange} />
       }
       <Form.Group widths='equal'>
-        { type === 'edit' &&
-        <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='icNumber' value={icNumber} required />
-        }
-        {type === 'add' &&
-        <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='icNumber' value={icNumber} onChange={handleChange} required />
-        }
+        <Form.Input label='Student Identity card no' placeholder='Student Identity card no' name='icNumber' value={icNumber} onChange={handleChange} readOnly={type === 'edit'} required />
         <Form.Field required>
           <label>Date of Birth</label>
           <DatePicker
