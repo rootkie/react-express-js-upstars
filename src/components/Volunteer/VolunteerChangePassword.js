@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useReducer } from 'react'
 import PropTypes from 'prop-types'
 import { Form, Button, Header, Message, Image, Segment, Grid, Icon } from 'semantic-ui-react'
 import axios from 'axios'
@@ -10,91 +10,114 @@ const initialState = {
   message: ''
 }
 
-class VolunteerChangePassword extends Component {
-    static propTypes = {
-      _id: PropTypes.string
-    }
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'updateField':
+      return {
+        ...state,
+        [action.name]: action.value
+      }
+    case 'setMessage':
+      return {
+        ...state,
+        message: action.message
+      }
+    case 'success':
+      return {
+        ...initialState,
+        message: 'Your password has been changed successfully!'
+      }
+    default:
+      return state
+  }
+}
 
-  state = {...initialState}
+const VolunteerChangePassword = ({_id}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+  const handleChange = (e, { name, value }) => dispatch({ type: 'updateField', name, value })
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault()
-    const { oldPassword, newPassword, confirmNewPassword } = this.state
-    const userId = this.props._id
-    if (newPassword !== confirmNewPassword) {
-      this.setState({ message: 'Passwords do not match! Please try again.' })
+    const { oldPassword, newPassword, confirmNewPassword } = state
+    const userId = _id
+    if (newPassword.length < 6) {
+      dispatch({ type: 'setMessage', message: 'Please provide a password that is at least 6 characters long' })
       return
     }
-    // Set the message and attempts to log in
-    this.setState({ message: 'Changing password in progress...' })
+    if (newPassword !== confirmNewPassword) {
+      dispatch({ type: 'setMessage', message: 'Passwords do not match! Please try again.' })
+      return
+    }
+    dispatch({ type: 'setMessage', message: 'Changing password in progress...' })
     axios.post('/users/changePassword', { oldPassword, newPassword, userId })
       .then(response => {
-        this.setState({ message: 'Your password has been changed successfully!', ...initialState })
+        dispatch({ type: 'success' })
       })
-      // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
         console.log(error)
-        this.setState({message: error.response.data.error})
+        dispatch({ type: 'setMessage', message: error.response.data.error })
       })
   }
 
-  render () {
-    const { oldPassword, newPassword, confirmNewPassword, message } = this.state
+  const { oldPassword, newPassword, confirmNewPassword, message } = state
 
-    return (
-      <div className='change-password'>
-        <style>{`
+  return (
+    <div className='change-password'>
+      <style>{`
           body > div,
           body > div > div,
           body > div > div > div.change-password {
             height: 100%;
           }
     `}</style>
-        <Grid
-          textAlign='center'
-          style={{ height: '100%' }}
-          verticalAlign='middle'>
-          <Grid.Column style={{ maxWidth: 700 }}>
-            <Image size='medium' centered src={require('./../Misc/logo.png')} />
-            <Header as='h2' color='teal' textAlign='center'>
+      <Grid
+        textAlign='center'
+        style={{ height: '100%' }}
+        verticalAlign='middle'>
+        <Grid.Column style={{ maxWidth: 750, marginTop: 50 }}>
+          <Image size='medium' centered src={require('./../Misc/logo.png')} />
+          <Header as='h2' color='teal' textAlign='center'>
               Change User Password
-            </Header>
-            <Form size='large' onSubmit={this.handleSubmit}>
-              <Segment stacked>
-                <Form.Input
-                  fluid
-                  icon='unlock alternate'
-                  iconPosition='left'
-                  placeholder='Current Password'
-                  name='oldPassword' value={oldPassword} type='password' onChange={this.handleChange} required />
-                <Form.Input
-                  fluid
-                  icon='lock'
-                  iconPosition='left'
-                  placeholder='New Password'
-                  type='password' name='newPassword' value={newPassword} onChange={this.handleChange} required />
-                <Form.Input
-                  fluid
-                  icon={<Icon name='lock' color='green' />}
-                  iconPosition='left'
-                  placeholder='Confirm New Password'
-                  type='password' name='confirmNewPassword' value={confirmNewPassword} onChange={this.handleChange} required />
+          </Header>
+          <Form size='large' onSubmit={handleSubmit}>
+            <Segment stacked>
+              <Form.Input
+                fluid
+                icon='unlock alternate'
+                iconPosition='left'
+                placeholder='Current Password'
+                name='oldPassword' value={oldPassword} type='password' onChange={handleChange} required />
+              <Form.Input
+                fluid
+                icon='lock'
+                iconPosition='left'
+                placeholder='New Password'
+                type='password' name='newPassword' value={newPassword} onChange={handleChange} required />
+              <Form.Input
+                fluid
+                icon={<Icon name='lock' color='green' />}
+                iconPosition='left'
+                placeholder='Confirm New Password'
+                type='password' name='confirmNewPassword' value={confirmNewPassword} onChange={handleChange} required />
 
-                <Button color='teal' fluid size='large' type='submit'>Change Password</Button>
-                <Message
-                  hidden={message === ''}
-                  negative
-                  content={message}
-                />
-              </Segment>
-            </Form>
-          </Grid.Column>
-        </Grid>
-      </div>
-    )
-  }
+              <Button color='teal' fluid size='large' type='submit'>Change Password</Button>
+              <Message
+                hidden={message === ''}
+                primary
+                icon='save outline'
+                content={message}
+              />
+            </Segment>
+          </Form>
+        </Grid.Column>
+      </Grid>
+    </div>
+  )
+}
+
+VolunteerChangePassword.propTypes = {
+  _id: PropTypes.string
 }
 
 export default VolunteerChangePassword
