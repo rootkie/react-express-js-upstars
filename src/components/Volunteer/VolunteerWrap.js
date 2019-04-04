@@ -7,15 +7,6 @@ import VolunteerChangePassword from './VolunteerChangePassword'
 import ErrorPage from '../Error/ErrorPage'
 
 const VolunteerWrap = ({match, _id, roles}) => {
-  // const deleteUser = (userId) => {
-  //   axios.delete('/admin/user',
-  //     {
-  //       data: {
-  //         userId
-  //       }
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
   return (
     <div>
       <Switch>
