@@ -321,7 +321,11 @@ module.exports.register = async (req, res, next) => {
       commencementDate,
       exitDate,
       preferredTimeSlot,
-      roles: ['Tutor']
+      roles: ['Tutor'],
+      admin: {
+        interviewNotes: '',
+        adminNotes: ''
+      }
     })
 
     // Special addition for development, may remove during deployment / production

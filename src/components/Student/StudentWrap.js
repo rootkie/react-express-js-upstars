@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer } from 'react'
 import { Switch, Route } from 'react-router-dom'
+import { Grid } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
@@ -92,7 +93,7 @@ const StudentWrap = ({roles, match}) => {
 
   const { studentData, otherStudentData, isLoading } = state
   return (
-    <div>
+    <React.Fragment>
       <Switch>
         <Route exact path={`${match.path}/add`} render={() => <StudentForm addStudent={addStudent} />} />
         <Route exact path={`${match.path}/edit/:id`} render={props => <StudentEdit roles={roles} editStudent={editStudent} {...props} />} />
@@ -100,7 +101,10 @@ const StudentWrap = ({roles, match}) => {
         <Route exact path={`${match.path}/viewOthers`} render={() => <StudentViewOthers studentData={otherStudentData} isLoading={isLoading} />} />
         <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
       </Switch>
-    </div>
+      <Grid>
+        <Grid.Row></Grid.Row>
+      </Grid>
+    </React.Fragment>
   )
 }
 

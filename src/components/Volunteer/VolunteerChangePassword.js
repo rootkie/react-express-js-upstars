@@ -104,7 +104,6 @@ const VolunteerChangePassword = ({_id}) => {
               <Button color='teal' fluid size='large' type='submit'>Change Password</Button>
               <Message
                 hidden={message === ''}
-                primary
                 icon='save outline'
                 content={message}
               />

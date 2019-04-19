@@ -3,7 +3,7 @@ import { Form, Header, Icon, Segment, Image, Message, Grid, Step } from 'semanti
 import LoginDetails from './LoginDetails'
 import PersonalInfo from './PersonalInfo'
 import axios from 'axios'
-import { string, object, boolean, date, ref } from 'yup'
+import { string, object, boolean, date, ref, array } from 'yup'
 import ReCAPTCHA from 'react-google-recaptcha'
 const recaptchaRef = React.createRef()
 
@@ -141,21 +141,23 @@ const submitEntry = (dispatch, state) => e => {
   const { email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric,
     preferredTimeSlot, commencementDate, exitDate, terms, captchaCode } = state
 
+  // Timeslot here is calculated to make sure there is at least 1 entry in the array
+  const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
   const requiredFieldsForSubmit = object({
     captchaCode: string().required('Please accept the terms again to refresh your reCaptcha verification'),
     terms: boolean().oneOf([true], 'Please accept the terms and conditions'),
     exitDate: date().required('Please enter a valid exit date'),
     commencementDate: date().required('Please enter a valid commencement date'),
-    preferredTimeSlot: object().required('Please provide your preferred time slots'),
+    timeSlot: array().required('Please provide your preferred time slots'),
     nric: string().required('Please provide an IC number').uppercase().matches(/^[STFG]\d{7}[A-Z]$/, 'Please provide a valid IC Number'),
     nationality: string().required('Please provide your nationality'),
     gender: string().required('Please provide your gender'),
     dob: date().required('Please enter a valid date of birth'),
-    homephone: string().required('Please provide a homephone number').matches(/^6\d{7}/, 'Please provide a valid homephone number'),
+    homephone: string().required('Please provide a homephone number').matches(/^6\d{7}$/, 'Please provide a valid homephone number'),
     handphone: string().required('Please provide a handphone number').matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number'),
     schoolLevel: string().required('Please provide your schooling level'),
     schoolClass: string().required('Please provide your school class'),
-    postalCode: string().required('Please provide a postal code').matches(/\d{6}/, 'Please provide a valid postal code'),
+    postalCode: string().required('Please provide a postal code').matches(/^\d{6}/, 'Please provide a valid postal code'),
     address: string().required('Please provide an address'),
     name: string().required('Please provide your name'),
     passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
@@ -165,9 +167,8 @@ const submitEntry = (dispatch, state) => e => {
 
   // Validate the object against the params written above
   requiredFieldsForSubmit
-    .validate({email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric, preferredTimeSlot, commencementDate, exitDate, terms, captchaCode})
+    .validate({email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric, timeSlot, commencementDate, exitDate, terms, captchaCode})
     .then(valid => {
-      const timeSlot = Object.keys(preferredTimeSlot).reduce((last, curr) => (preferredTimeSlot[curr] ? last.concat(curr) : last), [])
       const volunteerData = {
         email,
         password,
