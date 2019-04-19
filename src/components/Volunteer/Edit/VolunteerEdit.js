@@ -13,6 +13,7 @@ import ClassView from './ClassView'
 const initialState = {
   name: '',
   address: '',
+  gender: '',
   handphone: '',
   postalCode: '',
   homephone: '',

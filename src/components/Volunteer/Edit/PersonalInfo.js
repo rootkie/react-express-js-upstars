@@ -30,11 +30,12 @@ const PersonalInfo = ({state, handleChange, dispatch}) => {
   RENDER
   ==============
   */
-  const { name, dob, nric, address, postalCode, handphone, homephone, schoolLevel, schoolClass, commencementDate, exitDate, preferredTimeSlot, edit } = state
+  const { name, dob, nric, gender, address, postalCode, handphone, homephone, schoolLevel, schoolClass, commencementDate, exitDate, preferredTimeSlot, edit } = state
   return (
     <Segment attached='bottom' color='red'>
       <Form.Group widths='equal'>
         <Form.Input label='Name' placeholder='Name' name='name' value={name} readOnly required />
+        <Form.Input label='Gender' placeholder='Gender' name='gender' value={gender === 'M' ? 'Male' : 'Female'} readOnly required />
       </Form.Group>
       <Form.Group widths='equal'>
         <Form.Field required>
