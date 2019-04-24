@@ -661,7 +661,7 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.post('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a className to search for'})
+      expect(response.body).toEqual({'error': 'Please provide a class name'})
     })
 
     test('adding with className but missing remaining fields', async () => {

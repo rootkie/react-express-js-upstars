@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import { Link } from 'react-router-dom'
+import { string, date, object } from 'yup'
 import 'react-datepicker/dist/react-datepicker.css'
 
 // Init typeOptions to be used in dropdown for TYPE of class
@@ -60,22 +61,36 @@ const reducer = (state, action) => {
 const handleSubmit = (state, dispatch, addClass) => async e => {
   e.preventDefault()
   const { className, classType, venue, dayAndTime, startDate } = state
-  const data = {
-    className,
-    classType,
-    venue,
-    dayAndTime: dayAndTime === 'Enrichment' ? 'nil' : dayAndTime,
-    startDate
-  }
+  const required = object({
+    className: string().required('Please provide a class name'),
+    classType: string().required('Please provide a class type'),
+    venue: string().required('Please provide a class venue'),
+    dayAndTime: string().required('Please provide details on the schedule of the class'),
+    startDate: date().required('Please provide a valid starting date')
+  })
 
-  try {
-    const newClassId = await addClass(data)
-    // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
-    dispatch({type: 'submitSuccess', newClassId})
-  } catch (err) {
-    console.log(err.response)
-    dispatch({type: 'handleError', message: err.response.data.error})
-  }
+  required.validate({
+    className, classType, venue, dayAndTime, startDate
+  }).then(async valid => {
+    const data = {
+      className,
+      classType,
+      venue,
+      dayAndTime: dayAndTime === 'Enrichment' ? 'nil' : dayAndTime,
+      startDate
+    }
+    try {
+      const newClassId = await addClass(data)
+      // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
+      dispatch({type: 'submitSuccess', newClassId})
+    } catch (err) {
+      dispatch({type: 'handleError', message: err.response.data.error})
+    }
+  }).catch(err => {
+    if (err.name === 'ValidationError') {
+      dispatch({type: 'handleError', message: err.errors})
+    }
+  })
 }
 
 const ClassForm = ({addClass}) => {

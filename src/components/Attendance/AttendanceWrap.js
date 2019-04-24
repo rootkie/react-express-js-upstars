@@ -52,7 +52,7 @@ const AttendanceWrap = ({match, roles}) => {
   // summary - overall summary and stats of all classes - only available to Admin and above
     <React.Fragment>
       <Switch>
-        <Route exact path={`${match.path}/add`} render={() => <AttendanceForm classData={classData} />} />
+        <Route exact path={`${match.path}/add`} render={props => <AttendanceForm classData={classData} {...props} />} />
         <Route exact path={`${match.path}/search`} render={() => <AttendanceSearch classData={classData} />} />
         <Route exact path={`${match.path}/view/:attendanceId`} render={props => <AttendanceView roles={roles} classData={classData} {...props} />} />
         <Route exact path={`${match.path}/user`} render={() => <AttendanceUser classData={classData} />} />
