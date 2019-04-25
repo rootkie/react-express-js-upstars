@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { Table, Form, Dropdown, Icon, Loader, Dimmer, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
-import { array } from 'prop-types'
+import PropTypes from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
@@ -12,172 +12,165 @@ const datePickingStyle = {
   alignItems: 'center'
 }
 
-class AttendanceSearch extends Component {
-  static propTypes = {
-    classData: array.isRequired
-  }
-  constructor (props) {
-    super(props)
-    this.state = {
-      startDate: undefined,
-      endDate: undefined,
-      moreOptions: false,
-      classSelector: '',
-      isLoading: true,
-      attendances: []
-    }
-  }
+const initialState = {
+  startDate: undefined,
+  endDate: undefined,
+  moreOptions: false,
+  classSelector: '',
+  isLoading: true,
+  attendances: []
+}
 
-  componentDidMount () {
-    // get attendance initial data to be passed to search
-    this.getInitialAttendance()
-  }
-
-  // Get the data and populate the state so that the front-end can display.
-  getInitialAttendance () {
-    axios.get('/attendance/class/dateStart/dateEnd')
-      .then(response => {
-        this.setState({attendances: this.formatAttendances(response.data.foundAttendances), isLoading: false})
-      }).catch(error => {
-        console.log(error)
-      })
-  }
-
-  formatAttendances = (rawAttendanceData) => {
-    let attendances = []
-    // Refactor the information for easier display.
-    for (let [index, attendanceData] of rawAttendanceData.entries()) {
-      attendances[index] = {
-        _id: attendanceData._id,
-        className: attendanceData.class.className,
-        date: moment(attendanceData.date).format('DD/MM/YYYY'),
-        type: attendanceData.type,
-        hours: attendanceData.hours
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'initAttendance':
+      return {
+        ...state,
+        attendances: action.attendances,
+        isLoading: false
       }
-    }
-    return attendances
+    case 'updateField':
+      return {
+        ...state,
+        [action.name]: action.value
+      }
+    case 'clearField':
+      return {
+        ...state,
+        startDate: undefined,
+        endDate: undefined,
+        classSelector: ''
+      }
+    default:
+      return state
   }
+}
 
-  handleSearch = e => {
+const getInitialAttendance = async (dispatch) => {
+  const response = await axios.get('/attendance/class/dateStart/dateEnd')
+  const { foundAttendances } = response.data
+  dispatch({type: 'initAttendance', attendances: foundAttendances})
+}
+
+const AttendanceSearch = ({classData}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    getInitialAttendance(dispatch)
+  }, [])
+
+  const handleSearch = e => {
     e.preventDefault()
-    let { startDate, endDate, classSelector } = this.state
-    this.setState({ isLoading: true }) // reset selected when filtered
+    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    const { startDate, endDate, classSelector } = state
+    /*
+      Special formating is done below to fit the API call: /attendance/class/:classId?/dateStart/:dateStart?/dateEnd/:dateEnd?
+      Case 1: startDate is not given, optional field ':dateStart?' will be empty and backend ignores this search requirement
+      Case 2: endDate is also optional, like startDate
+      Case 3: class is also optional
+      So an API like '/attendance/class/dateStart/dateEnd/' will simply return every single attendance records of every class. (Limit to 200)
+      For more info visit the Wiki: https://github.com/rootkie/react-express-js-upstars/wiki/Attendance#3-get-attendance-for-admin-and-superadmin
+    */
 
-    // Special formating to fit the API Call. Explained below: /attendance/class/:classId?/dateStart/:dateStart?/dateEnd/:dateEnd?
-    // Case 1: startDate is not given, optional field ':dateStart?' will be empty and backend ignores this search requirement
-    // Case 2: endDate is not given, similarly, endDate is optional
-    // Case 3: class is not given. '?' in the API means the field is optional.
-    // So an API like '/attendance/class/dateStart/dateEnd/' will simply return every single attendance records of every class.
-    if (startDate !== null) {
-      startDate = moment(startDate).format('[/]DDMMYYYY') //  From the moments docs, [] allows additional characters
-    } else {
-      startDate = ''
-    }
-    if (endDate !== null) {
-      endDate = moment(endDate).format('[/]DDMMYYYY')
-    } else {
-      endDate = ''
-    }
+    // moment format adds the slash (/) while formatting. Refer to https://momentjs.com/docs/#/displaying/format/ under Escaping characters
+    const startDateFormat = (startDate) ? moment(startDate).format('[/]DDMMYYYY') : ''
+    const endDateFormat = (endDate) ? moment(endDate).format('[/]DDMMYYYY') : ''
+    const classSelectorFormat = (classSelector.length > 0) ? '/' + classSelector : classSelector
 
-    if (classSelector.length > 0) classSelector = '/' + classSelector
-
-    // Get new data based on the search filters and populate attendance
-    axios.get('/attendance/class' + classSelector + '/dateStart' + startDate + '/dateEnd' + endDate)
+    axios.get('/attendance/class' + classSelectorFormat + '/dateStart' + startDateFormat + '/dateEnd' + endDateFormat)
       .then(response => {
-        let attendances = this.formatAttendances(response.data.foundAttendances)
-        this.setState({ isLoading: false, attendances })
+        const { foundAttendances } = response.data
+        dispatch({type: 'initAttendance', attendances: foundAttendances})
       })
   }
 
   // Used to add a class as an additional filter
-  getAttendance = (e, { value }) => this.setState({classSelector: value})
+  const getAttendance = (e, { value }) => dispatch({type: 'updateField', name: 'classSelector', value})
 
-  handleDateChange = (dateType, date) => this.setState({[dateType]: date})
-
-  toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
-
-  clear = e => {
+  const clear = e => {
     e.preventDefault()
-    this.setState({startDate: null, endDate: null, classSelector: ''})
+    dispatch({type: 'clearField'})
   }
 
-  render () {
-    const { moreOptions, classSelector, attendances, isLoading } = this.state
-    const { classData } = this.props
+  const { moreOptions, classSelector, attendances, isLoading, endDate, startDate } = state
 
+  if (isLoading) {
     return (
-      <Grid stackable stretched>
-        <Grid.Row>
-          <Grid.Column>
-            <Table celled striped unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='6'>
-                    <Form>
-                      <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <Form.Group inline style={{marginBottom: 0}}>
-                          <Form.Field style={datePickingStyle}>
-                            <label>Starting Date</label>
-                            <DatePicker
-                              dateFormat='DD/MM/YYYY'
-                              showMonthDropdown
-                              showYearDropdown
-                              dropdownMode='select'
-                              selected={this.state.startDate}
-                              maxDate={this.state.endDate}
-                              onChange={(date) => this.handleDateChange('startDate', date)}
-                              placeholderText='Click to select' />
-                          </Form.Field>
-                          <Form.Field style={datePickingStyle}>
-                            <label>Ending Date</label>
-                            <DatePicker
-                              dateFormat='DD/MM/YYYY'
-                              showMonthDropdown
-                              showYearDropdown
-                              dropdownMode='select'
-                              selected={this.state.endDate}
-                              minDate={this.state.startDate}
-                              onChange={(date) => this.handleDateChange('endDate', date)}
-                              placeholderText='Click to select' />
-                          </Form.Field>
-                          <Form.Button positive onClick={this.handleSearch}>Search attendance records</Form.Button>
-                          <Form.Button negative onClick={this.clear}>Clear all fields</Form.Button>
-                        </Form.Group>
-                        <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
-                      </div>
-                      {moreOptions && <div>
-                        <Form.Field style={{paddingTop: '10px'}}>
-                          <label>Classes</label>
-                          <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.getAttendance} />
+      <Dimmer inverted>
+        <Loader indeterminate>Loading Data</Loader>
+      </Dimmer>
+    )
+  }
+  return (
+    <Grid stackable stretched>
+      <Grid.Row>
+        <Grid.Column>
+          <Table celled striped unstackable>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell colSpan='6'>
+                  <Form>
+                    <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
+                      <Form.Group inline style={{marginBottom: 0}}>
+                        <Form.Field style={datePickingStyle}>
+                          <label>Starting Date</label>
+                          <DatePicker
+                            dateFormat='DD/MM/YYYY'
+                            showMonthDropdown
+                            showYearDropdown
+                            dropdownMode='select'
+                            selected={startDate}
+                            maxDate={endDate}
+                            onChange={date => dispatch({type: 'updateField', name: 'startDate', value: date})}
+                            placeholderText='Click to select' />
                         </Form.Field>
-                      </div>}
-                    </Form>
-                    <Dimmer active={isLoading} inverted>
-                      <Loader indeterminate active={isLoading}>Loading Data</Loader>
-                    </Dimmer>
-                  </Table.HeaderCell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.HeaderCell>Index</Table.HeaderCell>
-                  <Table.HeaderCell>Class Name</Table.HeaderCell>
-                  <Table.HeaderCell>Lesson Date</Table.HeaderCell>
-                  <Table.HeaderCell>Status</Table.HeaderCell>
-                  <Table.HeaderCell>Hours</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              {attendances.length !== 0 &&
+                        <Form.Field style={datePickingStyle}>
+                          <label>Ending Date</label>
+                          <DatePicker
+                            dateFormat='DD/MM/YYYY'
+                            showMonthDropdown
+                            showYearDropdown
+                            dropdownMode='select'
+                            selected={endDate}
+                            minDate={startDate}
+                            onChange={date => dispatch({type: 'updateField', name: 'endDate', value: date})}
+                            placeholderText='Click to select' />
+                        </Form.Field>
+                        <Form.Button positive onClick={handleSearch}>Search attendance records</Form.Button>
+                        <Form.Button negative onClick={clear}>Clear all fields</Form.Button>
+                      </Form.Group>
+                      <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={() => dispatch({type: 'updateField', name: 'moreOptions', value: !moreOptions})} />
+                    </div>
+                    {moreOptions && <div>
+                      <Form.Field style={{paddingTop: '10px'}}>
+                        <label>Classes</label>
+                        <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={getAttendance} />
+                      </Form.Field>
+                    </div>}
+                  </Form>
+                </Table.HeaderCell>
+              </Table.Row>
+              <Table.Row>
+                <Table.HeaderCell>Index</Table.HeaderCell>
+                <Table.HeaderCell>Class Name</Table.HeaderCell>
+                <Table.HeaderCell>Lesson Date</Table.HeaderCell>
+                <Table.HeaderCell>Status</Table.HeaderCell>
+                <Table.HeaderCell>Hours</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            {attendances.length !== 0 &&
               <Table.Body>
-                {attendances.map((options, i) => (
-                  <Table.Row key={`attendance-${i}`}>
+                {attendances.map((attendance, i) => (
+                  <Table.Row key={`attendance-${attendance._id}`}>
                     <Table.Cell collapsing>{i + 1}</Table.Cell>
-                    <Table.Cell><Link to={'/dashboard/attendance/view/' + options._id}>{options.className}</Link></Table.Cell>
-                    <Table.Cell>{options.date}</Table.Cell>
-                    <Table.Cell>{options.type}</Table.Cell>
-                    <Table.Cell>{options.hours}</Table.Cell>
+                    <Table.Cell><Link to={'/dashboard/attendance/view/' + attendance._id}>{attendance.class.className}</Link></Table.Cell>
+                    <Table.Cell>{moment(attendance.date).format('DD/MM/YYYY')}</Table.Cell>
+                    <Table.Cell>{attendance.type}</Table.Cell>
+                    <Table.Cell>{attendance.hours}</Table.Cell>
                   </Table.Row>))}
               </Table.Body>
-              }
-              {attendances.length === 0 &&
+            }
+            {attendances.length === 0 &&
               <Table.Body>
                 <Table.Row key={`empty-attendance`}>
                   <Table.Cell collapsing>1</Table.Cell>
@@ -187,14 +180,17 @@ class AttendanceSearch extends Component {
                   <Table.Cell>nil</Table.Cell>
                 </Table.Row>
               </Table.Body>
-              }
-            </Table>
+            }
+          </Table>
 
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    )
-  }
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
+  )
+}
+
+AttendanceSearch.propTypes = {
+  classData: PropTypes.array.isRequired
 }
 
 export default AttendanceSearch
