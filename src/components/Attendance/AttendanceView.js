@@ -159,7 +159,7 @@ const AttendanceView = ({match, classData, roles, history}) => {
     const { attendanceDate: date, classId, type, students, users, hours } = state
     const requiredFields = object({
       type: string().required('Was this lesson held? Or was it cancelled?'),
-      hours: number().min(0, 'The minimum hour is zero (0)').required('Please provide the number of hours')
+      hours: number('Please enter a valid number of hours').min(0, 'The minimum hour is zero (0)').required('Please provide the number of hours')
     })
     requiredFields.validate({
       type, hours
@@ -195,8 +195,8 @@ const AttendanceView = ({match, classData, roles, history}) => {
   const { submitSuccess, edit, buttonName, deleteConfirm, isLoading, errorMessage, createdAt, updatedAt, __v } = state
   if (isLoading) {
     return (
-      <Dimmer active={isLoading} inverted>
-        <Loader indeterminate active={isLoading}>Loading Data</Loader>
+      <Dimmer active inverted>
+        <Loader indeterminate>Loading Data</Loader>
       </Dimmer>
     )
   }

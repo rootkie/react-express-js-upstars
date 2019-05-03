@@ -96,7 +96,7 @@ const AttendanceSearch = ({classData}) => {
 
   if (isLoading) {
     return (
-      <Dimmer inverted>
+      <Dimmer active inverted>
         <Loader indeterminate>Loading Data</Loader>
       </Dimmer>
     )
@@ -110,7 +110,7 @@ const AttendanceSearch = ({classData}) => {
               <Table.Row>
                 <Table.HeaderCell colSpan='6'>
                   <Form>
-                    <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
                       <Form.Group inline style={{marginBottom: 0}}>
                         <Form.Field style={datePickingStyle}>
                           <label>Starting Date</label>
@@ -144,7 +144,7 @@ const AttendanceSearch = ({classData}) => {
                     {moreOptions && <div>
                       <Form.Field style={{paddingTop: '10px'}}>
                         <label>Classes</label>
-                        <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={getAttendance} />
+                        <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={getAttendance} clearable />
                       </Form.Field>
                     </div>}
                   </Form>

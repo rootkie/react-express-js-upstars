@@ -129,8 +129,8 @@ const AttendanceForm = ({classData, history}) => {
   const { error, classSelection, isLoading } = state
   if (isLoading) {
     return (
-      <Dimmer active={isLoading} inverted>
-        <Loader indeterminate active={isLoading}>Loading Data</Loader>
+      <Dimmer active inverted>
+        <Loader indeterminate active>Loading Data</Loader>
       </Dimmer>
     )
   }
