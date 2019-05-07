@@ -59,6 +59,11 @@ const reducer = (state, action) => {
 const AttendanceForm = ({classData, history}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
+  /*
+  ===========
+  FUNCTIONS
+  ===========
+  */
   const handleClass = (e, { value }) => {
     dispatch({type: 'retrieveData', value})
     axios.get('/class/' + value)
@@ -125,11 +130,15 @@ const AttendanceForm = ({classData, history}) => {
       }
     })
   }
-
+  /*
+  ============
+  RENDER
+  ============
+  */
   const { error, classSelection, isLoading } = state
   if (isLoading) {
     return (
-      <Dimmer active inverted>
+      <Dimmer active>
         <Loader indeterminate active>Loading Data</Loader>
       </Dimmer>
     )

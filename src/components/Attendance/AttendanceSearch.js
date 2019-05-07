@@ -59,6 +59,12 @@ const AttendanceSearch = ({classData}) => {
     getInitialAttendance(dispatch)
   }, [])
 
+  /*
+  ============
+  FUNCTIONS
+  ============
+  */
+
   const handleSearch = e => {
     e.preventDefault()
     dispatch({type: 'updateField', name: 'isLoading', value: true})
@@ -91,12 +97,16 @@ const AttendanceSearch = ({classData}) => {
     e.preventDefault()
     dispatch({type: 'clearField'})
   }
-
+  /*
+  ==========
+  RENDER
+  ==========
+  */
   const { moreOptions, classSelector, attendances, isLoading, endDate, startDate } = state
 
   if (isLoading) {
     return (
-      <Dimmer active inverted>
+      <Dimmer active>
         <Loader indeterminate>Loading Data</Loader>
       </Dimmer>
     )

@@ -80,6 +80,11 @@ const reducer = (state, action) => {
 const AttendanceUser = ({classData}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
+  /*
+  ============
+  FUNCTIONS
+  ============
+  */
   const formatUserAttendance = (rawUserData) => {
     let attendances = []
     for (const [index, attendanceData] of rawUserData.userAttendance.entries()) {
@@ -127,7 +132,11 @@ const AttendanceUser = ({classData}) => {
       dispatch({type: 'updateField', name: 'isLoading', value: false})
     }
   }
-
+  /*
+  ============
+  RENDER
+  ============
+  */
   const { isLoading } = state
   if (isLoading) {
     return (

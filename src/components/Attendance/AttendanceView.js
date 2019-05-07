@@ -67,6 +67,16 @@ const reducer = (state, action) => {
         updatedAt: moment(),
         __v: state.__v + 1
       }
+    case 'resetState':
+      return {
+        ...initialState
+      }
+    case 'showError':
+      return {
+        ...state,
+        isLoading: false,
+        errorMessage: action.value
+      }
     default:
       return state
   }
@@ -79,10 +89,16 @@ const AttendanceView = ({match, classData, roles, history}) => {
     getAttendanceData()
   }, [match.params.attendanceId])
 
+  /*
+  ============
+  FUNCTIONS
+  ============
+  */
   const getAttendanceData = async () => {
     const { attendanceId } = match.params
+    dispatch({type: 'resetState'})
     if (!/^[0-9a-fA-F]{24}$/.test(attendanceId)) {
-      return dispatch({type: 'updateField', name: 'errorMessage', value: 'This attendance cannot be found. Please try again.'})
+      return dispatch({type: 'showError', value: 'This attendance cannot be found. Please try again.'})
     }
     const response = await axios.get('attendance/' + attendanceId)
     let users = []
@@ -97,7 +113,7 @@ const AttendanceView = ({match, classData, roles, history}) => {
         status: userData.status
       }
     }
-    const classAuthorisedForEdit = classData.map(el => el.text)
+    const classAuthorisedForEdit = classData.map(el => el.value)
     for (const [index, studentData] of attendances.students.entries()) {
       students[index] = {
         text: studentData.student.name,
@@ -155,8 +171,11 @@ const AttendanceView = ({match, classData, roles, history}) => {
   }
 
   const handleSubmit = () => {
+    const { attendanceDate: date, classId, type, students, users, hours, classAuthorisedForEdit } = state
+    if (classAuthorisedForEdit.indexOf(classId) === -1) {
+      return dispatch({type: 'showError', value: 'You are not authorised to edit this attendance.'})
+    }
     dispatch({type: 'updateField', name: 'isLoading', value: true})
-    const { attendanceDate: date, classId, type, students, users, hours } = state
     const requiredFields = object({
       type: string().required('Was this lesson held? Or was it cancelled?'),
       hours: number('Please enter a valid number of hours').min(0, 'The minimum hour is zero (0)').required('Please provide the number of hours')
@@ -191,11 +210,16 @@ const AttendanceView = ({match, classData, roles, history}) => {
   const dismiss = () => {
     dispatch({type: 'updateField', name: 'submitSuccess', value: false})
   }
+  /*
+  ===============
+  RENDER
+  ===============
+  */
 
-  const { submitSuccess, edit, buttonName, deleteConfirm, isLoading, errorMessage, createdAt, updatedAt, __v } = state
+  const { submitSuccess, edit, buttonName, deleteConfirm, isLoading, errorMessage, classAuthorisedForEdit, classId, createdAt, updatedAt, __v } = state
   if (isLoading) {
     return (
-      <Dimmer active inverted>
+      <Dimmer active>
         <Loader indeterminate>Loading Data</Loader>
       </Dimmer>
     )
@@ -214,7 +238,7 @@ const AttendanceView = ({match, classData, roles, history}) => {
         <Grid.Column>
           <Form onSubmit={handleEdit}>
             <AddEditForm state={state} dispatch={dispatch} newAttendance={false} edit={edit} />
-            {(roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) &&
+            {(roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1 || classAuthorisedForEdit.indexOf(classId) !== -1) &&
               <React.Fragment>
                 <Button value='submit' type='submit' icon labelPosition='left' positive={edit}>
                   <Icon name='edit' />

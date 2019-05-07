@@ -11,6 +11,11 @@ const typeOptions = [
 ]
 
 const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, edit}) => {
+  /*
+  ==============
+  FUNCTIONS
+  ==============
+  */
   const handleCheckboxChangeForUser = (e, { name: id, checked }) => {
     let users = [...state.users]
     const pos = users.map(usr => usr.key).indexOf(id)
@@ -57,6 +62,11 @@ const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, ed
       dispatch({type: 'changeType', users, students})
     }
   }
+  /*
+  ============
+  RENDER
+  ============
+  */
 
   const { attendanceDate, type, className, students, users, hours, classSelection } = state
   return (

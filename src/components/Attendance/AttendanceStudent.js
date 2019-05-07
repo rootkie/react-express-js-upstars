@@ -80,6 +80,11 @@ const reducer = (state, action) => {
 const AttendanceStudent = ({classData}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
+  /*
+  =============
+  FUNCTIONS
+  =============
+  */
   const formatStudentAttendance = (rawStudentData) => {
     let attendances = []
     for (const [index, attendanceData] of rawStudentData.studentAttendance.entries()) {
@@ -130,10 +135,15 @@ const AttendanceStudent = ({classData}) => {
     }
   }
 
+  /*
+  ===========
+  RENDER
+  ===========
+  */
   const { isLoading } = state
   if (isLoading) {
     return (
-      <Dimmer active inverted>
+      <Dimmer active>
         <Loader indeterminate>Loading Data</Loader>
       </Dimmer>
     )

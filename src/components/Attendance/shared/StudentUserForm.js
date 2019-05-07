@@ -10,6 +10,12 @@ const datePickingStyle = {
 }
 
 const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) => {
+  /*
+  ===========
+  FUNCTIONS
+  ===========
+  */
+
   const resetComponent = () => {
     dispatch({type: 'resetSearchBar'})
   }
@@ -45,6 +51,11 @@ const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) =
     dispatch({type: 'updateField', name: 'moreOptions', value: !state.moreOptions})
   }
 
+  /*
+  ================
+  RENDER
+  ================
+  */
   const { startDate, endDate, moreOptions, classSelector, value, results, isLoadingSearch, attendanceFormattedData, error } = state
   return (
     <React.Fragment>
