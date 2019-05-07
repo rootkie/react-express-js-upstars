@@ -1,66 +1,69 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Table, Header, Icon, Dimmer, Loader, Grid } from 'semantic-ui-react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 
-class AttendanceSummary extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      isLoading: true,
-      summaryData: []
-    }
-    axios.get('attendance/summary/all')
-      .then(response => {
-        this.setState({ summaryData: response.data.editedActiveClass, isLoading: false })
-      })
+const AttendanceSummary = () => {
+  const [isLoading, setLoading] = useState(true)
+  const [summaryData, setData] = useState([])
+
+  useEffect(() => {
+    retrieveData()
+  }, [])
+
+  const retrieveData = async () => {
+    const response = await axios.get('attendance/summary/all')
+    setData(response.data.editedActiveClass)
+    setLoading(false)
   }
 
-  render () {
-    const { isLoading, summaryData } = this.state
+  /*
+  ===========
+  RENDER
+  ===========
+  */
 
-    return (
-      <Grid stackable stretched>
-        <Dimmer active={isLoading} inverted>
-          <Loader indeterminate active={isLoading}>Loading Data</Loader>
-        </Dimmer>
-        <Grid.Row>
-          <Grid.Column>
-            <Header as='h2'>
-              <Icon name='bar chart' />
-              <Header.Content>
+  return (
+    <Grid stackable stretched>
+      <Dimmer active={isLoading} inverted>
+        <Loader indeterminate active={isLoading}>Loading Data</Loader>
+      </Dimmer>
+      <Grid.Row>
+        <Grid.Column>
+          <Header as='h2'>
+            <Icon name='bar chart' />
+            <Header.Content>
             Summary of all classes
-              </Header.Content>
-            </Header>
-            <Table celled striped unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Class Name</Table.HeaderCell>
-                  <Table.HeaderCell>Student No.</Table.HeaderCell>
-                  <Table.HeaderCell>Student / %</Table.HeaderCell>
-                  <Table.HeaderCell>User No.</Table.HeaderCell>
-                  <Table.HeaderCell>User / %</Table.HeaderCell>
-                  <Table.HeaderCell>Student-Tutor Ratio</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
+            </Header.Content>
+          </Header>
+          <Table celled striped unstackable>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Class Name</Table.HeaderCell>
+                <Table.HeaderCell>Student No.</Table.HeaderCell>
+                <Table.HeaderCell>Student Attendance</Table.HeaderCell>
+                <Table.HeaderCell>User No.</Table.HeaderCell>
+                <Table.HeaderCell>User Attendance</Table.HeaderCell>
+                <Table.HeaderCell>Student-Tutor Ratio</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
 
-              <Table.Body>
-                {summaryData.map((options, index) => (
-                  <Table.Row key={`class-${index}`}>
-                    <Table.Cell collapsing><Link to={'/dashboard/classes/id/' + options.id}>{options.className}</Link></Table.Cell>
-                    <Table.Cell collapsing>{options.studentNumber}</Table.Cell>
-                    <Table.Cell collapsing>{options.studentsPercentage * 100}%</Table.Cell>
-                    <Table.Cell collapsing>{options.userNumber}</Table.Cell>
-                    <Table.Cell collapsing>{options.usersPercentage * 100}%</Table.Cell>
-                    <Table.Cell collapsing>{options.STRatio}</Table.Cell>
-                  </Table.Row>))}
-              </Table.Body>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    )
-  }
+            <Table.Body>
+              {summaryData.map((options, index) => (
+                <Table.Row key={`class-${index}`}>
+                  <Table.Cell collapsing><Link to={'/dashboard/classes/id/' + options.id}>{options.className}</Link></Table.Cell>
+                  <Table.Cell collapsing>{options.studentNumber}</Table.Cell>
+                  <Table.Cell collapsing>{options.studentsPercentage * 100}%</Table.Cell>
+                  <Table.Cell collapsing>{options.userNumber}</Table.Cell>
+                  <Table.Cell collapsing>{options.usersPercentage * 100}%</Table.Cell>
+                  <Table.Cell collapsing>{options.STRatio}</Table.Cell>
+                </Table.Row>))}
+            </Table.Body>
+          </Table>
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
+  )
 }
 
 export default AttendanceSummary
