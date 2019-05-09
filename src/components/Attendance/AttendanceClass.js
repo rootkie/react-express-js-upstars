@@ -3,6 +3,7 @@ import { Table, Form, Dropdown, Icon, Header, Pagination, Dimmer, Loader, Grid }
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
 const initialState = {
   classSelector: '',
@@ -206,7 +207,7 @@ const AttendanceClass = ({classData}) => {
                 <Table.HeaderCell>Percentage</Table.HeaderCell>
                 {/* Display attendance dates (6 sets per page) */}
                 {attendanceDates.map((date) => (
-                  <Table.HeaderCell key={date._id}>{moment(date.date).format('ll')} ({date.type})</Table.HeaderCell>
+                  <Table.HeaderCell key={date._id}><Link to={`/dashboard/attendance/view/${date._id}`} target='_blank'>{moment(date.date).format('ll')}</Link> ({date.type})</Table.HeaderCell>
                 ))}
               </Table.Row>
             </Table.Header>
@@ -249,7 +250,7 @@ const AttendanceClass = ({classData}) => {
                 <Table.HeaderCell>Percentage</Table.HeaderCell>
                 {/* Display attendance dates (6 sets per page) */}
                 {attendanceDates.map((date) => (
-                  <Table.HeaderCell key={date._id}>{moment(date.date).format('ll')} ({date.type})</Table.HeaderCell>
+                  <Table.HeaderCell key={date._id}><Link to={`/dashboard/attendance/view/${date._id}`} target='_blank'>{moment(date.date).format('ll')}</Link> ({date.type})</Table.HeaderCell>
                 ))}
               </Table.Row>
             </Table.Header>

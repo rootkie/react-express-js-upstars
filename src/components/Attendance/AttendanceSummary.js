@@ -22,12 +22,15 @@ const AttendanceSummary = () => {
   RENDER
   ===========
   */
-
+  if (isLoading) {
+    return (
+      <Dimmer active>
+        <Loader indeterminate>Loading Data</Loader>
+      </Dimmer>
+    )
+  }
   return (
     <Grid stackable stretched>
-      <Dimmer active={isLoading} inverted>
-        <Loader indeterminate active={isLoading}>Loading Data</Loader>
-      </Dimmer>
       <Grid.Row>
         <Grid.Column>
           <Header as='h2'>
