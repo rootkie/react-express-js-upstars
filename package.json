@@ -1,6 +1,6 @@
 {
   "name": "react-express-js-upstars",
-  "version": "0.6.0beta",
+  "version": "0.6.1beta",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -23,7 +23,7 @@
     "react-google-recaptcha": "^0.12.0",
     "react-router-dom": "^4.3.1",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.84.0",
+    "semantic-ui-react": "^0.86.0",
     "yup": "^0.26.6"
   },
   "devDependencies": {
@@ -45,7 +45,7 @@
     "supertest": "^3.2.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set PORT=3001 && react-scripts start",
     "build": "react-scripts build",
     "unit": "jest -c __tests__/jest.config.unit.js",
     "integration": "jest -c __tests__/jest.config.integration.js",

@@ -1,404 +1,141 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
-import { Table, Form, Dropdown, Dimmer, Loader, Header, Message, Grid } from 'semantic-ui-react'
+import React, { useEffect, useReducer } from 'react'
+import { Table, Form, Dimmer, Loader, Message, Grid } from 'semantic-ui-react'
 import axios from 'axios'
+import StatusAndRoles from './StatusAndRoles'
 
-const statusOptions = [
-  { key: 'Deleted', text: 'Deleted', value: 'Deleted' },
-  { key: 'Suspended', text: 'Suspended', value: 'Suspended' },
-  { key: 'Active', text: 'Active', value: 'Active' },
-  { key: 'Pending', text: 'Pending', value: 'Pending' }
-]
+const initialState = {
+  pendingUsers: [],
+  activeUsers: [],
+  suspendedUsers: [],
+  deletedUsers: [],
+  error: '',
+  searchName: '',
+  isLoading: true
+}
 
-const roleOptions = [
-  { key: 'SuperAdmin', text: 'SuperAdmin', value: 'SuperAdmin' },
-  { key: 'Admin', text: 'Admin', value: 'Admin' },
-  { key: 'Tutor', text: 'Tutor', value: 'Tutor' },
-  { key: 'SuperVisor', text: 'SuperVisor', value: 'SuperVisor' },
-  { key: 'Temporary', text: 'Temporary', value: 'Temporary' },
-  { key: 'Mentor', text: 'Mentor', value: 'Mentor' },
-  { key: 'Adhoc', text: 'Adhoc', value: 'Adhoc' }
-]
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'initData':
+      return {
+        ...state,
+        pendingUsers: action.pendingUsers,
+        activeUsers: action.activeUsers,
+        suspendedUsers: action.suspendedUsers,
+        deletedUsers: action.deletedUsers,
+        isLoading: false,
+        error: ''
+      }
+    case 'updateField':
+      return {
+        ...state,
+        [action.name]: action.value
+      }
+    case 'refreshData':
+      return {
+        ...state,
+        isLoading: true,
+        searchName: '',
+        error: ''
+      }
+    default:
+      return state
+  }
+}
 
-class ChangeStatus extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      pendingUsers: [],
-      activeUsers: [],
-      suspendedUsers: [],
-      deletedUsers: [],
-      error: '',
-      searchName: '',
-      isLoading: true
-    }
-    this.getData()
+const ChangeStatus = () => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    getData()
+  }, [])
+
+  const handleChange = (e, { value }) => {
+    dispatch({type: 'updateField', name: 'searchName', value})
   }
 
-  handleChange = (e, { value }) => {
-    this.setState({searchName: value})
-  }
-
-  getData = () => {
-    axios.all(
+  const getData = async () => {
+    const [pending, active, suspended, deleted] = await Promise.all(
       [
         axios.get('admin/pendingUsers'),
         axios.get('users'),
         axios.get('admin/suspended'),
         axios.get('admin/deleted')
-      ])
-      .then(axios.spread((pending, active, suspended, deleted) => {
-        let pendingUsers = pending.data.users
-        let activeUsers = active.data.users
-        let suspendedUsers = suspended.data.users
-        let deletedUsers = deleted.data.users
-        this.setState({ pendingUsers, activeUsers, suspendedUsers, deletedUsers, isLoading: false })
-      }))
+      ]
+    )
+    const pendingUsers = pending.data.users
+    const activeUsers = active.data.users
+    const suspendedUsers = suspended.data.users
+    const deletedUsers = deleted.data.users
+    dispatch({type: 'initData', pendingUsers, activeUsers, suspendedUsers, deletedUsers})
   }
 
-  handleStatus = (type, index) => (e, {value}) => {
-    let { pendingUsers, activeUsers, suspendedUsers, deletedUsers } = this.state
-    this.setState({ isLoading: true })
-    e.preventDefault()
-    switch (type) {
-      case 'pendingUsers':
-        if (pendingUsers[index].status === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        pendingUsers[index].status = value
-        axios.post('admin/userStatusPermissions', { userId: pendingUsers[index]._id, newStatus: value })
-          .then(response => {
-            this.setState({ pendingUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      case 'activeUsers':
-        if (activeUsers[index].status === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        activeUsers[index].status = value
-        axios.post('admin/userStatusPermissions', { userId: activeUsers[index]._id, newStatus: value })
-          .then(response => {
-            this.setState({ activeUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      case 'suspendedUsers':
-        if (suspendedUsers[index].status === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        suspendedUsers[index].status = value
-        axios.post('admin/userStatusPermissions', { userId: suspendedUsers[index]._id, newStatus: value })
-          .then(response => {
-            this.setState({ suspendedUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      case 'deletedUsers':
-        if (deletedUsers[index].status === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        deletedUsers[index].status = value
-        axios.post('admin/userStatusPermissions', { userId: deletedUsers[index]._id, newStatus: value })
-          .then(response => {
-            this.setState({ deletedUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      default:
-    }
-  }
-
-  handleRole = (type, index) => (e, {value}) => {
-    let { pendingUsers, activeUsers, suspendedUsers, deletedUsers } = this.state
-    e.preventDefault()
-    if (value.length === 0) {
-      return
-    }
-    this.setState({ isLoading: true })
-    switch (type) {
-      case 'pendingUsers':
-        if (pendingUsers[index].roles === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        pendingUsers[index].roles = value
-        axios.post('admin/userStatusPermissions', { userId: pendingUsers[index]._id, newRoles: value })
-          .then(response => {
-            this.setState({ pendingUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      case 'activeUsers':
-        if (activeUsers[index].roles === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        activeUsers[index].roles = value
-        axios.post('admin/userStatusPermissions', { userId: activeUsers[index]._id, newRoles: value })
-          .then(response => {
-            this.setState({ activeUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      case 'suspendedUsers':
-        if (suspendedUsers[index].roles === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        suspendedUsers[index].roles = value
-        axios.post('admin/userStatusPermissions', { userId: suspendedUsers[index]._id, newRoles: value })
-          .then(response => {
-            this.setState({ suspendedUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      case 'deletedUsers':
-        if (deletedUsers[index].roles === value) {
-          this.setState({ isLoading: false })
-          break
-        }
-        deletedUsers[index].roles = value
-        axios.post('admin/userStatusPermissions', { userId: deletedUsers[index]._id, newRoles: value })
-          .then(response => {
-            this.setState({ deletedUsers, isLoading: false })
-          })
-          .catch(err => {
-            console.log(err)
-            this.setState({ error: err.response.data.error, isLoading: false })
-          })
-        break
-      default:
-    }
-  }
-
-  handleFilter = () => {
-    let { searchName } = this.state
+  const handleFilter = async (e) => {
+    const { searchName } = state
     if (searchName.length < 1) {
-      this.setState({ isLoading: true })
-      this.getData()
+      refresh(e)
       return
     }
-    axios.get(`admin/search/${searchName}`)
-      .then(response => {
-        console.log(response)
-        let pendingUsers = response.data.pendingMatched
-        let activeUsers = response.data.activeMatched
-        let suspendedUsers = response.data.suspendedMatched
-        let deletedUsers = response.data.deletedMatched
-        this.setState({ pendingUsers, activeUsers, suspendedUsers, deletedUsers, isLoadingSearch: false })
-      })
+    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    const response = await axios.get(`admin/search/${searchName}`)
+    const pendingUsers = response.data.pendingMatched
+    const activeUsers = response.data.activeMatched
+    const suspendedUsers = response.data.suspendedMatched
+    const deletedUsers = response.data.deletedMatched
+    dispatch({type: 'initData', pendingUsers, activeUsers, suspendedUsers, deletedUsers})
   }
 
-  refresh = (e) => {
+  const refresh = (e) => {
     e.preventDefault()
-    this.setState({ isLoading: true, searchName: '' })
-    this.getData()
+    dispatch({type: 'refreshData'})
+    getData()
   }
 
-  render () {
-    const { isLoading, activeUsers, pendingUsers, suspendedUsers, deletedUsers, error, searchName } = this.state
-    if (isLoading) {
-      return (
-        <div>
-          <Dimmer active>
-            <Loader indeterminate>Loading data</Loader>
-          </Dimmer>
-        </div>
-      )
-    } else {
-      return (
-        <Grid stackable stretched>
-          <Grid.Row>
-            <Grid.Column>
-              <Table compact celled unstackable>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell colSpan='5'>
-                      <Form>
-                        <div style={{display: 'flex'}}>
-                          <Form.Group inline style={{marginBottom: 0}}>
-                            <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} icon='search' onChange={this.handleChange} />
-                            <Form.Button onClick={this.handleFilter}>Filter results</Form.Button>
-                            <Form.Button positive onClick={this.refresh}>Refresh Data / Reset Search</Form.Button>
-                          </Form.Group>
-                        </div>
-                      </Form>
-                    </Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-              </Table>
-              <Message
-                hidden={error === ''}
-                negative
-                content={error}
-              />
-            </Grid.Column>
-          </Grid.Row>
-
-          <Grid.Row>
-            <Grid.Column>
-              <Header as='h3' dividing>Pending Users</Header>
-              <Table celled columns={3} unstackable>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>Name</Table.HeaderCell>
-                    <Table.HeaderCell>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Roles</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                {pendingUsers.length !== 0 &&
-                <Table.Body>
-                  {pendingUsers.map((user, i) => (
-                    <Table.Row key={`user-${i}`}>
-                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.name}</Link></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('pendingUsers', i)} /></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('pendingUsers', i)} /></Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
-                }
-                {pendingUsers.length === 0 &&
-                <Table.Body>
-                  <Table.Row key={`empty-pending-user`}>
-                    <Table.Cell>Oops! No Pending Users Found!</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                  </Table.Row>
-                </Table.Body>
-                }
-              </Table>
-            </Grid.Column>
-          </Grid.Row>
-
-          <Grid.Row>
-            <Grid.Column>
-              <Header as='h3' dividing>Active Users</Header>
-              <Table celled columns={3} unstackable>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>Name</Table.HeaderCell>
-                    <Table.HeaderCell>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Roles</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                {activeUsers.length !== 0 &&
-                <Table.Body>
-                  {activeUsers.map((user, i) => (
-                    <Table.Row key={`user-${i}`}>
-                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.name}</Link></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('activeUsers', i)} /></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('activeUsers', i)} /></Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
-                }
-                {activeUsers.length === 0 &&
-                <Table.Body>
-                  <Table.Row key={`empty-active-user`}>
-                    <Table.Cell>Oops! No Active Users Found!</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                  </Table.Row>
-                </Table.Body>
-                }
-              </Table>
-            </Grid.Column>
-          </Grid.Row>
-
-          <Grid.Row>
-            <Grid.Column>
-              <Header as='h3' dividing>Suspended Users</Header>
-              <Table celled columns={3} unstackable>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>Name</Table.HeaderCell>
-                    <Table.HeaderCell>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Roles</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                {suspendedUsers.length !== 0 &&
-                <Table.Body>
-                  {suspendedUsers.map((user, i) => (
-                    <Table.Row key={`user-${i}`}>
-                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.name}</Link></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('suspendedUsers', i)} /></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('suspendedUsers', i)} /></Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
-                }
-                {suspendedUsers.length === 0 &&
-                <Table.Body>
-                  <Table.Row key={`empty-suspended-user`}>
-                    <Table.Cell>Oops! No Suspended Users Found!</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                  </Table.Row>
-                </Table.Body>
-                }
-              </Table>
-            </Grid.Column>
-          </Grid.Row>
-
-          <Grid.Row>
-            <Grid.Column>
-              <Header as='h3' dividing>Deleted Users</Header>
-              <Table celled columns={3} unstackable>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>Name</Table.HeaderCell>
-                    <Table.HeaderCell>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Roles</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                {deletedUsers.length !== 0 &&
-                <Table.Body>
-                  {deletedUsers.map((user, i) => (
-                    <Table.Row key={`user-${i}`}>
-                      <Table.Cell><Link to={`/dashboard/volunteer/profile/${user._id}`}>{user.name}</Link></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Select Status' fluid selection options={statusOptions} value={user.status} onChange={this.handleStatus('deletedUsers', i)} /></Table.Cell>
-                      <Table.Cell><Dropdown placeholder='Roles' fluid multiple selection options={roleOptions} value={user.roles} onChange={this.handleRole('deletedUsers', i)} /></Table.Cell>
-                    </Table.Row>))}
-                </Table.Body>
-                }
-                {deletedUsers.length === 0 &&
-                <Table.Body>
-                  <Table.Row key={`empty-deleted-user`}>
-                    <Table.Cell>Oops! No Deleted Users Found!</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                    <Table.Cell>nil</Table.Cell>
-                  </Table.Row>
-                </Table.Body>
-                }
-              </Table>
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
-      )
-    }
+  const { isLoading, activeUsers, pendingUsers, suspendedUsers, deletedUsers, error, searchName } = state
+  if (isLoading) {
+    return (
+      <div>
+        <Dimmer active>
+          <Loader indeterminate>Loading data</Loader>
+        </Dimmer>
+      </div>
+    )
+  } else {
+    return (
+      <Grid stackable stretched>
+        <Grid.Row>
+          <Grid.Column>
+            <Table compact celled unstackable>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell colSpan='5'>
+                    <Form>
+                      <div style={{display: 'flex'}}>
+                        <Form.Group inline style={{marginBottom: 0}}>
+                          <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} icon='search' onChange={handleChange} />
+                          <Form.Button onClick={handleFilter}>Filter results</Form.Button>
+                          <Form.Button positive onClick={refresh}>Refresh Data / Reset Search</Form.Button>
+                        </Form.Group>
+                      </div>
+                    </Form>
+                  </Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+            </Table>
+            <Message
+              hidden={error === ''}
+              header='Error!'
+              icon='exclamation'
+              negative
+              content={error}
+            />
+          </Grid.Column>
+        </Grid.Row>
+        <StatusAndRoles userData={pendingUsers} dispatch={dispatch} userType='Pending' />
+        <StatusAndRoles userData={activeUsers} dispatch={dispatch} userType='Active' />
+        <StatusAndRoles userData={suspendedUsers} dispatch={dispatch} userType='Suspended' />
+        <StatusAndRoles userData={deletedUsers} dispatch={dispatch} userType='Deleted' />
+      </Grid>
+    )
   }
 }
 

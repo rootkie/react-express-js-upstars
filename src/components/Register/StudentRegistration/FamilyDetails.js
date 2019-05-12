@@ -37,11 +37,11 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
       </Form.Group>
       <Form.Group widths='equal'>
         <Form.Input label='Email' placeholder='email' type='email' name='fatherEmail' value={fatherEmail} onChange={handleChange} />
-        <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='fatherContactNumber' value={fatherContactNumber} onChange={handleChange} />
+        <Form.Input type='String' label='Mobile number' placeholder='Mobile number' name='fatherContactNumber' value={fatherContactNumber} onChange={handleChange} />
       </Form.Group>
       <Form.Group widths='equal'>
         <Form.Input label='Occupation' placeholder='Occupation' name='fatherOccupation' value={fatherOccupation} onChange={handleChange} />
-        <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='fatherIncome' value={fatherIncome} onChange={handleChange} />
+        <Form.Input type='String' label='Monthly Income' placeholder='Monthly Income' name='fatherIncome' value={fatherIncome} onChange={handleChange} />
       </Form.Group>
 
       {/* Mother's information */}
@@ -52,11 +52,11 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
       </Form.Group>
       <Form.Group widths='equal'>
         <Form.Input label='Email' placeholder='email' type='email' name='motherEmail' value={motherEmail} onChange={handleChange} />
-        <Form.Input type='number' label='Mobile number' placeholder='Mobile number' name='motherContactNumber' value={motherContactNumber} onChange={handleChange} />
+        <Form.Input type='String' label='Mobile number' placeholder='Mobile number' name='motherContactNumber' value={motherContactNumber} onChange={handleChange} />
       </Form.Group>
       <Form.Group widths='equal'>
         <Form.Input label='Occupation' placeholder='Occupation' name='motherOccupation' value={motherOccupation} onChange={handleChange} />
-        <Form.Input type='number' label='Monthly Income' placeholder='Monthly Income' name='motherIncome' value={motherIncome} onChange={handleChange} />
+        <Form.Input type='String' label='Monthly Income' placeholder='Monthly Income' name='motherIncome' value={motherIncome} onChange={handleChange} />
       </Form.Group>
 
       {/* adding additional family members */}
@@ -75,13 +75,13 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
           {otherFamily.map((member, i) => (
             <Table.Row key={i}>
               <Table.Cell>
-                <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={otherFamily[i].name} placeholder='Name' onChange={updateFamilyMember(i, 'name')} />
+                <Form.Input transparent key={`name-${i}`} name={`name-${i}`} value={member.name} placeholder='Name' onChange={updateFamilyMember(i, 'name')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={otherFamily[i].relationship} placeholder='Relationship' onChange={updateFamilyMember(i, 'relationship')} />
+                <Form.Input transparent key={`relationship-${i}`} name={`relationship-${i}`} value={member.relationship} placeholder='Relationship' onChange={updateFamilyMember(i, 'relationship')} />
               </Table.Cell>
               <Table.Cell>
-                <Form.Input type='number' transparent key={`age-${i}`} name={`age-${i}`} value={otherFamily[i].age} placeholder='Age' onChange={updateFamilyMember(i, 'age')} />
+                <Form.Input type='number' transparent key={`age-${i}`} name={`age-${i}`} value={member.age} placeholder='Age' onChange={updateFamilyMember(i, 'age')} />
               </Table.Cell>
             </Table.Row>
           ))}

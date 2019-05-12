@@ -34,10 +34,18 @@ module.exports.getAllUsers = async (req, res, next) => {
 
 // Everyone but restricted to their own profile, verified using token. Only Admin and above can view all.
 module.exports.getUser = async (req, res, next) => {
+  const { id } = req.params
   try {
+    if (!(/^[0-9a-fA-F]{24}$/).test(id)) {
+      const error = {
+        status: 400,
+        error: 'Please provide a valid userId'
+      }
+      throw error
+    }
     const approved = await util.checkRole({
       roles: ['Admin', 'SuperAdmin', 'Mentor'],
-      params: req.params.id,
+      params: id,
       decoded: req.decoded
     })
     // Check if user is only accessing their own particulars. Admin and above always returns a true.
@@ -51,7 +59,7 @@ module.exports.getUser = async (req, res, next) => {
 
     // Find user based on ID and retrieve its className. Restricted based on the need to view admin
     // Since the auth check above already confirmed the user can view this profile, the privilege checks if the user can see (and edit) admin field
-    let user = await User.findById(req.params.id).populate('classes', 'className status')
+    let user = await User.findById(id).populate('classes', 'className status')
       .select('-password -commencementDate -email -resetPasswordToken').lean()
     if (!user) {
       const error = {
@@ -294,7 +302,7 @@ module.exports.changePassword = async (req, res, next) => {
       }
       transporter.sendMail(message, (error, info) => {
         if (error) {
-          console.log(error)
+          console.error(error)
         }
       })
     }

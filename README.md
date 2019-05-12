@@ -46,7 +46,7 @@ $ ./node_modules/.bin/nodemon server/
 Or use:
 $ export PATH=$PATH:`pwd`/node_modules/.bin/
 $ nodemon server/
-Or finally install nodemon as a global package:
+Or finally install nodemon as a global package (which is recommended by nodemon docs):
 $ npm i nodemon -g
 ```
 
@@ -63,6 +63,6 @@ This repository is where we do development and there are many ways you can parti
 
 Copyright &copy; R3:C0D3 | Ulu Pandan Stars. All rights reserved.
 
-Currently we do not have a plan to appoint any open-source licence at the moment. However, you are still free to use the code to
+Currently we do not have a plan to assign any open-source licence. However, you are still free to use the code to
 develop and contribute freely as long as the code is public. 
 

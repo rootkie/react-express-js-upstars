@@ -13,10 +13,13 @@ import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
 import ErrorPage from './Error/ErrorPage'
 
-// For development
-axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
-// For production
-// axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
+// For production automatic during npm build
+if (process.env.NODE_ENV === 'production') {
+  axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
+} else {
+  // For development automatic during npm start or npm test
+  axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
+}
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
@@ -70,6 +73,12 @@ const reducer = (state, action) => {
   }
 }
 
+/*
+=============
+FUNCTIONS
+=============
+*/
+
 const isUserLoggedIn = async (dispatch) => {
   try {
     const response = await axios.get('/check')
@@ -78,7 +87,7 @@ const isUserLoggedIn = async (dispatch) => {
     // isLoggedIn() is then called again to ensure access token is valid
     // Else if there are any errors anywhere, auth status default to false.
     if (response.data.auth === false) {
-      let refreshToken = window.localStorage.refreshToken
+      const refreshToken = window.localStorage.refreshToken
       if (!refreshToken) {
         // Redirect them to Login Page if they don't even if a refresh token.
         dispatch({type: 'redirectLogin'})
@@ -96,25 +105,21 @@ const isUserLoggedIn = async (dispatch) => {
           dispatch({type: 'redirectLogin'})
         }
       }
-    }
-    if (response.data.auth === true) {
+    } else if (response.data.auth === true) {
       let { name, _id, roles } = response.data
+      return dispatch({type: 'success', name, _id, roles})
+    } else if (response.data.auth === 'expiring') {
+      // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
+      // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
+      const { name, _id, roles } = response.data
       dispatch({type: 'success', name, _id, roles})
-      return
-    }
-    // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
-    // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
-    if (response.data.auth === 'expiring') {
-      let { name, _id, roles } = response.data
-      dispatch({type: 'success', name, _id, roles})
-      let refreshToken = window.localStorage.refreshToken
+      const refreshToken = window.localStorage.refreshToken
       if (refreshToken) {
         const rawRefreshResponse = await axios.post('/refresh', { refreshToken })
         const { token, status } = rawRefreshResponse.data
         if (status === true) {
           window.localStorage.setItem('token', token)
           axios.defaults.headers.common['x-access-token'] = token
-          return
         } else {
           window.localStorage.removeItem('token')
           window.localStorage.removeItem('refreshToken')
@@ -123,7 +128,6 @@ const isUserLoggedIn = async (dispatch) => {
       }
     }
   } catch (err) {
-    console.log(err)
     dispatch({type: 'redirectLogin'})
   }
 }
@@ -134,47 +138,55 @@ const setTimeInterval = (dispatch) => {
     isUserLoggedIn(dispatch)
   }, 600000)
 }
-
 const clearTimeInterval = () => {
   window.clearInterval(forceRefresh)
 }
 
+/*
+================
+MAIN FUNCTION
+================
+*/
+
 const MainCtrl = ({match}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // Runs every time match props change, similar to componentDidUpdate
+  // Runs every time 'match' props change, similar to componentDidUpdate
   // Refer to https://reactjs.org/docs/hooks-effect.html#detailed-explanation for more information
   useEffect(() => {
-    console.log('check')
     isUserLoggedIn(dispatch)
   }, [match])
 
-  // seperate useEffect Hook to allow ease of cleanup
   useEffect(() => {
     // Catch all non 2xx responses that occur in the dashboard. Login is not affected.
     const myInterceptor = axios.interceptors.response.use(response => {
       return response
     }, error => {
-      if (error.response.status === 500 || error.response.status === 404 || error.response.status === 403) {
-        let errorCode = error.response.status
+      if (error.response && (error.response.status === 500 || error.response.status === 404 || error.response.status === 403)) {
+        const errorCode = error.response.status
         dispatch({type: 'showError', errorCode})
       }
       // Error such as 400 || 401 are handled locally.
       return Promise.reject(error)
     })
     return () => {
-      //  Once unmount, remove the axios interceptors so that there might not be unintended effects to other pages etc
-      axios.interceptors.request.eject(myInterceptor)
+      //  Once unmount, remove the axios interceptors so that there will not be unintended effects to other pages etc
+      axios.interceptors.response.eject(myInterceptor)
     }
   }, [match])
 
   useEffect(() => {
     setTimeInterval(dispatch)
-    // Clean-up automatically when props changes.
     return () => {
       clearTimeInterval()
     }
   }, [match])
+
+  /*
+  ===============
+  RENDER
+  ===============
+  */
 
   const { path } = match
   const { name, _id, roles, errorCode, isLoggedIn, confirm } = state
@@ -200,7 +212,7 @@ const MainCtrl = ({match}) => {
         <Grid style={GridStyle} stackable>
           <SideMenu roles={roles} />
           <Grid.Column width={13} style={MainContentStyle}>
-            {/* Path in this case refers to /dashboard that is inherited */}
+            {/* Path refers to /dashboard that is inherited */}
             {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
             <Switch>

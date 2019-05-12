@@ -1,5 +1,57 @@
 # Change Log
 
+## [v0.6.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.6.1-beta) (May 12, 2019, 10.50am)
+- [Bump] Versions of UPStars software
+- [Changed] In-line code documentation
+- [Changed] All Classes Functions to Hooks
+- [Changed] Break classEdit to 3 files for easy maintenance
+- [Added] Clone Function for classes
+- [Fixed] Refresh token not working for Pending users
+- [Fixed] Clone Class Name incorrect
+- [Fixed] useEffect to work properly when changing URLs
+- [Changed] Student related files to Hooks
+- [Fixed] Student related bugs left in 0.6.0-beta
+- [Changed] Student Models with adjustments from Number to String
+- [Changed] Dump file data for testing
+- [Fixed] Home page overflow UI issues
+- [Added] Tooltips to show timing stats
+- [Changed] Better handling of map functions in JSX
+- [Added] Yup validation in multiple forms
+- [Updated] Semantic-ui-react npm package
+- [Added] Textarea support for admin notes
+- [Added] Readonly to NRIC fields
+- [Changed] VolunteerWrap and VolunteerChangePassword to Hook
+- [Changed] VolunteerView to Hooks
+- [Added] Split the User Edit file to multiple functional components
+- [Fixed] Standardised formatting for all pages to have white margin at bottom of page
+- [Fixed] CSS of user pages
+- [Fixed] Wrong regex functions in Yup cause breaking edits
+- [Added] Force npm start to run in port 3001 by default
+- [Fixed] User schema breaking because of missing admin fields
+- [Added] Gender is missed out in the edit form
+- [Changed] AttendanceWrap to Hooks
+- [Changed] AttendanceForm to Hooks 
+- [Changed] Backend error text to be clearer
+- [Changed] AttendanceSearch to Hooks
+- [Changed] AttendanceView to Hooks
+- [Added] Shared AddEdit form for both functions
+- [Changed] AttendanceUser and AttendanceStudent to Hooks
+- [Fixed] Issue with loading screen
+- [Added] Combined Student and User attendance summary search page
+- [Changed] AttendanceClass to Hooks
+- [Added] Code commenting to standardise
+- [Added] Security validation in AttendanceView
+- [Changed] AttendanceSummary to Hooks
+- [Added] Links to attendance in summary
+- [Changed] Admin functions to Hooks
+- [Added] New file and structure to manage roles and status
+- [Added] Better error handling on front-end
+- [Removed] Console.log dev messages in front-end
+- [Added] .env usage in front-end
+- [Fixed] Memory leak issue
+- [Added] Auto API calls cancellation to prevent memory leak
+- [Added] Better URI redirects if the ID is invalid
+
 ## [v0.6.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.6.0-beta) (March 9, 2019, 4.55pm)
 - [Changed] DB Schemas for User and Student
 - [Changed] Better readability in AuthController

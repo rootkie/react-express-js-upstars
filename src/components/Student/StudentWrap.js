@@ -1,115 +1,120 @@
-import React, { Component } from 'react'
-import { Route, Switch } from 'react-router-dom'
-import { array, object } from 'prop-types'
+import React, { useEffect, useReducer } from 'react'
+import { Switch, Route } from 'react-router-dom'
+import { Grid } from 'semantic-ui-react'
+import PropTypes from 'prop-types'
 import StudentForm from './StudentForm'
 import StudentView from './StudentView'
 import StudentEdit from './StudentEdit'
 import StudentViewOthers from './StudentViewOthers'
 import axios from 'axios'
-import { filterData } from '../../utils'
 import ErrorPage from '../Error/ErrorPage'
+const source = axios.CancelToken.source()
 
-class StudentWrap extends Component {
-  static propTypes = {
-    match: object.isRequired,
-    roles: array.isRequired
+const initialState = {
+  studentData: [],
+  otherStudentData: [],
+  isLoading: true
+}
+
+/*
+  ============================================================================
+  Loading of initial Student data
+  ============================================================================
+*/
+const getStudents = async dispatch => {
+  const response = await axios.get('students', {cancelToken: source.token})
+  dispatch({type: 'studentLoaded', studentData: response.data.students})
+}
+
+const getOtherStudents = async dispatch => {
+  const response = await axios.get('otherStudents', {cancelToken: source.token})
+  dispatch({type: 'otherStudentLoaded', otherStudentData: response.data.students})
+}
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'startLoading':
+      return {
+        ...state,
+        isLoading: true
+      }
+    case 'studentLoaded':
+      return {
+        ...state,
+        studentData: action.studentData,
+        isLoading: false
+      }
+    case 'otherStudentLoaded':
+      return {
+        ...state,
+        otherStudentData: action.otherStudentData
+      }
+    default:
+      return state
   }
+}
 
-  // get data from server
-  constructor (props) {
-    super(props)
-    let { roles } = props
-    this.state = {
-      studentData: [],
-      otherStudentData: [],
-      filteredData: false,
-      filteredDataOthers: false,
-      isLoading: true
-    }
-    this.getStudents()
+const StudentWrap = ({roles, match}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    getStudents(dispatch)
     if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-      this.getOtherStudents()
+      getOtherStudents(dispatch)
     }
-  }
-
-  getStudents = () => {
-    axios.get('students')
-      .then(response => {
-        this.setState({ studentData: response.data.students, isLoading: false })
-      })
-      .catch(err => {
-        console.log(err)
-      })
-  }
-
-  getOtherStudents = () => {
-    axios.get('otherStudents')
-      .then(response => {
-        this.setState({ otherStudentData: response.data.students })
-      })
-      .catch(err => {
-        console.log(err)
-      })
-  }
-
-  addStudent = async (studentDataToSubmit) => {
-    const response = await axios.post('admin/students', studentDataToSubmit)
-    this.getStudents()
-    return response.data.newStudentId
-  }
-
-  editStudent = async (studentDataToSubmit) => {
-    let { roles } = this.props
-    await axios.put('/students', {
-      ...studentDataToSubmit
-    })
-    this.getStudents()
-    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-      this.getOtherStudents()
+    return () => {
+      source.cancel('API cancelled')
     }
-  }
+  }, [])
 
-  // Calls getStudent to refresh the state
-  deleteStudent = studentId => {
-    axios.delete('/students',
+  const deleteStudent = async (studentId) => {
+    dispatch({type: 'startLoading'})
+    await axios.delete('/students',
       {
         data: {
           studentId
         }
       })
-      .then((response) => {
-        this.getStudents()
-      })
-      .catch((err) => console.log(err))
+    getStudents(dispatch)
+    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+      getOtherStudents(dispatch)
+    }
   }
 
-  // filteredData could be different from the studentData
-  // studentData is everything untouched which filtered changes. The front-end will display the filtered data as a priority to studentData
-  searchFilter = (criteria) => {
-    const { studentData } = this.state
-    this.setState({filteredData: filterData(studentData, criteria)})
+  const addStudent = async studentData => {
+    const response = await axios.post('/admin/students', studentData)
+    getStudents(dispatch)
+    return response.data.newStudentId
   }
 
-  searchFilterOthers = (criteria) => {
-    const { otherStudentData } = this.state
-    this.setState({filteredDataOthers: filterData(otherStudentData, criteria)})
+  const editStudent = async (studentId, studentData) => {
+    await axios.put('/students', { ...studentData, studentId })
+    getStudents(dispatch)
+    if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
+      getOtherStudents(dispatch)
+    }
   }
 
-  render () {
-    const { studentData, otherStudentData, filteredData, isLoading, filteredDataOthers } = this.state
-    const { roles, match } = this.props
-    return (
-      <div>
-        <Switch>
-          <Route exact path={`${match.path}/add`} render={() => <StudentForm addStudent={this.addStudent} />} />
-          <Route exact path={`${match.path}/edit/:id`} render={props => <StudentEdit editStudent={this.editStudent} roles={roles} {...props} />} />
-          <Route exact path={`${match.path}/view`} render={() => <StudentView studentData={filteredData || studentData} deleteStudent={this.deleteStudent} searchFilter={this.searchFilter} isLoading={isLoading} roles={roles} />} />
-          <Route exact path={`${match.path}/viewOthers`} render={() => <StudentViewOthers studentData={filteredDataOthers || otherStudentData} searchFilter={this.searchFilterOthers} isLoading={isLoading} />} />
-          <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
-        </Switch>
-      </div>
-    )
-  }
+  const { studentData, otherStudentData, isLoading } = state
+  return (
+    <React.Fragment>
+      <Switch>
+        <Route exact path={`${match.path}/add`} render={() => <StudentForm addStudent={addStudent} />} />
+        <Route exact path={`${match.path}/edit/:id`} render={props => <StudentEdit roles={roles} editStudent={editStudent} {...props} />} />
+        <Route exact path={`${match.path}/view`} render={() => <StudentView studentData={studentData} isLoading={isLoading} roles={roles} deleteStudent={deleteStudent} />} />
+        <Route exact path={`${match.path}/viewOthers`} render={() => <StudentViewOthers studentData={otherStudentData} isLoading={isLoading} />} />
+        <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
+      </Switch>
+      <Grid>
+        <Grid.Row></Grid.Row>
+      </Grid>
+    </React.Fragment>
+  )
+}
+
+StudentWrap.propTypes = {
+  match: PropTypes.object.isRequired,
+  roles: PropTypes.array.isRequired
 }
 
 export default StudentWrap

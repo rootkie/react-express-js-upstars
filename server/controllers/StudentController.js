@@ -16,6 +16,16 @@ module.exports.addStudent = async (req, res, next) => {
     // }
   }
 
+  // Force add the admin field so that front-end can parse data properly
+  edited = {
+    ...edited,
+    admin: {
+      interviewNotes: '',
+      adminNotes: '',
+      exitReason: ''
+    }
+  }
+
   const newStudent = new Student(edited)
   try {
     const error = await newStudent.validateSync()
@@ -68,7 +78,6 @@ module.exports.addStudent = async (req, res, next) => {
 module.exports.adminAddStudent = async (req, res, next) => {
   let edited = {}
   const list = ['name', 'icNumber', 'dob', 'address', 'gender', 'nationality', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'admin']
-  const {captchaCode} = req.body
 
   try {
     // Use a loop to populate edited if field is present
@@ -90,24 +99,6 @@ module.exports.adminAddStudent = async (req, res, next) => {
       throw error
     }
 
-    let secret = process.env.CAPTCHA_SECRET_PROD
-    if (process.env.NODE_ENV === 'development') {
-      secret = process.env.CAPTCHA_SECRET_DEV
-    }
-
-    const response = await axios.post('https://www.google.com/recaptcha/api/siteverify',
-      querystring.stringify({
-        secret,
-        response: captchaCode
-      }))
-
-    if (response.data.success === false) {
-      const error = {
-        status: 401,
-        error: 'There is something wrong with the client Captcha. That is all we know.'
-      }
-      throw error
-    }
     const successStudentSignup = await newStudent.save()
     res.status(201).json({
       newStudentId: successStudentSignup._id
@@ -140,7 +131,7 @@ module.exports.editStudentById = async (req, res, next) => {
     }
 
     let edited = {}
-    const list = ['name', 'address', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'status', 'admin']
+    const list = ['name', 'dob', 'nationality', 'gender', 'address', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'status', 'admin']
 
     // Use a loop to populate edited if field is present according to the `list` array
     for (let checkChanged of list) {

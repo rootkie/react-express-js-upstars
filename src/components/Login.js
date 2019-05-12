@@ -12,6 +12,12 @@ const initialState = {
   showLink: false
 }
 
+/*
+=======================================================
+Functions required in the main body
+=======================================================
+*/
+
 const isLoggedIn = async (dispatch) => {
   try {
     const response = await axios({
@@ -19,9 +25,9 @@ const isLoggedIn = async (dispatch) => {
       url: '/check',
       headers: { 'x-access-token': window.localStorage.token }
     })
-    let authStatus = response.data.auth
+    const authStatus = response.data.auth
     if (authStatus === false) {
-      let refreshToken = window.localStorage.refreshToken
+      const refreshToken = window.localStorage.refreshToken
       if (!refreshToken) {
         // Cleaning up the interface
         window.localStorage.removeItem('token')
@@ -44,10 +50,15 @@ const isLoggedIn = async (dispatch) => {
       dispatch({type: 'redirectUser'})
     }
   } catch (err) {
-    console.log(err)
+    dispatch({type: 'stopLoading'})
   }
 }
 
+/*
+===============================================
+REDUCERS
+===============================================
+*/
 const reducer = (state, action) => {
   switch (action.type) {
     case 'stopLoading':
@@ -85,6 +96,11 @@ const reducer = (state, action) => {
   }
 }
 
+/*
+=================================================
+MAIN FUNCTION
+=================================================
+*/
 const Login = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
@@ -92,6 +108,12 @@ const Login = () => {
   useEffect(() => {
     isLoggedIn(dispatch)
   }, [])
+
+  /*
+  =========================
+  MISC FUNCTIONS
+  =========================
+  */
 
   const handleChange = (e, { name, value }) => {
     dispatch({type: 'updateField', name, value})
@@ -112,12 +134,19 @@ const Login = () => {
       })
       .catch(error => {
         dispatch({type: 'showError', message: error.response.data.error})
-        dispatch({type: 'updateField', name: 'showLink', value: false})
         if (error.response.data.error === 'Your account has yet to be verified, please verify your email by checking your email account') {
           dispatch({type: 'showLink'})
+        } else {
+          dispatch({type: 'updateField', name: 'showLink', value: false})
         }
       })
   }
+
+  /*
+  =======================
+  RENDER BODY
+  =======================
+  */
 
   const { email, password, message, redirect, isLoading, showLink } = state
 
@@ -126,11 +155,9 @@ const Login = () => {
   }
   if (isLoading) {
     return (
-      <div>
-        <Dimmer active>
-          <Loader indeterminate>Loading data</Loader>
-        </Dimmer>
-      </div>
+      <Dimmer active>
+        <Loader indeterminate>Loading data</Loader>
+      </Dimmer>
     )
   }
 

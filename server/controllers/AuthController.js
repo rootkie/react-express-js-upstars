@@ -175,7 +175,7 @@ module.exports.changePassword = async (req, res, next) => {
     }
     transporter.sendMail(message, (error, info) => {
       if (error) {
-        console.log(error)
+        console.error(error)
       }
     })
   } catch (err) {
@@ -321,7 +321,11 @@ module.exports.register = async (req, res, next) => {
       commencementDate,
       exitDate,
       preferredTimeSlot,
-      roles: ['Tutor']
+      roles: ['Tutor'],
+      admin: {
+        interviewNotes: '',
+        adminNotes: ''
+      }
     })
 
     // Special addition for development, may remove during deployment / production
@@ -521,7 +525,7 @@ module.exports.refreshToken = async (req, res, next) => {
             $ne: 'Deleted'
           }
         })
-        if (!user || user.status !== 'Active') {
+        if (!user || (user.status !== 'Active' && user.status !== 'Pending')) {
           return result(false, null)
         }
         return result(true, generateToken(user))
@@ -596,7 +600,7 @@ module.exports.newLink = async (req, res, next) => {
     }
     transporter.sendMail(message, async (error, info) => {
       if (error) {
-        console.log(error)
+        console.error(error)
       } else {
         console.log('Message sent')
       }

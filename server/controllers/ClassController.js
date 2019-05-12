@@ -11,7 +11,7 @@ module.exports.addClass = async (req, res, next) => {
     if (!className || className.length === 0) {
       const error = {
         status: 400,
-        error: 'Please provide a className to search for'
+        error: 'Please provide a class name'
       }
       throw error
     }
@@ -85,7 +85,7 @@ module.exports.cloneClass = async (req, res, next) => {
       ...oldClassData.toObject(),
       _id: mongoose.Types.ObjectId(),
       status: 'Active',
-      className: oldClassData + 'Clone',
+      className: oldClassData.className + ' Clone',
       startDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date()

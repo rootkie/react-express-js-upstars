@@ -48,7 +48,6 @@ const ForgetPassword = () => {
       })
       // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
-        console.log(error)
         if (error.response.data.error) {
           dispatch({type: 'error', message: error.response.data.error})
         } else {

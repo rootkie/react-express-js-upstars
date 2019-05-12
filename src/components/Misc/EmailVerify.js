@@ -15,8 +15,7 @@ const verifyEmail = (dispatch, match) => {
     .then(response => {
       dispatch({type: 'verificationSuccess'})
     }).catch(err => {
-      console.log(err)
-      dispatch({type: 'verificationFailure'})
+      dispatch({type: 'verificationFailure', err})
     })
 }
 
@@ -42,7 +41,7 @@ const EmailVerify = ({match}) => {
 
   useEffect(() => {
     verifyEmail(dispatch, match)
-  }, [])
+  }, [match.params.token])
 
   const { success, error } = state
 

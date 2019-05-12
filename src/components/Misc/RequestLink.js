@@ -47,7 +47,6 @@ const RequestLink = () => {
         dispatch({type: 'success', message: 'Your request has been successful. If the details match, an email will be sent to you.'})
       })
       .catch(error => {
-        console.log(error)
         if (error.response.data.error) {
           dispatch({type: 'error', message: error.response.data.error})
         } else {
