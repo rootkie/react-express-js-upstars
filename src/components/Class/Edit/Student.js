@@ -31,12 +31,12 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
       studentIds: idList
     })
       .then(response => {
-        getClass(id, dispatch)
+        getClass(id)
         dispatch({type: 'addStudentSuccess'})
         setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
       })
       .catch(err => {
-        console.log(err)
+        dispatch({type: 'showError', error: err.response.data.error})
       })
   }
 
@@ -48,12 +48,12 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
       }
     })
       .then(response => {
-        getClass(id, dispatch)
+        getClass(id)
         dispatch({type: 'deleteStudentSuccess'})
         setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
       })
       .catch(err => {
-        console.log(err)
+        dispatch({type: 'showError', error: err.response.data.error})
       })
   }
 

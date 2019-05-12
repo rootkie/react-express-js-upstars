@@ -31,12 +31,12 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
       userIds: idList
     })
       .then(response => {
-        getClass(id, dispatch)
+        getClass(id)
         dispatch({type: 'addUserSuccess'})
         setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
       })
       .catch(err => {
-        console.log(err)
+        dispatch({type: 'showError', error: err.response.data.error})
       })
   }
 
@@ -49,12 +49,12 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
       }
     })
       .then(response => {
-        getClass(id, dispatch)
+        getClass(id)
         dispatch({type: 'deleteUserSuccess'})
         setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
       })
       .catch(err => {
-        console.log(err)
+        dispatch({type: 'showError', error: err.response.data.error})
       })
   }
 

@@ -57,7 +57,6 @@ const ResetPassword = ({match}) => {
         dispatch({type: 'success', message: 'Your password has been successfully reset. Please proceed to log-in'})
       })
       .catch(error => {
-        console.log(error)
         if (error.response.data.error) dispatch({type: 'error', message: error.response.data.error})
         else dispatch({type: 'error', message: 'Something went wrong, please try again.'})
       })

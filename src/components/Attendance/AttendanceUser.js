@@ -126,8 +126,6 @@ const AttendanceUser = ({classData}) => {
       } else {
         dispatch({type: 'updateField', name: 'attendanceFormattedData', value: userNoAttendance})
       }
-    } catch (err) {
-      console.log(err)
     } finally {
       dispatch({type: 'updateField', name: 'isLoading', value: false})
     }

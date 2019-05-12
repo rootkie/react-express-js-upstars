@@ -50,7 +50,7 @@ const isLoggedIn = async (dispatch) => {
       dispatch({type: 'redirectUser'})
     }
   } catch (err) {
-    console.log(err)
+    dispatch({type: 'stopLoading'})
   }
 }
 
@@ -155,11 +155,9 @@ const Login = () => {
   }
   if (isLoading) {
     return (
-      <div>
-        <Dimmer active>
-          <Loader indeterminate>Loading data</Loader>
-        </Dimmer>
-      </div>
+      <Dimmer active>
+        <Loader indeterminate>Loading data</Loader>
+      </Dimmer>
     )
   }
 

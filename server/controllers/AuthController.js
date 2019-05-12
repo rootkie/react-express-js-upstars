@@ -175,7 +175,7 @@ module.exports.changePassword = async (req, res, next) => {
     }
     transporter.sendMail(message, (error, info) => {
       if (error) {
-        console.log(error)
+        console.error(error)
       }
     })
   } catch (err) {
@@ -600,7 +600,7 @@ module.exports.newLink = async (req, res, next) => {
     }
     transporter.sendMail(message, async (error, info) => {
       if (error) {
-        console.log(error)
+        console.error(error)
       } else {
         console.log('Message sent')
       }

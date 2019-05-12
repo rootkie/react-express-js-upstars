@@ -13,11 +13,13 @@ import StudentWrap from './Student/StudentWrap'
 import AdminWrap from './Admin/AdminWrap'
 import ErrorPage from './Error/ErrorPage'
 
-const signal = axios.CancelToken.source()
-// For development
-axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
-// For production
-// axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
+// For production automatic during npm build
+if (process.env.NODE_ENV === 'production') {
+  axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
+} else {
+  // For development automatic during npm start or npm test
+  axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
+}
 axios.defaults.headers.common['x-access-token'] = window.localStorage.token
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
@@ -103,15 +105,12 @@ const isUserLoggedIn = async (dispatch) => {
           dispatch({type: 'redirectLogin'})
         }
       }
-    }
-    if (response.data.auth === true) {
+    } else if (response.data.auth === true) {
       let { name, _id, roles } = response.data
-      dispatch({type: 'success', name, _id, roles})
-      return
-    }
-    // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
-    // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
-    if (response.data.auth === 'expiring') {
+      return dispatch({type: 'success', name, _id, roles})
+    } else if (response.data.auth === 'expiring') {
+      // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
+      // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
       const { name, _id, roles } = response.data
       dispatch({type: 'success', name, _id, roles})
       const refreshToken = window.localStorage.refreshToken
@@ -121,7 +120,6 @@ const isUserLoggedIn = async (dispatch) => {
         if (status === true) {
           window.localStorage.setItem('token', token)
           axios.defaults.headers.common['x-access-token'] = token
-          return
         } else {
           window.localStorage.removeItem('token')
           window.localStorage.removeItem('refreshToken')
@@ -130,7 +128,6 @@ const isUserLoggedIn = async (dispatch) => {
       }
     }
   } catch (err) {
-    console.log(err)
     dispatch({type: 'redirectLogin'})
   }
 }
@@ -141,7 +138,6 @@ const setTimeInterval = (dispatch) => {
     isUserLoggedIn(dispatch)
   }, 600000)
 }
-
 const clearTimeInterval = () => {
   window.clearInterval(forceRefresh)
 }
@@ -161,29 +157,12 @@ const MainCtrl = ({match}) => {
     isUserLoggedIn(dispatch)
   }, [match])
 
-  // Adds the cancelToken so that if any API returns 40x / 50x errors, the current API calls are cancelled,
-  // React will not call setState in useReducer, thus there is no memory leak.
-  useEffect(() => {
-    const requestInterceptor = axios.interceptors.request.use(config => {
-      return {
-        ...config,
-        cancelToken: signal.token
-      }
-    }, error => {
-      return Promise.reject(error)
-    })
-    return () => {
-      axios.interceptors.request.eject(requestInterceptor)
-    }
-  }, [match])
-
   useEffect(() => {
     // Catch all non 2xx responses that occur in the dashboard. Login is not affected.
     const myInterceptor = axios.interceptors.response.use(response => {
       return response
     }, error => {
       if (error.response && (error.response.status === 500 || error.response.status === 404 || error.response.status === 403)) {
-        signal.cancel('API cancelled')
         const errorCode = error.response.status
         dispatch({type: 'showError', errorCode})
       }

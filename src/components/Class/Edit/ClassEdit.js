@@ -51,16 +51,6 @@ const initialState = {
   studentOptions: []
 }
 
-const getClass = (classId, dispatch) => {
-  axios.get('class/' + classId)
-    .then(response => {
-      dispatch({type: 'setClassData', data: response.data.class})
-    })
-    .catch(err => {
-      console.log(err)
-    })
-}
-
 const reducer = (state, action) => {
   switch (action.type) {
     case 'loading':
@@ -193,14 +183,25 @@ const reducer = (state, action) => {
   }
 }
 
-const ClassEdit = ({editClass, roles, match}) => {
+const ClassEdit = ({editClass, roles, match, history}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
     dispatch({type: 'reload'})
     const classId = match.params.id
-    getClass(classId, dispatch)
+    getClass(classId)
   }, [match.params.id])
+
+  const getClass = async (classId) => {
+    try {
+      const response = await axios.get('class/' + classId)
+      dispatch({type: 'setClassData', data: response.data.class})
+    } catch (err) {
+      if (err.response.status === 400) {
+        history.replace('/dashboard/classes/view')
+      }
+    }
+  }
 
   const handleChange = (e, { name, value }) => {
     const { edit } = state
@@ -231,7 +232,6 @@ const ClassEdit = ({editClass, roles, match}) => {
         setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
       } catch (error) {
         if (error.response) dispatch({type: 'showError', error: error.response.data.error})
-        console.log(error)
       }
     }
   }
@@ -241,6 +241,8 @@ const ClassEdit = ({editClass, roles, match}) => {
     axios.get(`/class/clone/${match.params.id}`)
       .then(response => {
         dispatch({type: 'cloneSuccess', link: response.data.newClassId})
+      }).catch(err => {
+        dispatch({type: 'showError', error: err.response.data.error})
       })
   }
 
@@ -348,7 +350,8 @@ const ClassEdit = ({editClass, roles, match}) => {
 ClassEdit.propTypes = {
   editClass: PropTypes.func.isRequired,
   match: PropTypes.object.isRequired,
-  roles: PropTypes.array.isRequired
+  roles: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired
 }
 
 export default ClassEdit

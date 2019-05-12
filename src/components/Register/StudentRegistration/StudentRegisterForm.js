@@ -293,13 +293,11 @@ const submitAll = (dispatch, state) => e => {
 
     axios.post('/students', studentDataToSubmit)
       .then(response => {
-        console.log('success')
         // The reset is so that the timeout error will not appear after successful submission
         recaptchaRef.current.reset()
         dispatch({type: 'showSuccess'})
       })
       .catch(error => {
-        console.log(error.response)
         recaptchaRef.current.reset()
         dispatch({type: 'updateField', name: 'terms', value: false})
         dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})

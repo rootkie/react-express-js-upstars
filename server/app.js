@@ -63,7 +63,7 @@ app.use(mongoSanitize({
 require('./Routes')(app)
 
 app.use((err, req, res, next) => {
-  console.log(err)
+  console.error(err)
   res.status(500).send({
     error: "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."
   })

@@ -30,19 +30,15 @@ const resetSearch = dispatch => dispatch({type: 'resetSearch'})
 const handleSearchChange = dispatch => async (e, { value }) => {
   if (value.length < 1) return resetSearch(dispatch)
   dispatch({type: 'startSearch', value})
-  try {
-    const response = await axios.get(`studentsResponsive/${value}`)
-    const studentList = response.data.studentsFiltered.map(student => {
-      return {
-        title: student.name,
-        id: student._id,
-        key: student._id
-      }
-    })
-    dispatch({type: 'completedSearch', results: studentList})
-  } catch (err) {
-    console.log(err)
-  }
+  const response = await axios.get(`studentsResponsive/${value}`)
+  const studentList = response.data.studentsFiltered.map(student => {
+    return {
+      title: student.name,
+      id: student._id,
+      key: student._id
+    }
+  })
+  dispatch({type: 'completedSearch', results: studentList})
 }
 
 const handleResultSelect = dispatch => (e, { result }) => {

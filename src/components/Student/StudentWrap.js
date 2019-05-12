@@ -8,6 +8,7 @@ import StudentEdit from './StudentEdit'
 import StudentViewOthers from './StudentViewOthers'
 import axios from 'axios'
 import ErrorPage from '../Error/ErrorPage'
+const source = axios.CancelToken.source()
 
 const initialState = {
   studentData: [],
@@ -21,12 +22,12 @@ const initialState = {
   ============================================================================
 */
 const getStudents = async dispatch => {
-  const response = await axios.get('students')
+  const response = await axios.get('students', {cancelToken: source.token})
   dispatch({type: 'studentLoaded', studentData: response.data.students})
 }
 
 const getOtherStudents = async dispatch => {
-  const response = await axios.get('otherStudents')
+  const response = await axios.get('otherStudents', {cancelToken: source.token})
   dispatch({type: 'otherStudentLoaded', otherStudentData: response.data.students})
 }
 
@@ -60,6 +61,9 @@ const StudentWrap = ({roles, match}) => {
     getStudents(dispatch)
     if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
       getOtherStudents(dispatch)
+    }
+    return () => {
+      source.cancel('API cancelled')
     }
   }, [])
 

@@ -7,6 +7,7 @@ import ClassView from './ClassView.js'
 import ClassEdit from './Edit/ClassEdit.js'
 import axios from 'axios'
 import ErrorPage from '../Error/ErrorPage'
+const source = axios.CancelToken.source()
 
 const initialState = {
   classData: [],
@@ -20,7 +21,7 @@ FUNCTIONS
 */
 
 const getClasses = (dispatch) => {
-  axios.get('class')
+  axios.get('class', {cancelToken: source.token})
     .then(response => {
       const { activeClasses, stoppedClasses } = response.data
       // Merge both together to show it in a single table
@@ -52,6 +53,10 @@ const ClassWrap = ({match, roles}) => {
 
   useEffect(() => {
     getClasses(dispatch)
+
+    return () => {
+      source.cancel('API cancelled')
+    }
   }, [])
 
   /*

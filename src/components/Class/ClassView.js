@@ -115,7 +115,7 @@ const ClassView = ({classData, stopClass, isLoading, roles}) => {
                   <Table.Row key={`class-${i}`} negative={Class.status === 'Stopped'}>
                     {roles.indexOf('SuperAdmin') !== -1 &&
                       <Table.Cell collapsing>
-                        <Checkbox name={Class._id} onChange={handleCheckBox} checked={selected.includes(Class._id)} />
+                        <Checkbox name={Class._id} onChange={handleCheckBox} checked={selected.includes(Class._id)} disabled={Class.status === 'Stopped'} />
                       </Table.Cell>
                     }
                     <Table.Cell collapsing>{i + 1}</Table.Cell>

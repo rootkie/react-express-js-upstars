@@ -98,12 +98,13 @@ const AttendanceView = ({match, classData, roles, history}) => {
     const { attendanceId } = match.params
     dispatch({type: 'resetState'})
     if (!/^[0-9a-fA-F]{24}$/.test(attendanceId)) {
-      return dispatch({type: 'showError', value: 'This attendance cannot be found. Please try again.'})
+      return history.replace('/dashboard/attendance/search')
     }
     const response = await axios.get('attendance/' + attendanceId)
     let users = []
     let students = []
     const { attendances } = response.data
+    if (attendances === null) return history.replace('/dashboard/attendance/search')
     const { hours, date, type, createdAt, updatedAt, __v } = attendances
     for (const [index, userData] of attendances.users.entries()) {
       users[index] = {
@@ -160,14 +161,18 @@ const AttendanceView = ({match, classData, roles, history}) => {
     const { attendanceId } = match.params
     const { classId } = state
     dispatch({type: 'prepDelete'})
-    await axios.delete('attendance', {
-      data: {
-        attendanceId: [attendanceId],
-        classId
-      }
-    })
-    dispatch({type: 'updateField', name: 'isLoading', value: false})
-    history.push('/dashboard/attendance/search')
+    try {
+      await axios.delete('attendance', {
+        data: {
+          attendanceId: [attendanceId],
+          classId
+        }
+      })
+      dispatch({type: 'updateField', name: 'isLoading', value: false})
+      history.push('/dashboard/attendance/search')
+    } catch (err) {
+      dispatch({type: 'showError', value: err.response.data.error})
+    }
   }
 
   const handleSubmit = () => {
@@ -195,12 +200,12 @@ const AttendanceView = ({match, classData, roles, history}) => {
         dispatch({type: 'successEdit'})
       } catch (err) {
         if (err.response.data) {
-          dispatch({type: 'updateField', name: 'errorMessage', value: err.response.data.error})
+          dispatch({type: 'showError', value: err.response.data.error})
         }
       }
     }).catch(err => {
       if (err.name === 'ValidationError') {
-        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+        dispatch({type: 'showError', value: err.errors})
       }
     }).finally(() => {
       dispatch({type: 'updateField', name: 'isLoading', value: false})

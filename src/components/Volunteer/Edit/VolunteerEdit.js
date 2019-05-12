@@ -130,35 +130,39 @@ const VolunteerEdit = ({history, match, roles}) => {
   }, [match.params.userId])
 
   const getProfile = async (userId) => {
-    const response = await axios.get(`/users/${userId}`)
-    const { dob, exitDate, preferredTimeSlot } = response.data.user
-    let userData = {
-      ...response.data.user,
-      dob: moment(dob),
-      exitDate: moment(exitDate),
-      preferredTimeSlot: {
-        'Monday 7-9.30pm': preferredTimeSlot.includes('Monday 7-9.30pm'),
-        'Tuesday 7-9.30pm': preferredTimeSlot.includes('Tuesday 7-9.30pm'),
-        'Wednesday 7-9.30pm': preferredTimeSlot.includes('Wednesday 7-9.30pm'),
-        'Thursday 7-9.30pm': preferredTimeSlot.includes('Thursday 7-9.30pm'),
-        'Friday 7-9.30pm': preferredTimeSlot.includes('Friday 7-9.30pm'),
-        'Saturday 10-12.30pm': preferredTimeSlot.includes('Saturday 10-12.30pm'),
-        'Saturday 12.15-1.15pm': preferredTimeSlot.includes('Saturday 10-12.30pm'),
-        'Saturday 12.00-2.30pm': preferredTimeSlot.includes('Saturday 12.00-2.30pm')
-      }
-    }
-    if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) {
-      const { interviewDate, commencementDate } = userData.admin
-      userData = {
-        ...userData,
-        admin: {
-          ...userData.admin,
-          interviewDate: interviewDate ? moment(interviewDate) : interviewDate,
-          commencementDate: commencementDate ? moment(commencementDate) : commencementDate
+    try {
+      const response = await axios.get(`/users/${userId}`)
+      const { dob, exitDate, preferredTimeSlot } = response.data.user
+      let userData = {
+        ...response.data.user,
+        dob: moment(dob),
+        exitDate: moment(exitDate),
+        preferredTimeSlot: {
+          'Monday 7-9.30pm': preferredTimeSlot.includes('Monday 7-9.30pm'),
+          'Tuesday 7-9.30pm': preferredTimeSlot.includes('Tuesday 7-9.30pm'),
+          'Wednesday 7-9.30pm': preferredTimeSlot.includes('Wednesday 7-9.30pm'),
+          'Thursday 7-9.30pm': preferredTimeSlot.includes('Thursday 7-9.30pm'),
+          'Friday 7-9.30pm': preferredTimeSlot.includes('Friday 7-9.30pm'),
+          'Saturday 10-12.30pm': preferredTimeSlot.includes('Saturday 10-12.30pm'),
+          'Saturday 12.15-1.15pm': preferredTimeSlot.includes('Saturday 10-12.30pm'),
+          'Saturday 12.00-2.30pm': preferredTimeSlot.includes('Saturday 12.00-2.30pm')
         }
       }
+      if (roles.indexOf('SuperAdmin') !== -1 || roles.indexOf('Admin') !== -1) {
+        const { interviewDate, commencementDate } = userData.admin
+        userData = {
+          ...userData,
+          admin: {
+            ...userData.admin,
+            interviewDate: interviewDate ? moment(interviewDate) : interviewDate,
+            commencementDate: commencementDate ? moment(commencementDate) : commencementDate
+          }
+        }
+      }
+      dispatch({type: 'initUser', userData})
+    } catch (err) {
+      if (err.response.status === 400) history.replace('/dashboard/volunteer/view')
     }
-    dispatch({type: 'initUser', userData})
   }
 
   // Most of these edit functions are only allowed when edit mode to toggled to true.
@@ -242,7 +246,6 @@ const VolunteerEdit = ({history, match, roles}) => {
             dispatch({type: 'submitSuccess'})
           })
           .catch((err) => {
-            console.log(err)
             dispatch({type: 'setErrorMessage', value: err.response.data.error})
           })
       }).catch(err => {
@@ -268,6 +271,8 @@ const VolunteerEdit = ({history, match, roles}) => {
         window.localStorage.removeItem('token')
         window.localStorage.removeItem('refreshToken')
         history.replace('/')
+      }).catch(err => {
+        dispatch({type: 'setErrorMessage', value: err.response.data.error})
       })
   }
 

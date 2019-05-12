@@ -55,7 +55,6 @@ const VolunteerChangePassword = ({_id}) => {
         dispatch({ type: 'success' })
       })
       .catch(error => {
-        console.log(error)
         dispatch({ type: 'setMessage', message: error.response.data.error })
       })
   }

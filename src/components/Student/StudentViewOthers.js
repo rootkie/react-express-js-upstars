@@ -47,19 +47,15 @@ const reducer = (state, action) => {
 const handleSearchChange = dispatch => async (e, { value }) => {
   if (value.length < 1) return resetComponent(dispatch)
   dispatch({type: 'startSearch', value})
-  try {
-    const response = await axios.get(`otherStudentsResponsive/${value}`)
-    const studentList = response.data.studentsFiltered.map(student => {
-      return {
-        title: student.name,
-        id: student._id,
-        key: student._id
-      }
-    })
-    dispatch({type: 'endSearch', results: studentList})
-  } catch (err) {
-    console.log(err)
-  }
+  const response = await axios.get(`otherStudentsResponsive/${value}`)
+  const studentList = response.data.studentsFiltered.map(student => {
+    return {
+      title: student.name,
+      id: student._id,
+      key: student._id
+    }
+  })
+  dispatch({type: 'endSearch', results: studentList})
 }
 
 const resetComponent = (dispatch) => dispatch({type: 'resetSearch'})
