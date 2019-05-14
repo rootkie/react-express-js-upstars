@@ -1,4 +1,3 @@
-'use strict'
 const jwt = require('jsonwebtoken')
 
 module.exports.generateToken = req => {
@@ -7,14 +6,14 @@ module.exports.generateToken = req => {
     roles,
     status,
     classes,
-    profile
+    name
   } = req
   const user = {
     _id,
     roles,
     status,
     classes,
-    name: profile.name
+    name
   }
   return jwt.sign(user, process.env.SECRET, {
     expiresIn: '30m'

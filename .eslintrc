@@ -1,10 +1,13 @@
 {
-  "extends": ["standard", "standard-react", "plugin:jest/recommended"],
+  "extends": ["standard", "standard-react", "plugin:jest/recommended", "plugin:react/recommended"],
   "parser": "babel-eslint",
-  "plugins": ["jest"],
+  "plugins": ["jest", "react-hooks"],
   "env": {
     "node": true,
     "jest": true,
     "es6": true
+  },
+  "rules": {
+    "react-hooks/rules-of-hooks": "error"
   }
 }

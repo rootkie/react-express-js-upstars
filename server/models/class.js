@@ -7,7 +7,8 @@ const ClassSchema = new Schema({
   // Class information
   className: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   classType: {
     type: String,
@@ -43,6 +44,21 @@ const ClassSchema = new Schema({
 }, {
   timestamps: true,
   minimize: false
+})
+
+ClassSchema.pre('save', function (next) {
+  this.increment()
+  return next()
+})
+
+ClassSchema.pre('findOneAndUpdate', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
+})
+
+ClassSchema.pre('updateMany', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
 })
 
 module.exports = mongoose.model('Class', ClassSchema)

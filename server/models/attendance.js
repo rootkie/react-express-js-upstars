@@ -4,10 +4,10 @@ const Schema = mongoose.Schema
 // ================================
 // Attendance Schema
 // ================================
+
 const AttendanceSchema = new Schema({
   date: {
     type: Date,
-    default: Date.now,
     required: true
   },
   hours: {
@@ -21,9 +21,10 @@ const AttendanceSchema = new Schema({
     required: true
   },
   users: [{
-    list: {
+    user: {
       type: Schema.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     },
     status: {
       type: Number,
@@ -32,12 +33,14 @@ const AttendanceSchema = new Schema({
     _id: false
   }],
   students: [{
-    list: {
+    student: {
       type: Schema.ObjectId,
-      ref: 'Student'
+      ref: 'Student',
+      required: true
     },
     status: {
-      type: Number
+      type: Number,
+      required: true
     },
     _id: false
   }],
@@ -50,6 +53,16 @@ const AttendanceSchema = new Schema({
 {
   timestamps: true,
   minimize: false
+})
+
+AttendanceSchema.pre('save', function (next) {
+  this.increment()
+  return next()
+})
+
+AttendanceSchema.pre('updateMany', function (next) {
+  this.updateMany({ $inc: { __v: 1 } })
+  next()
 })
 
 module.exports = mongoose.model('Attendance', AttendanceSchema)

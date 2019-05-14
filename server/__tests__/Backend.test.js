@@ -14,10 +14,9 @@ beforeAll(async () => {
   userToken = response.body.token
 })
 
-afterAll((done) => {
+afterAll(() => {
   exec('mongorestore --drop -d tests dump/tests')
-  done()
-}, 7000)
+})
 
 describe('testing auth related API mostly without token', () => {
   describe('login testing', () => {
@@ -96,7 +95,7 @@ describe('testing auth related API mostly without token', () => {
         classes: ['5b97b8f2adfb2e018c64d372'],
         status: 'Active',
         roles: ['Tutor', 'SuperAdmin', 'Admin'],
-        name: 'Wuying  Kong'
+        name: 'Wuying Kong'
       }
       expiringAccessToken = await jwt.sign(user, process.env.SECRET, {
         expiresIn: '9m'
@@ -129,7 +128,7 @@ describe('testing auth related API mostly without token', () => {
       const response = await app.get('/check').set('x-access-token', accessToken)
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('auth', true)
-      expect(response.body).toHaveProperty('name', 'Wuying  Kong')
+      expect(response.body).toHaveProperty('name', 'Wuying Kong')
       expect(response.body).toHaveProperty('_id', '5b912ba72b9ec042a58f88a4')
       expect(response.body).toHaveProperty('classes', ['5b97b8f2adfb2e018c64d372'])
       expect(response.body).toHaveProperty('roles', ['Tutor', 'SuperAdmin', 'Admin'])
@@ -140,7 +139,7 @@ describe('testing auth related API mostly without token', () => {
       const response = await app.get('/check').set('x-access-token', expiringAccessToken)
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('auth', 'expiring')
-      expect(response.body).toHaveProperty('name', 'Wuying  Kong')
+      expect(response.body).toHaveProperty('name', 'Wuying Kong')
       expect(response.body).toHaveProperty('_id', '5b912ba72b9ec042a58f88a4')
       expect(response.body).toHaveProperty('classes', ['5b97b8f2adfb2e018c64d372'])
       expect(response.body).toHaveProperty('roles', ['Tutor', 'SuperAdmin', 'Admin'])
@@ -187,140 +186,112 @@ describe('testing auth related API mostly without token', () => {
     // This allows the test to bypass the captcha validation
     const userData =
     {
-      // Best to replace the email with your own personal email to test the response.
+      // Best to log into ethereal email account to check the email is really sent out
       email: 'testuser10@upstars.com',
-      profile: {
-        name: 'Test User',
-        gender: 'M',
-        dob: '2004-03-09T16:00:00.000Z',
-        nationality: 'singaporean',
-        nric: 'T0423783D',
-        address: 'Upstars Block 999 #13-902',
-        postalCode: 654999,
-        homephone: 63846358,
-        handphone: 94562395,
-        schoolClass: 'Sec 2-5',
-        schoolLevel: 'Upstars Secondary'
-      },
+      name: 'Test User',
+      gender: 'M',
+      dob: '2004-03-09T16:00:00.000Z',
+      nationality: 'singaporean',
+      nric: 'T0423783D',
+      address: 'Upstars Block 999 #13-902',
+      postalCode: 654999,
+      homephone: 63846358,
+      handphone: 94562395,
+      schoolClass: 'Sec 2-5',
+      schoolLevel: 'Upstars Secondary',
       password: 'password',
+      commencementDate: '2018-09-25T12:53:52+00:00',
+      exitDate: '2018-10-25T12:53:52+00:00',
+      preferredTimeSlot: ['Tuesday 7-9.30pm'],
+      captchaCode: 'anyRandomString'
+    }
+
+    // Missing email and password
+    const missingUserInfo = {
+      name: 'Test User',
+      gender: 'M',
+      dob: '2004-03-09T16:00:00.000Z',
+      nationality: 'singaporean',
+      nric: 'T0423783D',
+      address: 'Upstars Block 999 #13-902',
+      postalCode: 654999,
+      homephone: 63846358,
+      handphone: 94562395,
+      schoolClass: 'Sec 2-5',
+      schoolLevel: 'Upstars Secondary',
       commencementDate: '2018-09-25T12:53:52+00:00',
       exitDate: '2018-10-25T12:53:52+00:00',
       preferredTimeSlot: ['Tuesday 7-9.30pm']
     }
 
-    test('empty captcha, registration not working', async () => {
-      expect.assertions(2)
-      const response = await app.post('/register').send({
-        userData,
-        captchaCode: ''
-      })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
+    test('registration working', async () => {
+      expect.assertions(1)
+      const response = await app.post('/register').send(userData)
+      expect(response.statusCode).toBe(201)
     })
 
-    test('wrong captcha, registration not working', async () => {
+    test('duplicate email', async () => {
       expect.assertions(2)
       const response = await app.post('/register').send({
-        ...userData,
-        captchaCode: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+        ...missingUserInfo,
+        email: 'testuser@upstars.com',
+        password: 'password'
       })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
+      expect(response.statusCode).toBe(409)
+      expect(response.body).toEqual({'error': 'Email already exists.'})
     })
 
-    describe('bypass captcha in these tests', () => {
-      // Missing email and password
-      const missingUserInfo = {
-        profile: {
-          name: 'Test User',
-          gender: 'M',
-          dob: '2004-03-09T16:00:00.000Z',
-          nationality: 'singaporean',
-          nric: 'T0423783D',
-          address: 'Upstars Block 999 #13-902',
-          postalCode: 654999,
-          homephone: 63846358,
-          handphone: 94562395,
-          schoolClass: 'Sec 2-5',
-          schoolLevel: 'Upstars Secondary'
-        },
-        commencementDate: '2018-09-25T12:53:52+00:00',
-        exitDate: '2018-10-25T12:53:52+00:00',
-        preferredTimeSlot: ['Tuesday 7-9.30pm']
-      }
-
-      test('registration working', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send(userData)
-        expect(response.statusCode).toBe(201)
-        expect(response.body).toEqual({'success': 'true'})
-      }, 8000)
-
-      test('duplicate email', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser@upstars.com',
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(409)
-        expect(response.body).toEqual({'error': 'Email already exists.'})
+    test('missing email', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        password: 'password'
       })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    })
 
-      test('missing email', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    test('missing password', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser10@upstars.com'
       })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    })
 
-      test('missing password', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser10@upstars.com'
-        })
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    test('Bad Password', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser10@upstars.com',
+        password: 'pass'
       })
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    })
 
-      test('Bad Password', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser10@upstars.com',
-          password: 'pass'
-        })
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+    test('Suspended User attempting to register', async () => {
+      expect.assertions(2)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser2@upstars.com',
+        password: 'password'
       })
+      expect(response.statusCode).toBe(403)
+      expect(response.body).toEqual({'error': 'Your account has been suspended. Please contact the administrator for follow up actions'})
+    })
 
-      test('Suspended User attempting to register', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser2@upstars.com',
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(403)
-        expect(response.body).toEqual({'error': 'Your account has been suspended. Please contact the administrator for follow up actions'})
+    test('Recreating new account for deleted users', async () => {
+      expect.assertions(1)
+      const response = await app.post('/register').send({
+        ...missingUserInfo,
+        email: 'testuser6@upstars.com',
+        password: 'password',
+        captchaCode: 'anyRandomString'
       })
-
-      // The test(s) to check if the new account is really created and old account randomised is to be done in
-      // UserController.test.js under searching for user via ID
-      test('Recreating new account for deleted users', async () => {
-        expect.assertions(2)
-        const response = await app.post('/register').send({
-          ...missingUserInfo,
-          email: 'testuser6@upstars.com',
-          password: 'password'
-        })
-        expect(response.statusCode).toBe(201)
-        expect(response.body).toEqual({'success': 'true'})
-      }, 10000)
+      expect(response.statusCode).toBe(201)
     })
   })
 
@@ -356,10 +327,9 @@ describe('testing auth related API mostly without token', () => {
     })
 
     test('verify email using a valid token', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const response = await app.post('/verifyEmail').send({token: encodedString})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
     })
   })
 
@@ -369,7 +339,7 @@ describe('testing auth related API mostly without token', () => {
       const response = await app.post('/changepassword')
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
-    }, 10000)
+    })
 
     test('no email prompts errors', async () => {
       expect.assertions(2)
@@ -407,10 +377,9 @@ describe('testing auth related API mostly without token', () => {
     })
 
     test('proper requests returns success', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
     })
   })
 
@@ -457,10 +426,48 @@ describe('testing auth related API mostly without token', () => {
     })
 
     test('proper reset password returns success', async () => {
-      expect.assertions(2)
+      expect.assertions(1)
       const response = await app.post('/resetpassword').send({password: 'password123', token})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
+    })
+  })
+
+  describe('send new email verification link', () => {
+    test('no input fields throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('no nric throw error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser10@upstars.com'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('wrong nric causes empty response', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser10@upstars.com', nric: 'T0423783E'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
+    })
+
+    test('wrong email causes empty response', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser3@upstars.com', nric: 'T0423783D'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
+    })
+
+    test('correct fields also return empty but have email sent with link', async () => {
+      // Either check nodemon to see if the 'message sent' log is written or go to
+      // ethereal email to check if it is really sent
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser10@upstars.com', nric: 'T0423783D'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
     })
   })
 })
@@ -473,7 +480,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/pendingUsers')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Lai Ta Toh'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'profile': {'name': 'Mr. Ho Jin He'}, 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
+      expect(response.body).toEqual({'users': [{'name': 'Lai Ta Toh', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'name': 'Mr. Ho Jin He', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
     })
   })
 
@@ -482,7 +489,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/suspended')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
+      expect(response.body).toEqual({'users': [{'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
     })
   })
 
@@ -491,7 +498,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/deleted')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}]})
+      expect(response.body).toEqual({'users': [{'_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor']}]})
     })
   })
 
@@ -501,7 +508,7 @@ describe('testing admin related APIs', async () => {
       const response = await app.get('/admin/search/cRIs')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
-      expect(response.body).toHaveProperty('activeMatched', [{'profile': {'name': 'Mr. Cristian Bartell'}, 'status': 'Active', 'roles': ['Tutor'], '_id': '5b9255700333773af993ae9c'}])
+      expect(response.body).toHaveProperty('activeMatched', [{'name': 'Mr. Cristian Bartell', 'status': 'Active', 'roles': ['Tutor'], '_id': '5b9255700333773af993ae9c'}])
       expect(response.body).toHaveProperty('suspendedMatched', [])
       expect(response.body).toHaveProperty('deletedMatched', [])
     })
@@ -511,19 +518,19 @@ describe('testing admin related APIs', async () => {
       const response = await app.get('/admin/search/G')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
-      expect(response.body).toHaveProperty('activeMatched', [{'profile': {'name': 'Wuying  Kong'}, 'status': 'Active', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b912ba72b9ec042a58f88a4'}])
-      expect(response.body).toHaveProperty('suspendedMatched', [{'profile': {'name': 'Marie G Kruger'}, 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
-      expect(response.body).toHaveProperty('deletedMatched', [])
+      expect(response.body).toHaveProperty('activeMatched', [{'name': 'Wuying Kong', 'status': 'Active', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b912ba72b9ec042a58f88a4'}])
+      expect(response.body).toHaveProperty('suspendedMatched', [{'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
+      expect(response.body).toHaveProperty('deletedMatched', [{'_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor']}])
     })
 
-    test('deleted match', async () => {
+    test('none match', async () => {
       expect.assertions(5)
       const response = await app.get('/admin/search/admin')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
       expect(response.body).toHaveProperty('activeMatched', [])
       expect(response.body).toHaveProperty('suspendedMatched', [])
-      expect(response.body).toHaveProperty('deletedMatched', [{'profile': {'name': 'Admin1'}, 'status': 'Deleted', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5a1111574f52053930820a42'}])
+      expect(response.body).toHaveProperty('deletedMatched', [])
     })
   })
 
@@ -532,7 +539,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.delete('/admin/user')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a userId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide working userId(s)'})
     })
 
     test('deleting non-existing user', async () => {
@@ -544,22 +551,22 @@ describe('testing admin related APIs', async () => {
 
     test('deleting already deleted user', async () => {
       expect.assertions(2)
-      const response = await app.delete('/admin/user').send({userId: ['5a1111574f52053930820a42']})
+      const response = await app.delete('/admin/user').send({userId: ['5c73acb2afcab33a4012ac29']})
       expect(response.statusCode).toBe(404)
       expect(response.body).toEqual({'error': 'The user you requested to delete does not exist.'})
     })
 
     test('deleting current users', async () => {
-      expect.assertions(6)
+      expect.assertions(5)
       const response = await app.delete('/admin/user').send({userId: ['5b912ba72b9ec042a58f88a4']})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user.status).toBe('Deleted')
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372').set('x-access-token', userToken)
       expect(classData.statusCode).toBe(200)
-      expect(classData.body.class.users).toEqual([{'_id': '5b9255700333773af993ae9c', 'profile': {'name': 'Mr. Cristian Bartell'}}])
+      // The class started with 2 people, leaving with one after the deletion of the user above.
+      expect(classData.body.class.users).toEqual([{'_id': '5b9255700333773af993ae9c', 'name': 'Mr. Cristian Bartell'}])
     })
   })
 
@@ -600,7 +607,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true, 'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
+      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')
@@ -609,15 +616,11 @@ describe('testing admin related APIs', async () => {
       expect(classData.statusCode).toBe(200)
       expect(classData.body.class.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         },
         {
-          'profile': {
-            'name': 'Wuying  Kong'
-          },
+          'name': 'Wuying Kong',
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
@@ -630,7 +633,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin', 'Tutor']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true, 'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
+      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 0, 'ok': 1}})
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')
@@ -658,7 +661,7 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.post('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a className to search for'})
+      expect(response.body).toEqual({'error': 'Please provide a class name'})
     })
 
     test('adding with className but missing remaining fields', async () => {
@@ -676,22 +679,25 @@ describe('testing class related APIs', async () => {
     })
 
     test('correct fields successfully add class', async () => {
-      expect.assertions(11)
+      expect.assertions(13)
       const response = await app.post('/class').send({
         ...classDetail,
         venue: 'Ulu Pandan Room 3'
       })
       expect(response.statusCode).toBe(201)
-      expect(response.body.success).toBe(true)
-      expect(response.body.newClass).toHaveProperty('students', [])
-      expect(response.body.newClass).toHaveProperty('users', [])
-      expect(response.body.newClass).toHaveProperty('status', 'Active')
-      expect(response.body.newClass).toHaveProperty('className', 'Upstars Class B')
-      expect(response.body.newClass).toHaveProperty('classType', 'Tuition')
-      expect(response.body.newClass).toHaveProperty('venue', 'Ulu Pandan Room 3')
-      expect(response.body.newClass).toHaveProperty('dayAndTime', 'Friday 9PM')
-      expect(response.body.newClass).toHaveProperty('startDate', '2018-10-14T06:59:06.643Z')
-      expect(response.body.newClass).toHaveProperty('_id')
+      expect(response.body.newClassId).toEqual(expect.any(String))
+      const classDetails = await app.get(`/class/${response.body.newClassId}`)
+      expect(classDetails.body.class).toHaveProperty('students', [])
+      expect(classDetails.body.class).toHaveProperty('users', [])
+      expect(classDetails.body.class).toHaveProperty('status', 'Active')
+      expect(classDetails.body.class).toHaveProperty('className', 'Upstars Class B')
+      expect(classDetails.body.class).toHaveProperty('classType', 'Tuition')
+      expect(classDetails.body.class).toHaveProperty('venue', 'Ulu Pandan Room 3')
+      expect(classDetails.body.class).toHaveProperty('dayAndTime', 'Friday 9PM')
+      expect(classDetails.body.class).toHaveProperty('startDate', '2018-10-14T06:59:06.643Z')
+      expect(classDetails.body.class).toHaveProperty('createdAt')
+      expect(classDetails.body.class).toHaveProperty('updatedAt')
+      expect(classDetails.body.class).toHaveProperty('__v')
     })
   })
 
@@ -714,8 +720,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Class A',
           'classType': 'Tuition',
           'venue': 'Upstars Classroom 1',
-          'dayAndTime': 'Wednesday, 3pm',
-          '__v': 0
+          'dayAndTime': 'Wednesday, 3pm'
         },
         {
           'status': 'Active',
@@ -723,8 +728,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Class B',
           'classType': 'Tuition',
           'venue': 'Ulu Pandan Room 3',
-          'dayAndTime': 'Friday 9PM',
-          '__v': 0
+          'dayAndTime': 'Friday 9PM'
         }
       ])
       expect(response.body.stoppedClasses).toEqual([
@@ -734,8 +738,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Stopped Class',
           'classType': 'Enrichment',
           'venue': 'Upstars Level 3',
-          'dayAndTime': 'nil',
-          '__v': 0
+          'dayAndTime': 'nil'
         }
       ])
     })
@@ -751,8 +754,7 @@ describe('testing class related APIs', async () => {
           'className': 'Upstars Class A',
           'classType': 'Tuition',
           'venue': 'Upstars Classroom 1',
-          'dayAndTime': 'Wednesday, 3pm',
-          '__v': 0
+          'dayAndTime': 'Wednesday, 3pm'
         }
       ])
       expect(response.body.stoppedClasses).toEqual([])
@@ -763,8 +765,8 @@ describe('testing class related APIs', async () => {
     test('invalid ObjectId used for classId throws error', async () => {
       expect.assertions(2)
       const response = await app.get('/class/123')
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('valid but wrong ObjectId used for classId throws error', async () => {
@@ -778,23 +780,17 @@ describe('testing class related APIs', async () => {
       const classObject = {
         'students': [
           {
-            'profile': {
-              'name': 'Lingxin  Long'
-            },
+            'name': 'Lingxin  Long',
             '_id': '5b936ce7defc1a592d677008'
           }
         ],
         'users': [
           {
-            'profile': {
-              'name': 'Mr. Cristian Bartell'
-            },
+            'name': 'Mr. Cristian Bartell',
             '_id': '5b9255700333773af993ae9c'
           },
           {
-            'profile': {
-              'name': 'Wuying  Kong'
-            },
+            'name': 'Wuying Kong',
             '_id': '5b912ba72b9ec042a58f88a4'
           }
         ],
@@ -805,7 +801,9 @@ describe('testing class related APIs', async () => {
         'venue': 'Upstars Classroom 1',
         'dayAndTime': 'Wednesday, 3pm',
         'startDate': '2018-10-03T12:36:07.000Z',
-        '__v': 0
+        '__v': 2,
+        'createdAt': expect.any(String),
+        'updatedAt': expect.any(String)
       }
       expect.assertions(2)
       const response = await app.get('/class/5b97b8f2adfb2e018c64d372')
@@ -819,14 +817,14 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.delete('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure input is correct.'})
+      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure all values are correct.'})
     })
 
     test('stopping a class with empty classId', async () => {
       expect.assertions(2)
       const response = await app.delete('/class').send({classId: []})
-      expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Class not found'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure all values are correct.'})
     })
 
     test('stopping a class using wrong Ids throws error', async () => {
@@ -837,10 +835,9 @@ describe('testing class related APIs', async () => {
     })
 
     test('stopping a class using valid Ids returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.delete('/class').send({classId: ['5b97b8f2adfb2e018c64d372']})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class).toHaveProperty('status', 'Stopped')
     })
@@ -884,14 +881,13 @@ describe('testing class related APIs', async () => {
     })
 
     test('editing a class with correct ID returns success', async () => {
-      expect.assertions(5)
+      expect.assertions(4)
       const response = await app.put('/class').send({
         ...classDetail,
         classId: '5b97b8f2adfb2e018c64d372',
         status: 'Active'
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       // The 3 tests below only verify that these 3 fields are edited as intended
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class).toHaveProperty('status', 'Active')
@@ -914,12 +910,10 @@ describe('testing user side APIs', () => {
       const userData = {
         'users': [
           {
-            'profile': {
-              'name': 'Mr. Cristian Bartell',
-              'gender': 'M',
-              'nric': 'S925556F',
-              'dob': '2004-03-09T16:00:00.000Z'
-            },
+            'name': 'Mr. Cristian Bartell',
+            'gender': 'M',
+            'nric': 'S925556F',
+            'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
               'Tutor'
@@ -938,12 +932,10 @@ describe('testing user side APIs', () => {
       const allUserData = {
         'users': [
           {
-            'profile': {
-              'name': 'Mr. Cristian Bartell',
-              'gender': 'M',
-              'nric': 'S925556F',
-              'dob': '2004-03-09T16:00:00.000Z'
-            },
+            'name': 'Mr. Cristian Bartell',
+            'gender': 'M',
+            'nric': 'S925556F',
+            'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
               'Tutor'
@@ -951,12 +943,10 @@ describe('testing user side APIs', () => {
             '_id': '5b9255700333773af993ae9c'
           },
           {
-            'profile': {
-              'name': 'Wuying  Kong',
-              'gender': 'M',
-              'nric': 'S923456F',
-              'dob': '2004-03-09T16:00:00.000Z'
-            },
+            'name': 'Wuying Kong',
+            'gender': 'M',
+            'nric': 'S923456F',
+            'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
               'SuperAdmin',
@@ -976,94 +966,74 @@ describe('testing user side APIs', () => {
 
   describe('viewing a single user data', () => {
     const userFullData = {
-      'profile': {
-        'name': 'Mr. Cristian Bartell',
-        'gender': 'M',
-        'nric': 'S925556F',
-        'nationality': 'singaporean',
-        'dob': '2004-03-09T16:00:00.000Z',
-        'address': '486 Schmitt Drive',
-        'postalCode': 623411,
-        'handphone': 84720133,
-        'homephone': 60437898,
-        'schoolClass': 'Sec 3-3',
-        'schoolLevel': 'UPStars Secondary'
-      },
-      'father': {
-        'name': 'Sam Kong',
-        'email': 'samkong@upstars.com',
-        'occupation': 'Manager'
-      },
-      'mother': {
-        'name': 'Yahui  Geng',
-        'occupation': 'Poultry cutter',
-        'email': 'yahuigeng@upstars.com'
-      },
-      'misc': {
-        'hobbies': [
-          'Running. Studying'
-        ],
-        'careerGoal': 'Economist',
-        'formalEducation': [
-          {
-            'dateFrom': '2014-12-31T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'school': 'Upstars Secondary',
-            'highestLevel': 'Sec 4'
-          }
-        ],
-        'coursesSeminar': [
-          {
-            'year': '2016-01-01T00:00:00.000Z',
-            'courseAndObjective': 'Upstars Institute'
-          }
-        ],
-        'achievements': [
-          {
-            'dateFrom': '2018-09-06T13:43:33.359Z',
-            'dateTo': '2018-09-06T13:43:33.359Z',
-            'organisation': 'Upstars',
-            'description': 'Great performance award'
-          }
-        ],
-        'cca': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'cip': [
-          {
-            'dateFrom': '2015-01-31T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:45:56.027Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'workInternExp': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:46:12.164Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'competence': [
-          {
-            'languages': [
-              'English, Chinese'
-            ],
-            'subjects': [
-              'Math, Science, English, Chinese'
-            ],
-            'interests': [
-              'Everything'
-            ]
-          }
-        ]
-      },
+      'name': 'Mr. Cristian Bartell',
+      'gender': 'M',
+      'nric': 'S925556F',
+      'nationality': 'singaporean',
+      'dob': '2004-03-09T16:00:00.000Z',
+      'address': '486 Schmitt Drive',
+      'postalCode': 623411,
+      'handphone': 84720133,
+      'homephone': 60437898,
+      'schoolClass': 'Sec 3-3',
+      'schoolLevel': 'UPStars Secondary',
+      'fatherName': 'Sam Kong',
+      'fatherEmail': 'samkong@upstars.com',
+      'fatherOccupation': 'Manager',
+      'motherName': 'Yahui Geng',
+      'motherOccupation': 'Poultry cutter',
+      'motherEmail': 'yahuigeng@upstars.com',
+      'hobbies': 'Running. Studying',
+      'careerGoal': 'Economist',
+      'formalEducation': [
+        {
+          'dateFrom': '2014-12-31T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'school': 'Upstars Secondary',
+          'highestLevel': 'Sec 4'
+        }
+      ],
+      'coursesSeminar': [
+        {
+          'year': 2016,
+          'courseAndObjective': 'Upstars Institute'
+        }
+      ],
+      'achievements': [
+        {
+          'dateFrom': '2018-09-06T13:43:33.359Z',
+          'dateTo': '2018-09-06T13:43:33.359Z',
+          'organisation': 'Upstars',
+          'description': 'Great performance award'
+        }
+      ],
+      'cca': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'cip': [
+        {
+          'dateFrom': '2015-01-31T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:45:56.027Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'workInternExp': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:46:12.164Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'languages': 'English, Chinese',
+      'subjects': 'Math, Science, English, Chinese',
+      'interests': 'Everything',
       'preferredTimeSlot': [
         'Tuesday 7-9.30pm',
         'Wednesday 7-9.30pm'
@@ -1081,7 +1051,7 @@ describe('testing user side APIs', () => {
       ],
       '_id': '5b9255700333773af993ae9c',
       'exitDate': '2018-12-27T16:00:00.000Z',
-      '__v': 0
+      '__v': 3
     }
 
     test('lowPriv user does not have auth to view other users', async () => {
@@ -1113,7 +1083,7 @@ describe('testing user side APIs', () => {
       })
     })
 
-    test('admin user simply cannot access non existent user', async () => {
+    test('admin user cannot access non existent user', async () => {
       expect.assertions(2)
       const response = await app.get('/users/5b9255700333773af993ae20').set('x-access-token', userToken)
       expect(response.statusCode).toBe(404)
@@ -1128,9 +1098,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         }
       ])
@@ -1142,9 +1110,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         }
       ])
@@ -1163,9 +1129,7 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         }
       ])
@@ -1177,15 +1141,11 @@ describe('testing user side APIs', () => {
       expect(response.statusCode).toBe(200)
       expect(response.body.users).toEqual([
         {
-          'profile': {
-            'name': 'Mr. Cristian Bartell'
-          },
+          'name': 'Mr. Cristian Bartell',
           '_id': '5b9255700333773af993ae9c'
         },
         {
-          'profile': {
-            'name': 'Wuying  Kong'
-          },
+          'name': 'Wuying Kong',
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
@@ -1229,14 +1189,13 @@ describe('testing user side APIs', () => {
       // Actual is password123
       const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password12345', newPassword: 'password'})
       expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'Old password does not match. Please try again'})
+      expect(response.body).toEqual({'error': 'Your old password does not match. Please try again'})
     })
 
     test('changing password properly returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'password'})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
       const user = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password'})
       expect(user.body).toHaveProperty('token')
     })
@@ -1244,94 +1203,74 @@ describe('testing user side APIs', () => {
 
   describe('editing user particulars', () => {
     const incompleteUserDetails = {
-      'profile': {
-        'name': 'Mr. Cristian Bartell',
-        'gender': 'M',
-        'nric': 'S925556F',
-        'nationality': 'singaporean',
-        'dob': '2004-03-09T16:00:00.000Z',
-        'address': '486 Schmitt Drive',
-        'postalCode': 623411,
-        'handphone': 84720133,
-        'homephone': 60437898,
-        'schoolClass': 'Sec 3-4',
-        'schoolLevel': 'UPStars Secondary'
-      },
-      'father': {
-        'name': 'Sam Kong',
-        'email': 'samkong@upstars.com',
-        'occupation': 'Manager'
-      },
-      'mother': {
-        'name': 'Yahui  Geng',
-        'occupation': 'Poultry cutter',
-        'email': 'yahuigeng@upstars.com'
-      },
-      'misc': {
-        'hobbies': [
-          'Running. Studying'
-        ],
-        'careerGoal': 'Economist',
-        'formalEducation': [
-          {
-            'dateFrom': '2014-12-31T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'school': 'Upstars Secondary',
-            'highestLevel': 'Sec 4'
-          }
-        ],
-        'coursesSeminar': [
-          {
-            'year': '2016-01-01T00:00:00.000Z',
-            'courseAndObjective': 'Upstars Institute'
-          }
-        ],
-        'achievements': [
-          {
-            'dateFrom': '2018-09-06T13:43:33.359Z',
-            'dateTo': '2018-09-06T13:43:33.359Z',
-            'organisation': 'Upstars',
-            'description': 'Great performance award'
-          }
-        ],
-        'cca': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2015-12-30T16:00:00.000Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'cip': [
-          {
-            'dateFrom': '2015-01-31T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:45:56.027Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'workInternExp': [
-          {
-            'dateFrom': '2015-01-01T16:00:00.000Z',
-            'dateTo': '2018-09-06T13:46:12.164Z',
-            'organisation': 'Upstars',
-            'rolePosition': 'Volunteer'
-          }
-        ],
-        'competence': [
-          {
-            'languages': [
-              'English, Chinese'
-            ],
-            'subjects': [
-              'Math, Science, English, Chinese'
-            ],
-            'interests': [
-              'Everything'
-            ]
-          }
-        ]
-      },
+      'name': 'Mr. Cristian Bartell',
+      'gender': 'M',
+      'nric': 'S925556F',
+      'nationality': 'singaporean',
+      'dob': '2004-03-09T16:00:00.000Z',
+      'address': '486 Schmitt Drive',
+      'postalCode': 623411,
+      'handphone': 84720133,
+      'homephone': 60437898,
+      'schoolClass': 'Sec 3-4',
+      'schoolLevel': 'UPStars Secondary',
+      'fatherName': 'Sam Kong',
+      'fatherEmail': 'samkong@upstars.com',
+      'fatherOccupation': 'Manager',
+      'motherName': 'Yahui Geng',
+      'motherOccupation': 'Poultry cutter',
+      'motherEmail': 'yahuigeng@upstars.com',
+      'hobbies': 'Running. Studying',
+      'careerGoal': 'Economist',
+      'formalEducation': [
+        {
+          'dateFrom': '2014-12-31T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'school': 'Upstars Secondary',
+          'highestLevel': 'Sec 4'
+        }
+      ],
+      'coursesSeminar': [
+        {
+          'year': 2016,
+          'courseAndObjective': 'Upstars Institute'
+        }
+      ],
+      'achievements': [
+        {
+          'dateFrom': '2018-09-06T13:43:33.359Z',
+          'dateTo': '2018-09-06T13:43:33.359Z',
+          'organisation': 'Upstars',
+          'description': 'Great performance award'
+        }
+      ],
+      'cca': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2015-12-30T16:00:00.000Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'cip': [
+        {
+          'dateFrom': '2015-01-31T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:45:56.027Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'workInternExp': [
+        {
+          'dateFrom': '2015-01-01T16:00:00.000Z',
+          'dateTo': '2018-09-06T13:46:12.164Z',
+          'organisation': 'Upstars',
+          'rolePosition': 'Volunteer'
+        }
+      ],
+      'languages': 'English, Chinese',
+      'subjects': 'Math, Science, English, Chinese',
+      'interests': 'Everything',
       'preferredTimeSlot': [
         'Tuesday 7-9.30pm',
         'Wednesday 7-9.30pm'
@@ -1357,19 +1296,18 @@ describe('testing user side APIs', () => {
     })
 
     test('non-admin editing own account returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/users').set('x-access-token', lowPrivUserToken).send({
         ...incompleteUserDetails,
         userId: '5b9255700333773af993ae9c'})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', lowPrivUserToken)
       // Instead of Class 3-3
-      expect(userData.body).toHaveProperty('user.profile.schoolClass', 'Sec 3-4')
+      expect(userData.body).toHaveProperty('user.schoolClass', 'Sec 3-4')
     })
 
     test('admin editing other account returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/users').set('x-access-token', userToken).send({
         ...incompleteUserDetails,
         userId: '5b9255700333773af993ae9c',
@@ -1381,7 +1319,6 @@ describe('testing user side APIs', () => {
         }
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
       const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
       expect(userData.body.user.admin).toEqual({
         'interviewDate': '2018-09-06T16:00:00.000Z',
@@ -1410,8 +1347,8 @@ describe('testing user side APIs', () => {
     test('Bad classId throws error', async () => {
       expect.assertions(2)
       const response = await app.delete('/users/class').send({userIds: [], classId: '123'})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('correct classId and empty userId succeed', async () => {
@@ -1462,8 +1399,8 @@ describe('testing user side APIs', () => {
     test('Bad classId throws error', async () => {
       expect.assertions(2)
       const response = await app.post('/users/class').send({userIds: [], classId: '123'})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a classId'})
     })
 
     test('correct classId returns success', async () => {
@@ -1539,59 +1476,73 @@ describe('testing user side APIs', () => {
     })
 
     test('non-admin deleting own account succeed', async () => {
-      expect.assertions(4)
+      expect.assertions(3)
       const response = await app.delete('/users')
         .set('x-access-token', lowPrivUserToken)
         .send({userId: '5b9255700333773af993ae9c'
         })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'status': 'success'})
       const user = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
       // Also make sure class has the user list updated
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(user.body).toHaveProperty('user.status', 'Deleted')
       expect(classData.body.class.users).toEqual([
         {
-          'profile': {
-            'name': 'Wuying  Kong'
-          },
+          'name': 'Wuying Kong',
           '_id': '5b912ba72b9ec042a58f88a4'
         }
       ])
+    })
+  })
+
+  describe('send new verify email links', () => {
+    test('no fields throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('no nric throws error', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({nric: 'S9237776F'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+    })
+
+    test('normal email returns empty', async () => {
+      expect.assertions(2)
+      const response = await app.post('/link').send({email: 'testuser5@upstars.com', nric: 'S9237776F'})
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toEqual({})
     })
   })
 })
 
 describe('testing student side APIs', () => {
   const studentBasicData = {
-    'profile': {
-      'name': 'Laa Huu Min',
-      'icNumber': 'T0240435J',
-      'dob': '2002-04-18T16:00:00.000Z',
-      'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
-      // 'gender': 'F',
-      'nationality': 'Singaporean',
-      'classLevel': 'Secondary 4',
-      'schoolName': 'Upstars Secondary'
-    },
-    'father': {
-      'name': 'Lai Ming Yuan',
-      'icNumber': 'S7571632Z',
-      'nationality': 'citizen',
-      'contactNumber': '94623272',
-      'email': 'laimingyuan@upstars.com',
-      'occupation': 'Teacher',
-      'income': '4000'
-    },
-    'mother': {
-      'name': 'Jin Rui Tong',
-      'icNumber': 'S7904993Z',
-      'nationality': 'pr',
-      'contactNumber': '84722333',
-      'email': 'jinruitong@upstars.com',
-      'occupation': 'Housewife',
-      'income': '0'
-    },
+    'name': 'Laa Huu Min',
+    'icNumber': 'T0240435J',
+    'dob': '2002-04-18T16:00:00.000Z',
+    'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+    // 'gender': 'F',
+    'nationality': 'Singaporean',
+    'classLevel': 'Secondary 4',
+    'schoolName': 'Upstars Secondary',
+    'fatherName': 'Lai Ming Yuan',
+    'fatherIcNumber': 'S7571632Z',
+    'fatherNationality': 'citizen',
+    'fatherContactNumber': '94623272',
+    'fatherEmail': 'laimingyuan@upstars.com',
+    'fatherOccupation': 'Teacher',
+    'fatherIncome': 4000,
+    'motherName': 'Jin Rui Tong',
+    'motherIcNumber': 'S7904993Z',
+    'motherNationality': 'pr',
+    'motherContactNumber': '84722333',
+    'motherEmail': 'jinruitong@upstars.com',
+    'motherOccupation': 'Housewife',
+    'motherIncome': 0,
     'otherFamily': [
       {
         'name': 'Lai Ruu Meng',
@@ -1599,65 +1550,59 @@ describe('testing student side APIs', () => {
         'age': '12'
       }
     ],
-    'misc': {
-      'fas': [
-        'FSC'
-      ],
-      'fsc': 'Singapore FSC',
-      'tuition': [
-        'Private'
-      ],
-      'academicInfo': [
-        {
-          'year': '2018',
-          'term': '1',
-          'english': '78',
-          'math': '76',
-          'motherTongue': '78',
-          'science': '76',
-          'overall': '77'
-        },
-        {
-          'year': '2018',
-          'term': '2',
-          'english': '65',
-          'math': '66',
-          'motherTongue': '65',
-          'science': '66',
-          'overall': '66'
-        },
-        {
-          'year': '2018',
-          'term': '3',
-          'english': '61',
-          'math': '63',
-          'motherTongue': '63',
-          'science': '61',
-          'overall': '62'
-        }
-      ]
-    }
-    // 'captchaCode': '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
+    'fas': [
+      'FSC'
+    ],
+    'fsc': 'Singapore FSC',
+    'tuition': [
+      'Private'
+    ],
+    'academicInfo': [
+      {
+        'year': 2018,
+        'term': 1,
+        'english': 78,
+        'math': 76,
+        'motherTongue': 78,
+        'science': 76,
+        'overall': 77
+      },
+      {
+        'year': 2018,
+        'term': 2,
+        'english': 65,
+        'math': 66,
+        'motherTongue': 65,
+        'science': 66,
+        'overall': 66
+      },
+      {
+        'year': 2018,
+        'term': 3,
+        'english': 61,
+        'math': 63,
+        'motherTongue': 63,
+        'science': 61,
+        'overall': 62
+      }
+    ],
+    'captchaCode': '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
   }
   describe('get all active students', () => {
     test('everyone should retrieve all students profile', async () => {
       const students = [
         {
-          'profile': {
-            'name': 'Lingxin  Long',
-            'icNumber': 'T0299228D',
-            'dob': '2002-09-04T16:00:00.000Z',
-            'gender': 'F'
-          },
+          'name': 'Lingxin  Long',
+          'icNumber': 'T0299228D',
+          'dob': '2002-09-04T16:00:00.000Z',
+          'gender': 'F',
           '_id': '5b936ce7defc1a592d677008'
         },
         {
-          'profile': {
-            'name': 'Yi Jia Yi',
-            'icNumber': 'T0416861A',
-            'dob': '2004-03-01T16:00:00.000Z',
-            'gender': 'F'
-          },
+          'name': 'Yi Jia Yi',
+          'icNumber': 'T0416861A',
+          'dob': '2004-03-01T16:00:00.000Z',
+          'gender': 'F',
           '_id': '5b9674ef22deaf1ee1aa4dc1'
         }
       ]
@@ -1673,12 +1618,10 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const students = [
         {
-          'profile': {
-            'name': 'Student Suspended',
-            'icNumber': 'T02994428D',
-            'dob': '2002-09-04T16:00:00.000Z',
-            'gender': 'F'
-          },
+          'name': 'Student Suspended',
+          'icNumber': 'T02994428D',
+          'dob': '2002-09-04T16:00:00.000Z',
+          'gender': 'F',
           'status': 'Suspended',
           '_id': '5b94e4ca97a4b26f4dbaf26e'
         }
@@ -1705,18 +1648,15 @@ describe('testing student side APIs', () => {
     })
 
     test('correct studentId returns all values', async () => {
-      expect.assertions(10)
+      expect.assertions(30)
       const response = await app.get('/students/5b936ce7defc1a592d677008')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toHaveProperty('student.profile')
-      expect(response.body).toHaveProperty('student.father')
-      expect(response.body).toHaveProperty('student.mother')
-      expect(response.body).toHaveProperty('student.misc')
-      expect(response.body).toHaveProperty('student.admin')
-      expect(response.body).toHaveProperty('student.classes')
+      const list = ['name', 'icNumber', 'dob', 'gender', 'address', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo', 'classes', 'admin']
+      for (let property of list) {
+        expect(response.body).toHaveProperty(`student.${property}`)
+      }
       expect(response.body).toHaveProperty('student.status', 'Active')
       expect(response.body).toHaveProperty('student._id', '5b936ce7defc1a592d677008')
-      expect(response.body).toHaveProperty('student.otherFamily')
     })
   })
 
@@ -1732,7 +1672,7 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/studentsResponsive/NGx')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': [{'profile': {'name': 'Lingxin  Long'}, '_id': '5b936ce7defc1a592d677008'}]})
+      expect(response.body).toEqual({'studentsFiltered': [{'name': 'Lingxin  Long', '_id': '5b936ce7defc1a592d677008'}]})
     })
   })
 
@@ -1748,22 +1688,12 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/otherStudentsResponsive/uDEn')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': [{'profile': {'name': 'Student Suspended'}, '_id': '5b94e4ca97a4b26f4dbaf26e'}]})
+      expect(response.body).toEqual({'studentsFiltered': [{'name': 'Student Suspended', '_id': '5b94e4ca97a4b26f4dbaf26e'}]})
     })
   })
 
   describe('adding student API', () => {
-    test('wrong captcha code throws error', async () => {
-      expect.assertions(2)
-      const response = await app.post('/students').send({
-        ...studentBasicData,
-        captchaCode: '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
-      })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
-    })
-
-    test('bypass captcha, missing fields throw error', async () => {
+    test('missing fields throw error', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData
@@ -1772,20 +1702,18 @@ describe('testing student side APIs', () => {
       expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
     })
 
-    test('bypass captcha, registration success', async () => {
+    test('registration success', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
-        'profile': {
-          'name': 'Laa Huu Min',
-          'icNumber': 'T0240435J',
-          'dob': '2002-04-18T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Secondary 4',
-          'schoolName': 'Upstars Secondary'
-        }
+        'name': 'Laa Huu Min',
+        'icNumber': 'T0240435J',
+        'dob': '2002-04-18T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Secondary 4',
+        'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(201)
       expect(response.body).toEqual({'newStudent': expect.any(String)})
@@ -1795,16 +1723,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
-        'profile': {
-          'name': 'Laa Huu Min',
-          'icNumber': 'T0240435J',
-          'dob': '2002-04-18T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Secondary 4',
-          'schoolName': 'Upstars Secondary'
-        }
+        'name': 'Laa Huu Min',
+        'icNumber': 'T0240435J',
+        'dob': '2002-04-18T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #03-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Secondary 4',
+        'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
@@ -1820,18 +1746,8 @@ describe('testing student side APIs', () => {
       exitDate: '',
       exitReason: ''
     }
-    test('wrong captcha code throws error', async () => {
-      expect.assertions(2)
-      const response = await app.post('/admin/students').send({
-        ...studentBasicData,
-        admin,
-        captchaCode: '03AMGVjXhPIIXARot4pzcGC0avvZ2KKtZKNEA936e_HCX24vTbiaHz-eFV5_90NrbdyJ8lgtYD3lt0DPzrZm84u10Lx4Goc-a_Ev2SWp7kodbKtxJzSEoP7TYdY9SsaRRKVtdtgATZe6Y8jEKYfxKFXyLKAuEAu5b5wCTK6UZF-mF6TlxAMlh0p8sVSPenc6-HV9WIF90tX9xLg5QVyd91O8iaKcnCz33_Nd-rbM2tiGv1wUPojRr87curV8wxEzcpVR929MoiAxu663x7lOcQoSWzeqrJyMOG1A'
-      })
-      expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. Maybe its the Captcha issue? That is all we know.'})
-    })
 
-    test('bypass captcha, missing fields throw error', async () => {
+    test('missing fields throw error', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
@@ -1841,21 +1757,19 @@ describe('testing student side APIs', () => {
       expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
     })
 
-    test('bypass captcha, registration success', async () => {
+    test('registration success', async () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
         admin,
-        'profile': {
-          'name': 'Lao Shu Min',
-          'icNumber': 'T0188435J',
-          'dob': '2001-11-10T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Sec 5-1',
-          'schoolName': 'Upstars Sec'
-        }
+        'name': 'Lao Shu Min',
+        'icNumber': 'T0188435J',
+        'dob': '2001-11-10T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Sec 5-1',
+        'schoolName': 'Upstars Sec'
       })
       expect(response.statusCode).toBe(201)
       expect(response.body).toEqual({'newStudent': expect.any(String)})
@@ -1865,16 +1779,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/students').send({
         ...studentBasicData,
-        'profile': {
-          'name': 'Lao Shu Min',
-          'icNumber': 'T0188435J',
-          'dob': '2001-11-10T16:00:00.000Z',
-          'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
-          'gender': 'F',
-          'nationality': 'Singaporean',
-          'classLevel': 'Sec 5-1',
-          'schoolName': 'Upstars Sec'
-        }
+        'name': 'Lao Shu Min',
+        'icNumber': 'T0188435J',
+        'dob': '2001-11-10T16:00:00.000Z',
+        'address': 'Singapore RedHill Block 377A #04-77 Lorong 7',
+        'gender': 'F',
+        'nationality': 'Singaporean',
+        'classLevel': 'Sec 5-1',
+        'schoolName': 'Upstars Sec'
       })
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
@@ -1995,35 +1907,34 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/students')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
     })
 
     test('deleting without proper studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: []})
-      expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
     })
 
     test('deleting with wrong studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677001']})
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student you requested to delete does not exist.'})
+      expect(response.body).toEqual({'error': 'The student(s) you requested to delete does not exist.'})
     })
 
     test('deleting with malfunctioned studentId', async () => {
       expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d6770021']})
-      expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
     })
 
     test('deleting mass number of studentId returns success', async () => {
-      expect.assertions()
+      expect.assertions(2)
       const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677008', '5b9674ef22deaf1ee1aa4dc1']})
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
 
       // Check if the respective classes have already removed them from the class list
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
@@ -2033,66 +1944,61 @@ describe('testing student side APIs', () => {
 
   describe('edit a student data', () => {
     let editStudentData = {
-      'profile': {
-        'name': 'Lingxin  Long',
-        'icNumber': 'T0299228D',
-        'dob': '2002-09-04T16:00:00.000Z',
-        'address': 'Upstars Road 123',
-        'gender': 'F',
-        'nationality': 'Singaporean',
-        'classLevel': 'Primary 6',
-        // Edited the school name
-        'schoolName': 'Upstars Primary School'
-      },
-      'father': {
-        'name': 'Long Lai La',
-        'icNumber': 'S7382913D',
-        'nationality': 'citizen',
-        'email': 'longlaila@upstars.com',
-        'occupation': 'Manager',
-        'contactNumber': 91231234,
-        'income': 5000
-      },
-      'mother': {
-        'name': 'Foo Fa Hui',
-        'icNumber': 'S7892838F',
-        'nationality': 'citizen',
-        'email': 'foofahui@upstars.com',
-        'occupation': 'Housewife',
-        'contactNumber': 81231234,
-        'income': 0
-      },
-      'misc': {
-        'fas': [
-          'MOE'
-        ],
-        'tuition': [
-          'CDAC',
-          'Mendaki',
-          'Private'
-        ],
-        'academicInfo': [
-          {
-            'year': 2018,
-            'term': 3,
-            'english': 60,
-            'math': 60,
-            'motherTongue': 60,
-            'science': 60,
-            'overall': 60
-          },
-          {
-            'year': 2018,
-            'term': 2,
-            'english': 65,
-            'math': 65,
-            'motherTongue': 65,
-            'science': 65,
-            'overall': 65
-          }
-        ],
-        'fsc': 'ABC FSC'
-      },
+      'name': 'Lingxin  Long',
+      'icNumber': 'T0299228D',
+      'dob': '2002-09-04T16:00:00.000Z',
+      'address': 'Upstars Road 123',
+      'gender': 'F',
+      'nationality': 'Singaporean',
+      'classLevel': 'Primary 6',
+      // Edited the school name
+      'schoolName': 'Upstars Primary School',
+      'fatherName': 'Long Lai La',
+      'fatherIcNumber': 'S7382913D',
+      'fatherNationality': 'citizen',
+      'fatherEmail': 'longlaila@upstars.com',
+      'fatherOccupation': 'Manager',
+      'fatherContactNumber': 91231234,
+      'fatherIincome': 5000,
+
+      'motherName': 'Foo Fa Hui',
+      'motherIcNumber': 'S7892838F',
+      'motherNationality': 'citizen',
+      'motherEmail': 'foofahui@upstars.com',
+      'motherOccupation': 'Housewife',
+      'motherContactNumber': 81231234,
+      'motherIncome': 0,
+
+      'fas': [
+        'MOE'
+      ],
+      'tuition': [
+        'CDAC',
+        'Mendaki',
+        'Private'
+      ],
+      'academicInfo': [
+        {
+          'year': 2018,
+          'term': 3,
+          'english': 60,
+          'math': 60,
+          'motherTongue': 60,
+          'science': 60,
+          'overall': 60
+        },
+        {
+          'year': 2018,
+          'term': 2,
+          'english': 65,
+          'math': 65,
+          'motherTongue': 65,
+          'science': 65,
+          'overall': 65
+        }
+      ],
+      'fsc': 'ABC FSC',
+
       'admin': {
         'interviewNotes': 'Good!',
         'adminNotes': 'Good!',
@@ -2135,23 +2041,20 @@ describe('testing student side APIs', () => {
     })
 
     test('proper edit changes classes and students', async () => {
-      expect.assertions(4)
+      expect.assertions(3)
       const response = await app.put('/students').send({
         ...editStudentData,
         studentId: '5b936ce7defc1a592d677008'
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
 
       // Check class and personal details
       const userData = await app.get('/students/5b936ce7defc1a592d677008')
-      expect(userData.body.student.profile).toHaveProperty('schoolName', 'Upstars Primary School')
+      expect(userData.body.student).toHaveProperty('schoolName', 'Upstars Primary School')
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class.students).toEqual([
         {
-          'profile': {
-            'name': 'Lingxin  Long'
-          },
+          'name': 'Lingxin  Long',
           '_id': '5b936ce7defc1a592d677008'
         }
       ])
@@ -2161,10 +2064,9 @@ describe('testing student side APIs', () => {
 
 describe('testing attendance related APIs', () => {
   let lowPrivUserToken
-  beforeAll(async (done) => {
+  beforeAll(async () => {
     const response = await app.post('/login').send({email: 'testuser4@upstars.com', password: 'password'})
     lowPrivUserToken = response.body.token
-    done()
   })
   describe('get a single attendance by ID', () => {
     test('bad attendance ID throws error', async () => {
@@ -2192,10 +2094,8 @@ describe('testing attendance related APIs', () => {
       expect(response.body.attendances).toHaveProperty('hours', 4)
       expect(response.body.attendances.students).toEqual([
         {
-          'list': {
-            'profile': {
-              'name': 'Lingxin  Long'
-            },
+          'student': {
+            'name': 'Lingxin  Long',
             '_id': '5b936ce7defc1a592d677008'
           },
           'status': 0
@@ -2203,10 +2103,8 @@ describe('testing attendance related APIs', () => {
       ])
       expect(response.body.attendances.users).toEqual([
         {
-          'list': {
-            'profile': {
-              'name': 'Wuying  Kong'
-            },
+          'user': {
+            'name': 'Wuying Kong',
             '_id': '5b912ba72b9ec042a58f88a4'
           },
           'status': 1
@@ -2274,40 +2172,36 @@ describe('testing attendance related APIs', () => {
       }
     ]
     test('no filters returns all attendance', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual(foundAttendances)
     })
 
     test('class filter returns attendance from that class', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/5b97b8f2adfb2e018c64d372/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual(foundAttendances)
     })
 
     test('bad class ID returns null', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/5b97b8f2adfb2e018c64d312/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual([])
     })
 
     test('filter returns attendance from non existenent class returns empty', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.get('/attendance/class/5b97bdc5058d1e1e64d232f3/dateStart/dateEnd')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual([])
     })
 
-    test('filter returns attendance after date', async () => {
+    test('filter returns attendance after selected date', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/20180916/dateEnd')
+      const response = await app.get('/attendance/class/dateStart/16092018/dateEnd')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([
         {
@@ -2335,9 +2229,9 @@ describe('testing attendance related APIs', () => {
       ])
     })
 
-    test('filter returns attendance before date', async () => {
+    test('filter returns attendance before selected date', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/dateEnd/20180916')
+      const response = await app.get('/attendance/class/dateStart/dateEnd/16092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([
         {
@@ -2376,9 +2270,9 @@ describe('testing attendance related APIs', () => {
       ])
     })
 
-    test('filter returns attendance for both dates date', async () => {
+    test('filter returns attendance for both start and end dates', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/class/dateStart/20180919/dateEnd/20180926')
+      const response = await app.get('/attendance/class/dateStart/19092018/dateEnd/26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.foundAttendances).toEqual([
         {
@@ -2406,11 +2300,10 @@ describe('testing attendance related APIs', () => {
       ])
     })
 
-    test('bad date filter returns attendance empty', async () => {
-      expect.assertions(3)
-      const response = await app.get('/attendance/class/dateStart/20180926/dateEnd/20180919')
+    test('bad date filter returns attendance as empty', async () => {
+      expect.assertions(2)
+      const response = await app.get('/attendance/class/dateStart/26092018/dateEnd/19092018')
       expect(response.statusCode).toBe(200)
-      expect(response.body.status).toBe('success')
       expect(response.body.foundAttendances).toEqual([])
     })
   })
@@ -2418,7 +2311,7 @@ describe('testing attendance related APIs', () => {
   describe('get attendance by userId', () => {
     test('all fields are working', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180901-20180926')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/01092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 5)
       expect(response.body.attendances[0]).toHaveProperty('attended', 2)
@@ -2490,7 +2383,7 @@ describe('testing attendance related APIs', () => {
 
     test('all fields working 2', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/19092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2526,7 +2419,7 @@ describe('testing attendance related APIs', () => {
 
     test('adding class as a perimeter', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926/5b97b8f2adfb2e018c64d372')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/19092018-26092018/5b97b8f2adfb2e018c64d372')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2562,7 +2455,7 @@ describe('testing attendance related APIs', () => {
 
     test('non existent class returns empty', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/20180919-20180926/5b97bdc5058d1e1e64d232f3')
+      const response = await app.get('/attendance/user/5b912ba72b9ec042a58f88a4/19092018-26092018/5b97bdc5058d1e1e64d232f3')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances).toEqual([])
     })
@@ -2571,7 +2464,7 @@ describe('testing attendance related APIs', () => {
   describe('get attendance by student ID', () => {
     test('all fields are working', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180901-20180926')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/01092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 5)
       expect(response.body.attendances[0]).toHaveProperty('attended', 2)
@@ -2643,7 +2536,7 @@ describe('testing attendance related APIs', () => {
 
     test('all fields working 2', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/19092018-26092018')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2679,7 +2572,7 @@ describe('testing attendance related APIs', () => {
 
     test('adding class as a perimeter', async () => {
       expect.assertions(6)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926/5b97b8f2adfb2e018c64d372')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/19092018-26092018/5b97b8f2adfb2e018c64d372')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances[0]).toHaveProperty('total', 2)
       expect(response.body.attendances[0]).toHaveProperty('attended', 1)
@@ -2715,7 +2608,7 @@ describe('testing attendance related APIs', () => {
 
     test('non existent class returns empty', async () => {
       expect.assertions(2)
-      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/20180919-20180926/5b97bdc5058d1e1e64d232f3')
+      const response = await app.get('/attendance/student/5b936ce7defc1a592d677008/19092018-26092018/5b97bdc5058d1e1e64d232f3')
       expect(response.statusCode).toBe(200)
       expect(response.body.attendances).toEqual([])
     })
@@ -2770,7 +2663,7 @@ describe('testing attendance related APIs', () => {
         {
           'userID': '5b912ba72b9ec042a58f88a4',
           'userName': [
-            'Wuying  Kong'
+            'Wuying Kong'
           ],
           'total': 3,
           'attended': 2,
@@ -2852,11 +2745,11 @@ describe('testing attendance related APIs', () => {
       'hours': 5,
       // 'classId': '5b97b8f2adfb2e018c64d372',
       'users': [{
-        'list': '5b912ba72b9ec042a58f88a4',
+        'user': '5b912ba72b9ec042a58f88a4',
         'status': 1
       }],
       'students': [{
-        'list': '5b936ce7defc1a592d677008',
+        'student': '5b936ce7defc1a592d677008',
         'status': 1
       }],
       'type': 'Class'
@@ -2903,7 +2796,7 @@ describe('testing attendance related APIs', () => {
     })
 
     test('all fields present returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.post('/attendance')
         .set('x-access-token', userToken)
         .send({
@@ -2912,12 +2805,11 @@ describe('testing attendance related APIs', () => {
           date: '2018-10-17T16:00:00.000Z'
         })
       expect(response.statusCode).toBe(201)
-      expect(response.body.success).toBe(true)
       expect(response.body).toHaveProperty('attendanceId')
     })
 
     test('editing an attendance works', async () => {
-      expect.assertions(4)
+      expect.assertions(3)
       const response = await app.post('/attendance')
         .set('x-access-token', userToken)
         .send({
@@ -2927,7 +2819,6 @@ describe('testing attendance related APIs', () => {
           date: '2018-10-17T16:00:00.000Z'
         })
       expect(response.statusCode).toBe(201)
-      expect(response.body.success).toBe(true)
       expect(response.body).toHaveProperty('attendanceId')
 
       const attendanceData = await app.get(`/attendance/${response.body.attendanceId}`)
@@ -2940,7 +2831,7 @@ describe('testing attendance related APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/attendance').set('x-access-token', userToken)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide an existing attendanceId'})
     })
 
     test('no attendanceId throws error', async () => {
@@ -2951,7 +2842,7 @@ describe('testing attendance related APIs', () => {
           classId: '5b97b8f2adfb2e018c64d372'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide an existing attendanceId'})
     })
 
     test('no classId throws error', async () => {
@@ -2963,7 +2854,7 @@ describe('testing attendance related APIs', () => {
           attendanceId: '5b990729cef48424966ed0de'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 attendanceId, classId and ensure input is correct'})
+      expect(response.body).toEqual({'error': 'Please provide an existing classId'})
     })
 
     test('insufficient privilege throws error', async () => {
@@ -2979,7 +2870,7 @@ describe('testing attendance related APIs', () => {
     })
 
     test('proper token returns success', async () => {
-      expect.assertions(3)
+      expect.assertions(2)
       const response = await app.delete('/attendance')
         .set('x-access-token', userToken)
         .send({
@@ -2987,10 +2878,47 @@ describe('testing attendance related APIs', () => {
           attendanceId: '5b990729cef48424966ed0de'
         })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'success': true})
 
       const attendanceData = await app.get('/attendance/5b990729cef48424966ed0de')
       expect(attendanceData.body.attendances).toBe(null)
+    })
+  })
+})
+
+describe('testing stats and misc related APIs', () => {
+  test('stats should be working', async () => {
+    expect.assertions(8)
+    const response = await app.get('/stats/dashboard')
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toHaveProperty('totalUserEstimate', 9)
+    expect(response.body).toHaveProperty('newUserJoined', 2)
+    expect(response.body).toHaveProperty('totalClassesEstimate', 3)
+    expect(response.body).toHaveProperty('totalClassesHeldEstimate', 5)
+    expect(response.body).toHaveProperty('newClassesHeld', 0)
+    expect(response.body).toHaveProperty('totalStudentEstimate', 5)
+    expect(response.body).toHaveProperty('newStudentJoined', 2)
+  })
+
+  describe('cloning a new class', () => {
+    test('bad classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/123')
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toEqual({'error': 'Please provide a proper classId'})
+    })
+
+    test('non-existent classId throws error', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/5b97b8f2adfb2e018c64d123')
+      expect(response.statusCode).toBe(404)
+      expect(response.body).toEqual({'error': 'Class not found, please try again'})
+    })
+
+    test('proper classId returns success', async () => {
+      expect.assertions(2)
+      const response = await app.get('/class/clone/5b97bdc5058d1e1e64d232f3')
+      expect(response.statusCode).toBe(201)
+      expect(response.body).toHaveProperty('newClassId', expect.any(String))
     })
   })
 })

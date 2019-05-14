@@ -1,4 +1,152 @@
 # Change Log
+
+## [v0.6.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.6.1-beta) (May 12, 2019, 10.50am)
+- [Bump] Versions of UPStars software
+- [Changed] In-line code documentation
+- [Changed] All Classes Functions to Hooks
+- [Changed] Break classEdit to 3 files for easy maintenance
+- [Added] Clone Function for classes
+- [Fixed] Refresh token not working for Pending users
+- [Fixed] Clone Class Name incorrect
+- [Fixed] useEffect to work properly when changing URLs
+- [Changed] Student related files to Hooks
+- [Fixed] Student related bugs left in 0.6.0-beta
+- [Changed] Student Models with adjustments from Number to String
+- [Changed] Dump file data for testing
+- [Fixed] Home page overflow UI issues
+- [Added] Tooltips to show timing stats
+- [Changed] Better handling of map functions in JSX
+- [Added] Yup validation in multiple forms
+- [Updated] Semantic-ui-react npm package
+- [Added] Textarea support for admin notes
+- [Added] Readonly to NRIC fields
+- [Changed] VolunteerWrap and VolunteerChangePassword to Hook
+- [Changed] VolunteerView to Hooks
+- [Added] Split the User Edit file to multiple functional components
+- [Fixed] Standardised formatting for all pages to have white margin at bottom of page
+- [Fixed] CSS of user pages
+- [Fixed] Wrong regex functions in Yup cause breaking edits
+- [Added] Force npm start to run in port 3001 by default
+- [Fixed] User schema breaking because of missing admin fields
+- [Added] Gender is missed out in the edit form
+- [Changed] AttendanceWrap to Hooks
+- [Changed] AttendanceForm to Hooks 
+- [Changed] Backend error text to be clearer
+- [Changed] AttendanceSearch to Hooks
+- [Changed] AttendanceView to Hooks
+- [Added] Shared AddEdit form for both functions
+- [Changed] AttendanceUser and AttendanceStudent to Hooks
+- [Fixed] Issue with loading screen
+- [Added] Combined Student and User attendance summary search page
+- [Changed] AttendanceClass to Hooks
+- [Added] Code commenting to standardise
+- [Added] Security validation in AttendanceView
+- [Changed] AttendanceSummary to Hooks
+- [Added] Links to attendance in summary
+- [Changed] Admin functions to Hooks
+- [Added] New file and structure to manage roles and status
+- [Added] Better error handling on front-end
+- [Removed] Console.log dev messages in front-end
+- [Added] .env usage in front-end
+- [Fixed] Memory leak issue
+- [Added] Auto API calls cancellation to prevent memory leak
+- [Added] Better URI redirects if the ID is invalid
+
+## [v0.6.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.6.0-beta) (March 9, 2019, 4.55pm)
+- [Changed] DB Schemas for User and Student
+- [Changed] Better readability in AuthController
+- [Changed] Utils.js to match new schemas
+- [Changed] AuthController code
+- [Changed] UserController code
+- [Changed] StudentController
+- [Changed] ClassController
+- [Changed] AttendanceController
+- [Changed] AdminController
+- [Changed] StatisticsController
+- [Added] Pre 'save' and 'update' hooks to increment version
+- [Removed] Filter of timestamps and versioning
+- [Changed] Dump files to match new schemas
+- [Changed] AuthController tests to fit new APIs
+- [Removed] Strict option in few files
+- [Fixed] Mongoose Deprecation warnings by changing updates
+- [Changed] Class e2e tests
+- [Fixed] Mongoose exclusion and inclusion errors
+- [Changed] User API tests
+- [Added] Jest-circus package
+- [Fixed] BeforeAll() running in only mode by changing from Jasmine2 to jest-circus
+- [Changed] Student API tests
+- [Changed] Attendance API tests
+- [Fixed] Attendance moment.js issues
+- [Changed] Stats and Misc tests
+- [Fixed] Class Cloning spread operator
+- [Added] UserController and StudentController added lean() so that the response are quicker
+- [Changed] Revert the code in UserController edit User func
+- [Changed] Student and User registration to match new schema
+- [Added] New link added to robots.txt
+- [Fixed] Grammar issues in registration email
+- [Added] Better code documentation
+- [Changed] Student Front-end to match the new APIs
+- [Fixed] Spelling error in Student Schema
+- [Changed] User State to match new schemas
+- [Fixed] Async await issue to update user list after deletion
+- [Removed] Unnecessary state from StudentForm
+- [Changed] ClassEdit for new schema
+- [Fixed] ChangeStatus for adding Helper as role
+- [Changed] Attendance to suit new schemas
+- [Fixed] Redirect to wrong page after deletion of Attendance
+
+## [v0.5.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.5.0-beta) (February 8, 2019, 5.20pm)
+- [Trial] React Hooks in v.16.7.0-alpha2
+- [Changed] Classes to React functional components in StudentRegister
+- [Added] React Hooks for useReducer to mimick Redux without boilerplate
+- [Removed] Individual error pages
+- [Added] Single Error Page with props
+- [Changed] Route function from component to render
+- [Changed] Classes are changed to functions for Main related pages.
+- [Changed] Moved VolunteerRegistration to hooks
+- [Changed] UI for better sign up experience
+- [Changed] File Structures to break up functions to smaller ones.
+- [Changed] SideMenu
+- [Changed] Login to React Hooks
+- [Removed] Unnecessary filler page
+- [Fixed] ReCaptcha validation issue on server for Student and User Registration purposes
+- [Changed] Backend tests for the various APIs changed
+- [Added] More env variables to suit new code changes
+- [Reverted] ReCaptcha validation to clicking on terms , not accepting
+- [Fixed] User directed wrong page when timeout in register
+- [Changed] Hooks for EmailVerify.js
+- [Changed] ForgetPass to Hooks
+- [Changed] ResetPass to Hooks
+- [Fixed] Mongoose Deprecation issues and warnings
+- [Added] APIs for class cloning and overall stats
+- [Added] Backend tests for these 2 APIs
+- [Fixed] Basic Mongoose ID validation
+- [Added] Home page
+- [Hooks] #71 (Home Page)
+- [Added] Privacy policies to T&C
+- [Edited] Move function blocks out from main block
+- [Fixed] React Recaptcha timeout after submit
+- [Changed] Files organisation
+- [Added] Send email verification link
+- [Fixed] Fixed #74
+- [Changed] MainCtrl.js to Hooks
+- [Changed] All routes to be clearer
+- [Added] ErrorPage link to every wrapper
+
+## [v0.4.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.4.0-beta) (December 15, 2018, 2.33pm)
+- [Changed] Update process is changed so that mongoose validation works properly
+- [Added] Stricter schema validation in Users and Students
+- [Removed] Unnecessary responses from API calls
+- [Changed] Backend tests
+- [Removed] Success: true from most API responses
+- [Bumped] Version to 0.4.0beta
+- [Changed] Backend tests are edited to fit new API calls
+- [Changed] Standardisation of UP Stars instead of UPStars
+- [Added] Optimisation to multiple APIs involving queries
+- [Added] Indexing to important fields used regularly
+- [Removed] Unnecessary function in Users Model.
+- [Fixed] Mailing issues
+
 ## [v0.3.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.3.1-beta) (November 11, 2018, 4.03pm)
 - [Security] Standardised wrong email / password response
 - [Feature] Utilised .env for security considerations, allowing different configurations on different machines

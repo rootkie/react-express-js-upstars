@@ -1,235 +1,303 @@
-import React, { Component } from 'react'
+import React, { useReducer } from 'react'
 import { Table, Form, Dropdown, Icon, Header, Pagination, Dimmer, Loader, Grid } from 'semantic-ui-react'
-import { array } from 'prop-types'
+import PropTypes from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
-class AttendanceClass extends Component {
-  static propTypes = {
-    classData: array.isRequired
-  }
-  constructor (props) {
-    super(props)
-    // Basic Stats contains the non-changing details as well as the filtered dates (only) to be displayed
-    // student and tutor attendance contains filtered attendance data (corrosponding to the dates in Basic Stats) taking account of the pages and number to be displayed.
-    this.state = {
-      classSelector: '',
-      basicStats: {
-        'studentNumber': 0,
-        'tutorNumber': 0,
-        'studentTutorRatio': 0
-      },
-      totalPages: 1,
-      activePage: 1,
-      rawClassData: [],
-      studentAttendance: [],
-      tutorAttendance: [],
-      isLoading: false
+const initialState = {
+  classSelector: '',
+  basicStats: {
+    studentNumber: 0,
+    tutorNumber: 0,
+    studentTutorRatio: 0
+  },
+  attendanceDates: [],
+  totalPages: 1,
+  activePage: 1,
+  rawClassData: [],
+  studentAttendance: [],
+  tutorAttendance: [],
+  isLoading: false
+}
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'updateField':
+      return {
+        ...state,
+        [action.name]: action.value
+      }
+    case 'initAttendance': {
+      const {basicStats, totalPages, details, rawClassData} = action
+      return {
+        ...state,
+        ...details,
+        basicStats,
+        totalPages,
+        rawClassData,
+        isLoading: false
+      }
     }
+    case 'handlePage':
+      return {
+        ...state,
+        ...action.details,
+        isLoading: false
+      }
+    default:
+      return state
   }
+}
 
-  handleSubmit = (e) => {
+const AttendanceClass = ({classData}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+  /*
+  ============
+  FUNCTIONS
+  ============
+  */
+  const handleSubmit = async e => {
     e.preventDefault()
-    this.setState({isLoading: true})
-    axios.get(`/attendance/${this.state.classSelector}/summary`)
-      .then(response => {
-        let rawClassData = response.data
-        // Calculate pages required by rounding up the number divided by 6 (6 sets of data / page)
-        let pagesRequired = Math.ceil(response.data.attendanceDates.length / 6)
-        // number 1 is the default since we always display the first page when user selects any class
-        let editedClassData = this.processData(rawClassData, 1)
-        this.setState({
-          basicStats: editedClassData.basicStats,
-          totalPages: pagesRequired,
-          studentAttendance: editedClassData.studentAttendance,
-          tutorAttendance: editedClassData.tutorAttendance,
-          rawClassData,
-          isLoading: false
-        })
-      })
-      .catch(error => {
-        console.log(error)
-      })
+    const {classSelector} = state
+    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    const response = await axios.get(`/attendance/${classSelector}/summary`)
+    const rawClassData = {...response.data}
+    // Calculate pages required by rounding up the number divided by 6 (max 6 sets of data / page)
+    const pagesRequired = Math.ceil(rawClassData.attendanceDates.length / 6)
+    const { studentNumber, tutorNumber, studentTutorRatio } = rawClassData
+    const basicStats = {
+      studentNumber,
+      tutorNumber,
+      studentTutorRatio
+    }
+    // default to providing attendance data on page one (1)
+    const details = processAttendanceByPage(rawClassData, 1)
+    dispatch({type: 'initAttendance',
+      basicStats,
+      totalPages: pagesRequired,
+      details,
+      rawClassData
+    })
   }
 
-  processData = (rawData, activePage) => {
-    // They calculate the index so that we can slice off the necesary data based on the current page user selects
-    // E.G. For first (1) page, indexOfLast is six (6) and indexOfFirst is zero (0), thus slicing a total of six (6) data sets
-    // For Array.Slice, the end index is NOT included
+  const processAttendanceByPage = (rawClassData, activePage) => {
+    const { attendanceDates, compiledStudentAttendance, compiledUserAttendance } = rawClassData
     const indexOfLast = activePage * 6
     const indexOfFirst = indexOfLast - 6
-    let attendanceDates = rawData.attendanceDates.slice(indexOfFirst, indexOfLast)
-    let basicStats = {
-      studentNumber: rawData.studentNumber,
-      tutorNumber: rawData.tutorNumber,
-      studentTutorRatio: rawData.studentTutorRatio,
-      status: rawData.status,
-      attendanceDates
-    }
-    let studentAttendance = rawData.compiledStudentAttendance.map((user) => {
+    const studentAttendance = compiledStudentAttendance.map(student => {
+      const { details, attended, percentage, studentName, studentID, total } = student
       return {
-        details: user.details.slice(indexOfFirst, indexOfLast),
-        attended: user.attended,
-        percentage: user.percentage,
-        studentName: user.studentName[0],
-        studentID: user.studentID,
-        total: user.total
+        status: details.slice(indexOfFirst, indexOfLast),
+        attended,
+        percentage,
+        studentName: studentName[0],
+        studentID,
+        total
       }
     })
-    let tutorAttendance = rawData.compiledUserAttendance.map((user) => {
+    const tutorAttendance = compiledUserAttendance.map(user => {
+      const { details, attended, percentage, userName, userID, total } = user
       return {
-        details: user.details.slice(indexOfFirst, indexOfLast),
-        attended: user.attended,
-        percentage: user.percentage,
-        userName: user.userName[0],
-        userID: user.userID,
-        total: user.total
+        status: details.slice(indexOfFirst, indexOfLast),
+        attended,
+        percentage,
+        userName: userName[0],
+        userID,
+        total
       }
     })
     return {
       studentAttendance,
       tutorAttendance,
-      basicStats
+      attendanceDates: attendanceDates.slice(indexOfFirst, indexOfLast)
     }
   }
 
-  handlePaginationChange = (e, { activePage }) => {
+  const handlePaginationChange = (e, { activePage }) => {
     e.preventDefault()
-    this.setState({isLoading: true})
-    // Here, the same processData function is called in which activePage is whatever page user selects
-    let editedClassData = this.processData(this.state.rawClassData, activePage)
-    this.setState({
-      basicStats: editedClassData.basicStats,
-      studentAttendance: editedClassData.studentAttendance,
-      tutorAttendance: editedClassData.tutorAttendance,
-      activePage,
-      isLoading: false
-    })
+    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    const { rawClassData } = state
+    const details = processAttendanceByPage(rawClassData, activePage)
+    dispatch({type: 'handlePage', details})
   }
 
-  // Real-time API call to search for the data.
-  handleSearchOptions = (e, { name, value }) => {
-    this.setState({[name]: value})
+  const handleSearchOptions = (e, { name, value }) => {
+    e.preventDefault()
+    dispatch({type: 'updateField', name, value})
   }
 
-  render () {
-    const { classSelector, basicStats, totalPages, studentAttendance, tutorAttendance, isLoading } = this.state
-    const { classData } = this.props
-
+  /*
+  =============
+  RENDER
+  =============
+  */
+  const { classSelector, basicStats, totalPages, studentAttendance, tutorAttendance, isLoading, attendanceDates } = state
+  const { studentNumber, tutorNumber, studentTutorRatio } = basicStats
+  if (isLoading) {
     return (
-      <Grid stackable stretched>
-        <Dimmer active={isLoading} inverted>
-          <Loader indeterminate active={isLoading}>Loading Data</Loader>
-        </Dimmer>
-        <Grid.Row>
-          <Grid.Column>
-            <Table celled striped unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Form onSubmit={this.handleSubmit}>
-                      <Form.Field required>
-                        <label>Class</label>
-                        <Dropdown name='classSelector' value={classSelector} placeholder='Select a class to view the report' search fluid selection minCharacters={0} options={classData} onChange={this.handleSearchOptions} />
-                      </Form.Field>
-                      <Form.Button positive fluid disabled={!classSelector}>Retrieve class attendance summary</Form.Button>
-                    </Form>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Header>
-              <Icon name='bar chart' />
-              <Header.Content>
-            Basic class statistics
-              </Header.Content></Header>
-            <Table celled striped unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Student No.</Table.HeaderCell>
-                  <Table.HeaderCell>Tutor No.</Table.HeaderCell>
-                  <Table.HeaderCell>Student - Tutor Ratio</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-
-              <Table.Body>
-                <Table.Row>
-                  <Table.Cell collapsing>{basicStats.studentNumber}</Table.Cell>
-                  <Table.Cell collapsing>{basicStats.tutorNumber}</Table.Cell>
-                  <Table.Cell collapsing>{basicStats.studentTutorRatio}</Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Header>
-              <Icon name='line graph' />
-              <Header.Content>
-            Full Attendance Records
-              </Header.Content>
-            </Header>
-            {/* 11 columns (5 for basic data and 6 for attendance records per page) */}
-            {/* 6 sets is tested on computer resolutions of min 1280 x 720 to be able to see everything */}
-            <Table celled striped columns={11} unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Name</Table.HeaderCell>
-                  <Table.HeaderCell>Role</Table.HeaderCell>
-                  <Table.HeaderCell>Total Class Held</Table.HeaderCell>
-                  <Table.HeaderCell>No. attendeed</Table.HeaderCell>
-                  <Table.HeaderCell>Percentage</Table.HeaderCell>
-                  {/* Display attendance dates (6 sets per page) */}
-                  {basicStats.status === 'success' && basicStats.attendanceDates.map((date) => (
-                    <Table.HeaderCell>{moment(date.date).format('L')}</Table.HeaderCell>
-                  ))}
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {/* nested maps allow the various details to be displayed out in order */}
-                {basicStats.status === 'success' && studentAttendance.map((attendance) => (
-                  <Table.Row key={`attendanceStudent-${attendance.studentName}`}>
-                    <Table.Cell>{attendance.studentName}</Table.Cell>
-                    <Table.Cell>Student</Table.Cell>
-                    <Table.Cell>{attendance.total}</Table.Cell>
-                    <Table.Cell>{attendance.attended}</Table.Cell>
-                    <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
-                    {attendance.details.map((individualStatus) => (
-                      <Table.Cell>{individualStatus}</Table.Cell>
-                    ))}
-                  </Table.Row>
-                ))}
-                {basicStats.status === 'success' && tutorAttendance.map((attendance) => (
-                  <Table.Row key={`attendanceUser-${attendance.userName}`} positive>
-                    <Table.Cell>{attendance.userName}</Table.Cell>
-                    <Table.Cell>Tutor</Table.Cell>
-                    <Table.Cell>{attendance.total}</Table.Cell>
-                    <Table.Cell>{attendance.attended}</Table.Cell>
-                    <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
-                    {attendance.details.map((individualStatus) => (
-                      <Table.Cell>{individualStatus}</Table.Cell>
-                    ))}
-                  </Table.Row>
-                ))}
-              </Table.Body>
-              <Table.Footer>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='11'>
-                    <Pagination defaultActivePage={1} totalPages={totalPages} floated='right' onPageChange={this.handlePaginationChange} />
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Footer>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+      <Dimmer active>
+        <Loader indeterminate>Loading Data</Loader>
+      </Dimmer>
     )
   }
+  return (
+    <Grid stackable stretched>
+      <Grid.Row>
+        <Grid.Column>
+          <Table celled striped unstackable>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell colSpan='4'>
+                  <Form onSubmit={handleSubmit}>
+                    <Form.Field required>
+                      <label>Class</label>
+                      <Dropdown name='classSelector' value={classSelector} placeholder='Select a class to view the report' search fluid selection minCharacters={0} options={classData} onChange={handleSearchOptions} />
+                    </Form.Field>
+                    <Form.Button positive fluid disabled={!classSelector}>Retrieve class attendance summary</Form.Button>
+                  </Form>
+                </Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+          </Table>
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row>
+        <Grid.Column>
+          <Header>
+            <Icon name='bar chart' />
+            <Header.Content>
+            Basic class statistics
+            </Header.Content></Header>
+          <Table celled striped unstackable>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Student No.</Table.HeaderCell>
+                <Table.HeaderCell>Tutor No.</Table.HeaderCell>
+                <Table.HeaderCell>Student - Tutor Ratio</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+
+            <Table.Body>
+              <Table.Row>
+                <Table.Cell collapsing>{studentNumber}</Table.Cell>
+                <Table.Cell collapsing>{tutorNumber}</Table.Cell>
+                <Table.Cell collapsing>{studentTutorRatio}</Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          </Table>
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row>
+        <Grid.Column>
+          <Header>
+            <Icon name='line graph' />
+            <Header.Content>
+            Full Attendance Records
+            </Header.Content>
+          </Header>
+          {/* 11 columns (4 for basic data and 6 for attendance records per page) */}
+          {/* 6 sets is tested on computer resolutions of min 1280 x 720 to be able to see everything */}
+          <Table celled striped columns={10} unstackable attached>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Student Name</Table.HeaderCell>
+                <Table.HeaderCell>Total Class Held</Table.HeaderCell>
+                <Table.HeaderCell>No. attended</Table.HeaderCell>
+                <Table.HeaderCell>Percentage</Table.HeaderCell>
+                {/* Display attendance dates (6 sets per page) */}
+                {attendanceDates.map((date) => (
+                  <Table.HeaderCell key={date._id}><Link to={`/dashboard/attendance/view/${date._id}`} target='_blank'>{moment(date.date).format('ll')}</Link> ({date.type})</Table.HeaderCell>
+                ))}
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {studentAttendance.map((attendance) => (
+                <Table.Row key={`attendanceStudent-${attendance.studentName}`}>
+                  <Table.Cell>{attendance.studentName}</Table.Cell>
+                  <Table.Cell>{attendance.total}</Table.Cell>
+                  <Table.Cell>{attendance.attended}</Table.Cell>
+                  <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
+                  {attendance.status.map((individualStatus, index) => (
+                    <Table.Cell key={index} textAlign='center'>
+                      {individualStatus === 1 && <Icon color='green' name='check' size='large' />}
+                      {individualStatus === 0 && <Icon color='red' name='close' size='large' />}
+                      {individualStatus === '-' && <Icon color='black' name='minus' size='large' />}
+                    </Table.Cell>
+                  ))}
+                </Table.Row>
+              ))}
+              {studentAttendance.length === 0 &&
+              <Table.Row key='empty-student-attendance'>
+                <Table.Cell>No Student</Table.Cell>
+                <Table.Cell>0</Table.Cell>
+                <Table.Cell>0</Table.Cell>
+                <Table.Cell>0.00%</Table.Cell>
+                {attendanceDates.map((date, index) => (
+                  <Table.Cell key={index}>-</Table.Cell>
+                ))}
+              </Table.Row>
+              }
+            </Table.Body>
+          </Table>
+
+          <Table celled striped columns={10} unstackable attached>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>User Name</Table.HeaderCell>
+                <Table.HeaderCell>Total Class Held</Table.HeaderCell>
+                <Table.HeaderCell>No. attended</Table.HeaderCell>
+                <Table.HeaderCell>Percentage</Table.HeaderCell>
+                {/* Display attendance dates (6 sets per page) */}
+                {attendanceDates.map((date) => (
+                  <Table.HeaderCell key={date._id}><Link to={`/dashboard/attendance/view/${date._id}`} target='_blank'>{moment(date.date).format('ll')}</Link> ({date.type})</Table.HeaderCell>
+                ))}
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {tutorAttendance.map((attendance) => (
+                <Table.Row key={`attendanceUser-${attendance.userName}`}>
+                  <Table.Cell>{attendance.userName}</Table.Cell>
+                  <Table.Cell>{attendance.total}</Table.Cell>
+                  <Table.Cell>{attendance.attended}</Table.Cell>
+                  <Table.Cell>{(attendance.percentage * 100).toFixed(2)}%</Table.Cell>
+                  {attendance.status.map((individualStatus, index) => (
+                    <Table.Cell key={index} textAlign='center'>
+                      {individualStatus === 1 && <Icon color='green' name='check' size='large' />}
+                      {individualStatus === 0 && <Icon color='red' name='close' size='large' />}
+                      {individualStatus === '-' && <Icon color='black' name='minus' size='large' />}
+                    </Table.Cell>
+                  ))}
+                </Table.Row>
+              ))}
+              {tutorAttendance.length === 0 &&
+              <Table.Row key='empty-tutor-attendance'>
+                <Table.Cell>No Tutor</Table.Cell>
+                <Table.Cell>0</Table.Cell>
+                <Table.Cell>0</Table.Cell>
+                <Table.Cell>0.00%</Table.Cell>
+                {attendanceDates.map((date, index) => (
+                  <Table.Cell key={index}>-</Table.Cell>
+                ))}
+              </Table.Row>
+              }
+            </Table.Body>
+            <Table.Footer>
+              <Table.Row>
+                <Table.HeaderCell colSpan='10'>
+                  <Pagination defaultActivePage={1} totalPages={totalPages} floated='right' onPageChange={handlePaginationChange} />
+                </Table.HeaderCell>
+              </Table.Row>
+            </Table.Footer>
+          </Table>
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
+  )
+}
+
+AttendanceClass.propTypes = {
+  classData: PropTypes.array.isRequired
 }
 
 export default AttendanceClass

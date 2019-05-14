@@ -1,17 +1,11 @@
-import React, { Component } from 'react'
-import { Table, Form, Dropdown, Icon, Header, Dimmer, Loader, Message, Grid, Search } from 'semantic-ui-react'
-import { array } from 'prop-types'
-import DatePicker from 'react-datepicker'
+import React, { useReducer } from 'react'
+import { Dimmer, Loader, Grid } from 'semantic-ui-react'
+import PropTypes from 'prop-types'
 import moment from 'moment'
+import StudentUserForm from './shared/StudentUserForm'
 import axios from 'axios'
-import 'react-datepicker/dist/react-datepicker.css'
 
-const datePickingStyle = {
-  display: 'flex',
-  alignItems: 'center'
-}
-
-let noResultsStudent = {
+const studentNoAttendance = {
   total: 'Oops! No Attendance Records Found!',
   attended: 'Change your search parameters!',
   totalHours: 'nil',
@@ -26,61 +20,74 @@ let noResultsStudent = {
   }]
 }
 
-let attendanceFormattedData = noResultsStudent
+const initialState = {
+  startDate: undefined,
+  endDate: undefined,
+  moreOptions: false,
+  isLoading: false,
+  results: [],
+  value: '',
+  isLoadingSearch: false,
+  classSelector: '',
+  studentSelector: '',
+  error: '',
+  attendanceFormattedData: studentNoAttendance
+}
 
-class AttendanceStudent extends Component {
-  static propTypes = {
-    classData: array.isRequired
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'updateField':
+      return {
+        ...state,
+        [action.name]: action.value
+      }
+    case 'resetSearchBar':
+      return {
+        ...state,
+        isLoadingSearch: false,
+        results: [],
+        studentSelector: ''
+      }
+    case 'startSearch':
+      return {
+        ...state,
+        isLoadingSearch: true,
+        value: action.value
+      }
+    case 'endSearch':
+      return {
+        ...state,
+        isLoadingSearch: false,
+        results: action.results
+      }
+    case 'startSubmit':
+      return {
+        ...state,
+        isLoading: true,
+        error: ''
+      }
+    case 'setError':
+      return {
+        ...state,
+        isLoading: false,
+        error: action.error
+      }
+    default:
+      return state
   }
-  // Everything here is similar to AttendanceUser
-  constructor (props) {
-    super(props)
-    this.state = {
-      startDate: undefined,
-      endDate: undefined,
-      moreOptions: false,
-      isLoading: true,
-      results: [],
-      value: '',
-      isLoadingSearch: false,
-      classSelector: '',
-      studentSelector: '',
-      error: '',
-      attendanceFormattedData
-    }
-  }
+}
 
-  componentDidMount () {
-    this.setState({isLoading: false})
-  }
+const AttendanceStudent = ({classData}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
 
-  resetComponent = () => this.setState({ isLoadingSearch: false, results: [] })
-
-  handleSearchChange = (e, { value }) => {
-    this.setState({ isLoadingSearch: true, value })
-    if (value.length < 1) return this.resetComponent()
-    axios.get(`studentsResponsive/${value}`)
-      .then(response => {
-        console.log(response)
-        let studentList = response.data.studentsFiltered.map(student => {
-          return {
-            title: student.profile.name,
-            id: student._id,
-            key: student._id
-          }
-        })
-        this.setState({ isLoadingSearch: false, results: studentList })
-      })
-  }
-
-  handleResultSelect = (e, { result }) => {
-    this.setState({value: result.title, studentSelector: result.id})
-  }
-
-  formatStudentAttendance = (rawStudentData) => {
+  /*
+  =============
+  FUNCTIONS
+  =============
+  */
+  const formatStudentAttendance = (rawStudentData) => {
     let attendances = []
-    let student = {}
-    for (let [index, attendanceData] of rawStudentData.studentAttendance.entries()) {
+    for (const [index, attendanceData] of rawStudentData.studentAttendance.entries()) {
       attendances[index] = {
         className: attendanceData.className[0],
         date: moment(attendanceData.date).format('DD/MM/YYYY'),
@@ -92,7 +99,7 @@ class AttendanceStudent extends Component {
     }
     // Compilation of the overall statistics of a student
     // Note, the total hours is only calculated based on the date range given. Any attendance outside of it is not shown.
-    student = {
+    const student = {
       total: rawStudentData.total,
       attended: rawStudentData.attended,
       totalHours: rawStudentData.totalHours,
@@ -102,172 +109,52 @@ class AttendanceStudent extends Component {
     return student
   }
 
-  handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    this.setState({ isLoading: true, error: '' })
-    let { startDate, endDate, classSelector, studentSelector } = this.state
+    dispatch({type: 'startSubmit'})
+    const { startDate, endDate, classSelector, studentSelector } = state
 
     if (!studentSelector) {
-      this.setState({ error: 'Please provide a student to search for!', isLoading: false })
-    } else {
-      startDate = moment(startDate).format('[/]YYYYMMDD')
-      endDate = moment(endDate).format('[-]YYYYMMDD')
-      axios.get('attendance/student/' + studentSelector + startDate + endDate + '/' + classSelector)
-        .then(response => {
-        // If there are any records, else a default text is shown to inform the user.
-          if (response.data.attendances.length > 0) {
-            this.setState({attendanceFormattedData: this.formatStudentAttendance(response.data.attendances[0]), isLoading: false})
-          } else {
-            this.setState({isLoading: false, attendanceFormattedData: noResultsStudent})
-          }
-        }).catch(error => {
-          console.log(error)
-        })
+      return dispatch({type: 'setError', error: 'Please provide a student to search for!'})
+    }
+    const sdate = moment(startDate).format('[/]DDMMYYYY')
+    const edate = moment(endDate).format('[-]DDMMYYYY')
+    try {
+      const response = await axios.get('attendance/student/' + studentSelector + sdate + edate + '/' + classSelector)
+      const { attendances } = response.data
+      if (attendances.length > 0) {
+        const attendanceFormattedData = formatStudentAttendance(attendances[0])
+        dispatch({type: 'updateField', name: 'attendanceFormattedData', value: attendanceFormattedData})
+      } else {
+        dispatch({type: 'updateField', name: 'attendanceFormattedData', value: studentNoAttendance})
+      }
+    } finally {
+      dispatch({type: 'updateField', name: 'isLoading', value: false})
     }
   }
 
-  handleDateChange = (dateType, date) => this.setState({[dateType]: date})
-
-  handleSearchOptions = (e, { name, value }) => this.setState({[name]: value})
-
-  toggleOptions = () => this.setState({moreOptions: !this.state.moreOptions})
-
-  render () {
-    const { moreOptions, classSelector, value, results, isLoadingSearch, isLoading, attendanceFormattedData, error } = this.state
-    const { classData } = this.props
-
+  /*
+  ===========
+  RENDER
+  ===========
+  */
+  const { isLoading } = state
+  if (isLoading) {
     return (
-      <Grid stackable stretched>
-        <Grid.Row>
-          <Grid.Column>
-            <Table celled striped unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell colSpan='4'>
-                    <Form onSubmit={this.handleSubmit}>
-                      <div id='volunteer-date-wrapper' style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <Form.Group inline style={{marginBottom: 0}}>
-                          <Form.Field style={datePickingStyle}>
-                            <label>Starting Date</label>
-                            <DatePicker
-                              dateFormat='DD/MM/YYYY'
-                              required
-                              showMonthDropdown
-                              showYearDropdown
-                              dropdownMode='select'
-                              selected={this.state.startDate}
-                              maxDate={this.state.endDate}
-                              onChange={(date) => this.handleDateChange('startDate', date)}
-                              placeholderText='Click to select' />
-                          </Form.Field>
-                          <Form.Field style={datePickingStyle}>
-                            <label>Ending Date</label>
-                            <DatePicker
-                              dateFormat='DD/MM/YYYY'
-                              required
-                              showMonthDropdown
-                              showYearDropdown
-                              dropdownMode='select'
-                              selected={this.state.endDate}
-                              minDate={this.state.startDate}
-                              onChange={(date) => this.handleDateChange('endDate', date)}
-                              placeholderText='Click to select' />
-                          </Form.Field>
-                          <Form.Button positive>Search student's attendance records</Form.Button>
-                        </Form.Group>
-                        <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={this.toggleOptions} />
-                      </div>
-                      <Form.Field required>
-                        <label>Students</label>
-                        <Search
-                          loading={isLoadingSearch}
-                          onResultSelect={this.handleResultSelect}
-                          onSearchChange={this.handleSearchChange}
-                          results={results}
-                          value={value}
-                        />
-                      </Form.Field>
-                      {moreOptions && <div>
-                        <Form.Field style={{paddingTop: '5px'}}>
-                          <label>Classes</label>
-                          <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={this.handleSearchOptions} />
-                        </Form.Field>
-                      </div>}
-
-                    </Form>
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-        {/* Loading screen that shows during API calls for UX */}
-        <Dimmer active={isLoading} inverted>
-          <Loader indeterminate active={isLoading}>Loading Data</Loader>
-        </Dimmer>
-        <Grid.Row>
-          <Grid.Column>
-            <Message
-              hidden={error.length === 0}
-              negative
-              content={error}
-            />
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Header as='h3' dividing>Student Statistics</Header>
-            <Table compact celled unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Attendance Found</Table.HeaderCell>
-                  <Table.HeaderCell>Attended</Table.HeaderCell>
-                  <Table.HeaderCell>Total Hours</Table.HeaderCell>
-                  <Table.HeaderCell>Percentage</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                <Table.Row>
-                  <Table.Cell>{attendanceFormattedData.total}</Table.Cell>
-                  <Table.Cell>{attendanceFormattedData.attended}</Table.Cell>
-                  <Table.Cell>{attendanceFormattedData.totalHours}</Table.Cell>
-                  <Table.Cell>{attendanceFormattedData.percentage * 100}%</Table.Cell>
-                </Table.Row>
-              </Table.Body>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Header as='h3' dividing>Student Attendance</Header>
-            <Table celled striped unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Class Name</Table.HeaderCell>
-                  <Table.HeaderCell>Date</Table.HeaderCell>
-                  <Table.HeaderCell>Type</Table.HeaderCell>
-                  <Table.HeaderCell>Hours</Table.HeaderCell>
-                  <Table.HeaderCell>Status</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-
-              <Table.Body>
-                {attendanceFormattedData.attendances.map((data) => (
-                  <Table.Row key={data.className + data.date}>
-                    <Table.Cell collapsing>{data.className}</Table.Cell>
-                    <Table.Cell collapsing>{data.date}</Table.Cell>
-                    <Table.Cell collapsing>{data.type}</Table.Cell>
-                    <Table.Cell collapsing>{data.hours}</Table.Cell>
-                    <Table.Cell collapsing>{data.status === 1 ? 'Present' : 'Absent'}</Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+      <Dimmer active>
+        <Loader indeterminate>Loading Data</Loader>
+      </Dimmer>
     )
   }
+  return (
+    <Grid stackable stretched>
+      <StudentUserForm state={state} dispatch={dispatch} classData={classData} handleSubmit={handleSubmit} userType='student' />
+    </Grid>
+  )
+}
+
+AttendanceStudent.propTypes = {
+  classData: PropTypes.array.isRequired
 }
 
 export default AttendanceStudent

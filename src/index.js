@@ -2,18 +2,19 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import MainCtrl from './components/MainCtrl'
-import StudentRegister from './components/Register/StudentRegisterForm'
-import VolunteerRegister from './components/Register/VolunteerRegisterForm'
+import StudentRegister from './components/Register/StudentRegistration/StudentRegisterForm'
+import VolunteerRegister from './components/Register/VolunteerRegistration/VolunteerRegisterForm'
 import Login from './components/Login'
-import ForgetPassword from './components/ForgetPassword'
-import ResetPassword from './components/ResetPassword'
-import EmailVerify from './components/EmailVerify'
+import ForgetPassword from './components/Misc/ForgetPassword'
+import ResetPassword from './components/Misc/ResetPassword'
+import EmailVerify from './components/Misc/EmailVerify'
 import Home from './components/Main/Home'
 import 'semantic-ui-css/semantic.min.css'
 import './index.css'
 import Student from './components/Main/Students'
 import Volunteer from './components/Main/Tutors'
-import FourZeroFour from './components/Error/404'
+import ErrorPage from './components/Error/ErrorPage'
+import RequestLink from './components/Misc/RequestLink'
 
 const Root = () => (
   <Router>
@@ -28,8 +29,9 @@ const Root = () => (
         <Route exact path='/forgetpassword' component={ForgetPassword} />
         <Route exact path='/resetpassword/:token' component={ResetPassword} />
         <Route exact path='/verifyaccount/:token' component={EmailVerify} />
+        <Route exact path='/requestlink' component={RequestLink} />
         <Route path='/dashboard' component={MainCtrl} />
-        <Route component={FourZeroFour} />
+        <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
       </Switch>
     </div>
   </Router>

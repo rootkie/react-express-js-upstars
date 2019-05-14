@@ -23,6 +23,11 @@ app.use(function (req, res, next) {
   next()
 })
 
+mongoose.set('debug', true)
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
+
 // Connecting to database
 mongoose.Promise = global.Promise
 if (process.env.NODE_ENV === 'production') {
@@ -36,7 +41,6 @@ if (process.env.NODE_ENV === 'production') {
   ssl: true
   })
   */
-mongoose.set('debug', true)
 
 app.use(helmet())
 
@@ -59,7 +63,7 @@ app.use(mongoSanitize({
 require('./Routes')(app)
 
 app.use((err, req, res, next) => {
-  console.log(err)
+  console.error(err)
   res.status(500).send({
     error: "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."
   })

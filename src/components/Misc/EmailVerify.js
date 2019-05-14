@@ -1,6 +1,7 @@
-import React, { Component } from 'react'
+import React, { useReducer, useEffect } from 'react'
 import { Header, Message, Image, Grid, Icon } from 'semantic-ui-react'
 import axios from 'axios'
+import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 
 const initialState = {
@@ -8,27 +9,41 @@ const initialState = {
   error: false
 }
 
-class EmailVerify extends Component {
-  state = {...initialState}
-  // Before the page starts to render
-  constructor (props) {
-    super(props)
-    this.verifyEmail(props)
-  }
-
-verifyEmail = (props) => {
-  let { token } = props.match.params
+const verifyEmail = (dispatch, match) => {
+  let { token } = match.params
   axios.post(`/verifyEmail`, { token })
     .then(response => {
-      this.setState({ success: true })
-    }).catch((err) => {
-      console.log(err)
-      this.setState({ error: true })
+      dispatch({type: 'verificationSuccess'})
+    }).catch(err => {
+      dispatch({type: 'verificationFailure', err})
     })
 }
 
-render () {
-  const { success, error } = this.state
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'verificationSuccess':
+      return {
+        ...state,
+        success: true
+      }
+    case 'verificationFailure':
+      return {
+        ...state,
+        error: true
+      }
+    default:
+      return state
+  }
+}
+
+const EmailVerify = ({match}) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  useEffect(() => {
+    verifyEmail(dispatch, match)
+  }, [match.params.token])
+
+  const { success, error } = state
 
   return (
     <div className='verify-form'>
@@ -62,6 +77,9 @@ render () {
     </div>
   )
 }
+
+EmailVerify.propTypes = {
+  match: PropTypes.object.isRequired
 }
 
 export default EmailVerify
