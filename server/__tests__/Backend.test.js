@@ -343,7 +343,7 @@ describe('testing auth related API mostly without token', () => {
 
     test('no email prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({nric: 'S925556F'})
+      const response = await app.post('/changepassword').send({nric: 'S9255568F'})
       expect(response.statusCode).toBe(400)
       expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
     })
@@ -371,14 +371,14 @@ describe('testing auth related API mostly without token', () => {
 
     test('suspended user prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({email: 'testuser2@upstars.com', nric: 'S924456F'})
+      const response = await app.post('/changepassword').send({email: 'testuser2@upstars.com', nric: 'S9244567F'})
       expect(response.statusCode).toBe(403)
       expect(response.body).toEqual({'error': 'Your account has been suspended, please contact the administrator for follow up actions'})
     })
 
     test('proper requests returns success', async () => {
       expect.assertions(1)
-      const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
+      const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S9255568F'})
       expect(response.statusCode).toBe(200)
     })
   })
@@ -391,7 +391,7 @@ describe('testing auth related API mostly without token', () => {
         _id: '5b9255700333773af993ae9c',
         random: process.env.RESET_PASSWORD_RANDOM
       }
-      await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
+      await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F8'})
       token = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
         expiresIn: 60 * 30
       })
@@ -912,7 +912,7 @@ describe('testing user side APIs', () => {
           {
             'name': 'Mr. Cristian Bartell',
             'gender': 'M',
-            'nric': 'S925556F',
+            'nric': 'S9255568F',
             'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
@@ -934,7 +934,7 @@ describe('testing user side APIs', () => {
           {
             'name': 'Mr. Cristian Bartell',
             'gender': 'M',
-            'nric': 'S925556F',
+            'nric': 'S9255568F',
             'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
@@ -945,7 +945,7 @@ describe('testing user side APIs', () => {
           {
             'name': 'Wuying Kong',
             'gender': 'M',
-            'nric': 'S923456F',
+            'nric': 'S9234567F',
             'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
@@ -968,7 +968,7 @@ describe('testing user side APIs', () => {
     const userFullData = {
       'name': 'Mr. Cristian Bartell',
       'gender': 'M',
-      'nric': 'S925556F',
+      'nric': 'S9255568F',
       'nationality': 'singaporean',
       'dob': '2004-03-09T16:00:00.000Z',
       'address': '486 Schmitt Drive',
@@ -1051,7 +1051,7 @@ describe('testing user side APIs', () => {
       ],
       '_id': '5b9255700333773af993ae9c',
       'exitDate': '2018-12-27T16:00:00.000Z',
-      '__v': 3
+      '__v': 2
     }
 
     test('lowPriv user does not have auth to view other users', async () => {
@@ -1205,7 +1205,7 @@ describe('testing user side APIs', () => {
     const incompleteUserDetails = {
       'name': 'Mr. Cristian Bartell',
       'gender': 'M',
-      'nric': 'S925556F',
+      'nric': 'S9255568F',
       'nationality': 'singaporean',
       'dob': '2004-03-09T16:00:00.000Z',
       'address': '486 Schmitt Drive',
@@ -1619,7 +1619,7 @@ describe('testing student side APIs', () => {
       const students = [
         {
           'name': 'Student Suspended',
-          'icNumber': 'T02994428D',
+          'icNumber': 'T0299448D',
           'dob': '2002-09-04T16:00:00.000Z',
           'gender': 'F',
           'status': 'Suspended',

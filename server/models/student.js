@@ -16,7 +16,9 @@ const StudentSchema = new Schema({
     type: String,
     unique: true,
     required: true,
-    trim: true
+    trim: true,
+    uppercase: true,
+    match: /^[STFG]\d{7}[A-Z]$/
   },
 
   dob: {

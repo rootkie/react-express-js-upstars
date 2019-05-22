@@ -12,7 +12,7 @@ const mongoose = require('mongoose')
 // New in 0.3.1-beta to replace constConfig.js
 require('dotenv').config()
 // Setup logger
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
+app.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
 // Serve static assets
 app.use(express.static(path.resolve(__dirname, '..', 'build')))
 // Enable Cross Origin Resource Sharing

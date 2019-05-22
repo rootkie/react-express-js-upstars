@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 const Topbar = ({name, _id}) => (
   <Menu size='large' fixed='top' color='blue' inverted>
-    <Menu.Item header width={2}>UPStars [beta v0.6.1]</Menu.Item>
+    <Menu.Item header width={2}>UPStars [beta v0.7.0]</Menu.Item>
     <Menu.Menu position='right'>
       <Dropdown item text={name}>
         <Dropdown.Menu>

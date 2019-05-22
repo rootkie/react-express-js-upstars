@@ -10,7 +10,8 @@ const UserSchema = new Schema({
     type: String,
     unique: true,
     trim: true,
-    required: true
+    required: true,
+    lowercase: true
   },
 
   password: {
@@ -44,7 +45,9 @@ const UserSchema = new Schema({
   nric: {
     type: String,
     trim: true,
-    required: true
+    required: true,
+    uppercase: true,
+    match: /^[STFG]\d{7}[A-Z]$/
   },
 
   address: {
@@ -332,5 +335,17 @@ UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Co
     })
   })
 }
+
+UserSchema.path('postalCode').validate(value => {
+  return (/^\d{6}$/).test(value)
+})
+
+UserSchema.path('homephone').validate(value => {
+  return (/^6\d{7}$/).test(value)
+})
+
+UserSchema.path('handphone').validate(value => {
+  return (/^[8|9]\d{7}$/).test(value)
+})
 
 module.exports = mongoose.model('User', UserSchema)

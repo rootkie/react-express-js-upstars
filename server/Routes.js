@@ -4,7 +4,7 @@ const studentControl = require('./controllers/StudentController')
 const attendanceControl = require('./controllers/AttendanceController')
 const userControl = require('./controllers/UserController.js')
 const adminControl = require('./controllers/AdminController.js')
-const statisticsControl = require('./controllers/statisticsController')
+const statisticsControl = require('./controllers/StatisticsController')
 const hasRole = require('./routeMiddleware').hasRole
 
 // ==============Serving api======================

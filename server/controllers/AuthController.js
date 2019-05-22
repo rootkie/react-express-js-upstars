@@ -141,15 +141,12 @@ module.exports.changePassword = async (req, res, next) => {
     // The email is sent after the user data is successfully saved and a 200 reply is returned
     // all emails delivered to real address
     let mailConfig = {
-      host: 'smtp.gmail.com',
+      host: 'friday.mxlogin.com',
       port: 465,
       secure: true,
       auth: {
-        type: 'OAuth2',
         user: process.env.USER,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN
+        pass: process.env.EMAIL_PASS
       }
     }
     if (process.env.NODE_ENV === 'development') {
@@ -378,15 +375,12 @@ module.exports.register = async (req, res, next) => {
     const encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
     // all emails delivered to real address
     let mailConfig = {
-      host: 'smtp.gmail.com',
+      host: 'friday.mxlogin.com',
       port: 465,
       secure: true,
       auth: {
-        type: 'OAuth2',
         user: process.env.USER,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN
+        pass: process.env.EMAIL_PASS
       }
     }
     if (process.env.NODE_ENV === 'development') {
@@ -563,15 +557,12 @@ module.exports.newLink = async (req, res, next) => {
     const encodedString = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, { expiresIn: '3 days' })
     // all emails delivered to real address
     let mailConfig = {
-      host: 'smtp.gmail.com',
+      host: 'friday.mxlogin.com',
       port: 465,
       secure: true,
       auth: {
-        type: 'OAuth2',
         user: process.env.USER,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN
+        pass: process.env.EMAIL_PASS
       }
     }
     if (process.env.NODE_ENV === 'development') {

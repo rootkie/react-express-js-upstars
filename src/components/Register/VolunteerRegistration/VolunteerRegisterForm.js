@@ -90,7 +90,8 @@ const reducer = (state, action) => {
     case 'clearError':
       return {
         ...state,
-        errorMessage: ''
+        errorMessage: '',
+        success: false
       }
     case 'submitSuccess':
       return {
@@ -157,7 +158,7 @@ const submitEntry = (dispatch, state) => e => {
     handphone: string().required('Please provide a handphone number').matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number'),
     schoolLevel: string().required('Please provide your schooling level'),
     schoolClass: string().required('Please provide your school class'),
-    postalCode: string().required('Please provide a postal code').matches(/^\d{6}/, 'Please provide a valid postal code'),
+    postalCode: string().required('Please provide a postal code').matches(/^\d{6}$/, 'Please provide a valid postal code'),
     address: string().required('Please provide an address'),
     name: string().required('Please provide your name'),
     passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),

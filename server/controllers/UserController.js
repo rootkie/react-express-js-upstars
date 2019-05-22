@@ -269,15 +269,12 @@ module.exports.changePassword = async (req, res, next) => {
       // Assume PRODUCTION first. Will change only if it is a production server
       // all emails delivered to real address
       let mailConfig = {
-        host: 'smtp.gmail.com',
+        host: 'friday.mxlogin.com',
         port: 465,
         secure: true,
         auth: {
-          type: 'OAuth2',
           user: process.env.USER,
-          clientId: process.env.CLIENT_ID,
-          clientSecret: process.env.CLIENT_SECRET,
-          refreshToken: process.env.REFRESH_TOKEN
+          pass: process.env.EMAIL_PASS
         }
       }
       if (process.env.NODE_ENV === 'development') {
