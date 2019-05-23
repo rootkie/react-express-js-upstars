@@ -241,9 +241,9 @@ const StudentEdit = ({editStudent, match, roles}) => {
             ...studentData,
             admin: {
               ...studentData.admin,
-              commencementDate: commencementDate ? moment(commencementDate) : commencementDate,
-              interviewDate: interviewDate ? moment(interviewDate) : interviewDate,
-              exitDate: exitDate ? moment(exitDate) : exitDate
+              commencementDate: commencementDate ? moment(commencementDate) : undefined,
+              interviewDate: interviewDate ? moment(interviewDate) : undefined,
+              exitDate: exitDate ? moment(exitDate) : undefined
             }
           }
         }

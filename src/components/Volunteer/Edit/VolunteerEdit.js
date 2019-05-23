@@ -154,8 +154,8 @@ const VolunteerEdit = ({history, match, roles}) => {
           ...userData,
           admin: {
             ...userData.admin,
-            interviewDate: interviewDate ? moment(interviewDate) : interviewDate,
-            commencementDate: commencementDate ? moment(commencementDate) : commencementDate
+            interviewDate: interviewDate ? moment(interviewDate) : undefined,
+            commencementDate: commencementDate ? moment(commencementDate) : undefined
           }
         }
       }

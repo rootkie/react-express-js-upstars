@@ -163,7 +163,7 @@ AddEditForm.propTypes = {
   dispatch: PropTypes.func.isRequired,
   newAttendance: PropTypes.bool.isRequired,
   edit: PropTypes.bool.isRequired,
-  classData: PropTypes.object,
+  classData: PropTypes.array,
   handleClass: PropTypes.func
 }
 

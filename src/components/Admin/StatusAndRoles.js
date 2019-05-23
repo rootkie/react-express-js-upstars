@@ -105,7 +105,7 @@ const StatusAndRoles = ({userData, dispatch, userType}) => {
 }
 
 StatusAndRoles.propTypes = {
-  userData: PropTypes.object.isRequired,
+  userData: PropTypes.array.isRequired,
   dispatch: PropTypes.func.isRequired,
   userType: PropTypes.string.isRequired
 }
