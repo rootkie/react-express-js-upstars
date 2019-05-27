@@ -9,6 +9,10 @@ const initialState = {
   error: false
 }
 
+const heightStyle = { height: '100%' }
+const maxWidth = { maxWidth: 550 }
+const image = require('./logo.png')
+
 const verifyEmail = (dispatch, match) => {
   let { token } = match.params
   axios.post(`/verifyEmail`, { token })
@@ -56,10 +60,10 @@ const EmailVerify = ({match}) => {
     `}</style>
       <Grid
         textAlign='center'
-        style={{ height: '100%' }}
+        style={heightStyle}
         verticalAlign='middle'>
-        <Grid.Column style={{ maxWidth: 550 }}>
-          <Image size='big' centered src={require('./logo.png')} />
+        <Grid.Column style={maxWidth}>
+          <Image size='big' centered src={image} />
           <Header as='h2' color='teal' textAlign='center'>
               Verify your email
           </Header>

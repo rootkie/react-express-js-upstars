@@ -9,6 +9,10 @@ const initialState = {
   message: ''
 }
 
+const heightStyle = { height: '100%' }
+const maxWidth = { maxWidth: 550 }
+const image = require('./logo.png')
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'updateField':
@@ -69,10 +73,10 @@ const ForgetPassword = () => {
     `}</style>
       <Grid
         textAlign='center'
-        style={{ height: '100%' }}
+        style={heightStyle}
         verticalAlign='middle'>
-        <Grid.Column style={{ maxWidth: 550 }}>
-          <Image size='big' centered src={require('./logo.png')} />
+        <Grid.Column style={maxWidth}>
+          <Image size='big' centered src={image} />
           <Header as='h2' color='teal' textAlign='center'>
               Reset your account password
           </Header>
