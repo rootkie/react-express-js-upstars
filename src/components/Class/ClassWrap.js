@@ -7,7 +7,6 @@ import ClassView from './ClassView.js'
 import ClassEdit from './Edit/ClassEdit.js'
 import axios from 'axios'
 import ErrorPage from '../Error/ErrorPage'
-const source = axios.CancelToken.source()
 
 const initialState = {
   classData: [],
@@ -20,7 +19,7 @@ FUNCTIONS
 ===================
 */
 
-const getClasses = (dispatch) => {
+const getClasses = (dispatch, source) => {
   axios.get('class', {cancelToken: source.token})
     .then(response => {
       const { activeClasses, stoppedClasses } = response.data
@@ -50,9 +49,10 @@ const reducer = (state, action) => {
 
 const ClassWrap = ({match, roles}) => {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const source = axios.CancelToken.source()
 
   useEffect(() => {
-    getClasses(dispatch)
+    getClasses(dispatch, source)
 
     return () => {
       source.cancel('API cancelled')
@@ -103,7 +103,7 @@ const ClassWrap = ({match, roles}) => {
     await axios.delete('/class', {
       data
     })
-    getClasses(dispatch)
+    getClasses(dispatch, source)
   }
 
   /*

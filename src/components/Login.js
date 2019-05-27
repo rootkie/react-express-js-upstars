@@ -12,6 +12,10 @@ const initialState = {
   showLink: false
 }
 
+const heightStyle = { height: '100%' }
+const maxWidth = { maxWidth: 550 }
+const image = require('./Misc/logo.png')
+
 /*
 =======================================================
 Functions required in the main body
@@ -172,10 +176,10 @@ const Login = () => {
     `}</style>
       <Grid
         textAlign='center'
-        style={{ height: '100%' }}
+        style={heightStyle}
         verticalAlign='middle'>
-        <Grid.Column style={{ maxWidth: 550 }}>
-          <Image size='big' centered src={require('./Misc/logo.png')} />
+        <Grid.Column style={maxWidth}>
+          <Image size='big' centered src={image} />
           <Header as='h2' color='teal' textAlign='center'>
               Log-in to your account
           </Header>

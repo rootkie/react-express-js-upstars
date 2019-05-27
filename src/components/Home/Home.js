@@ -22,7 +22,6 @@ const getDashboardStats = async (setState) => {
 const Home = ({roles}) => {
   const [state, setState] = useState(initialState)
   const { totalUserEstimate, newUserJoined, totalClassesEstimate, totalClassesHeldEstimate, newClassesHeld, totalStudentEstimate, newStudentJoined } = state
-
   // useEffect here runs only once on render unless the page is refreshed
   useEffect(() => {
     getDashboardStats(setState)

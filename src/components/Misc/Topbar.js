@@ -26,4 +26,4 @@ Topbar.propTypes = {
   _id: PropTypes.string
 }
 
-export default Topbar
+export default React.memo(Topbar)
