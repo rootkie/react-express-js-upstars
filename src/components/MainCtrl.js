@@ -1,17 +1,25 @@
-import React, { useReducer, useEffect } from 'react'
+import React, { useReducer, useEffect, Suspense, lazy } from 'react'
 import { Route, Switch, Redirect } from 'react-router-dom'
-import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
+import { Container, Grid, Dimmer, Loader, Header, Icon } from 'semantic-ui-react'
 import axios from 'axios'
-import Topbar from './Misc/Topbar'
-import SideMenu from './Misc/SideMenu'
-import ClassWrap from './Class/ClassWrap'
-import Home from './Home/Home'
 import PropTypes from 'prop-types'
-import VolunteerWrap from './Volunteer/VolunteerWrap'
-import AttendanceWrap from './Attendance/AttendanceWrap'
-import StudentWrap from './Student/StudentWrap'
-import AdminWrap from './Admin/AdminWrap'
+// import Topbar from './Misc/Topbar'
+// import SideMenu from './Misc/SideMenu'
+// import ClassWrap from './Class/ClassWrap'
+// import Home from './Home/Home'
+// import VolunteerWrap from './Volunteer/VolunteerWrap'
+// import AttendanceWrap from './Attendance/AttendanceWrap'
+// import StudentWrap from './Student/StudentWrap'
+// import AdminWrap from './Admin/AdminWrap'
 import ErrorPage from './Error/ErrorPage'
+const Topbar = lazy(() => import('./Misc/Topbar'))
+const SideMenu = lazy(() => import('./Misc/SideMenu'))
+const ClassWrap = lazy(() => import('./Class/ClassWrap'))
+const Home = lazy(() => import('./Home/Home'))
+const VolunteerWrap = lazy(() => import('./Volunteer/VolunteerWrap'))
+const AttendanceWrap = lazy(() => import('./Attendance/AttendanceWrap'))
+const StudentWrap = lazy(() => import('./Student/StudentWrap'))
+const AdminWrap = lazy(() => import('./Admin/AdminWrap'))
 
 // For production automatic during npm build
 if (process.env.NODE_ENV === 'production') {
@@ -142,6 +150,16 @@ const clearTimeInterval = () => {
   window.clearInterval(forceRefresh)
 }
 
+const loadingPage = (
+  <Dimmer active page>
+    <Header as='h2' icon inverted>
+      <Icon name='dashboard' />
+        Loading the dashboard.
+      <Header.Subheader>Thank you for your patience</Header.Subheader>
+    </Header>
+  </Dimmer>
+)
+
 /*
 ================
 MAIN FUNCTION
@@ -208,24 +226,26 @@ const MainCtrl = ({match}) => {
   } else if (isLoggedIn && confirm) {
     return (
       <Container fluid>
-        <Topbar name={name} _id={_id} />
-        <Grid style={GridStyle} stackable>
-          <SideMenu roles={roles} />
-          <Grid.Column width={13} style={MainContentStyle}>
-            {/* Path refers to /dashboard that is inherited */}
-            {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
+        <Suspense fallback={loadingPage}>
+          <Topbar name={name} _id={_id} />
+          <Grid style={GridStyle} stackable>
+            <SideMenu roles={roles} />
+            <Grid.Column width={13} style={MainContentStyle}>
+              {/* Path refers to /dashboard that is inherited */}
+              {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
-            <Switch>
-              <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
-              <Route path={`${path}/students`} render={props => <StudentWrap roles={roles} {...props} />} />
-              <Route path={`${path}/classes`} render={props => <ClassWrap roles={roles} {...props} />} />
-              <Route path={`${path}/volunteer`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
-              <Route path={`${path}/attendance`} render={props => <AttendanceWrap roles={roles} {...props} />} />
-              <Route path={`${path}/admin`} render={props => <AdminWrap {...props} />} />
-              <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
-            </Switch>
-          </Grid.Column>
-        </Grid>
+              <Switch>
+                <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
+                <Route path={`${path}/students`} render={props => <StudentWrap roles={roles} {...props} />} />
+                <Route path={`${path}/classes`} render={props => <ClassWrap roles={roles} {...props} />} />
+                <Route path={`${path}/volunteer`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
+                <Route path={`${path}/attendance`} render={props => <AttendanceWrap roles={roles} {...props} />} />
+                <Route path={`${path}/admin`} render={props => <AdminWrap {...props} />} />
+                <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
+              </Switch>
+            </Grid.Column>
+          </Grid>
+        </Suspense>
       </Container>
     )
   } else {
