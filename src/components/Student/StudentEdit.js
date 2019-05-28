@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from 'react'
+import React, { useReducer, useEffect, useMemo, useCallback } from 'react'
 import { Form, Message, Table, Menu, Dimmer, Loader, Header, Grid, Icon, List, Popup } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
@@ -257,9 +257,9 @@ const StudentEdit = ({editStudent, match, roles}) => {
     }
   }
 
-  const handleActiveChange = (e, {name}) => {
+  const handleActiveChange = useCallback((e, {name}) => {
     dispatch(({type: 'changeActive', name}))
-  }
+  }, [state.activeItem])
 
   /*
   ===========
@@ -269,15 +269,13 @@ const StudentEdit = ({editStudent, match, roles}) => {
 
   const { activeItem, errorMessage, edit, isLoading, success, classes, buttonContent, createdAt, updatedAt, __v } = state
 
-  if (isLoading) {
-    return (
-      <Dimmer active>
-        <Loader indeterminate>Loading Data</Loader>
+  return (
+    <Grid stackable stretched>
+      <Dimmer active={isLoading} page>
+        <Loader indeterminate active={isLoading}>Loading Data</Loader>
       </Dimmer>
-    )
-  } else {
-    return (
-      <Grid stackable stretched>
+      {/* Performance to make sure the top menu bar do not re-render every time someone types */}
+      {useMemo(() => (
         <Grid.Row>
           <Grid.Column>
             <Menu attached='top' pointing fluid stackable>
@@ -290,92 +288,99 @@ const StudentEdit = ({editStudent, match, roles}) => {
               2. Family Info
               </Menu.Item>
               {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
-              <Menu.Item name='Office' active={activeItem === 'Office'} onClick={handleActiveChange} color={'orange'}>
-                <Icon name='dashboard' />
+                <Menu.Item name='Office' active={activeItem === 'Office'} onClick={handleActiveChange} color={'orange'}>
+                  <Icon name='dashboard' />
               3. For office use
-              </Menu.Item>
+                </Menu.Item>
               }
             </Menu>
           </Grid.Column>
         </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Form>
-              { activeItem === 'Personal Info' &&
-                <PersonalInfo state={state} dispatch={dispatch} handleChange={handleChange} edit={edit} type='edit' />
-              }
-              { activeItem === 'Family Details' &&
-                <FamilyDetails state={state} dispatch={dispatch} handleChange={handleChange} edit={edit} />
-              }
-              {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) && activeItem === 'Office' &&
-                <Office admin={state.admin} dispatch={dispatch} edit={edit} />
-              }
-              <Message
-                icon='exclamation triangle'
-                hidden={errorMessage.length === 0 || !errorMessage}
-                negative
-                header='Error!'
-                content={errorMessage}
-              />
-              <Message
-                icon='save'
-                hidden={!success}
-                positive
-                header='Success!'
-                content='Successfully Submitted and saved'
-              />
-              {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
+      ), [activeItem, handleActiveChange])}
+      <Grid.Row>
+        <Grid.Column>
+          <Form>
+            { activeItem === 'Personal Info' &&
+              <PersonalInfo state={state} dispatch={dispatch} handleChange={handleChange} edit={edit} type='edit' />
+            }
+            { activeItem === 'Family Details' &&
+              <FamilyDetails state={state} dispatch={dispatch} handleChange={handleChange} edit={edit} />
+            }
+            {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) && activeItem === 'Office' &&
+              <Office admin={state.admin} dispatch={dispatch} edit={edit} />
+            }
+            <Message
+              icon='exclamation triangle'
+              hidden={errorMessage.length === 0 || !errorMessage}
+              negative
+              header='Error!'
+              content={errorMessage}
+            />
+            <Message
+              icon='save'
+              hidden={!success}
+              positive
+              header='Success!'
+              content='Successfully Submitted and saved'
+            />
+            {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
               <Form.Button type='button' content={buttonContent} icon='edit' labelPosition='left' onClick={toggleButton(state, dispatch, editStudent, match.params.id)} />
-              }
-            </Form>
-          </Grid.Column>
-        </Grid.Row>
-        <Header as='h3' dividing>Classes</Header>
-        <Grid.Row>
-          <Grid.Column>
-            <Table compact celled unstackable>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell width='1'>S/N</Table.HeaderCell>
-                  <Table.HeaderCell width='6'>Name</Table.HeaderCell>
-                  <Table.HeaderCell width='5'>Status</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              {classes.length !== 0 &&
-              <Table.Body>
-                {classes.map((Class, i) => (
-                  <Table.Row key={`class-${Class._id}`}>
-                    <Table.Cell>{i + 1}</Table.Cell>
-                    <Table.Cell><Link to={`/dashboard/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
-                    <Table.Cell>{Class.status}</Table.Cell>
-                  </Table.Row>))}
-              </Table.Body>
-              }
-              {classes.length === 0 &&
-              <Table.Body>
-                <Table.Row key={`empty-class`}>
-                  <Table.Cell>1</Table.Cell>
-                  <Table.Cell>Oops! No Classes Found!</Table.Cell>
-                  <Table.Cell>nil</Table.Cell>
-                </Table.Row>
-              </Table.Body>
-              }
-            </Table>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <List size='mini' horizontal bulleted>
-              <List.Item><Popup size='mini' trigger={<div>Latest update {moment(updatedAt).fromNow()}</div>} content={moment(updatedAt).format('LLL')} /></List.Item>
-              <List.Item>Edited {__v} times</List.Item>
-              <List.Item><Popup size='mini' trigger={<div>Created {moment(createdAt).fromNow()}</div>} content={moment(createdAt).format('LLL')} /></List.Item>
-            </List>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    )
-  }
+            }
+          </Form>
+        </Grid.Column>
+      </Grid.Row>
+      {/* React useMemo makes sure that when typing the form, the class table does not re-render for no reason unless classes, createdAt,
+          updatedAt, __v are changed */}
+      {useMemo(() => (
+        <React.Fragment>
+          <Header as='h3' dividing>Classes</Header>
+          <Grid.Row>
+            <Grid.Column>
+              <Table compact celled unstackable>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell width='1'>S/N</Table.HeaderCell>
+                    <Table.HeaderCell width='6'>Name</Table.HeaderCell>
+                    <Table.HeaderCell width='5'>Status</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                {classes.length !== 0 &&
+                  <Table.Body>
+                    {classes.map((Class, i) => (
+                      <Table.Row key={`class-${Class._id}`}>
+                        <Table.Cell>{i + 1}</Table.Cell>
+                        <Table.Cell><Link to={`/dashboard/classes/id/${Class._id}`}>{Class.className}</Link></Table.Cell>
+                        <Table.Cell>{Class.status}</Table.Cell>
+                      </Table.Row>))}
+                  </Table.Body>
+                }
+                {classes.length === 0 &&
+                  <Table.Body>
+                    <Table.Row key={`empty-class`}>
+                      <Table.Cell>1</Table.Cell>
+                      <Table.Cell>Oops! No Classes Found!</Table.Cell>
+                      <Table.Cell>nil</Table.Cell>
+                    </Table.Row>
+                  </Table.Body>
+                }
+              </Table>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <List size='mini' horizontal bulleted>
+                <List.Item><Popup size='mini' trigger={<div>Latest update {moment(updatedAt).fromNow()}</div>} content={moment(updatedAt).format('LLL')} /></List.Item>
+                <List.Item>Edited {__v} times</List.Item>
+                <List.Item><Popup size='mini' trigger={<div>Created {moment(createdAt).fromNow()}</div>} content={moment(createdAt).format('LLL')} /></List.Item>
+              </List>
+            </Grid.Column>
+          </Grid.Row>
+        </React.Fragment>
+      ), [classes, createdAt, updatedAt, __v])}
+    </Grid>
+  )
 }
+// }
 
 StudentEdit.propTypes = {
   editStudent: PropTypes.func,

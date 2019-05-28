@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useMemo } from 'react'
 import FamilyDetails from '../StudentRegistration/FamilyDetails'
 import PersonalInfo from '../StudentRegistration/PersonalInfo'
 import { Form, Message, Header, Icon, Segment, Image, Grid, Step } from 'semantic-ui-react'
@@ -343,36 +343,42 @@ const StudentForm = () => {
   return (
     <Segment style={{ padding: '3em 0em' }} vertical>
       <Grid container stackable verticalAlign='middle'>
-        <Grid.Row>
-          <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column textAlign='center'>
-            <Header as='h1' color='blue'>
+        {useMemo(() => (
+          <React.Fragment>
+            <Grid.Row>
+              <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column textAlign='center'>
+                <Header as='h1' color='blue'>
               Sign up as a student
-            </Header>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Step.Group attached='top'>
-              <Step active={activeItem === 'Personal Info'} completed={activeItem === 'Family Details'}>
-                <Icon name='user' />
-                <Step.Content>
-                  <Step.Title>Personal Info</Step.Title>
-                  <Step.Description>Fill in your personal details</Step.Description>
-                </Step.Content>
-              </Step>
-              <Step disabled={activeItem !== 'Family Details'} active={activeItem === 'Family Details'}>
-                <Icon name='info circle' />
-                <Step.Content>
-                  <Step.Title>Family & Misc</Step.Title>
-                  <Step.Description>Enter family details</Step.Description>
-                </Step.Content>
-              </Step>
-            </Step.Group>
-          </Grid.Column>
-        </Grid.Row>
+                </Header>
+              </Grid.Column>
+            </Grid.Row>
+          </React.Fragment>
+        ), [])}
+        {useMemo(() => (
+          <Grid.Row>
+            <Grid.Column>
+              <Step.Group attached='top'>
+                <Step active={activeItem === 'Personal Info'} completed={activeItem === 'Family Details'}>
+                  <Icon name='user' />
+                  <Step.Content>
+                    <Step.Title>Personal Info</Step.Title>
+                    <Step.Description>Fill in your personal details</Step.Description>
+                  </Step.Content>
+                </Step>
+                <Step disabled={activeItem !== 'Family Details'} active={activeItem === 'Family Details'}>
+                  <Icon name='info circle' />
+                  <Step.Content>
+                    <Step.Title>Family & Misc</Step.Title>
+                    <Step.Description>Enter family details</Step.Description>
+                  </Step.Content>
+                </Step>
+              </Step.Group>
+            </Grid.Column>
+          </Grid.Row>
+        ), [activeItem])}
         <Grid.Row>
           <Grid.Column>
             <Form>

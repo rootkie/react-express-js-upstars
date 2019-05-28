@@ -110,4 +110,4 @@ StatusAndRoles.propTypes = {
   userType: PropTypes.string.isRequired
 }
 
-export default StatusAndRoles
+export default React.memo(StatusAndRoles)

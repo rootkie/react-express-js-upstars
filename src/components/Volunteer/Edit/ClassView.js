@@ -43,4 +43,4 @@ ClassView.propTypes = {
   classes: PropTypes.array.isRequired
 }
 
-export default ClassView
+export default React.memo(ClassView)

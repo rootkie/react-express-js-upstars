@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react'
+import React, { useEffect, useReducer, useCallback, useMemo } from 'react'
 import { Form, Button, Header, Icon, Menu, Message, Dimmer, Loader, Modal, Grid, List, Popup } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import axios from 'axios'
@@ -255,13 +255,13 @@ const VolunteerEdit = ({history, match, roles}) => {
       })
   }
 
-  const handleItemClick = (e, { name }) => dispatch({ type: 'updateField', name: 'activeItem', value: name })
+  const handleItemClick = useCallback((e, { name }) => dispatch({ type: 'updateField', name: 'activeItem', value: name }), [state.activeItem])
 
-  const deactivateAccount = (e) => {
+  const deactivateAccount = useCallback((e) => {
     dispatch({type: 'updateField', name: 'deactivate', value: true})
-  }
+  }, [state.deactivate])
 
-  const handleDeactivate = (e) => {
+  const handleDeactivate = useCallback((e) => {
     const { userId } = match.params
     axios.delete('users', { data: {
       userId
@@ -274,11 +274,11 @@ const VolunteerEdit = ({history, match, roles}) => {
       }).catch(err => {
         dispatch({type: 'setErrorMessage', value: err.response.data.error})
       })
-  }
+  }, [match.params.userId])
 
-  const handleClose = (e) => {
+  const handleClose = useCallback((e) => {
     dispatch({type: 'updateField', name: 'deactivate', value: false})
-  }
+  }, [state.deactivate])
 
   /*
   =============
@@ -288,27 +288,26 @@ const VolunteerEdit = ({history, match, roles}) => {
 
   const { buttonContent, classes, edit, activeItem, errorMessage, isLoading, deactivate, createdAt, updatedAt, __v, success } = state
 
-  if (isLoading) {
-    return (
-      <Dimmer active>
-        <Loader indeterminate>Loading Data</Loader>
-      </Dimmer>
-    )
-  }
   return (
     <Grid stackable stretched>
-      <Grid.Row>
-        <Grid.Column>
-          <Menu attached='top' fluid pointing stackable>
-            <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={handleItemClick} color={'red'}><Icon name='user' />Personal Info</Menu.Item>
-            <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={handleItemClick} color={'blue'}><Icon name='info circle' />Family Details</Menu.Item>
-            <Menu.Item name='Personal Statement' active={activeItem === 'Personal Statement'} onClick={handleItemClick} color={'orange'}><Icon name='write' />Personal Statement</Menu.Item>
-            {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
+      <Dimmer page active={isLoading}>
+        <Loader indeterminate active={isLoading}>Loading Data</Loader>
+      </Dimmer>
+      {/* Performance optimisation to prevent excessive re-render. Roles is excluded because React works differently and cannot compute arrays well */}
+      {useMemo(() => (
+        <Grid.Row>
+          <Grid.Column>
+            <Menu attached='top' fluid pointing stackable>
+              <Menu.Item name='Personal Info' active={activeItem === 'Personal Info'} onClick={handleItemClick} color={'red'}><Icon name='user' />Personal Info</Menu.Item>
+              <Menu.Item name='Family Details' active={activeItem === 'Family Details'} onClick={handleItemClick} color={'blue'}><Icon name='info circle' />Family Details</Menu.Item>
+              <Menu.Item name='Personal Statement' active={activeItem === 'Personal Statement'} onClick={handleItemClick} color={'orange'}><Icon name='write' />Personal Statement</Menu.Item>
+              {(roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) &&
               <Menu.Item name='For office use' active={activeItem === 'For office use'} onClick={handleItemClick} color={'green'}><Icon name='dashboard' />For office use</Menu.Item>
-            }
-          </Menu>
-        </Grid.Column>
-      </Grid.Row>
+              }
+            </Menu>
+          </Grid.Column>
+        </Grid.Row>
+      ), [handleItemClick, activeItem])}
       <Grid.Row>
         <Grid.Column>
 
@@ -348,40 +347,44 @@ const VolunteerEdit = ({history, match, roles}) => {
           <ClassView classes={classes} />
         </Grid.Column>
       </Grid.Row>
-      <Grid.Row>
-        <Grid.Column>
-          <Header as='h3' dividing>Personal Settings</Header>
-          <Button negative animated='vertical' onClick={deactivateAccount}>
-            <Button.Content visible>Deactivate your account</Button.Content>
-            <Button.Content hidden>
-              <Icon name='trash' />
-            </Button.Content>
-          </Button>
-          <Modal open={deactivate} dimmer='blurring' size='large'>
-            <Modal.Header>Is this goodbye?</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <Header>Before you go...</Header>
-                <p>Note that the account deactivation is highly irreverisble</p>
-                <p>UPStars thank you for being with us. We hope to have you onboard again!</p>
-              </Modal.Description>
-            </Modal.Content>
-            <Modal.Actions>
-              <Button negative icon='close' labelPosition='right' content='Never mind, keep my account' onClick={handleClose} />
-              <Button positive icon='checkmark' labelPosition='right' content='Deactivate' onClick={handleDeactivate} />
-            </Modal.Actions>
-          </Modal>
-        </Grid.Column>
-      </Grid.Row>
-      <Grid.Row>
-        <Grid.Column>
-          <List size='mini' horizontal bulleted>
-            <List.Item><Popup size='mini' trigger={<div>Latest update {moment(updatedAt).fromNow()}</div>} content={moment(updatedAt).format('LLL')} /></List.Item>
-            <List.Item>Edited {__v} times</List.Item>
-            <List.Item><Popup size='mini' trigger={<div>Created {moment(createdAt).fromNow()}</div>} content={moment(createdAt).format('LLL')} /></List.Item>
-          </List>
-        </Grid.Column>
-      </Grid.Row>
+      {useMemo(() => (
+        <React.Fragment>
+          <Grid.Row>
+            <Grid.Column>
+              <Header as='h3' dividing>Personal Settings</Header>
+              <Button negative animated='vertical' onClick={deactivateAccount}>
+                <Button.Content visible>Deactivate your account</Button.Content>
+                <Button.Content hidden>
+                  <Icon name='trash' />
+                </Button.Content>
+              </Button>
+              <Modal open={deactivate} dimmer='blurring' size='large'>
+                <Modal.Header>Is this goodbye?</Modal.Header>
+                <Modal.Content>
+                  <Modal.Description>
+                    <Header>Before you go...</Header>
+                    <p>Note that the account deactivation is highly irreverisble</p>
+                    <p>UPStars thank you for being with us. We hope to have you onboard again!</p>
+                  </Modal.Description>
+                </Modal.Content>
+                <Modal.Actions>
+                  <Button negative icon='close' labelPosition='right' content='Never mind, keep my account' onClick={handleClose} />
+                  <Button positive icon='checkmark' labelPosition='right' content='Deactivate' onClick={handleDeactivate} />
+                </Modal.Actions>
+              </Modal>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <List size='mini' horizontal bulleted>
+                <List.Item><Popup size='mini' trigger={<div>Latest update {moment(updatedAt).fromNow()}</div>} content={moment(updatedAt).format('LLL')} /></List.Item>
+                <List.Item>Edited {__v} times</List.Item>
+                <List.Item><Popup size='mini' trigger={<div>Created {moment(createdAt).fromNow()}</div>} content={moment(createdAt).format('LLL')} /></List.Item>
+              </List>
+            </Grid.Column>
+          </Grid.Row>
+        </React.Fragment>
+      ), [updatedAt, createdAt, __v, handleDeactivate, handleClose, deactivateAccount])}
     </Grid>
   )
 }

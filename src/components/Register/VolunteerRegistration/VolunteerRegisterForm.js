@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useMemo } from 'react'
 import { Form, Header, Icon, Segment, Image, Message, Grid, Step } from 'semantic-ui-react'
 import LoginDetails from './LoginDetails'
 import PersonalInfo from './PersonalInfo'
@@ -226,36 +226,42 @@ const VolunteerRegister = () => {
   return (
     <Segment style={{ padding: '3em 0em' }} vertical>
       <Grid container stackable verticalAlign='middle'>
-        <Grid.Row>
-          <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column textAlign='center'>
-            <Header as='h1' color='blue'>
+        {useMemo(() => (
+          <React.Fragment>
+            <Grid.Row>
+              <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column textAlign='center'>
+                <Header as='h1' color='blue'>
                 Sign up as a volunteer
-            </Header>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Step.Group attached='top'>
-              <Step active={activeItem === 'Login Details'} completed={activeItem === 'Personal Info'}>
-                <Icon name='lock' />
-                <Step.Content>
-                  <Step.Title>Register</Step.Title>
-                  <Step.Description>Fill in your login details</Step.Description>
-                </Step.Content>
-              </Step>
-              <Step disabled={activeItem !== 'Personal Info'} active={activeItem === 'Personal Info'}>
-                <Icon name='user' />
-                <Step.Content>
-                  <Step.Title>Personal Details</Step.Title>
-                  <Step.Description>Enter personal information</Step.Description>
-                </Step.Content>
-              </Step>
-            </Step.Group>
-          </Grid.Column>
-        </Grid.Row>
+                </Header>
+              </Grid.Column>
+            </Grid.Row>
+          </React.Fragment>
+        ), [])}
+        {useMemo(() => (
+          <Grid.Row>
+            <Grid.Column>
+              <Step.Group attached='top'>
+                <Step active={activeItem === 'Login Details'} completed={activeItem === 'Personal Info'}>
+                  <Icon name='lock' />
+                  <Step.Content>
+                    <Step.Title>Register</Step.Title>
+                    <Step.Description>Fill in your login details</Step.Description>
+                  </Step.Content>
+                </Step>
+                <Step disabled={activeItem !== 'Personal Info'} active={activeItem === 'Personal Info'}>
+                  <Icon name='user' />
+                  <Step.Content>
+                    <Step.Title>Personal Details</Step.Title>
+                    <Step.Description>Enter personal information</Step.Description>
+                  </Step.Content>
+                </Step>
+              </Step.Group>
+            </Grid.Column>
+          </Grid.Row>
+        ), [activeItem])}
         <Grid.Row>
           <Grid.Column>
             <Form>
