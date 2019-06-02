@@ -14,6 +14,7 @@ const initialState = {
   name: '',
   address: '',
   gender: '',
+  nric: '',
   handphone: '',
   postalCode: '',
   homephone: '',
