@@ -11,15 +11,19 @@ const mongoose = require('mongoose')
 
 // New in 0.3.1-beta to replace constConfig.js
 require('dotenv').config()
+// Allow express to log using remote IP Address
+app.set('trust proxy', true)
 // Setup logger
 app.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
-// Serve static assets
-app.use(express.static(path.resolve(__dirname, '..', 'build')))
+
+app.use(helmet())
+
 // Enable Cross Origin Resource Sharing
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN)
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type, x-access-token')
+  res.header('Cache-Control', 'no-cache')
   next()
 })
 
@@ -41,8 +45,6 @@ if (process.env.NODE_ENV === 'production') {
   ssl: true
   })
   */
-
-app.use(helmet())
 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
@@ -70,7 +72,8 @@ app.use((err, req, res, next) => {
 })
 
 // ==================End of Initialization=========================
-
+// Serve static assets
+app.use(express.static(path.resolve(__dirname, '..', 'build')))
 // Always return the main index.html, so react-router render the route in the client
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'))

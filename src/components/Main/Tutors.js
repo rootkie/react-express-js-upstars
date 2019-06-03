@@ -153,43 +153,47 @@ const Volunteer = () => {
               <Grid.Column>
                 <div style={{ fontSize: '1.2em' }}>
                   <ol>
-                    <li style={{ fontSize: '1.33em' }}><b>UP Stars</b></li>
-                    <ul>
-                      <li>Do remember that you are committed to this program for one academic year (January to November)</li>
-                      <li>Do reply to emails, text messages, phone-calls promptly to acknowledge that you have  received the information, or to confirm attendance for events</li>
-                      <li>Do spread the word about UP Stars and encourage your friends to sign up</li>
-                      <li>Please return the key to the student centre at the end of the year to UP Stars</li>
-                      <li>Please join UP Stars facebook group</li>
-                      <li>If you are a JC2 student and will like to focus on your studies after the mid year, please find someone to replace you</li>
-                    </ul>
+                    <li><b style={{ fontSize: '1.33em' }}>UP Stars</b>
+                      <ul>
+                        <li>Do remember that you are committed to this program for one academic year (January to November)</li>
+                        <li>Do reply to emails, text messages, phone-calls promptly to acknowledge that you have  received the information, or to confirm attendance for events</li>
+                        <li>Do spread the word about UP Stars and encourage your friends to sign up</li>
+                        <li>Please return the key to the student centre at the end of the year to UP Stars</li>
+                        <li>Please join UP Stars facebook group</li>
+                        <li>If you are a JC2 student and will like to focus on your studies after the mid year, please find someone to replace you</li>
+                      </ul>
+                    </li>
                     <Divider hidden />
-                    <li style={{ fontSize: '1.33em' }}><b>Students</b></li>
-                    <ul>
-                      <li>Please treat all students fairly </li>
-                      <li>Do befriend your students to find out their interests, hobbies, academic weaknesses, etc</li>
-                      <li>Do remember to call your students a few days before class to encourage them to come</li>
-                      <li>Do give one week notice to your students for any class cancellation</li>
-                      <li>Do start and attend class on time and end class punctually</li>
-                      <li>Do refrain from using treats and sweets as a form of incentive</li>
-                      <li>Be respectful of your students; some of them are shy and academically weaker. Be supportive and  encouraging!</li>
-                      <li>You are welcome to hold extra classes for the students during the holidays or outside tuition  hours at the student centre. Please remember to inform us before the extra  classes</li>
-                      <li>Classes will not be held on public holidays</li>
-                    </ul>
+                    <li><b style={{ fontSize: '1.33em' }}>Students</b>
+                      <ul>
+                        <li>Please treat all students fairly </li>
+                        <li>Do befriend your students to find out their interests, hobbies, academic weaknesses, etc</li>
+                        <li>Do remember to call your students a few days before class to encourage them to come</li>
+                        <li>Do give one week notice to your students for any class cancellation</li>
+                        <li>Do start and attend class on time and end class punctually</li>
+                        <li>Do refrain from using treats and sweets as a form of incentive</li>
+                        <li>Be respectful of your students; some of them are shy and academically weaker. Be supportive and  encouraging!</li>
+                        <li>You are welcome to hold extra classes for the students during the holidays or outside tuition  hours at the student centre. Please remember to inform us before the extra  classes</li>
+                        <li>Classes will not be held on public holidays</li>
+                      </ul>
+                    </li>
                     <Divider hidden />
-                    <li style={{ fontSize: '1.33em' }}><b>The Study Centre</b></li>
-                    <ol>
-                      <li>Do be mindful of the noise levels; the student centre is a facility shared by other users</li>
-                      <li>Do keep the student centre clean. Throw all rubbish, especially food containers in the dustbins outside</li>
-                      <li>Do remember to sign in and sign out at the logbook for security reasons</li>
-                    </ol>
+                    <li><b style={{ fontSize: '1.33em' }}>The Study Centre</b>
+                      <ul>
+                        <li>Do be mindful of the noise levels; the student centre is a facility shared by other users</li>
+                        <li>Do keep the student centre clean. Throw all rubbish, especially food containers in the dustbins outside</li>
+                        <li>Do remember to sign in and sign out at the logbook for security reasons</li>
+                      </ul>
+                    </li>
                     <Divider hidden />
-                    <li style={{ fontSize: '1.33em' }}><b>Fellow Tutors</b></li>
-                    <ul>
-                      <li>Do communicate with one another regularly to keep each other informed about your attendance</li>
-                      <li>Do appoint a group leader who will be responsible for attendance taking</li>
-                      <li>Do exchange ideas about how to engage the students</li>
-                      <li>Do be supportive of one another</li>
-                    </ul>
+                    <li><b style={{ fontSize: '1.33em' }}>Fellow Tutors</b>
+                      <ul>
+                        <li>Do communicate with one another regularly to keep each other informed about your attendance</li>
+                        <li>Do appoint a group leader who will be responsible for attendance taking</li>
+                        <li>Do exchange ideas about how to engage the students</li>
+                        <li>Do be supportive of one another</li>
+                      </ul>
+                    </li>
                   </ol>
                 </div>
               </Grid.Column>
