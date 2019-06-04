@@ -1,6 +1,5 @@
 const express = require('express')
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
 const mongoSanitize = require('express-mongo-sanitize')
 const helmet = require('helmet')
 const path = require('path')
@@ -54,10 +53,8 @@ process.on('SIGINT', () => {
 })
 
 // Body parser stuff
-app.use(bodyParser.urlencoded({
-  extended: true
-}))
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 app.use(mongoSanitize({
   replaceWith: new String('')
 }))
