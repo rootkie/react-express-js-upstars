@@ -3,7 +3,7 @@ import FamilyDetails from '../StudentRegistration/FamilyDetails'
 import PersonalInfo from '../StudentRegistration/PersonalInfo'
 import { Form, Message, Header, Icon, Segment, Image, Grid, Step } from 'semantic-ui-react'
 import axios from 'axios'
-import { string, object, boolean, date, array, number } from 'yup'
+import { string, object, boolean, date } from 'yup'
 import ReCAPTCHA from 'react-google-recaptcha'
 const recaptchaRef = React.createRef()
 
