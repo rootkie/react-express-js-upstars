@@ -56,7 +56,7 @@ DesktopContainer.propTypes = {
   children: PropTypes.node
 }
 
-const MobileContainer = ({children}) => {
+const MobileContainer = ({ children }) => {
   const [sidebarOpened, setSidebar] = useState(false)
 
   const handlePusherClick = () => {

@@ -2,7 +2,6 @@ import React from 'react'
 import { Form, Header, Table, Checkbox } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
-import moment from 'moment'
 
 const typeOptions = [
   { key: 'Class', text: 'Class', value: 'Class' },
@@ -10,7 +9,7 @@ const typeOptions = [
   { key: 'Cancelled', text: 'Cancelled', value: 'Cancelled' }
 ]
 
-const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, edit}) => {
+const AddEditForm = ({ state, dispatch, classData, newAttendance, handleClass, edit }) => {
   /*
   ==============
   FUNCTIONS
@@ -20,7 +19,7 @@ const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, ed
     let users = [...state.users]
     const pos = users.map(usr => usr.key).indexOf(id)
     users[pos].status = checked ? 1 : 0
-    dispatch({type: 'updateField', name: 'users', value: users})
+    dispatch({ type: 'updateField', name: 'users', value: users })
   }
 
   const handleCheckboxChangeForStudent = (e, { name: id, checked }) => {
@@ -28,19 +27,19 @@ const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, ed
       let students = [...state.students]
       const pos = students.map(std => std.key).indexOf(id)
       students[pos].status = checked ? 1 : 0
-      dispatch({type: 'updateField', name: 'students', value: students})
+      dispatch({ type: 'updateField', name: 'students', value: students })
     }
   }
 
   const handleChange = (e, { name, value }) => {
     if (edit) {
-      dispatch({type: 'updateField', name, value})
+      dispatch({ type: 'updateField', name, value })
     }
   }
 
   const handleChangeType = (e, { value }) => {
     if (edit) {
-      dispatch({type: 'updateField', name: 'type', value})
+      dispatch({ type: 'updateField', name: 'type', value })
       let students = [...state.students]
       let users = [...state.users]
       if (value === 'Class') {
@@ -57,9 +56,9 @@ const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, ed
         for (let b = 0; b < users.length; b++) {
           users[b]['status'] = 0
         }
-        dispatch({type: 'updateField', name: 'hours', value: 0})
+        dispatch({ type: 'updateField', name: 'hours', value: 0 })
       }
-      dispatch({type: 'changeType', users, students})
+      dispatch({ type: 'changeType', users, students })
     }
   }
   /*
@@ -93,11 +92,11 @@ const AddEditForm = ({state, dispatch, classData, newAttendance, handleClass, ed
           <label>Date of class</label>
           <DatePicker
             placeholderText='Click to select a date'
-            dateFormat='DD/MM/YYYY'
+            dateFormat='dd/MM/yyyy'
             disabled={!classSelection}
             selected={attendanceDate}
-            maxDate={moment()}
-            onChange={date => { if (newAttendance) dispatch({type: 'updateField', name: 'attendanceDate', value: date}) }}
+            maxDate={new Date()}
+            onChange={date => { if (newAttendance) dispatch({ type: 'updateField', name: 'attendanceDate', value: date }) }}
             readOnly={!newAttendance}
             required />
         </Form.Field>
@@ -163,7 +162,7 @@ AddEditForm.propTypes = {
   dispatch: PropTypes.func.isRequired,
   newAttendance: PropTypes.bool.isRequired,
   edit: PropTypes.bool.isRequired,
-  classData: PropTypes.object,
+  classData: PropTypes.array,
   handleClass: PropTypes.func
 }
 

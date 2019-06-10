@@ -12,7 +12,7 @@ import AttendanceSummary from './AttendanceSummary.js'
 import axios from 'axios'
 import ErrorPage from '../Error/ErrorPage'
 
-const AttendanceWrap = ({match, roles}) => {
+const AttendanceWrap = ({ match, roles }) => {
   const [isLoading, setLoader] = useState(true)
   const [classData, setClassData] = useState([])
 

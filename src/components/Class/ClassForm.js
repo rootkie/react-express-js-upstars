@@ -2,10 +2,8 @@ import React, { useReducer } from 'react'
 import { Form, Message, Header, Grid } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import PropTypes from 'prop-types'
-import moment from 'moment'
 import { Link } from 'react-router-dom'
 import { string, date, object } from 'yup'
-import 'react-datepicker/dist/react-datepicker.css'
 
 // Init typeOptions to be used in dropdown for TYPE of class
 const typeOptions = [
@@ -19,7 +17,7 @@ const initialState = {
   venue: '',
   dayAndTime: '',
   classId: '',
-  startDate: moment(),
+  startDate: new Date(),
   submitSuccess: false,
   errorMessage: ''
 }
@@ -32,7 +30,7 @@ const reducer = (state, action) => {
         [action.name]: action.value
       }
     case 'updateDate':
-      const {startDate} = action
+      const { startDate } = action
       return {
         ...state,
         startDate
@@ -65,7 +63,11 @@ const handleSubmit = (state, dispatch, addClass) => async e => {
     className: string().required('Please provide a class name'),
     classType: string().required('Please provide a class type'),
     venue: string().required('Please provide a class venue'),
-    dayAndTime: string().required('Please provide details on the schedule of the class'),
+    dayAndTime: string().when('classType', {
+      is: 'Tuition',
+      then: string().required('Please provide details on the schedule of the class'),
+      otherwise: string()
+    }),
     startDate: date().required('Please provide a valid starting date')
   })
 
@@ -82,30 +84,30 @@ const handleSubmit = (state, dispatch, addClass) => async e => {
     try {
       const newClassId = await addClass(data)
       // Reset the form back to the initial state. This also populates the classID so that the user can click on the link to be directed immediately.
-      dispatch({type: 'submitSuccess', newClassId})
+      dispatch({ type: 'submitSuccess', newClassId })
     } catch (err) {
-      dispatch({type: 'handleError', message: err.response.data.error})
+      dispatch({ type: 'handleError', message: err.response.data.error })
     }
   }).catch(err => {
     if (err.name === 'ValidationError') {
-      dispatch({type: 'handleError', message: err.errors})
+      dispatch({ type: 'handleError', message: err.errors })
     }
   })
 }
 
-const ClassForm = ({addClass}) => {
+const ClassForm = ({ addClass }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const handleDateChange = (startDate) => {
-    dispatch({type: 'updateDate', startDate})
+    dispatch({ type: 'updateDate', startDate })
   }
 
   const closeMessage = () => {
-    dispatch({type: 'closeMessage'})
+    dispatch({ type: 'closeMessage' })
   }
 
   const { className, classType, venue, dayAndTime, submitSuccess, classId, errorMessage, startDate } = state
@@ -148,7 +150,7 @@ const ClassForm = ({addClass}) => {
                 fixedHeight
                 showMonthDropdown
                 dropdownMode='select'
-                dateFormat='DD/MM/YYYY'
+                dateFormat='dd/MM/yyyy'
                 selected={startDate}
                 onChange={handleDateChange} required />
             </Form.Field>

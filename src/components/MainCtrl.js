@@ -1,21 +1,22 @@
-import React, { useReducer, useEffect } from 'react'
+import React, { useReducer, useEffect, Suspense, lazy } from 'react'
 import { Route, Switch, Redirect } from 'react-router-dom'
-import { Container, Grid, Dimmer, Loader } from 'semantic-ui-react'
+import { Container, Grid, Dimmer, Loader, Header, Icon } from 'semantic-ui-react'
 import axios from 'axios'
-import Topbar from './Misc/Topbar'
-import SideMenu from './Misc/SideMenu'
-import ClassWrap from './Class/ClassWrap'
-import Home from './Home/Home'
 import PropTypes from 'prop-types'
-import VolunteerWrap from './Volunteer/VolunteerWrap'
-import AttendanceWrap from './Attendance/AttendanceWrap'
-import StudentWrap from './Student/StudentWrap'
-import AdminWrap from './Admin/AdminWrap'
+import 'react-datepicker/dist/react-datepicker.css'
 import ErrorPage from './Error/ErrorPage'
+const Topbar = lazy(() => import('./Misc/Topbar'))
+const SideMenu = lazy(() => import('./Misc/SideMenu'))
+const ClassWrap = lazy(() => import('./Class/ClassWrap'))
+const Home = lazy(() => import('./Home/Home'))
+const VolunteerWrap = lazy(() => import('./Volunteer/VolunteerWrap'))
+const AttendanceWrap = lazy(() => import('./Attendance/AttendanceWrap'))
+const StudentWrap = lazy(() => import('./Student/StudentWrap'))
+const AdminWrap = lazy(() => import('./Admin/AdminWrap'))
 
 // For production automatic during npm build
 if (process.env.NODE_ENV === 'production') {
-  axios.defaults.baseURL = 'https://test.rootkiddie.com/api'
+  axios.defaults.baseURL = 'https://upstars.wonyk.com/api'
 } else {
   // For development automatic during npm start or npm test
   axios.defaults.baseURL = 'http://127.0.0.1:3000/api'
@@ -90,7 +91,7 @@ const isUserLoggedIn = async (dispatch) => {
       const refreshToken = window.localStorage.refreshToken
       if (!refreshToken) {
         // Redirect them to Login Page if they don't even if a refresh token.
-        dispatch({type: 'redirectLogin'})
+        dispatch({ type: 'redirectLogin' })
       } else {
         let rawRefreshResponse = await axios.post('/refresh', { refreshToken })
         if (rawRefreshResponse.data.status === true) {
@@ -102,17 +103,17 @@ const isUserLoggedIn = async (dispatch) => {
           // If refresh token is invalid, remove both and redirect them to Login for security.
           window.localStorage.removeItem('token')
           window.localStorage.removeItem('refreshToken')
-          dispatch({type: 'redirectLogin'})
+          dispatch({ type: 'redirectLogin' })
         }
       }
     } else if (response.data.auth === true) {
       let { name, _id, roles } = response.data
-      return dispatch({type: 'success', name, _id, roles})
+      return dispatch({ type: 'success', name, _id, roles })
     } else if (response.data.auth === 'expiring') {
       // Silently change access token in the background, everything will continue. Cases of invalid refresh token is ignored.
       // Since MainCtrl checks the expiry, there will be no expiry checks in Login.
       const { name, _id, roles } = response.data
-      dispatch({type: 'success', name, _id, roles})
+      dispatch({ type: 'success', name, _id, roles })
       const refreshToken = window.localStorage.refreshToken
       if (refreshToken) {
         const rawRefreshResponse = await axios.post('/refresh', { refreshToken })
@@ -123,12 +124,12 @@ const isUserLoggedIn = async (dispatch) => {
         } else {
           window.localStorage.removeItem('token')
           window.localStorage.removeItem('refreshToken')
-          dispatch({type: 'redirectLogin'})
+          dispatch({ type: 'redirectLogin' })
         }
       }
     }
   } catch (err) {
-    dispatch({type: 'redirectLogin'})
+    dispatch({ type: 'redirectLogin' })
   }
 }
 
@@ -142,13 +143,33 @@ const clearTimeInterval = () => {
   window.clearInterval(forceRefresh)
 }
 
+const loadingPage = (
+  <Dimmer active page>
+    <Header as='h2' icon inverted>
+      <Icon name='dashboard' />
+        Loading the dashboard.
+      <Header.Subheader>Thank you for your patience</Header.Subheader>
+    </Header>
+  </Dimmer>
+)
+
+const Upgrade = () => (
+  <div>
+    <p>
+      Please upgrade to the newest browsers. We recommend Chrome, Firefox, Opera or Edge.
+    </p>
+  </div>
+)
+
+const isIE = /* @cc_on!@ */false || !!document.documentMode
+
 /*
 ================
 MAIN FUNCTION
 ================
 */
 
-const MainCtrl = ({match}) => {
+const MainCtrl = ({ match }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   // Runs every time 'match' props change, similar to componentDidUpdate
@@ -164,7 +185,7 @@ const MainCtrl = ({match}) => {
     }, error => {
       if (error.response && (error.response.status === 500 || error.response.status === 404 || error.response.status === 403)) {
         const errorCode = error.response.status
-        dispatch({type: 'showError', errorCode})
+        dispatch({ type: 'showError', errorCode })
       }
       // Error such as 400 || 401 are handled locally.
       return Promise.reject(error)
@@ -191,6 +212,9 @@ const MainCtrl = ({match}) => {
   const { path } = match
   const { name, _id, roles, errorCode, isLoggedIn, confirm } = state
 
+  if (isIE) {
+    return <Upgrade />
+  }
   if (!isLoggedIn) {
     return <Redirect to='/login' />
   } if (errorCode === 404) {
@@ -208,24 +232,26 @@ const MainCtrl = ({match}) => {
   } else if (isLoggedIn && confirm) {
     return (
       <Container fluid>
-        <Topbar name={name} _id={_id} />
-        <Grid style={GridStyle} stackable>
-          <SideMenu roles={roles} />
-          <Grid.Column width={13} style={MainContentStyle}>
-            {/* Path refers to /dashboard that is inherited */}
-            {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
+        <Suspense fallback={loadingPage}>
+          <Topbar name={name} _id={_id} />
+          <Grid style={GridStyle} stackable>
+            <SideMenu roles={roles} />
+            <Grid.Column width={13} style={MainContentStyle}>
+              {/* Path refers to /dashboard that is inherited */}
+              {/* Render is better than component for inline components: (Doesn't need to reload the DOM every time you access it (like back button))
               Refer to link - https://reacttraining.com/react-router/web/api/Route/render-func */}
-            <Switch>
-              <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
-              <Route path={`${path}/students`} render={props => <StudentWrap roles={roles} {...props} />} />
-              <Route path={`${path}/classes`} render={props => <ClassWrap roles={roles} {...props} />} />
-              <Route path={`${path}/volunteer`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
-              <Route path={`${path}/attendance`} render={props => <AttendanceWrap roles={roles} {...props} />} />
-              <Route path={`${path}/admin`} render={props => <AdminWrap {...props} />} />
-              <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
-            </Switch>
-          </Grid.Column>
-        </Grid>
+              <Switch>
+                <Route exact path={`${path}/home`} render={() => <Home roles={roles} />} />
+                <Route path={`${path}/students`} render={props => <StudentWrap roles={roles} {...props} />} />
+                <Route path={`${path}/classes`} render={props => <ClassWrap roles={roles} {...props} />} />
+                <Route path={`${path}/volunteer`} render={props => <VolunteerWrap _id={_id} roles={roles} {...props} />} />
+                <Route path={`${path}/attendance`} render={props => <AttendanceWrap roles={roles} {...props} />} />
+                <Route path={`${path}/admin`} render={props => <AdminWrap {...props} />} />
+                <Route render={() => <ErrorPage statusCode={'404 NOT FOUND'} errorMessage={'Your request could not be found on the server! That\'s all we know.'} />} />
+              </Switch>
+            </Grid.Column>
+          </Grid>
+        </Suspense>
       </Container>
     )
   } else {

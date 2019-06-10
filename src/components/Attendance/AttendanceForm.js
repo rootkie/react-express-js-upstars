@@ -11,8 +11,8 @@ const initialState = {
   className: '',
   type: 'Class',
   hours: '',
-  students: [{text: 'Select class to view sudents', key: '0'}],
-  users: [{text: 'Select class to view users', key: '0'}],
+  students: [{ text: 'Select class to view sudents', key: '0' }],
+  users: [{ text: 'Select class to view users', key: '0' }],
   isLoading: false,
   classSelection: false,
   error: ''
@@ -56,7 +56,7 @@ const reducer = (state, action) => {
   }
 }
 
-const AttendanceForm = ({classData, history}) => {
+const AttendanceForm = ({ classData, history }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   /*
@@ -65,7 +65,7 @@ const AttendanceForm = ({classData, history}) => {
   ===========
   */
   const handleClass = (e, { value }) => {
-    dispatch({type: 'retrieveData', value})
+    dispatch({ type: 'retrieveData', value })
     axios.get('/class/' + value)
       .then(response => {
         const { students, users } = response.data.class
@@ -88,13 +88,13 @@ const AttendanceForm = ({classData, history}) => {
             status: 1
           }
         }
-        dispatch({type: 'initData', userList, studentList})
+        dispatch({ type: 'initData', userList, studentList })
         if (userList.length === 0 && studentList.length === 0) {
-          dispatch({type: 'emptyClass'})
+          dispatch({ type: 'emptyClass' })
         }
       })
       .finally(() => {
-        dispatch({type: 'updateField', name: 'isLoading', value: false})
+        dispatch({ type: 'updateField', name: 'isLoading', value: false })
       })
   }
 
@@ -122,11 +122,11 @@ const AttendanceForm = ({classData, history}) => {
           })
         history.push(`/dashboard/attendance/view/${response.data.attendanceId}`)
       } catch (err) {
-        dispatch({type: 'updateField', name: 'error', value: err.response.data.error})
+        dispatch({ type: 'updateField', name: 'error', value: err.response.data.error })
       }
     }).catch(err => {
       if (err.name === 'ValidationError') {
-        dispatch({type: 'updateField', name: 'error', value: err.errors})
+        dispatch({ type: 'updateField', name: 'error', value: err.errors })
       }
     })
   }

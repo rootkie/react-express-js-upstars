@@ -1,6 +1,5 @@
 const express = require('express')
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
 const mongoSanitize = require('express-mongo-sanitize')
 const helmet = require('helmet')
 const path = require('path')
@@ -11,15 +10,19 @@ const mongoose = require('mongoose')
 
 // New in 0.3.1-beta to replace constConfig.js
 require('dotenv').config()
+// Allow express to log using remote IP Address
+app.set('trust proxy', true)
 // Setup logger
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
-// Serve static assets
-app.use(express.static(path.resolve(__dirname, '..', 'build')))
+app.use(morgan(':remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'))
+
+app.use(helmet())
+
 // Enable Cross Origin Resource Sharing
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN)
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type, x-access-token')
+  res.header('Cache-Control', 'no-cache')
   next()
 })
 
@@ -33,7 +36,7 @@ mongoose.Promise = global.Promise
 if (process.env.NODE_ENV === 'production') {
   mongoose.connect(process.env.DATABASE)
 } else {
-  mongoose.connect(process.env.DATABASE_DEBUG)
+  mongoose.connect(process.env.DATABASE_DEBUG, { poolSize: 10 })
 }
 /* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
   mongoose.openUri(process.env.DATABASE, {
@@ -41,8 +44,6 @@ if (process.env.NODE_ENV === 'production') {
   ssl: true
   })
   */
-
-app.use(helmet())
 
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
@@ -52,10 +53,8 @@ process.on('SIGINT', () => {
 })
 
 // Body parser stuff
-app.use(bodyParser.urlencoded({
-  extended: true
-}))
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 app.use(mongoSanitize({
   replaceWith: new String('')
 }))
@@ -70,7 +69,8 @@ app.use((err, req, res, next) => {
 })
 
 // ==================End of Initialization=========================
-
+// Serve static assets
+app.use(express.static(path.resolve(__dirname, '..', 'build')))
 // Always return the main index.html, so react-router render the route in the client
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'))

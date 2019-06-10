@@ -15,12 +15,12 @@ const fasOptions = [
 ]
 
 const tuitionOptions = [
-  {value: 'CDAC', text: 'CDAC'},
-  {value: 'Mendaki', text: 'Mendaki'},
-  {value: 'Private', text: 'Private'}
+  { value: 'CDAC', text: 'CDAC' },
+  { value: 'Mendaki', text: 'Mendaki' },
+  { value: 'Private', text: 'Private' }
 ]
 
-const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recaptchaRef}) => {
+const FamilyDetails = ({ dispatch, state, handleChange, updateFamilyMember, recaptchaRef }) => {
   const {
     terms, termsDetails, otherFamily, tuitionChoices, fas, fsc,
     fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome,
@@ -89,10 +89,10 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
         <Table.Footer>
           <Table.Row>
             <Table.HeaderCell colSpan='3'>
-              <Button floated='right' icon labelPosition='left' primary size='small' onClick={() => dispatch({type: 'incrementFamilyMember'})}>
+              <Button floated='right' icon labelPosition='left' primary type='button' size='small' onClick={() => dispatch({ type: 'incrementFamilyMember' })}>
                 <Icon name='user' /> Add Member
               </Button>
-              <Button floated='right' icon labelPosition='left' negative size='small' onClick={() => dispatch({type: 'decrementFamilyMember'})} >
+              <Button floated='right' icon labelPosition='left' negative type='button' size='small' onClick={() => dispatch({ type: 'decrementFamilyMember' })} >
                 <Icon name='user' /> Remove Member
               </Button>
             </Table.HeaderCell>
@@ -106,7 +106,7 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
         <label>Other Learning Support</label>
         {tuitionOptions.map((option, i) => {
           return (
-            <Form.Checkbox label={option.text} key={`option-${i}`} name={`${option.value}`} onChange={(e, {name, checked}) => dispatch({type: 'updateTuition', name, checked})} checked={tuitionChoices[option.value]} />
+            <Form.Checkbox label={option.text} key={`option-${i}`} name={`${option.value}`} onChange={(e, { name, checked }) => dispatch({ type: 'updateTuition', name, checked })} checked={tuitionChoices[option.value]} />
           )
         })}
       </Form.Group>
@@ -114,10 +114,10 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
       <Header as='h3'>Terms and Conditions</Header>
       <Form.Checkbox label={<label onClick={() => {
         recaptchaRef.current.execute()
-        dispatch({type: 'handleTermsOpen'})
+        dispatch({ type: 'handleTermsOpen' })
       }}>I agree to the Terms and Conditions</label>} name='terms' required checked={terms} />
 
-      <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='large'>
+      <Modal open={termsDetails} dimmer='blurring' size='large'>
         <Modal.Header>Terms and conditions</Modal.Header>
         <Modal.Content scrolling>
           <Modal.Description>
@@ -147,8 +147,8 @@ const FamilyDetails = ({dispatch, state, handleChange, updateFamilyMember, recap
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
-          <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={() => dispatch({type: 'handleTermsDisagree'})} />
-          <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={() => dispatch({type: 'handleTermsClose'})} />
+          <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={() => dispatch({ type: 'handleTermsDisagree' })} />
+          <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={() => dispatch({ type: 'handleTermsClose' })} />
         </Modal.Actions>
       </Modal>
     </Segment>

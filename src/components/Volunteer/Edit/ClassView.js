@@ -3,7 +3,7 @@ import { Table, Header } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 
-const ClassView = ({classes}) => {
+const ClassView = ({ classes }) => {
   return (
     <React.Fragment>
       <Header as='h3' dividing>Classes</Header>
@@ -43,4 +43,4 @@ ClassView.propTypes = {
   classes: PropTypes.array.isRequired
 }
 
-export default ClassView
+export default React.memo(ClassView)

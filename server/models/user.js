@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcrypt')
 
 // ================================
 // User Schema
@@ -44,7 +44,9 @@ const UserSchema = new Schema({
   nric: {
     type: String,
     trim: true,
-    required: true
+    required: true,
+    uppercase: true,
+    match: /^[STFG]\d{7}[A-Z]$/
   },
 
   address: {
@@ -297,18 +299,14 @@ const UserSchema = new Schema({
 // Coz of lexical this, didn't use =>
 UserSchema.pre('save', function (next) {
   const user = this
-  const SALT_FACTOR = 5
+  const SALT_FACTOR = 10
   this.increment()
   if (!user.isModified('password')) return next()
 
-  bcrypt.genSalt(SALT_FACTOR, (err, salt) => {
+  bcrypt.hash(user.password, SALT_FACTOR, (err, hash) => {
     if (err) return next(err)
-
-    bcrypt.hash(user.password, salt, null, (err, hash) => {
-      if (err) return next(err)
-      user.password = hash
-      next()
-    })
+    user.password = hash
+    next()
   })
 })
 
@@ -332,5 +330,17 @@ UserSchema.methods.comparePasswordPromise = function (candidatePassword) { // Co
     })
   })
 }
+
+UserSchema.path('postalCode').validate(value => {
+  return (/^\d{6}$/).test(value)
+})
+
+UserSchema.path('homephone').validate(value => {
+  return (/^6\d{7}$/).test(value)
+})
+
+UserSchema.path('handphone').validate(value => {
+  return (/^[8|9]\d{7}$/).test(value)
+})
 
 module.exports = mongoose.model('User', UserSchema)

@@ -4,24 +4,24 @@ import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
 
 const timeSlotOptions = [
-  {value: 'Monday 7-9.30pm', text: 'Monday 7-9.30pm'},
-  {value: 'Tuesday 7-9.30pm', text: 'Tuesday 7-9.30pm'},
-  {value: 'Wednesday 7-9.30pm', text: 'Wednesday 7-9.30pm'},
-  {value: 'Thursday 7-9.30pm', text: 'Thursday 7-9.30pm'},
-  {value: 'Friday 7-9.30pm', text: 'Friday 7-9.30pm'},
-  {value: 'Saturday 10-12.30pm', text: 'Saturday 10-12.30pm'},
-  {value: 'Saturday 12.15-1.15pm', text: 'Saturday 12.15-1.15pm'},
-  {value: 'Saturday 12.00-2.30pm', text: 'Saturday 12.00-2.30pm'}
+  { value: 'Monday 7-9.30pm', text: 'Monday 7-9.30pm' },
+  { value: 'Tuesday 7-9.30pm', text: 'Tuesday 7-9.30pm' },
+  { value: 'Wednesday 7-9.30pm', text: 'Wednesday 7-9.30pm' },
+  { value: 'Thursday 7-9.30pm', text: 'Thursday 7-9.30pm' },
+  { value: 'Friday 7-9.30pm', text: 'Friday 7-9.30pm' },
+  { value: 'Saturday 10-12.30pm', text: 'Saturday 10-12.30pm' },
+  { value: 'Saturday 12.15-1.15pm', text: 'Saturday 12.15-1.15pm' },
+  { value: 'Saturday 12.00-2.30pm', text: 'Saturday 12.00-2.30pm' }
 ]
 
-const PersonalInfo = ({state, handleChange, dispatch}) => {
+const PersonalInfo = ({ state, handleChange, dispatch }) => {
   const handleChangeCheckBox = (e, { name, checked }) => {
     if (state.edit) {
       const newTimeSlot = {
         ...state.preferredTimeSlot,
         [name]: checked
       }
-      dispatch({type: 'updateField', name: 'preferredTimeSlot', value: newTimeSlot})
+      dispatch({ type: 'updateField', name: 'preferredTimeSlot', value: newTimeSlot })
     }
   }
 
@@ -41,7 +41,7 @@ const PersonalInfo = ({state, handleChange, dispatch}) => {
         <Form.Field required>
           <label>Date of Birth</label>
           <DatePicker
-            dateFormat='DD/MM/YYYY'
+            dateFormat='dd/MM/yyyy'
             selected={dob}
             readOnly
             required />
@@ -64,12 +64,12 @@ const PersonalInfo = ({state, handleChange, dispatch}) => {
         <label>Intended Date of Exit</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           showMonthDropdown
           showYearDropdown
           dropdownMode='select'
           selected={exitDate}
-          onChange={date => { if (edit) dispatch({type: 'updateField', name: 'exitDate', value: date}) }}
+          onChange={date => { if (edit) dispatch({ type: 'updateField', name: 'exitDate', value: date }) }}
           minDate={commencementDate}
           required />
       </Form.Field>

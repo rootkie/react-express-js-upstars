@@ -29,7 +29,7 @@ const reducer = (state, action) => {
         [action.name]: action.value
       }
     case 'initAttendance': {
-      const {basicStats, totalPages, details, rawClassData} = action
+      const { basicStats, totalPages, details, rawClassData } = action
       return {
         ...state,
         ...details,
@@ -50,7 +50,7 @@ const reducer = (state, action) => {
   }
 }
 
-const AttendanceClass = ({classData}) => {
+const AttendanceClass = ({ classData }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
   /*
   ============
@@ -59,10 +59,10 @@ const AttendanceClass = ({classData}) => {
   */
   const handleSubmit = async e => {
     e.preventDefault()
-    const {classSelector} = state
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    const { classSelector } = state
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     const response = await axios.get(`/attendance/${classSelector}/summary`)
-    const rawClassData = {...response.data}
+    const rawClassData = { ...response.data }
     // Calculate pages required by rounding up the number divided by 6 (max 6 sets of data / page)
     const pagesRequired = Math.ceil(rawClassData.attendanceDates.length / 6)
     const { studentNumber, tutorNumber, studentTutorRatio } = rawClassData
@@ -73,7 +73,7 @@ const AttendanceClass = ({classData}) => {
     }
     // default to providing attendance data on page one (1)
     const details = processAttendanceByPage(rawClassData, 1)
-    dispatch({type: 'initAttendance',
+    dispatch({ type: 'initAttendance',
       basicStats,
       totalPages: pagesRequired,
       details,
@@ -116,15 +116,15 @@ const AttendanceClass = ({classData}) => {
 
   const handlePaginationChange = (e, { activePage }) => {
     e.preventDefault()
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     const { rawClassData } = state
     const details = processAttendanceByPage(rawClassData, activePage)
-    dispatch({type: 'handlePage', details})
+    dispatch({ type: 'handlePage', details })
   }
 
   const handleSearchOptions = (e, { name, value }) => {
     e.preventDefault()
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   /*
@@ -182,7 +182,7 @@ const AttendanceClass = ({classData}) => {
               <Table.Row>
                 <Table.Cell collapsing>{studentNumber}</Table.Cell>
                 <Table.Cell collapsing>{tutorNumber}</Table.Cell>
-                <Table.Cell collapsing>{studentTutorRatio}</Table.Cell>
+                <Table.Cell collapsing>{studentTutorRatio.toFixed(3)}</Table.Cell>
               </Table.Row>
             </Table.Body>
           </Table>

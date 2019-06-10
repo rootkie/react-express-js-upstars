@@ -25,11 +25,11 @@ FUNCTIONS
 ==================
 */
 
-const resetSearch = dispatch => dispatch({type: 'resetSearch'})
+const resetSearch = dispatch => dispatch({ type: 'resetSearch' })
 
 const handleSearchChange = dispatch => async (e, { value }) => {
   if (value.length < 1) return resetSearch(dispatch)
-  dispatch({type: 'startSearch', value})
+  dispatch({ type: 'startSearch', value })
   const response = await axios.get(`studentsResponsive/${value}`)
   const studentList = response.data.studentsFiltered.map(student => {
     return {
@@ -38,11 +38,11 @@ const handleSearchChange = dispatch => async (e, { value }) => {
       key: student._id
     }
   })
-  dispatch({type: 'completedSearch', results: studentList})
+  dispatch({ type: 'completedSearch', results: studentList })
 }
 
 const handleResultSelect = dispatch => (e, { result }) => {
-  dispatch({type: 'selectResult', id: result.id})
+  dispatch({ type: 'selectResult', id: result.id })
 }
 
 // Reducers are here
@@ -99,7 +99,7 @@ const reducer = (state, action) => {
   }
 }
 
-const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
+const StudentView = ({ studentData, isLoading, roles, deleteStudent }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   /* =====================================================
@@ -109,25 +109,25 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
   const handleCheckboxChange = (e, { name: _id, checked }) => {
     const { selected } = state
     const newSelected = checked ? [...selected, _id] : selected.filter(element => element !== _id)
-    dispatch({type: 'handleCheckbox', newSelected})
+    dispatch({ type: 'handleCheckbox', newSelected })
   }
 
   const handleDelete = () => {
     const { selected } = state
     selected.length > 0 && deleteStudent(selected)
-    dispatch({type: 'resetSelected'})
+    dispatch({ type: 'resetSelected' })
   }
 
   const handleDeleteConfirmation = (option) => async () => {
     switch (option) {
       case 'show':
-        dispatch({type: 'showConfirmMenu'})
+        dispatch({ type: 'showConfirmMenu' })
         break
       case 'confirm':
         await handleDelete()
         break
       case 'cancel':
-        dispatch({type: 'hideConfirmMenu'})
+        dispatch({ type: 'hideConfirmMenu' })
         break
       default:
     }
@@ -157,8 +157,8 @@ const StudentView = ({studentData, isLoading, roles, deleteStudent}) => {
                 <Table.Row>
                   <Table.HeaderCell colSpan='5'>
                     <Form>
-                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <Form.Group inline style={{marginBottom: 0}}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Form.Group inline style={{ marginBottom: 0 }}>
                           <Search
                             loading={isLoadingSearch}
                             onResultSelect={handleResultSelect(dispatch)}

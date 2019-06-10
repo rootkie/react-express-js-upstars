@@ -10,6 +10,10 @@ const initialState = {
   message: ''
 }
 
+const heightStyle = { height: '100%' }
+const width = { maxWidth: 750, marginTop: 50 }
+const image = require('./../Misc/logo.png')
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'updateField':
@@ -32,7 +36,7 @@ const reducer = (state, action) => {
   }
 }
 
-const VolunteerChangePassword = ({_id}) => {
+const VolunteerChangePassword = ({ _id }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => dispatch({ type: 'updateField', name, value })
@@ -72,10 +76,10 @@ const VolunteerChangePassword = ({_id}) => {
     `}</style>
       <Grid
         textAlign='center'
-        style={{ height: '100%' }}
+        style={heightStyle}
         verticalAlign='middle'>
-        <Grid.Column style={{ maxWidth: 750, marginTop: 50 }}>
-          <Image size='medium' centered src={require('./../Misc/logo.png')} />
+        <Grid.Column style={width}>
+          <Image size='medium' centered src={image} />
           <Header as='h2' color='teal' textAlign='center'>
               Change User Password
           </Header>

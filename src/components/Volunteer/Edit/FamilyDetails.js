@@ -2,7 +2,7 @@ import React from 'react'
 import { Form, Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 
-const FamilyDetails = ({state, handleChange}) => {
+const FamilyDetails = ({ state, handleChange }) => {
   const { fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, hobbies, careerGoal } = state
   return (
     <Segment attached='bottom' color='blue'>

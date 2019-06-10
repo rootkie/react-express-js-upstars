@@ -77,7 +77,7 @@ const reducer = (state, action) => {
   }
 }
 
-const AttendanceUser = ({classData}) => {
+const AttendanceUser = ({ classData }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   /*
@@ -109,11 +109,11 @@ const AttendanceUser = ({classData}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    dispatch({type: 'startSubmit'})
+    dispatch({ type: 'startSubmit' })
     const { startDate, endDate, classSelector, userSelector } = state
 
     if (!userSelector) {
-      return dispatch({type: 'setError', error: 'Please provide a user to search for!'})
+      return dispatch({ type: 'setError', error: 'Please provide a user to search for!' })
     }
     const sdate = moment(startDate).format('[/]DDMMYYYY')
     const edate = moment(endDate).format('[-]DDMMYYYY')
@@ -122,12 +122,12 @@ const AttendanceUser = ({classData}) => {
       const { attendances } = response.data
       if (attendances.length > 0) {
         const attendanceFormattedData = formatUserAttendance(attendances[0])
-        dispatch({type: 'updateField', name: 'attendanceFormattedData', value: attendanceFormattedData})
+        dispatch({ type: 'updateField', name: 'attendanceFormattedData', value: attendanceFormattedData })
       } else {
-        dispatch({type: 'updateField', name: 'attendanceFormattedData', value: userNoAttendance})
+        dispatch({ type: 'updateField', name: 'attendanceFormattedData', value: userNoAttendance })
       }
     } finally {
-      dispatch({type: 'updateField', name: 'isLoading', value: false})
+      dispatch({ type: 'updateField', name: 'isLoading', value: false })
     }
   }
   /*

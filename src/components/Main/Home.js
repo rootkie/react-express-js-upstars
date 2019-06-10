@@ -20,7 +20,7 @@ import {
 } from 'semantic-ui-react'
 import imgGroup from './assets/images/group.jpg'
 
-const PageHeader = ({mobile}) => {
+const PageHeader = ({ mobile }) => {
   const scroll = () => {
     if (!mobile) {
       window.scrollTo({
@@ -70,7 +70,7 @@ PageHeader.propTypes = {
   mobile: PropTypes.bool
 }
 
-const DesktopContainer = ({children}) => {
+const DesktopContainer = ({ children }) => {
   const [fixed, setFixed] = useState(false)
   const hideFixedMenu = () => setFixed(false)
   const showFixedMenu = () => setFixed(true)
@@ -129,7 +129,7 @@ DesktopContainer.propTypes = {
   children: PropTypes.node
 }
 
-const MobileContainer = ({children}) => {
+const MobileContainer = ({ children }) => {
   const [sidebarOpened, handleSidebar] = useState(false)
 
   const handlePusherClick = () => {
@@ -313,7 +313,7 @@ const Home = () => {
                     1. Who does UP Stars provide tuition services to?
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === 0}>
-                  <h2 style={{fontSize: '1.3em'}}>
+                  <h2 style={{ fontSize: '1.3em' }}>
                     UP Stars provides tuition to children from families living in the Ulu Pandan area.
                      We aim in particular to reach out to underserved families in Ulu Pandan.
                   </h2>

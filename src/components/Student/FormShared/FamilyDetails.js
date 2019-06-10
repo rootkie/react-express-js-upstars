@@ -15,20 +15,20 @@ const fasOptions = [
 ]
 
 const tuitionOptions = [
-  {value: 'CDAC', text: 'CDAC'},
-  {value: 'Mendaki', text: 'Mendaki'},
-  {value: 'Private', text: 'Private'}
+  { value: 'CDAC', text: 'CDAC' },
+  { value: 'Mendaki', text: 'Mendaki' },
+  { value: 'Private', text: 'Private' }
 ]
 
-const FamilyDetails = ({dispatch, state, handleChange, edit}) => {
+const FamilyDetails = ({ dispatch, state, handleChange, edit }) => {
   const { otherFamily, tuitionChoices, fas, fsc,
     fatherName, fatherIcNumber, fatherNationality, fatherContactNumber, fatherEmail, fatherOccupation, fatherIncome,
     motherName, motherIcNumber, motherNationality, motherContactNumber, motherEmail, motherOccupation, motherIncome } = state
 
-  const updateFamily = (index, property) => (e, {value}) => {
+  const updateFamily = (index, property) => (e, { value }) => {
     e.preventDefault()
     if (edit) {
-      dispatch({type: 'updateFamily', index, property, value})
+      dispatch({ type: 'updateFamily', index, property, value })
     }
   }
 
@@ -94,10 +94,10 @@ const FamilyDetails = ({dispatch, state, handleChange, edit}) => {
         <Table.Footer>
           <Table.Row>
             <Table.HeaderCell colSpan='3'>
-              <Button type='button' floated='right' icon labelPosition='left' primary size='small' onClick={() => { if (edit) dispatch({type: 'incFamily'}) }}>
+              <Button type='button' floated='right' icon labelPosition='left' primary size='small' onClick={() => { if (edit) dispatch({ type: 'incFamily' }) }}>
                 <Icon name='user' /> Add Member
               </Button>
-              <Button type='button' floated='right' icon labelPosition='left' negative size='small' onClick={() => { if (edit) dispatch({type: 'decFamily'}) }}>
+              <Button type='button' floated='right' icon labelPosition='left' negative size='small' onClick={() => { if (edit) dispatch({ type: 'decFamily' }) }}>
                 <Icon name='user' /> Remove Member
               </Button>
             </Table.HeaderCell>
@@ -111,7 +111,7 @@ const FamilyDetails = ({dispatch, state, handleChange, edit}) => {
         <label>Other Learning Support</label>
         {tuitionOptions.map((option, i) => {
           return (
-            <Form.Checkbox label={option.text} key={`option-${i}`} name={`${option.value}`} onChange={(e, {name, checked}) => { if (edit) dispatch({type: 'updateTuition', name, checked}) }} checked={tuitionChoices[option.value]} />
+            <Form.Checkbox label={option.text} key={`option-${i}`} name={`${option.value}`} onChange={(e, { name, checked }) => { if (edit) dispatch({ type: 'updateTuition', name, checked }) }} checked={tuitionChoices[option.value]} />
           )
         })}
       </Form.Group>

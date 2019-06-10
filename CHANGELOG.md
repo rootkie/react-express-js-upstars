@@ -1,5 +1,43 @@
 # Change Log
 
+## [0.7.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.7.0-beta) (June 10, 2019, 9.03pm)
+- [Bump] Version to 0.7.0-beta
+- [Added] Mongoose schema validation as add-on
+- [Changed] Tests data and fixes such as proper nric
+- [Fixed] Wrong routes link
+- [Added] Better UX in volunteer registration
+- [Fixed] Yup flagging undefined as a poor date
+- [Removed] function which forces user email to be lowercase
+- [Added] Better percentage figures in AttendanceSummary
+- [Fixed] Wrong prop types in multiple files
+- [Fixed] API cancellation bug resulted from changing tabs
+- [Added] Memo and better performance to topbar and sidebar
+- [Added] Better performance to login page
+- [Added] useMemo and useCallback hooks to edit and add forms
+- [Added] Code splitting in dashboard
+- [Fixed] Missing state property causing memory leak
+- [Moved] React-scripts from dev to main dependencies
+- [Deleted] Experimental jest code
+- [Changed] Main Index.html source
+- [Added] Support for remote IP logging
+- [Added] noCache in all API calls
+- [Fixed] Ordered listing wrong in Tutor page
+- [Fixed] New SEO links on Robots and Sitemap
+- [Updated] Multiple npm packages
+- [Added] NoScript warning
+- [Changed] BodyParser removed to use express built in middleware
+- [Removed] Deprecated package and install newer bcrypt
+- [Removed] Support for all IE versions
+- [Added] Compressed Image files for web support
+- [Added] Mongoose connection pooling support
+- [Fixed] Class cloning is fixed to add new classId to student and user
+- [Fixed] JS Linting to standardise all files
+- [Added] Better README troubleshooting steps
+- [Fixed] Loading screen will not disappear when there are errors in Student Edit
+- [Fixed] Fields validation in class adding when option is selected as 'Enrichment'
+- [Changed] Better percentage in All Class Attendance Summary
+- [Changed] Better UX for Student Registration
+
 ## [v0.6.1-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.6.1-beta) (May 12, 2019, 10.50am)
 - [Bump] Versions of UPStars software
 - [Changed] In-line code documentation

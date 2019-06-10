@@ -2,7 +2,7 @@ import React from 'react'
 import { Form, Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 
-const LoginDetails = ({state, handleChange}) => {
+const LoginDetails = ({ state, handleChange }) => {
   const { email, password, passwordcfm } = state
   return (
     <Segment attached='bottom' color='red'>

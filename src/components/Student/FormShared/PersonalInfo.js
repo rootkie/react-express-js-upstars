@@ -2,7 +2,6 @@ import React from 'react'
 import { Form, Button, Table, Icon, Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
-import moment from 'moment'
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
@@ -15,13 +14,13 @@ const statusOptions = [
   { key: 'suspended', text: 'Suspended', value: 'Suspended' }
 ]
 
-const PersonalInfo = ({state, dispatch, handleChange, edit, type}) => {
+const PersonalInfo = ({ state, dispatch, handleChange, edit, type }) => {
   const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName, academicInfo, status } = state
 
-  const handleAcademic = (index, property) => (e, {value}) => {
+  const handleAcademic = (index, property) => (e, { value }) => {
     e.preventDefault()
     if (edit) {
-      dispatch({type: 'updateAcademic', index, property, value})
+      dispatch({ type: 'updateAcademic', index, property, value })
     }
   }
 
@@ -37,14 +36,14 @@ const PersonalInfo = ({state, dispatch, handleChange, edit, type}) => {
           <label>Date of Birth</label>
           <DatePicker
             placeholderText='Click to select a date'
-            dateFormat='DD/MM/YYYY'
+            dateFormat='dd/MM/yyyy'
             showMonthDropdown
             showYearDropdown
             dropdownMode='select'
-            maxDate={moment()}
+            maxDate={new Date()}
             selected={dob}
             onChange={date => {
-              if (edit) dispatch({type: 'updateField', name: 'dob', value: date})
+              if (edit) dispatch({ type: 'updateField', name: 'dob', value: date })
             }}
             required />
         </Form.Field>
@@ -100,10 +99,10 @@ const PersonalInfo = ({state, dispatch, handleChange, edit, type}) => {
         <Table.Footer>
           <Table.Row>
             <Table.HeaderCell colSpan='7'>
-              <Button type='button' floated='right' icon labelPosition='left' primary size='small' onClick={() => { if (edit) dispatch({type: 'incAcademic'}) }}>
+              <Button type='button' floated='right' icon labelPosition='left' primary size='small' onClick={() => { if (edit) dispatch({ type: 'incAcademic' }) }}>
                 <Icon name='plus' /> Add Year
               </Button>
-              <Button type='button' floated='right' icon labelPosition='left' negative size='small' onClick={() => { if (edit) dispatch({type: 'decAcademic'}) }}>
+              <Button type='button' floated='right' icon labelPosition='left' negative size='small' onClick={() => { if (edit) dispatch({ type: 'decAcademic' }) }}>
                 <Icon name='minus' /> Remove Year
               </Button>
             </Table.HeaderCell>

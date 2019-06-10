@@ -10,7 +10,7 @@ require('dotenv').config()
 // ./node_modules/.bin/jest -c __tests__/jest.config.integration.js
 let userToken
 beforeAll(async () => {
-  const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
+  const response = await app.post('/login').send({ email: 'testuser@upstars.com', password: 'password' })
   userToken = response.body.token
 })
 
@@ -24,61 +24,61 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(2)
       const response = await app.post('/login')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and password.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and password.' })
     })
 
     test('login with missing password', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({email: ''})
+      const response = await app.post('/login').send({ email: '' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and password.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and password.' })
     })
 
     test('login with missing email', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({password: ''})
+      const response = await app.post('/login').send({ password: '' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and password.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and password.' })
     })
 
     test('login with wrong email', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({email: 'test@upstars.com', password: 'password'})
+      const response = await app.post('/login').send({ email: 'test@upstars.com', password: 'password' })
       expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'Wrong email or password'})
+      expect(response.body).toEqual({ 'error': 'Wrong email or password' })
     })
 
     test('login with wrong password', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password123'})
+      const response = await app.post('/login').send({ email: 'testuser@upstars.com', password: 'password123' })
       expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'Wrong email or password'})
+      expect(response.body).toEqual({ 'error': 'Wrong email or password' })
     })
 
     test('login with wrong password and email', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({email: 'test@upstars.com', password: 'password123'})
+      const response = await app.post('/login').send({ email: 'test@upstars.com', password: 'password123' })
       expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'Wrong email or password'})
+      expect(response.body).toEqual({ 'error': 'Wrong email or password' })
     })
 
     test('login with suspended account', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({email: 'testuser2@upstars.com', password: 'password'})
+      const response = await app.post('/login').send({ email: 'testuser2@upstars.com', password: 'password' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your account has been suspended, please contact the administrator for follow up actions'})
+      expect(response.body).toEqual({ 'error': 'Your account has been suspended, please contact the administrator for follow up actions' })
     })
 
     test('login with unverified account', async () => {
       expect.assertions(2)
-      const response = await app.post('/login').send({email: 'testuser5@upstars.com', password: 'password'})
+      const response = await app.post('/login').send({ email: 'testuser5@upstars.com', password: 'password' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your account has yet to be verified, please verify your email by checking your email account'})
+      expect(response.body).toEqual({ 'error': 'Your account has yet to be verified, please verify your email by checking your email account' })
     })
 
     test('login normally', async () => {
       expect.assertions(3)
-      const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
+      const response = await app.post('/login').send({ email: 'testuser@upstars.com', password: 'password' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('token')
       expect(response.body).toHaveProperty('refresh')
@@ -88,7 +88,7 @@ describe('testing auth related API mostly without token', () => {
   describe('x-access-token functionalities', () => {
     let accessToken, expiringAccessToken
     beforeAll(async () => {
-      const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
+      const response = await app.post('/login').send({ email: 'testuser@upstars.com', password: 'password' })
       accessToken = response.body.token
       const user = {
         _id: '5b912ba72b9ec042a58f88a4',
@@ -149,7 +149,7 @@ describe('testing auth related API mostly without token', () => {
   describe('refresh tokens test', () => {
     let refreshToken, deletedUserRefresh
     beforeAll(async () => {
-      const response = await app.post('/login').send({email: 'testuser@upstars.com', password: 'password'})
+      const response = await app.post('/login').send({ email: 'testuser@upstars.com', password: 'password' })
       refreshToken = response.body.refresh
       // Fake User ID
       const _id = '5b912ba72b9ec042a58f8855'
@@ -158,7 +158,7 @@ describe('testing auth related API mostly without token', () => {
 
     test('refresh token returns new valid x-access-token', async () => {
       expect.assertions(3)
-      const response = await app.post('/refresh').send({refreshToken})
+      const response = await app.post('/refresh').send({ refreshToken })
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('token')
       expect(response.body.status).toBe(true)
@@ -166,7 +166,7 @@ describe('testing auth related API mostly without token', () => {
 
     test('invalid refresh tokens returns false', async () => {
       expect.assertions(3)
-      const response = await app.post('/refresh').send({refreshToken: refreshToken + 'abc'})
+      const response = await app.post('/refresh').send({ refreshToken: refreshToken + 'abc' })
       expect(response.statusCode).toBe(200)
       expect(response.body.token).toBeNull()
       expect(response.body.status).toBe(false)
@@ -174,7 +174,7 @@ describe('testing auth related API mostly without token', () => {
 
     test('refresh tokens for invalid users returns false', async () => {
       expect.assertions(3)
-      const response = await app.post('/refresh').send({refreshToken: deletedUserRefresh})
+      const response = await app.post('/refresh').send({ refreshToken: deletedUserRefresh })
       expect(response.statusCode).toBe(200)
       expect(response.body.token).toBeNull()
       expect(response.body.status).toBe(false)
@@ -238,7 +238,7 @@ describe('testing auth related API mostly without token', () => {
         password: 'password'
       })
       expect(response.statusCode).toBe(409)
-      expect(response.body).toEqual({'error': 'Email already exists.'})
+      expect(response.body).toEqual({ 'error': 'Email already exists.' })
     })
 
     test('missing email', async () => {
@@ -248,7 +248,7 @@ describe('testing auth related API mostly without token', () => {
         password: 'password'
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email and password that is also at least 6 characters long.' })
     })
 
     test('missing password', async () => {
@@ -258,7 +258,7 @@ describe('testing auth related API mostly without token', () => {
         email: 'testuser10@upstars.com'
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email and password that is also at least 6 characters long.' })
     })
 
     test('Bad Password', async () => {
@@ -269,7 +269,7 @@ describe('testing auth related API mostly without token', () => {
         password: 'pass'
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email and password that is also at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email and password that is also at least 6 characters long.' })
     })
 
     test('Suspended User attempting to register', async () => {
@@ -280,7 +280,7 @@ describe('testing auth related API mostly without token', () => {
         password: 'password'
       })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your account has been suspended. Please contact the administrator for follow up actions'})
+      expect(response.body).toEqual({ 'error': 'Your account has been suspended. Please contact the administrator for follow up actions' })
     })
 
     test('Recreating new account for deleted users', async () => {
@@ -301,21 +301,21 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(2)
       const response = await app.post('/verifyEmail')
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Something went wrong, please try again.'})
+      expect(response.body).toEqual({ 'error': 'Something went wrong, please try again.' })
     })
 
     test('empty email token', async () => {
       expect.assertions(2)
-      const response = await app.post('/verifyEmail').send({token: ''})
+      const response = await app.post('/verifyEmail').send({ token: '' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Something went wrong, please try again.'})
+      expect(response.body).toEqual({ 'error': 'Something went wrong, please try again.' })
     })
 
     test('broken email token', async () => {
       expect.assertions(2)
-      const response = await app.post('/verifyEmail').send({token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmFjY2VhNTI1Y2IyYjY4Mjg2ODI3NGQiLCJpYXQiOjE1MzgwNTE3NDl9.nuHfY0bF13LT3qajl91fCycyyh5ZkbrHSvF06iLshqg'})
+      const response = await app.post('/verifyEmail').send({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmFjY2VhNTI1Y2IyYjY4Mjg2ODI3NGQiLCJpYXQiOjE1MzgwNTE3NDl9.nuHfY0bF13LT3qajl91fCycyyh5ZkbrHSvF06iLshqg' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Something went wrong, please try again.'})
+      expect(response.body).toEqual({ 'error': 'Something went wrong, please try again.' })
     })
 
     beforeAll(async () => {
@@ -328,7 +328,7 @@ describe('testing auth related API mostly without token', () => {
 
     test('verify email using a valid token', async () => {
       expect.assertions(1)
-      const response = await app.post('/verifyEmail').send({token: encodedString})
+      const response = await app.post('/verifyEmail').send({ token: encodedString })
       expect(response.statusCode).toBe(200)
     })
   })
@@ -338,47 +338,47 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(2)
       const response = await app.post('/changepassword')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and your NRIC number.' })
     })
 
     test('no email prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({nric: 'S925556F'})
+      const response = await app.post('/changepassword').send({ nric: 'S9255568F' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and your NRIC number.' })
     })
 
     test('no nric prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com'})
+      const response = await app.post('/changepassword').send({ email: 'testuser3@upstars.com' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and your NRIC number.'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and your NRIC number.' })
     })
 
     test('wrong nric prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S9255562F'})
+      const response = await app.post('/changepassword').send({ email: 'testuser3@upstars.com', nric: 'S9255562F' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Wrong email or nric. Please try again'})
+      expect(response.body).toEqual({ 'error': 'Wrong email or nric. Please try again' })
     })
 
     test('wrong email prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({email: 'testuser4@upstars.com', nric: 'S925556F'})
+      const response = await app.post('/changepassword').send({ email: 'testuser4@upstars.com', nric: 'S925556F' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Wrong email or nric. Please try again'})
+      expect(response.body).toEqual({ 'error': 'Wrong email or nric. Please try again' })
     })
 
     test('suspended user prompts errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/changepassword').send({email: 'testuser2@upstars.com', nric: 'S924456F'})
+      const response = await app.post('/changepassword').send({ email: 'testuser2@upstars.com', nric: 'S9244567F' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your account has been suspended, please contact the administrator for follow up actions'})
+      expect(response.body).toEqual({ 'error': 'Your account has been suspended, please contact the administrator for follow up actions' })
     })
 
     test('proper requests returns success', async () => {
       expect.assertions(1)
-      const response = await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
+      const response = await app.post('/changepassword').send({ email: 'testuser3@upstars.com', nric: 'S9255568F' })
       expect(response.statusCode).toBe(200)
     })
   })
@@ -391,7 +391,7 @@ describe('testing auth related API mostly without token', () => {
         _id: '5b9255700333773af993ae9c',
         random: process.env.RESET_PASSWORD_RANDOM
       }
-      await app.post('/changepassword').send({email: 'testuser3@upstars.com', nric: 'S925556F'})
+      await app.post('/changepassword').send({ email: 'testuser3@upstars.com', nric: 'S925556F8' })
       token = jwt.sign(objectToEncode, process.env.SECRET_EMAIL, {
         expiresIn: 60 * 30
       })
@@ -401,33 +401,33 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(2)
       const response = await app.post('/resetpassword')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There\'s something wrong, please try again.'})
+      expect(response.body).toEqual({ 'error': 'There\'s something wrong, please try again.' })
     })
 
     test('no password throws error', async () => {
       expect.assertions(2)
-      const response = await app.post('/resetpassword').send({token: 'test-token'})
+      const response = await app.post('/resetpassword').send({ token: 'test-token' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There\'s something wrong, please try again.'})
+      expect(response.body).toEqual({ 'error': 'There\'s something wrong, please try again.' })
     })
 
     test('no token throws error', async () => {
       expect.assertions(2)
-      const response = await app.post('/resetpassword').send({password: 'password'})
+      const response = await app.post('/resetpassword').send({ password: 'password' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There\'s something wrong, please try again.'})
+      expect(response.body).toEqual({ 'error': 'There\'s something wrong, please try again.' })
     })
 
     test('bad password throws error', async () => {
       expect.assertions(2)
-      const response = await app.post('/resetpassword').send({password: 'pass', token: 'test-token'})
+      const response = await app.post('/resetpassword').send({ password: 'pass', token: 'test-token' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a password that is at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide a password that is at least 6 characters long.' })
     })
 
     test('proper reset password returns success', async () => {
       expect.assertions(1)
-      const response = await app.post('/resetpassword').send({password: 'password123', token})
+      const response = await app.post('/resetpassword').send({ password: 'password123', token })
       expect(response.statusCode).toBe(200)
     })
   })
@@ -437,26 +437,26 @@ describe('testing auth related API mostly without token', () => {
       expect.assertions(2)
       const response = await app.post('/link')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and nric' })
     })
 
     test('no nric throw error', async () => {
       expect.assertions(2)
-      const response = await app.post('/link').send({email: 'testuser10@upstars.com'})
+      const response = await app.post('/link').send({ email: 'testuser10@upstars.com' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and nric' })
     })
 
     test('wrong nric causes empty response', async () => {
       expect.assertions(2)
-      const response = await app.post('/link').send({email: 'testuser10@upstars.com', nric: 'T0423783E'})
+      const response = await app.post('/link').send({ email: 'testuser10@upstars.com', nric: 'T0423783E' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toEqual({})
     })
 
     test('wrong email causes empty response', async () => {
       expect.assertions(2)
-      const response = await app.post('/link').send({email: 'testuser3@upstars.com', nric: 'T0423783D'})
+      const response = await app.post('/link').send({ email: 'testuser3@upstars.com', nric: 'T0423783D' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toEqual({})
     })
@@ -465,7 +465,7 @@ describe('testing auth related API mostly without token', () => {
       // Either check nodemon to see if the 'message sent' log is written or go to
       // ethereal email to check if it is really sent
       expect.assertions(2)
-      const response = await app.post('/link').send({email: 'testuser10@upstars.com', nric: 'T0423783D'})
+      const response = await app.post('/link').send({ email: 'testuser10@upstars.com', nric: 'T0423783D' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toEqual({})
     })
@@ -474,13 +474,13 @@ describe('testing auth related API mostly without token', () => {
 
 // There is no need for a x-access-token in development,refer to routeMiddleware.js
 // However, some APIs require it, so we will just parse it in
-describe('testing admin related APIs', async () => {
+describe('testing admin related APIs', () => {
   describe('retrieve pending users', () => {
     test('get pending users', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/pendingUsers')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'name': 'Lai Ta Toh', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb'}, {'name': 'Mr. Ho Jin He', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e'}]})
+      expect(response.body).toEqual({ 'users': [{ 'name': 'Lai Ta Toh', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5b96687dfcb4725189fe9efb' }, { 'name': 'Mr. Ho Jin He', 'status': 'Pending', 'roles': ['Tutor'], '_id': '5ba8c8cb8e235732b485a60e' }] })
     })
   })
 
@@ -489,7 +489,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/suspended')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}]})
+      expect(response.body).toEqual({ 'users': [{ 'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b' }] })
     })
   })
 
@@ -498,7 +498,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/admin/deleted')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'users': [{'_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor']}]})
+      expect(response.body).toEqual({ 'users': [{ '_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor'] }] })
     })
   })
 
@@ -508,7 +508,7 @@ describe('testing admin related APIs', async () => {
       const response = await app.get('/admin/search/cRIs')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
-      expect(response.body).toHaveProperty('activeMatched', [{'name': 'Mr. Cristian Bartell', 'status': 'Active', 'roles': ['Tutor'], '_id': '5b9255700333773af993ae9c'}])
+      expect(response.body).toHaveProperty('activeMatched', [{ 'name': 'Mr. Cristian Bartell', 'status': 'Active', 'roles': ['Tutor'], '_id': '5b9255700333773af993ae9c' }])
       expect(response.body).toHaveProperty('suspendedMatched', [])
       expect(response.body).toHaveProperty('deletedMatched', [])
     })
@@ -518,9 +518,9 @@ describe('testing admin related APIs', async () => {
       const response = await app.get('/admin/search/G')
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('pendingMatched', [])
-      expect(response.body).toHaveProperty('activeMatched', [{'name': 'Wuying Kong', 'status': 'Active', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b912ba72b9ec042a58f88a4'}])
-      expect(response.body).toHaveProperty('suspendedMatched', [{'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b'}])
-      expect(response.body).toHaveProperty('deletedMatched', [{'_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor']}])
+      expect(response.body).toHaveProperty('activeMatched', [{ 'name': 'Wuying Kong', 'status': 'Active', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b912ba72b9ec042a58f88a4' }])
+      expect(response.body).toHaveProperty('suspendedMatched', [{ 'name': 'Marie G Kruger', 'status': 'Suspended', 'roles': ['Tutor', 'SuperAdmin', 'Admin'], '_id': '5b9255260333773af993ae9b' }])
+      expect(response.body).toHaveProperty('deletedMatched', [{ '_id': '5c73acb2afcab33a4012ac29', 'name': 'Noh Qing Feng', 'status': 'Deleted', 'roles': ['Tutor'] }])
     })
 
     test('none match', async () => {
@@ -539,26 +539,26 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.delete('/admin/user')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide working userId(s)'})
+      expect(response.body).toEqual({ 'error': 'Please provide working userId(s)' })
     })
 
     test('deleting non-existing user', async () => {
       expect.assertions(2)
-      const response = await app.delete('/admin/user').send({userId: ['5ba8c8cb8e235732b485a620']})
+      const response = await app.delete('/admin/user').send({ userId: ['5ba8c8cb8e235732b485a620'] })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The user you requested to delete does not exist.'})
+      expect(response.body).toEqual({ 'error': 'The user you requested to delete does not exist.' })
     })
 
     test('deleting already deleted user', async () => {
       expect.assertions(2)
-      const response = await app.delete('/admin/user').send({userId: ['5c73acb2afcab33a4012ac29']})
+      const response = await app.delete('/admin/user').send({ userId: ['5c73acb2afcab33a4012ac29'] })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The user you requested to delete does not exist.'})
+      expect(response.body).toEqual({ 'error': 'The user you requested to delete does not exist.' })
     })
 
     test('deleting current users', async () => {
       expect.assertions(5)
-      const response = await app.delete('/admin/user').send({userId: ['5b912ba72b9ec042a58f88a4']})
+      const response = await app.delete('/admin/user').send({ userId: ['5b912ba72b9ec042a58f88a4'] })
       expect(response.statusCode).toBe(200)
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
@@ -566,7 +566,7 @@ describe('testing admin related APIs', async () => {
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372').set('x-access-token', userToken)
       expect(classData.statusCode).toBe(200)
       // The class started with 2 people, leaving with one after the deletion of the user above.
-      expect(classData.body.class.users).toEqual([{'_id': '5b9255700333773af993ae9c', 'name': 'Mr. Cristian Bartell'}])
+      expect(classData.body.class.users).toEqual([{ '_id': '5b9255700333773af993ae9c', 'name': 'Mr. Cristian Bartell' }])
     })
   })
 
@@ -575,7 +575,7 @@ describe('testing admin related APIs', async () => {
       expect.assertions(2)
       const response = await app.post('/admin/userStatusPermissions')
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'User does not exist'})
+      expect(response.body).toEqual({ 'error': 'User does not exist' })
     })
 
     test('no userId throws error', async () => {
@@ -585,7 +585,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin']
       })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'User does not exist'})
+      expect(response.body).toEqual({ 'error': 'User does not exist' })
     })
 
     test('wrong userId throws error', async () => {
@@ -596,7 +596,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin']
       })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'User does not exist'})
+      expect(response.body).toEqual({ 'error': 'User does not exist' })
     })
 
     test('correct userId shows success and changes classes accordingly', async () => {
@@ -607,7 +607,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 1, 'ok': 1}})
+      expect(response.body).toEqual({ 'editedClass': { 'n': 1, 'nModified': 1, 'ok': 1 } })
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')
@@ -633,7 +633,7 @@ describe('testing admin related APIs', async () => {
         'newRoles': ['SuperAdmin', 'Admin', 'Tutor']
       })
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'editedClass': {'n': 1, 'nModified': 0, 'ok': 1}})
+      expect(response.body).toEqual({ 'editedClass': { 'n': 1, 'nModified': 0, 'ok': 1 } })
       const userData = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', userToken)
       expect(userData.statusCode).toBe(200)
       expect(userData.body.user).toHaveProperty('status', 'Active')
@@ -642,7 +642,7 @@ describe('testing admin related APIs', async () => {
   })
 })
 
-describe('testing class related APIs', async () => {
+describe('testing class related APIs', () => {
   let lowPrivUserToken
   let classDetail = {
     className: 'Upstars Class B',
@@ -652,7 +652,7 @@ describe('testing class related APIs', async () => {
   }
   // This user is in only 1 class and thus should not be able to view every single class available
   beforeAll(async () => {
-    const response = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password123'})
+    const response = await app.post('/login').send({ email: 'testuser3@upstars.com', password: 'password123' })
     lowPrivUserToken = response.body.token
   })
 
@@ -661,21 +661,21 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.post('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a class name'})
+      expect(response.body).toEqual({ 'error': 'Please provide a class name' })
     })
 
     test('adding with className but missing remaining fields', async () => {
       expect.assertions(2)
       const response = await app.post('/class').send(classDetail)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+      expect(response.body).toEqual({ 'error': 'There is something wrong with the client input. That is all we know.' })
     })
 
     test('add duplicate class throws errors', async () => {
       expect.assertions(2)
-      const response = await app.post('/class').send({className: 'Upstars Class A'})
+      const response = await app.post('/class').send({ className: 'Upstars Class A' })
       expect(response.statusCode).toBe(409)
-      expect(response.body).toEqual({'error': 'Class already exist. Create a new class or edit a current class.'})
+      expect(response.body).toEqual({ 'error': 'Class already exist. Create a new class or edit a current class.' })
     })
 
     test('correct fields successfully add class', async () => {
@@ -706,7 +706,7 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/class')
       expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.body).toEqual({ 'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know." })
     })
 
     test('ALL class using superadmin token', async () => {
@@ -766,14 +766,14 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.get('/class/123')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('valid but wrong ObjectId used for classId throws error', async () => {
       expect.assertions(2)
       const response = await app.get('/class/5b97b8f2adfb2e018c64d344')
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'This class does not exist'})
+      expect(response.body).toEqual({ 'error': 'This class does not exist' })
     })
 
     test('valid ObjectId used for classId returns class', async () => {
@@ -817,26 +817,26 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.delete('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure all values are correct.'})
+      expect(response.body).toEqual({ 'error': 'Please provide at least 1 classId and ensure all values are correct.' })
     })
 
     test('stopping a class with empty classId', async () => {
       expect.assertions(2)
-      const response = await app.delete('/class').send({classId: []})
+      const response = await app.delete('/class').send({ classId: [] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide at least 1 classId and ensure all values are correct.'})
+      expect(response.body).toEqual({ 'error': 'Please provide at least 1 classId and ensure all values are correct.' })
     })
 
     test('stopping a class using wrong Ids throws error', async () => {
       expect.assertions(2)
-      const response = await app.delete('/class').send({classId: ['5bc48f55a1b6712584b28533']})
+      const response = await app.delete('/class').send({ classId: ['5bc48f55a1b6712584b28533'] })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Class not found'})
+      expect(response.body).toEqual({ 'error': 'Class not found' })
     })
 
     test('stopping a class using valid Ids returns success', async () => {
       expect.assertions(2)
-      const response = await app.delete('/class').send({classId: ['5b97b8f2adfb2e018c64d372']})
+      const response = await app.delete('/class').send({ classId: ['5b97b8f2adfb2e018c64d372'] })
       expect(response.statusCode).toBe(200)
       const classData = await app.get('/class/5b97b8f2adfb2e018c64d372')
       expect(classData.body.class).toHaveProperty('status', 'Stopped')
@@ -855,7 +855,7 @@ describe('testing class related APIs', async () => {
       expect.assertions(2)
       const response = await app.put('/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Our server had issues validating your inputs. Please fill in using proper values'})
+      expect(response.body).toEqual({ 'error': 'Our server had issues validating your inputs. Please fill in using proper values' })
     })
 
     test('editing a class with wrong classId', async () => {
@@ -866,7 +866,7 @@ describe('testing class related APIs', async () => {
         status: 'Active'
       })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Class not found. Please try again later'})
+      expect(response.body).toEqual({ 'error': 'Class not found. Please try again later' })
     })
 
     test('editing a class with correct ID but missing fields', async () => {
@@ -877,7 +877,7 @@ describe('testing class related APIs', async () => {
         classId: '5b97b8f2adfb2e018c64d372'
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Our server had issues validating your inputs. Please fill in using proper values'})
+      expect(response.body).toEqual({ 'error': 'Our server had issues validating your inputs. Please fill in using proper values' })
     })
 
     test('editing a class with correct ID returns success', async () => {
@@ -901,7 +901,7 @@ describe('testing user side APIs', () => {
   let lowPrivUserToken
   // Similarly, for getAllUser, this non-admin user can only see his / her own account details
   beforeAll(async () => {
-    const response = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password123'})
+    const response = await app.post('/login').send({ email: 'testuser3@upstars.com', password: 'password123' })
     lowPrivUserToken = response.body.token
   })
 
@@ -912,7 +912,7 @@ describe('testing user side APIs', () => {
           {
             'name': 'Mr. Cristian Bartell',
             'gender': 'M',
-            'nric': 'S925556F',
+            'nric': 'S9255568F',
             'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
@@ -934,7 +934,7 @@ describe('testing user side APIs', () => {
           {
             'name': 'Mr. Cristian Bartell',
             'gender': 'M',
-            'nric': 'S925556F',
+            'nric': 'S9255568F',
             'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
@@ -945,7 +945,7 @@ describe('testing user side APIs', () => {
           {
             'name': 'Wuying Kong',
             'gender': 'M',
-            'nric': 'S923456F',
+            'nric': 'S9234567F',
             'dob': '2004-03-09T16:00:00.000Z',
             'status': 'Active',
             'roles': [
@@ -968,7 +968,7 @@ describe('testing user side APIs', () => {
     const userFullData = {
       'name': 'Mr. Cristian Bartell',
       'gender': 'M',
-      'nric': 'S925556F',
+      'nric': 'S9255568F',
       'nationality': 'singaporean',
       'dob': '2004-03-09T16:00:00.000Z',
       'address': '486 Schmitt Drive',
@@ -1051,14 +1051,14 @@ describe('testing user side APIs', () => {
       ],
       '_id': '5b9255700333773af993ae9c',
       'exitDate': '2018-12-27T16:00:00.000Z',
-      '__v': 3
+      '__v': 2
     }
 
     test('lowPriv user does not have auth to view other users', async () => {
       expect.assertions(2)
       const response = await app.get('/users/5b912ba72b9ec042a58f88a4').set('x-access-token', lowPrivUserToken)
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+      expect(response.body).toEqual({ 'error': 'Your client does not have the permissions to access this function.' })
     })
 
     test('non-admin user is able to view personal account', async () => {
@@ -1087,7 +1087,7 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/users/5b9255700333773af993ae20').set('x-access-token', userToken)
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'User does not exist. Please try again'})
+      expect(response.body).toEqual({ 'error': 'User does not exist. Please try again' })
     })
   })
 
@@ -1157,46 +1157,46 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/users/changePassword')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.' })
     })
 
     test('changing password with missing fields throws error', async () => {
       expect.assertions(2)
       // Missing new password
-      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123'})
+      const response = await app.post('/users/changePassword').send({ userId: '5b9255700333773af993ae9c', oldPassword: 'password123' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.' })
     })
 
     test('changing password with bad password throws error', async () => {
       expect.assertions(2)
       // Less than the basic 6 characters
-      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'pass'})
+      const response = await app.post('/users/changePassword').send({ userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'pass' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.'})
+      expect(response.body).toEqual({ 'error': 'Please provide userId, old password and new password. Ensure password is at least 6 characters long.' })
     })
 
     test('changing password with non-existent userID throws error', async () => {
       expect.assertions(2)
       // Less than the basic 6 characters
-      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993a11c', oldPassword: 'password123', newPassword: 'password'})
+      const response = await app.post('/users/changePassword').send({ userId: '5b9255700333773af993a11c', oldPassword: 'password123', newPassword: 'password' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'User does not exist!'})
+      expect(response.body).toEqual({ 'error': 'User does not exist!' })
     })
 
     test('changing password with wrong oldPassword throws error', async () => {
       expect.assertions(2)
       // Actual is password123
-      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password12345', newPassword: 'password'})
+      const response = await app.post('/users/changePassword').send({ userId: '5b9255700333773af993ae9c', oldPassword: 'password12345', newPassword: 'password' })
       expect(response.statusCode).toBe(401)
-      expect(response.body).toEqual({'error': 'Your old password does not match. Please try again'})
+      expect(response.body).toEqual({ 'error': 'Your old password does not match. Please try again' })
     })
 
     test('changing password properly returns success', async () => {
       expect.assertions(2)
-      const response = await app.post('/users/changePassword').send({userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'password'})
+      const response = await app.post('/users/changePassword').send({ userId: '5b9255700333773af993ae9c', oldPassword: 'password123', newPassword: 'password' })
       expect(response.statusCode).toBe(200)
-      const user = await app.post('/login').send({email: 'testuser3@upstars.com', password: 'password'})
+      const user = await app.post('/login').send({ email: 'testuser3@upstars.com', password: 'password' })
       expect(user.body).toHaveProperty('token')
     })
   })
@@ -1205,7 +1205,7 @@ describe('testing user side APIs', () => {
     const incompleteUserDetails = {
       'name': 'Mr. Cristian Bartell',
       'gender': 'M',
-      'nric': 'S925556F',
+      'nric': 'S9255568F',
       'nationality': 'singaporean',
       'dob': '2004-03-09T16:00:00.000Z',
       'address': '486 Schmitt Drive',
@@ -1282,7 +1282,7 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/users').set('x-access-token', lowPrivUserToken)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a userId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a userId' })
     })
 
     test('non-admin editing others account throws error', async () => {
@@ -1290,16 +1290,16 @@ describe('testing user side APIs', () => {
       // UserId belongs to testuser@upstars.com
       const response = await app.post('/users').set('x-access-token', lowPrivUserToken).send({
         ...incompleteUserDetails,
-        userId: '5b912ba72b9ec042a58f88a4'})
+        userId: '5b912ba72b9ec042a58f88a4' })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+      expect(response.body).toEqual({ 'error': 'Your client does not have the permissions to access this function.' })
     })
 
     test('non-admin editing own account returns success', async () => {
       expect.assertions(2)
       const response = await app.post('/users').set('x-access-token', lowPrivUserToken).send({
         ...incompleteUserDetails,
-        userId: '5b9255700333773af993ae9c'})
+        userId: '5b9255700333773af993ae9c' })
       expect(response.statusCode).toBe(200)
       const userData = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', lowPrivUserToken)
       // Instead of Class 3-3
@@ -1334,26 +1334,26 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/users/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('no classId throws error', async () => {
       expect.assertions(2)
-      const response = await app.delete('/users/class').send({userIds: []})
+      const response = await app.delete('/users/class').send({ userIds: [] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('Bad classId throws error', async () => {
       expect.assertions(2)
-      const response = await app.delete('/users/class').send({userIds: [], classId: '123'})
+      const response = await app.delete('/users/class').send({ userIds: [], classId: '123' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('correct classId and empty userId succeed', async () => {
       expect.assertions(4)
-      const response = await app.delete('/users/class').send({userIds: [], classId: '5b97b8f2adfb2e018c64d372'})
+      const response = await app.delete('/users/class').send({ userIds: [], classId: '5b97b8f2adfb2e018c64d372' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toHaveProperty('class.students', ['5b936ce7defc1a592d677008'])
       expect(response.body).toHaveProperty('class.users', [
@@ -1386,21 +1386,21 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/users/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('no classId throws error', async () => {
       expect.assertions(2)
-      const response = await app.post('/users/class').send({userIds: []})
+      const response = await app.post('/users/class').send({ userIds: [] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('Bad classId throws error', async () => {
       expect.assertions(2)
-      const response = await app.post('/users/class').send({userIds: [], classId: '123'})
+      const response = await app.post('/users/class').send({ userIds: [], classId: '123' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('correct classId returns success', async () => {
@@ -1452,34 +1452,34 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/users')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a userId and ensure input is correct'})
+      expect(response.body).toEqual({ 'error': 'Please provide a userId and ensure input is correct' })
     })
 
     test('non-admin deleting other accounts throws error', async () => {
       expect.assertions(2)
       const response = await app.delete('/users')
         .set('x-access-token', lowPrivUserToken)
-        .send({userId: '5b912ba72b9ec042a58f88a4'
+        .send({ userId: '5b912ba72b9ec042a58f88a4'
         })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+      expect(response.body).toEqual({ 'error': 'Your client does not have the permissions to access this function.' })
     })
 
     test('admin deleting non-existent account throws error', async () => {
       expect.assertions(2)
       const response = await app.delete('/users')
         .set('x-access-token', userToken)
-        .send({userId: '5b912ba72b9ec042a58f8888'
+        .send({ userId: '5b912ba72b9ec042a58f8888'
         })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The user you requested to delete does not exist.'})
+      expect(response.body).toEqual({ 'error': 'The user you requested to delete does not exist.' })
     })
 
     test('non-admin deleting own account succeed', async () => {
       expect.assertions(3)
       const response = await app.delete('/users')
         .set('x-access-token', lowPrivUserToken)
-        .send({userId: '5b9255700333773af993ae9c'
+        .send({ userId: '5b9255700333773af993ae9c'
         })
       expect(response.statusCode).toBe(200)
       const user = await app.get('/users/5b9255700333773af993ae9c').set('x-access-token', userToken)
@@ -1500,19 +1500,19 @@ describe('testing user side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/link')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and nric' })
     })
 
     test('no nric throws error', async () => {
       expect.assertions(2)
-      const response = await app.post('/link').send({nric: 'S9237776F'})
+      const response = await app.post('/link').send({ nric: 'S9237776F' })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an email address and nric'})
+      expect(response.body).toEqual({ 'error': 'Please provide an email address and nric' })
     })
 
     test('normal email returns empty', async () => {
       expect.assertions(2)
-      const response = await app.post('/link').send({email: 'testuser5@upstars.com', nric: 'S9237776F'})
+      const response = await app.post('/link').send({ email: 'testuser5@upstars.com', nric: 'S9237776F' })
       expect(response.statusCode).toBe(200)
       expect(response.body).toEqual({})
     })
@@ -1609,7 +1609,7 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/students')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({students})
+      expect(response.body).toEqual({ students })
     })
   })
 
@@ -1619,7 +1619,7 @@ describe('testing student side APIs', () => {
       const students = [
         {
           'name': 'Student Suspended',
-          'icNumber': 'T02994428D',
+          'icNumber': 'T0299448D',
           'dob': '2002-09-04T16:00:00.000Z',
           'gender': 'F',
           'status': 'Suspended',
@@ -1628,7 +1628,7 @@ describe('testing student side APIs', () => {
       ]
       const response = await app.get('/otherStudents')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({students})
+      expect(response.body).toEqual({ students })
     })
   })
 
@@ -1637,14 +1637,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/students/123')
       expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.body).toEqual({ 'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know." })
     })
 
     test('non-existent studentId throws error', async () => {
       expect.assertions(2)
       const response = await app.get('/students/5b936ce7defc1a592d677121')
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Student does not exist. Please try again'})
+      expect(response.body).toEqual({ 'error': 'Student does not exist. Please try again' })
     })
 
     test('correct studentId returns all values', async () => {
@@ -1665,14 +1665,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/studentsResponsive/abc')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': []})
+      expect(response.body).toEqual({ 'studentsFiltered': [] })
     })
 
     test('API match case insensitive', async () => {
       expect.assertions(2)
       const response = await app.get('/studentsResponsive/NGx')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': [{'name': 'Lingxin  Long', '_id': '5b936ce7defc1a592d677008'}]})
+      expect(response.body).toEqual({ 'studentsFiltered': [{ 'name': 'Lingxin  Long', '_id': '5b936ce7defc1a592d677008' }] })
     })
   })
 
@@ -1681,14 +1681,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.get('/otherStudentsResponsive/abc')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': []})
+      expect(response.body).toEqual({ 'studentsFiltered': [] })
     })
 
     test('API match case insensitive', async () => {
       expect.assertions(2)
       const response = await app.get('/otherStudentsResponsive/uDEn')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'studentsFiltered': [{'name': 'Student Suspended', '_id': '5b94e4ca97a4b26f4dbaf26e'}]})
+      expect(response.body).toEqual({ 'studentsFiltered': [{ 'name': 'Student Suspended', '_id': '5b94e4ca97a4b26f4dbaf26e' }] })
     })
   })
 
@@ -1699,7 +1699,7 @@ describe('testing student side APIs', () => {
         ...studentBasicData
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+      expect(response.body).toEqual({ 'error': 'There is something wrong with the client input. That is all we know.' })
     })
 
     test('registration success', async () => {
@@ -1716,7 +1716,7 @@ describe('testing student side APIs', () => {
         'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(201)
-      expect(response.body).toEqual({'newStudent': expect.any(String)})
+      expect(response.body).toEqual({ 'newStudent': true })
     })
 
     test('duplicate account throw error', async () => {
@@ -1733,7 +1733,7 @@ describe('testing student side APIs', () => {
         'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
+      expect(response.body).toEqual({ 'error': 'Account already exist. If this is a mistake please contact our system admin.' })
     })
   })
 
@@ -1754,7 +1754,7 @@ describe('testing student side APIs', () => {
         admin
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+      expect(response.body).toEqual({ 'error': 'There is something wrong with the client input. That is all we know.' })
     })
 
     test('registration success', async () => {
@@ -1772,7 +1772,7 @@ describe('testing student side APIs', () => {
         'schoolName': 'Upstars Sec'
       })
       expect(response.statusCode).toBe(201)
-      expect(response.body).toEqual({'newStudent': expect.any(String)})
+      expect(response.body).toEqual({ 'newStudent': expect.any(String) })
     })
 
     test('duplicate account throw error', async () => {
@@ -1789,7 +1789,7 @@ describe('testing student side APIs', () => {
         'schoolName': 'Upstars Sec'
       })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Account already exist. If this is a mistake please contact our system admin.'})
+      expect(response.body).toEqual({ 'error': 'Account already exist. If this is a mistake please contact our system admin.' })
     })
   })
 
@@ -1798,14 +1798,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/students/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('deleting without classId', async () => {
       expect.assertions(2)
-      const response = await app.delete('/students/class').send({'studentIds': ['5b936ce7defc1a592d677008']})
+      const response = await app.delete('/students/class').send({ 'studentIds': ['5b936ce7defc1a592d677008'] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('wrong classId returns null', async () => {
@@ -1850,14 +1850,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.post('/students/class')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('adding without classId', async () => {
       expect.assertions(2)
-      const response = await app.post('/students/class').send({'studentIds': ['5b936ce7defc1a592d677008']})
+      const response = await app.post('/students/class').send({ 'studentIds': ['5b936ce7defc1a592d677008'] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('wrong classId throws error', async () => {
@@ -1867,7 +1867,7 @@ describe('testing student side APIs', () => {
         classId: '5b97b8f2adfb2e018c64d123'
       })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Please provide an existing class'})
+      expect(response.body).toEqual({ 'error': 'Please provide an existing class' })
     })
 
     test('wrong studentId returns none modified', async () => {
@@ -1907,33 +1907,33 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/students')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
+      expect(response.body).toEqual({ 'error': 'Please provide a studentId and ensure all values are correct' })
     })
 
     test('deleting without proper studentId', async () => {
       expect.assertions(2)
-      const response = await app.delete('/students').send({studentId: []})
+      const response = await app.delete('/students').send({ studentId: [] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
+      expect(response.body).toEqual({ 'error': 'Please provide a studentId and ensure all values are correct' })
     })
 
     test('deleting with wrong studentId', async () => {
       expect.assertions(2)
-      const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677001']})
+      const response = await app.delete('/students').send({ studentId: ['5b936ce7defc1a592d677001'] })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student(s) you requested to delete does not exist.'})
+      expect(response.body).toEqual({ 'error': 'The student(s) you requested to delete does not exist.' })
     })
 
     test('deleting with malfunctioned studentId', async () => {
       expect.assertions(2)
-      const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d6770021']})
+      const response = await app.delete('/students').send({ studentId: ['5b936ce7defc1a592d6770021'] })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId and ensure all values are correct'})
+      expect(response.body).toEqual({ 'error': 'Please provide a studentId and ensure all values are correct' })
     })
 
     test('deleting mass number of studentId returns success', async () => {
       expect.assertions(2)
-      const response = await app.delete('/students').send({studentId: ['5b936ce7defc1a592d677008', '5b9674ef22deaf1ee1aa4dc1']})
+      const response = await app.delete('/students').send({ studentId: ['5b936ce7defc1a592d677008', '5b9674ef22deaf1ee1aa4dc1'] })
       expect(response.statusCode).toBe(200)
 
       // Check if the respective classes have already removed them from the class list
@@ -2020,14 +2020,14 @@ describe('testing student side APIs', () => {
       expect.assertions(2)
       const response = await app.put('/students')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a studentId' })
     })
 
     test('missing studentId throws error', async () => {
       expect.assertions(2)
       const response = await app.put('/students').send(editStudentData)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a studentId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a studentId' })
     })
 
     test('non existent student throws error', async () => {
@@ -2037,7 +2037,7 @@ describe('testing student side APIs', () => {
         studentId: '5bd853dfc5cdec7794960abc'
       })
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'The student you requested to edit does not exist.'})
+      expect(response.body).toEqual({ 'error': 'The student you requested to edit does not exist.' })
     })
 
     test('proper edit changes classes and students', async () => {
@@ -2065,7 +2065,7 @@ describe('testing student side APIs', () => {
 describe('testing attendance related APIs', () => {
   let lowPrivUserToken
   beforeAll(async () => {
-    const response = await app.post('/login').send({email: 'testuser4@upstars.com', password: 'password'})
+    const response = await app.post('/login').send({ email: 'testuser4@upstars.com', password: 'password' })
     lowPrivUserToken = response.body.token
   })
   describe('get a single attendance by ID', () => {
@@ -2073,14 +2073,14 @@ describe('testing attendance related APIs', () => {
       expect.assertions(2)
       const response = await app.get('/attendance/123')
       expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know."})
+      expect(response.body).toEqual({ 'error': "The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That's all we know." })
     })
 
     test('non existent ID returns empty', async () => {
       expect.assertions(2)
       const response = await app.get('/attendance/5b990733cef48424966ed012')
       expect(response.statusCode).toBe(200)
-      expect(response.body).toEqual({'attendances': null})
+      expect(response.body).toEqual({ 'attendances': null })
     })
 
     test('working ID returns details', async () => {
@@ -2619,7 +2619,7 @@ describe('testing attendance related APIs', () => {
       expect.assertions(2)
       const response = await app.get('/attendance/5b97b8f2adfb2e018c64d3/summary')
       expect(response.statusCode).toBe(500)
-      expect(response.body).toEqual({'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.'})
+      expect(response.body).toEqual({ 'error': 'The server encountered an error and could not proceed and complete your request. If the problem persists, please contact our system administrator. That\'s all we know.' })
     })
 
     test('non-existent class returns empty array', async () => {
@@ -2759,7 +2759,7 @@ describe('testing attendance related APIs', () => {
       expect.assertions(2)
       const response = await app.post('/attendance').set('x-access-token', userToken)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('no classId throws error', async () => {
@@ -2768,7 +2768,7 @@ describe('testing attendance related APIs', () => {
         .set('x-access-token', userToken)
         .send(attendanceDetails)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a classId' })
     })
 
     test('missing fields throws error', async () => {
@@ -2780,7 +2780,7 @@ describe('testing attendance related APIs', () => {
           classId: '5b97b8f2adfb2e018c64d372'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'There is something wrong with the client input. That is all we know.'})
+      expect(response.body).toEqual({ 'error': 'There is something wrong with the client input. That is all we know.' })
     })
 
     test('no privilege throws error', async () => {
@@ -2792,7 +2792,7 @@ describe('testing attendance related APIs', () => {
           classId: '5b97b8f2adfb2e018c64d372'
         })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+      expect(response.body).toEqual({ 'error': 'Your client does not have the permissions to access this function.' })
     })
 
     test('all fields present returns success', async () => {
@@ -2831,7 +2831,7 @@ describe('testing attendance related APIs', () => {
       expect.assertions(2)
       const response = await app.delete('/attendance').set('x-access-token', userToken)
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an existing attendanceId'})
+      expect(response.body).toEqual({ 'error': 'Please provide an existing attendanceId' })
     })
 
     test('no attendanceId throws error', async () => {
@@ -2842,7 +2842,7 @@ describe('testing attendance related APIs', () => {
           classId: '5b97b8f2adfb2e018c64d372'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an existing attendanceId'})
+      expect(response.body).toEqual({ 'error': 'Please provide an existing attendanceId' })
     })
 
     test('no classId throws error', async () => {
@@ -2854,7 +2854,7 @@ describe('testing attendance related APIs', () => {
           attendanceId: '5b990729cef48424966ed0de'
         })
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide an existing classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide an existing classId' })
     })
 
     test('insufficient privilege throws error', async () => {
@@ -2866,7 +2866,7 @@ describe('testing attendance related APIs', () => {
           attendanceId: '5b990729cef48424966ed0de'
         })
       expect(response.statusCode).toBe(403)
-      expect(response.body).toEqual({'error': 'Your client does not have the permissions to access this function.'})
+      expect(response.body).toEqual({ 'error': 'Your client does not have the permissions to access this function.' })
     })
 
     test('proper token returns success', async () => {
@@ -2904,14 +2904,14 @@ describe('testing stats and misc related APIs', () => {
       expect.assertions(2)
       const response = await app.get('/class/clone/123')
       expect(response.statusCode).toBe(400)
-      expect(response.body).toEqual({'error': 'Please provide a proper classId'})
+      expect(response.body).toEqual({ 'error': 'Please provide a proper classId' })
     })
 
     test('non-existent classId throws error', async () => {
       expect.assertions(2)
       const response = await app.get('/class/clone/5b97b8f2adfb2e018c64d123')
       expect(response.statusCode).toBe(404)
-      expect(response.body).toEqual({'error': 'Class not found, please try again'})
+      expect(response.body).toEqual({ 'error': 'Class not found, please try again' })
     })
 
     test('proper classId returns success', async () => {

@@ -45,3 +45,7 @@ body {
   align-items: center;
   margin-left: 3%;
 }
+
+.disabled-link {
+  pointer-events: none;
+}

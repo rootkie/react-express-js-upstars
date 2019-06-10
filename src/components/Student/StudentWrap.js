@@ -8,7 +8,6 @@ import StudentEdit from './StudentEdit'
 import StudentViewOthers from './StudentViewOthers'
 import axios from 'axios'
 import ErrorPage from '../Error/ErrorPage'
-const source = axios.CancelToken.source()
 
 const initialState = {
   studentData: [],
@@ -21,14 +20,14 @@ const initialState = {
   Loading of initial Student data
   ============================================================================
 */
-const getStudents = async dispatch => {
-  const response = await axios.get('students', {cancelToken: source.token})
-  dispatch({type: 'studentLoaded', studentData: response.data.students})
+const getStudents = async (dispatch, source) => {
+  const response = await axios.get('students', { cancelToken: source.token })
+  dispatch({ type: 'studentLoaded', studentData: response.data.students })
 }
 
-const getOtherStudents = async dispatch => {
-  const response = await axios.get('otherStudents', {cancelToken: source.token})
-  dispatch({type: 'otherStudentLoaded', otherStudentData: response.data.students})
+const getOtherStudents = async (dispatch, source) => {
+  const response = await axios.get('otherStudents', { cancelToken: source.token })
+  dispatch({ type: 'otherStudentLoaded', otherStudentData: response.data.students })
 }
 
 const reducer = (state, action) => {
@@ -54,13 +53,14 @@ const reducer = (state, action) => {
   }
 }
 
-const StudentWrap = ({roles, match}) => {
+const StudentWrap = ({ roles, match }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const source = axios.CancelToken.source()
 
   useEffect(() => {
-    getStudents(dispatch)
+    getStudents(dispatch, source)
     if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-      getOtherStudents(dispatch)
+      getOtherStudents(dispatch, source)
     }
     return () => {
       source.cancel('API cancelled')
@@ -68,30 +68,30 @@ const StudentWrap = ({roles, match}) => {
   }, [])
 
   const deleteStudent = async (studentId) => {
-    dispatch({type: 'startLoading'})
+    dispatch({ type: 'startLoading' })
     await axios.delete('/students',
       {
         data: {
           studentId
         }
       })
-    getStudents(dispatch)
+    getStudents(dispatch, source)
     if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-      getOtherStudents(dispatch)
+      getOtherStudents(dispatch, source)
     }
   }
 
   const addStudent = async studentData => {
     const response = await axios.post('/admin/students', studentData)
-    getStudents(dispatch)
+    getStudents(dispatch, source)
     return response.data.newStudentId
   }
 
   const editStudent = async (studentId, studentData) => {
     await axios.put('/students', { ...studentData, studentId })
-    getStudents(dispatch)
+    getStudents(dispatch, source)
     if (roles.indexOf('Admin') !== -1 || roles.indexOf('SuperAdmin') !== -1) {
-      getOtherStudents(dispatch)
+      getOtherStudents(dispatch, source)
     }
   }
 

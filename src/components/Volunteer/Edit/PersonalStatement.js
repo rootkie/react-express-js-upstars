@@ -2,9 +2,8 @@ import React from 'react'
 import { Form, Segment, Table, Header, Icon, Button } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
-import moment from 'moment'
 
-const PersonalStatement = ({state, handleChange, dispatch}) => {
+const PersonalStatement = ({ state, handleChange, dispatch }) => {
   /*
   ==================
   FUNCTIONS
@@ -20,8 +19,8 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
             updatingField = [
               ...state[field],
               {
-                dateFrom: moment(),
-                dateTo: moment(),
+                dateFrom: new Date(),
+                dateTo: new Date(),
                 school: '',
                 highestLevel: ''
               }
@@ -40,8 +39,8 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
             updatingField = [
               ...state[field],
               {
-                dateFrom: moment(),
-                dateTo: moment(),
+                dateFrom: new Date(),
+                dateTo: new Date(),
                 organisation: '',
                 description: ''
               }
@@ -53,8 +52,8 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
             updatingField = [
               ...state[field],
               {
-                dateFrom: moment(),
-                dateTo: moment(),
+                dateFrom: new Date(),
+                dateTo: new Date(),
                 organisation: '',
                 rolePosition: ''
               }
@@ -76,17 +75,17 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
       } else if (option === 'dec') {
         updatingField = state[field].slice(0, -1)
       }
-      dispatch({type: 'updateField', name: field, value: updatingField})
+      dispatch({ type: 'updateField', name: field, value: updatingField })
     }
   }
 
-  const updateRepeatableChange = (index, field, property) => (e, {value}) => {
+  const updateRepeatableChange = (index, field, property) => (e, { value }) => {
     if (state.edit === true) {
       const updatingField = [
         ...state[field]
       ]
       updatingField[index][property] = value
-      dispatch({type: 'updateField', name: field, value: updatingField})
+      dispatch({ type: 'updateField', name: field, value: updatingField })
     }
   }
 
@@ -94,7 +93,7 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
     if (state.edit === true) {
       const updatingField = [...state[field]]
       updatingField[i][dateType] = date
-      dispatch({type: 'updateField', name: field, value: updatingField})
+      dispatch({ type: 'updateField', name: field, value: updatingField })
     }
   }
 
@@ -123,13 +122,13 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={education.dateFrom ? moment(education.dateFrom) : undefined}
+                    selected={education.dateFrom ? new Date(education.dateFrom) : undefined}
                     selectsStart
-                    dateFormat='DD/MM/YYYY'
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
-                    maxDate={education.dateTo ? moment(education.dateTo) : undefined}
+                    maxDate={education.dateTo ? new Date(education.dateTo) : undefined}
                     onChange={updateRepeatableDateChange('formalEducation', 'dateFrom', i)}
                     placeholderText='Click to select' />
                 </Form.Field>
@@ -137,13 +136,13 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={education.dateTo ? moment(education.dateTo) : undefined}
+                    selected={education.dateTo ? new Date(education.dateTo) : undefined}
                     selectsEnd
-                    dateFormat='DD/MM/YYYY'
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
-                    minDate={education.dateFrom ? moment(education.dateFrom) : undefined}
+                    minDate={education.dateFrom ? new Date(education.dateFrom) : undefined}
                     onChange={updateRepeatableDateChange('formalEducation', 'dateTo', i)}
                     placeholderText='Click to select' />
                 </Form.Field>
@@ -221,9 +220,9 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={achievement.dateFrom ? moment(achievement.dateFrom) : undefined}
-                    maxDate={achievement.dateTo ? moment(achievement.dateTo) : undefined}
-                    dateFormat='DD/MM/YYYY'
+                    selected={achievement.dateFrom ? new Date(achievement.dateFrom) : undefined}
+                    maxDate={achievement.dateTo ? new Date(achievement.dateTo) : undefined}
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -234,9 +233,9 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={achievement.dateTo ? moment(achievement.dateTo) : undefined}
-                    minDate={achievement.dateFrom ? moment(achievement.dateFrom) : undefined}
-                    dateFormat='DD/MM/YYYY'
+                    selected={achievement.dateTo ? new Date(achievement.dateTo) : undefined}
+                    minDate={achievement.dateFrom ? new Date(achievement.dateFrom) : undefined}
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -283,9 +282,9 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={activity.dateFrom ? moment(activity.dateFrom) : undefined}
-                    maxDate={activity.dateTo ? moment(activity.dateTo) : undefined}
-                    dateFormat='DD/MM/YYYY'
+                    selected={activity.dateFrom ? new Date(activity.dateFrom) : undefined}
+                    maxDate={activity.dateTo ? new Date(activity.dateTo) : undefined}
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -296,9 +295,9 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={activity.dateTo ? moment(activity.dateTo) : undefined}
-                    minDate={activity.dateFrom ? moment(activity.dateFrom) : undefined}
-                    dateFormat='DD/MM/YYYY'
+                    selected={activity.dateTo ? new Date(activity.dateTo) : undefined}
+                    minDate={activity.dateFrom ? new Date(activity.dateFrom) : undefined}
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -345,9 +344,9 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={service.dateFrom ? moment(service.dateFrom) : undefined}
-                    maxDate={service.dateTo ? moment(service.dateTo) : undefined}
-                    dateFormat='DD/MM/YYYY'
+                    selected={service.dateFrom ? new Date(service.dateFrom) : undefined}
+                    maxDate={service.dateTo ? new Date(service.dateTo) : undefined}
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -358,9 +357,9 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={service.dateTo ? moment(service.dateTo) : undefined}
-                    minDate={service.dateFrom ? moment(service.dateFrom) : undefined}
-                    dateFormat='DD/MM/YYYY'
+                    selected={service.dateTo ? new Date(service.dateTo) : undefined}
+                    minDate={service.dateFrom ? new Date(service.dateFrom) : undefined}
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -407,10 +406,10 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={work.dateFrom ? moment(work.dateFrom) : undefined}
-                    maxDate={work.dateTo ? moment(work.dateTo) : undefined}
+                    selected={work.dateFrom ? new Date(work.dateFrom) : undefined}
+                    maxDate={work.dateTo ? new Date(work.dateTo) : undefined}
                     onChange={updateRepeatableDateChange('workInternExp', 'dateFrom', i)}
-                    dateFormat='DD/MM/YYYY'
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'
@@ -420,10 +419,10 @@ const PersonalStatement = ({state, handleChange, dispatch}) => {
               <Table.Cell>
                 <Form.Field>
                   <DatePicker
-                    selected={work.dateTo ? moment(work.dateTo) : undefined}
-                    minDate={work.dateFrom ? moment(work.dateFrom) : undefined}
+                    selected={work.dateTo ? new Date(work.dateTo) : undefined}
+                    minDate={work.dateFrom ? new Date(work.dateFrom) : undefined}
                     onChange={updateRepeatableDateChange('workInternExp', 'dateTo', i)}
-                    dateFormat='DD/MM/YYYY'
+                    dateFormat='dd/MM/yyyy'
                     showMonthDropdown
                     showYearDropdown
                     dropdownMode='select'

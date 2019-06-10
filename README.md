@@ -8,7 +8,7 @@ This system is built using express.js as an API provider. The APIs are consumed 
 
 ## Documentation
 ### Getting Started
-1. Install Node >= v8.9.x
+1. Install Node >= v8.10.x
 2. `npm install`
 3. [Install MongoDB (v3.4 only)](https://docs.mongodb.com/manual/administration/install-community/)
 
@@ -48,6 +48,20 @@ $ export PATH=$PATH:`pwd`/node_modules/.bin/
 $ nodemon server/
 Or finally install nodemon as a global package (which is recommended by nodemon docs):
 $ npm i nodemon -g
+```
+
+If you face issues of React Scripts not compiling and gives error on dynamic imports:
+```
+> Module parse failed: Unexpected token. You may need an appropriate loader to handle this file type.
+Try:
+$ npm i --save-dev acorn-dynamic-import@3
+```
+
+Issue of duplicate or conflicting dependencies such as:
+```
+> There might be a problem with the project dependency tree. It is likely not a bug in Create React App, but something you need to fix locally.
+Try:
+Adding SKIP_PREFLIGHT_CHECK=true into .env or .env.development file (of which the .env.development file is committed in the project)
 ```
 
 ## Contributing

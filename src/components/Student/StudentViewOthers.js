@@ -46,7 +46,7 @@ const reducer = (state, action) => {
 
 const handleSearchChange = dispatch => async (e, { value }) => {
   if (value.length < 1) return resetComponent(dispatch)
-  dispatch({type: 'startSearch', value})
+  dispatch({ type: 'startSearch', value })
   const response = await axios.get(`otherStudentsResponsive/${value}`)
   const studentList = response.data.studentsFiltered.map(student => {
     return {
@@ -55,13 +55,13 @@ const handleSearchChange = dispatch => async (e, { value }) => {
       key: student._id
     }
   })
-  dispatch({type: 'endSearch', results: studentList})
+  dispatch({ type: 'endSearch', results: studentList })
 }
 
-const resetComponent = (dispatch) => dispatch({type: 'resetSearch'})
+const resetComponent = (dispatch) => dispatch({ type: 'resetSearch' })
 
 const handleResultSelect = dispatch => (e, { result }) => {
-  dispatch({type: 'redirect', result})
+  dispatch({ type: 'redirect', result })
 }
 
 /*
@@ -69,7 +69,7 @@ const handleResultSelect = dispatch => (e, { result }) => {
 RENDER
 ==========
 */
-const StudentViewOthers = ({studentData, isLoading}) => {
+const StudentViewOthers = ({ studentData, isLoading }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const { value, results, id, redirect, isLoadingSearch } = state
@@ -93,8 +93,8 @@ const StudentViewOthers = ({studentData, isLoading}) => {
                 <Table.Row>
                   <Table.HeaderCell colSpan='5'>
                     <Form>
-                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <Form.Group inline style={{marginBottom: 0}}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Form.Group inline style={{ marginBottom: 0 }}>
                           <Search
                             loading={isLoadingSearch}
                             onResultSelect={handleResultSelect(dispatch)}

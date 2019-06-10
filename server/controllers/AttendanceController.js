@@ -162,7 +162,6 @@ module.exports.getAttendanceById = async (req, res, next) => {
   const attendanceId = req.params.id
   try {
     const attendances = await Attendance.findById(attendanceId)
-      // .select('-updatedAt -createdAt')
       .populate('class', ['className'])
       .populate('students.student users.user', 'name')
       .lean()

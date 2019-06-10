@@ -2,14 +2,13 @@ import React from 'react'
 import { Form, Button, Table, Icon, Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
-import moment from 'moment'
 
 const genderOptions = [
   { key: 'm', text: 'Male', value: 'M' },
   { key: 'f', text: 'Female', value: 'F' }
 ]
 
-const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
+const PersonalInfo = ({ dispatch, state, handleChange, updateAcademic }) => {
   const { name, icNumber, dob, address, gender, nationality, classLevel, schoolName, academicInfo } = state
 
   return (
@@ -22,10 +21,10 @@ const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
           <label>Date of Birth</label>
           <DatePicker
             placeholderText='Click to select a date'
-            dateFormat='DD/MM/YYYY'
-            maxDate={moment()}
+            dateFormat='dd/MM/yyyy'
+            maxDate={new Date()}
             selected={dob}
-            onChange={date => dispatch({type: 'updateField', name: 'dob', value: date})}
+            onChange={date => dispatch({ type: 'updateField', name: 'dob', value: date })}
             showMonthDropdown
             showYearDropdown
             dropdownMode='select'
@@ -83,10 +82,10 @@ const PersonalInfo = ({dispatch, state, handleChange, updateAcademic}) => {
         <Table.Footer>
           <Table.Row>
             <Table.HeaderCell colSpan='7'>
-              <Button floated='right' icon labelPosition='left' primary size='small' type='button' onClick={() => dispatch({type: 'incrementAcademic'})}>
+              <Button floated='right' icon labelPosition='left' primary size='small' type='button' onClick={() => dispatch({ type: 'incrementAcademic' })}>
                 <Icon name='plus' /> Add Year
               </Button>
-              <Button floated='right' icon labelPosition='left' negative size='small' type='button' onClick={() => dispatch({type: 'decrementAcademic'})}>
+              <Button floated='right' icon labelPosition='left' negative size='small' type='button' onClick={() => dispatch({ type: 'decrementAcademic' })}>
                 <Icon name='minus' /> Remove Year
               </Button>
             </Table.HeaderCell>

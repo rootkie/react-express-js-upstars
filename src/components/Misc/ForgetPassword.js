@@ -9,6 +9,10 @@ const initialState = {
   message: ''
 }
 
+const heightStyle = { height: '100%' }
+const maxWidth = { maxWidth: 550 }
+const image = require('./logo.png')
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'updateField':
@@ -35,23 +39,23 @@ const ForgetPassword = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const handleSubmit = e => {
     e.preventDefault()
     const { email, nric } = state
-    dispatch({type: 'updateField', name: 'message', value: 'Processing in progress...'})
+    dispatch({ type: 'updateField', name: 'message', value: 'Processing in progress...' })
     axios.post('/changepassword', { email, nric })
       .then(response => {
-        dispatch({type: 'success', message: 'A password reset link has been sent to your email. Please allow for 5 minutes before requesting for a new link if you did not receive any email.'})
+        dispatch({ type: 'success', message: 'A password reset link has been sent to your email. Please allow for 5 minutes before requesting for a new link if you did not receive any email.' })
       })
       // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
         if (error.response.data.error) {
-          dispatch({type: 'error', message: error.response.data.error})
+          dispatch({ type: 'error', message: error.response.data.error })
         } else {
-          dispatch({type: 'error', message: 'There is something wrong. Please try again!'})
+          dispatch({ type: 'error', message: 'There is something wrong. Please try again!' })
         }
       })
   }
@@ -69,10 +73,10 @@ const ForgetPassword = () => {
     `}</style>
       <Grid
         textAlign='center'
-        style={{ height: '100%' }}
+        style={heightStyle}
         verticalAlign='middle'>
-        <Grid.Column style={{ maxWidth: 550 }}>
-          <Image size='big' centered src={require('./logo.png')} />
+        <Grid.Column style={maxWidth}>
+          <Image size='big' centered src={image} />
           <Header as='h2' color='teal' textAlign='center'>
               Reset your account password
           </Header>

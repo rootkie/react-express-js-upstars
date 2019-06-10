@@ -36,7 +36,7 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
             users: updatedUser._id
           }
         }, {
-          new: true
+          timestamps: true
         })
       } else if (updatedUser.status !== 'Active' && updatedUser.classes) {
         editedClass = await Class.updateMany({
@@ -48,11 +48,11 @@ module.exports.changeUserStatusAndPermissions = async (req, res, next) => {
             users: updatedUser._id
           }
         }, {
-          new: true
+          timestamps: true
         })
       }
     } else {
-      editedClass = {'n': 1, 'nModified': 0, 'ok': 1}
+      editedClass = { 'n': 1, 'nModified': 0, 'ok': 1 }
     }
 
     // Returns necessary information
@@ -139,6 +139,9 @@ module.exports.multipleUserDelete = async (req, res, next) => {
       }
     }, {
       status: 'Deleted'
+    },
+    {
+      timestamps: true
     })
     // If theres actually someone deleted, loop through and delete the userId from the classes each user is in
     if (userDeleted.n === 0) {
@@ -160,7 +163,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
             users: userDetails._id
           }
         }, {
-          new: true
+          timestamps: true
         })
       }
     }
@@ -178,7 +181,7 @@ module.exports.multipleUserDelete = async (req, res, next) => {
 module.exports.responsiveSearch = async (req, res, next) => {
   const { name } = req.params
   try {
-    // Find all users with that name of whatever status
+    // // Find all users with that name of whatever status
     const pendingMatched = await User.find({
       'status': 'Pending',
       'name': new RegExp(name, 'i')
@@ -205,6 +208,37 @@ module.exports.responsiveSearch = async (req, res, next) => {
       suspendedMatched,
       deletedMatched
     })
+
+    // The code below uses Promise.all to run in parallel but results are not satisfactory because of the need to open
+    // a minimum of 4 connections just to allow parallel queries. Will keep series until further tests
+    // const pending = User.find({
+    //   'status': 'Pending',
+    //   'name': new RegExp(name, 'i')
+    // }).limit(50).select('name roles status').sort('name').lean()
+
+    // const active = User.find({
+    //   'status': 'Active',
+    //   'name': new RegExp(name, 'i')
+    // }).limit(50).select('name roles status').sort('name').lean()
+
+    // const suspended = User.find({
+    //   'status': 'Suspended',
+    //   'name': new RegExp(name, 'i')
+    // }).limit(50).select('name roles status').sort('name').lean()
+
+    // const deleted = User.find({
+    //   'status': 'Deleted',
+    //   'name': new RegExp(name, 'i')
+    // }).limit(50).select('name roles status').sort('name').lean()
+
+    // Promise.all([pending, active, suspended, deleted]).then(([pendingMatched, activeMatched, suspendedMatched, deletedMatched]) => {
+    //   res.status(200).json({
+    //     pendingMatched,
+    //     activeMatched,
+    //     suspendedMatched,
+    //     deletedMatched
+    //   })
+    // })
   } catch (err) {
     console.error(err)
     next(err)

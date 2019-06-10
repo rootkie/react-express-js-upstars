@@ -6,5 +6,5 @@ Disallow: /resetpassword
 Disallow: /verifyaccount
 Disallow: /requestlink
 
-Sitemap: https://test.rootkiddie.com/sitemap.xml
+Sitemap: https://upstars.wonyk.com/sitemap.xml
 

@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Header, Statistic, Image, Grid } from 'semantic-ui-react'
 
-const ErrorPage = ({statusCode, errorMessage}) => (
+const ErrorPage = ({ statusCode, errorMessage }) => (
   <div className='verify-form'>
     <style>{`
           body > div,

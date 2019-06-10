@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useMemo } from 'react'
 import { Form, Header, Icon, Segment, Image, Message, Grid, Step } from 'semantic-ui-react'
 import LoginDetails from './LoginDetails'
 import PersonalInfo from './PersonalInfo'
@@ -90,7 +90,8 @@ const reducer = (state, action) => {
     case 'clearError':
       return {
         ...state,
-        errorMessage: ''
+        errorMessage: '',
+        success: false
       }
     case 'submitSuccess':
       return {
@@ -110,11 +111,11 @@ SUBMIT FUNCTIONS
 
 const submitPageOne = (dispatch, state) => e => {
   e.preventDefault()
-  dispatch({type: 'clearError'})
+  dispatch({ type: 'clearError' })
 
   // The function is binded to the same button that display 'next' and 'back'
   if (state.activeItem === 'Personal Info') {
-    dispatch({type: 'updateField', name: 'activeItem', value: 'Login Details'})
+    dispatch({ type: 'updateField', name: 'activeItem', value: 'Login Details' })
   } else {
     const { email, password, passwordcfm } = state
     const requiredFieldForLogin = object({
@@ -126,18 +127,18 @@ const submitPageOne = (dispatch, state) => e => {
       email,
       password,
       passwordcfm
-    }, {abortEarly: true}).then(valid => {
-      dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
+    }, { abortEarly: true }).then(valid => {
+      dispatch({ type: 'updateField', name: 'activeItem', value: 'Personal Info' })
     }).catch(err => {
-      dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+      dispatch({ type: 'updateField', name: 'errorMessage', value: err.errors })
     })
   }
 }
 
 const submitEntry = (dispatch, state) => e => {
   e.preventDefault()
-  dispatch({type: 'clearError'})
-  dispatch({type: 'updateField', name: 'loading', value: true})
+  dispatch({ type: 'clearError' })
+  dispatch({ type: 'updateField', name: 'loading', value: true })
   const { email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric,
     preferredTimeSlot, commencementDate, exitDate, terms, captchaCode } = state
 
@@ -157,17 +158,17 @@ const submitEntry = (dispatch, state) => e => {
     handphone: string().required('Please provide a handphone number').matches(/^[8|9]\d{7}$/, 'Please provide a valid handphone number'),
     schoolLevel: string().required('Please provide your schooling level'),
     schoolClass: string().required('Please provide your school class'),
-    postalCode: string().required('Please provide a postal code').matches(/^\d{6}/, 'Please provide a valid postal code'),
+    postalCode: string().required('Please provide a postal code').matches(/^\d{6}$/, 'Please provide a valid postal code'),
     address: string().required('Please provide an address'),
     name: string().required('Please provide your name'),
     passwordcfm: string().oneOf([ref('password'), null], 'Passwords do not match').required('Please provide the password confirmation'),
     password: string().required('Please provide a password').min(6, 'Please provide a password that has at least 6 characters'),
     email: string().required('Please provide an email address').email('Please provide a valid email')
-  }, {abortEarly: true})
+  }, { abortEarly: true })
 
   // Validate the object against the params written above
   requiredFieldsForSubmit
-    .validate({email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric, timeSlot, commencementDate, exitDate, terms, captchaCode})
+    .validate({ email, password, passwordcfm, name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric, timeSlot, commencementDate, exitDate, terms, captchaCode })
     .then(valid => {
       const volunteerData = {
         email,
@@ -192,18 +193,18 @@ const submitEntry = (dispatch, state) => e => {
       axios.post('/register', volunteerData)
         .then(response => {
           recaptchaRef.current.reset()
-          dispatch({type: 'submitSuccess'})
+          dispatch({ type: 'submitSuccess' })
         })
         .catch((err) => {
-          dispatch({type: 'updateField', name: 'loading', value: false})
-          dispatch({type: 'updateField', name: 'terms', value: false})
+          dispatch({ type: 'updateField', name: 'loading', value: false })
+          dispatch({ type: 'updateField', name: 'terms', value: false })
           recaptchaRef.current.reset()
-          if (err.response.data) dispatch({type: 'updateField', name: 'errorMessage', value: err.response.data.error})
+          if (err.response.data) dispatch({ type: 'updateField', name: 'errorMessage', value: err.response.data.error })
         })
     }).catch(err => {
       if (err.name === 'ValidationError') {
-        dispatch({type: 'updateField', name: 'loading', value: false})
-        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+        dispatch({ type: 'updateField', name: 'loading', value: false })
+        dispatch({ type: 'updateField', name: 'errorMessage', value: err.errors })
       }
     })
 }
@@ -218,43 +219,49 @@ const VolunteerRegister = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { activeItem, errorMessage, success, loading } = state
 
-  const handleChange = (e, {name, value}) => {
-    dispatch({type: 'updateField', name, value})
+  const handleChange = (e, { name, value }) => {
+    dispatch({ type: 'updateField', name, value })
   }
 
   return (
     <Segment style={{ padding: '3em 0em' }} vertical>
       <Grid container stackable verticalAlign='middle'>
-        <Grid.Row>
-          <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column textAlign='center'>
-            <Header as='h1' color='blue'>
+        {useMemo(() => (
+          <React.Fragment>
+            <Grid.Row>
+              <Image size='small' centered src={require('../../Misc/logo.png')} style={{ height: '100%' }} />
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column textAlign='center'>
+                <Header as='h1' color='blue'>
                 Sign up as a volunteer
-            </Header>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Step.Group attached='top'>
-              <Step active={activeItem === 'Login Details'} completed={activeItem === 'Personal Info'}>
-                <Icon name='lock' />
-                <Step.Content>
-                  <Step.Title>Register</Step.Title>
-                  <Step.Description>Fill in your login details</Step.Description>
-                </Step.Content>
-              </Step>
-              <Step disabled={activeItem !== 'Personal Info'} active={activeItem === 'Personal Info'}>
-                <Icon name='user' />
-                <Step.Content>
-                  <Step.Title>Personal Details</Step.Title>
-                  <Step.Description>Enter personal information</Step.Description>
-                </Step.Content>
-              </Step>
-            </Step.Group>
-          </Grid.Column>
-        </Grid.Row>
+                </Header>
+              </Grid.Column>
+            </Grid.Row>
+          </React.Fragment>
+        ), [])}
+        {useMemo(() => (
+          <Grid.Row>
+            <Grid.Column>
+              <Step.Group attached='top'>
+                <Step active={activeItem === 'Login Details'} completed={activeItem === 'Personal Info'}>
+                  <Icon name='lock' />
+                  <Step.Content>
+                    <Step.Title>Register</Step.Title>
+                    <Step.Description>Fill in your login details</Step.Description>
+                  </Step.Content>
+                </Step>
+                <Step disabled={activeItem !== 'Personal Info'} active={activeItem === 'Personal Info'}>
+                  <Icon name='user' />
+                  <Step.Content>
+                    <Step.Title>Personal Details</Step.Title>
+                    <Step.Description>Enter personal information</Step.Description>
+                  </Step.Content>
+                </Step>
+              </Step.Group>
+            </Grid.Column>
+          </Grid.Row>
+        ), [activeItem])}
         <Grid.Row>
           <Grid.Column>
             <Form>
@@ -295,8 +302,8 @@ const VolunteerRegister = () => {
                 ref={recaptchaRef}
                 size='invisible'
                 sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
-                onChange={() => dispatch({type: 'captchaChange'})}
-                onExpired={() => dispatch({type: 'captchaExpired'})}
+                onChange={() => dispatch({ type: 'captchaChange' })}
+                onExpired={() => dispatch({ type: 'captchaExpired' })}
               />
             </Form>
           </Grid.Column>

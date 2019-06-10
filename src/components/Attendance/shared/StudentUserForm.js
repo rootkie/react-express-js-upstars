@@ -9,7 +9,7 @@ const datePickingStyle = {
   alignItems: 'center'
 }
 
-const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) => {
+const StudentUserForm = ({ state, dispatch, classData, userType, handleSubmit }) => {
   /*
   ===========
   FUNCTIONS
@@ -17,11 +17,11 @@ const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) =
   */
 
   const resetComponent = () => {
-    dispatch({type: 'resetSearchBar'})
+    dispatch({ type: 'resetSearchBar' })
   }
 
   const handleSearchChange = async (e, { value }) => {
-    dispatch({type: 'startSearch', value})
+    dispatch({ type: 'startSearch', value })
     if (value.length < 1) return resetComponent()
     const uri = userType === 'student' ? 'studentsResponsive' : 'usersResponsive'
     const response = await axios.get(`${uri}/${value}`)
@@ -33,22 +33,22 @@ const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) =
         key: user._id
       }
     })
-    dispatch({type: 'endSearch', results: resultsList})
+    dispatch({ type: 'endSearch', results: resultsList })
   }
 
   const handleResultSelect = (e, { result }) => {
-    dispatch({type: 'updateField', name: 'value', value: result.title})
+    dispatch({ type: 'updateField', name: 'value', value: result.title })
     if (userType === 'student') {
-      return dispatch({type: 'updateField', name: 'studentSelector', value: result.id})
+      return dispatch({ type: 'updateField', name: 'studentSelector', value: result.id })
     }
-    dispatch({type: 'updateField', name: 'userSelector', value: result.id})
+    dispatch({ type: 'updateField', name: 'userSelector', value: result.id })
   }
   const handleClassSearchOptions = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const toggleOptions = () => {
-    dispatch({type: 'updateField', name: 'moreOptions', value: !state.moreOptions})
+    dispatch({ type: 'updateField', name: 'moreOptions', value: !state.moreOptions })
   }
 
   /*
@@ -66,37 +66,37 @@ const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) =
               <Table.Row>
                 <Table.HeaderCell colSpan='4'>
                   <Form onSubmit={handleSubmit}>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                      <Form.Group inline style={{marginBottom: 0}}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Form.Group inline style={{ marginBottom: 0 }}>
                         <Form.Field style={datePickingStyle}>
                           <label>Starting Date</label>
                           <DatePicker
-                            dateFormat='DD/MM/YYYY'
+                            dateFormat='dd/MM/yyyy'
                             required
                             showMonthDropdown
                             showYearDropdown
                             dropdownMode='select'
                             selected={startDate}
                             maxDate={endDate}
-                            onChange={(date) => dispatch({type: 'updateField', name: 'startDate', value: date})}
+                            onChange={(date) => dispatch({ type: 'updateField', name: 'startDate', value: date })}
                             placeholderText='Click to select' />
                         </Form.Field>
                         <Form.Field style={datePickingStyle}>
                           <label>Ending Date</label>
                           <DatePicker
-                            dateFormat='DD/MM/YYYY'
+                            dateFormat='dd/MM/yyyy'
                             required
                             showMonthDropdown
                             showYearDropdown
                             dropdownMode='select'
                             selected={endDate}
                             minDate={startDate}
-                            onChange={(date) => dispatch({type: 'updateField', name: 'endDate', value: date})}
+                            onChange={(date) => dispatch({ type: 'updateField', name: 'endDate', value: date })}
                             placeholderText='Click to select' />
                         </Form.Field>
                         <Form.Button positive>Search {userType === 'student' ? 'student\'s' : 'user\'s' } attendance records</Form.Button>
                       </Form.Group>
-                      <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={toggleOptions} />
+                      <Icon style={{ cursor: 'pointer' }} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={toggleOptions} />
                     </div>
                     <Form.Field required>
                       <label>{userType === 'student' ? 'Students' : 'Users' }</label>
@@ -109,7 +109,7 @@ const StudentUserForm = ({state, dispatch, classData, userType, handleSubmit}) =
                       />
                     </Form.Field>
                     {moreOptions && <div>
-                      <Form.Field style={{paddingTop: '5px'}}>
+                      <Form.Field style={{ paddingTop: '5px' }}>
                         <label>Classes</label>
                         <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={handleClassSearchOptions} clearable />
                       </Form.Field>

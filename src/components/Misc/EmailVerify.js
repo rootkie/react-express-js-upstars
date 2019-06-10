@@ -9,13 +9,17 @@ const initialState = {
   error: false
 }
 
+const heightStyle = { height: '100%' }
+const maxWidth = { maxWidth: 550 }
+const image = require('./logo.png')
+
 const verifyEmail = (dispatch, match) => {
   let { token } = match.params
   axios.post(`/verifyEmail`, { token })
     .then(response => {
-      dispatch({type: 'verificationSuccess'})
+      dispatch({ type: 'verificationSuccess' })
     }).catch(err => {
-      dispatch({type: 'verificationFailure', err})
+      dispatch({ type: 'verificationFailure', err })
     })
 }
 
@@ -36,7 +40,7 @@ const reducer = (state, action) => {
   }
 }
 
-const EmailVerify = ({match}) => {
+const EmailVerify = ({ match }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -56,10 +60,10 @@ const EmailVerify = ({match}) => {
     `}</style>
       <Grid
         textAlign='center'
-        style={{ height: '100%' }}
+        style={heightStyle}
         verticalAlign='middle'>
-        <Grid.Column style={{ maxWidth: 550 }}>
-          <Image size='big' centered src={require('./logo.png')} />
+        <Grid.Column style={maxWidth}>
+          <Image size='big' centered src={image} />
           <Header as='h2' color='teal' textAlign='center'>
               Verify your email
           </Header>

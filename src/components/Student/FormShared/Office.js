@@ -3,10 +3,10 @@ import { Form, Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
 
-const Office = ({admin, dispatch, edit}) => {
-  const handleAdminChange = (e, {name, value}) => {
+const Office = ({ admin, dispatch, edit }) => {
+  const handleAdminChange = (e, { name, value }) => {
     if (edit) {
-      dispatch({type: 'updateAdminField', name, value})
+      dispatch({ type: 'updateAdminField', name, value })
     }
   }
 
@@ -17,9 +17,9 @@ const Office = ({admin, dispatch, edit}) => {
         <label>Interview date</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           selected={interviewDate}
-          onChange={date => { if (edit) dispatch({type: 'updateAdminField', name: 'interviewDate', value: date}) }}
+          onChange={date => { if (edit) dispatch({ type: 'updateAdminField', name: 'interviewDate', value: date }) }}
         />
       </Form.Field>
       <Form.TextArea rows={3} label='Interview notes' placeholder='reason for acceptance' name='interviewNotes' value={interviewNotes} onChange={handleAdminChange} />
@@ -27,12 +27,12 @@ const Office = ({admin, dispatch, edit}) => {
         <label>Commencement date</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           showMonthDropdown
           dropdownMode='select'
           minDate={interviewDate}
           selected={commencementDate}
-          onChange={date => { if (edit) dispatch({type: 'updateAdminField', name: 'commencementDate', value: date}) }}
+          onChange={date => { if (edit) dispatch({ type: 'updateAdminField', name: 'commencementDate', value: date }) }}
         />
       </Form.Field>
       <Form.TextArea rows={3} label='Admin notes' placeholder='up to 1000 words' name='adminNotes' value={adminNotes} onChange={handleAdminChange} />
@@ -40,13 +40,13 @@ const Office = ({admin, dispatch, edit}) => {
         <label>Date of exit</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           showMonthDropdown
           showYearDropdown
           dropdownMode='select'
           minDate={commencementDate}
           selected={exitDate}
-          onChange={date => { if (edit) dispatch({type: 'updateAdminField', name: 'exitDate', value: date}) }}
+          onChange={date => { if (edit) dispatch({ type: 'updateAdminField', name: 'exitDate', value: date }) }}
         />
       </Form.Field>
       <Form.TextArea rows={3} label='Reason for exit' placeholder='reason for exit' name='exitReason' value={exitReason} onChange={handleAdminChange} />

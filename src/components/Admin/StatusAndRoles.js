@@ -21,7 +21,7 @@ const roleOptions = [
   { key: 'Adhoc', text: 'Adhoc', value: 'Adhoc' }
 ]
 
-const StatusAndRoles = ({userData, dispatch, userType}) => {
+const StatusAndRoles = ({ userData, dispatch, userType }) => {
   /*
   ===========
   FUNCTIONS
@@ -29,36 +29,36 @@ const StatusAndRoles = ({userData, dispatch, userType}) => {
   */
   // userType is always the status of user with the first character in UpperCase such as Pending (and) Active
   const stateUserName = userType.toLowerCase() + 'Users'
-  const handleStatus = (userId, index) => async (e, {value}) => {
+  const handleStatus = (userId, index) => async (e, { value }) => {
     e.preventDefault()
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     try {
       await axios.post('admin/userStatusPermissions', { userId, newStatus: value })
       let newUserArray = [...userData]
       newUserArray[index].status = value
-      dispatch({type: 'updateField', name: stateUserName, value: newUserArray})
+      dispatch({ type: 'updateField', name: stateUserName, value: newUserArray })
     } catch (err) {
-      dispatch({type: 'updateField', name: 'error', value: err.response.data.error})
+      dispatch({ type: 'updateField', name: 'error', value: err.response.data.error })
     } finally {
-      dispatch({type: 'updateField', name: 'isLoading', value: false})
+      dispatch({ type: 'updateField', name: 'isLoading', value: false })
     }
   }
 
-  const handleRole = (userId, index) => async (e, {value}) => {
+  const handleRole = (userId, index) => async (e, { value }) => {
     e.preventDefault()
     if (value.length === 0) {
       return
     }
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     try {
       await axios.post('admin/userStatusPermissions', { userId, newRoles: value })
       let newUserArray = [...userData]
       newUserArray[index].roles = value
-      dispatch({type: 'updateField', name: stateUserName, value: newUserArray})
+      dispatch({ type: 'updateField', name: stateUserName, value: newUserArray })
     } catch (err) {
-      dispatch({type: 'updateField', name: 'error', value: err.response.data.error})
+      dispatch({ type: 'updateField', name: 'error', value: err.response.data.error })
     } finally {
-      dispatch({type: 'updateField', name: 'isLoading', value: false})
+      dispatch({ type: 'updateField', name: 'isLoading', value: false })
     }
   }
   /*
@@ -105,9 +105,9 @@ const StatusAndRoles = ({userData, dispatch, userType}) => {
 }
 
 StatusAndRoles.propTypes = {
-  userData: PropTypes.object.isRequired,
+  userData: PropTypes.array.isRequired,
   dispatch: PropTypes.func.isRequired,
   userType: PropTypes.string.isRequired
 }
 
-export default StatusAndRoles
+export default React.memo(StatusAndRoles)

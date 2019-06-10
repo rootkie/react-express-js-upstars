@@ -20,8 +20,8 @@ const initialState = {
   classAuthorisedForEdit: [],
   isLoading: true,
   errorMessage: '',
-  students: [{text: 'Not found. Please try another search', key: '0'}],
-  users: [{text: 'Not found. Please try another search', key: '0'}],
+  students: [{ text: 'Not found. Please try another search', key: '0' }],
+  users: [{ text: 'Not found. Please try another search', key: '0' }],
   buttonName: 'Edit Attendance',
   deleteConfirm: false,
   submitSuccess: false
@@ -64,7 +64,7 @@ const reducer = (state, action) => {
         edit: false,
         submitSuccess: true,
         buttonName: 'Edit Attendance',
-        updatedAt: moment(),
+        updatedAt: new Date(),
         __v: state.__v + 1
       }
     case 'resetState':
@@ -82,7 +82,7 @@ const reducer = (state, action) => {
   }
 }
 
-const AttendanceView = ({match, classData, roles, history}) => {
+const AttendanceView = ({ match, classData, roles, history }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -96,7 +96,7 @@ const AttendanceView = ({match, classData, roles, history}) => {
   */
   const getAttendanceData = async () => {
     const { attendanceId } = match.params
-    dispatch({type: 'resetState'})
+    dispatch({ type: 'resetState' })
     if (!/^[0-9a-fA-F]{24}$/.test(attendanceId)) {
       return history.replace('/dashboard/attendance/search')
     }
@@ -124,7 +124,7 @@ const AttendanceView = ({match, classData, roles, history}) => {
       }
     }
     const compiledAttendanceObject = {
-      attendanceDate: moment(date),
+      attendanceDate: new Date(date),
       hours,
       className: attendances.class.className,
       classId: attendances.class._id,
@@ -136,31 +136,31 @@ const AttendanceView = ({match, classData, roles, history}) => {
       updatedAt,
       __v
     }
-    dispatch({type: 'initData', compiledAttendanceObject})
+    dispatch({ type: 'initData', compiledAttendanceObject })
   }
 
   const handleEdit = e => {
     e.preventDefault()
     if (state.edit === false) {
-      dispatch({type: 'setEdit'})
+      dispatch({ type: 'setEdit' })
     } else handleSubmit()
   }
 
   const handleDeletePopup = e => {
     e.preventDefault()
-    dispatch({type: 'updateField', name: 'deleteConfirm', value: true})
+    dispatch({ type: 'updateField', name: 'deleteConfirm', value: true })
   }
 
   const close = e => {
     e.preventDefault()
-    dispatch({type: 'updateField', name: 'deleteConfirm', value: false})
+    dispatch({ type: 'updateField', name: 'deleteConfirm', value: false })
   }
 
   const deletePage = async e => {
     e.preventDefault()
     const { attendanceId } = match.params
     const { classId } = state
-    dispatch({type: 'prepDelete'})
+    dispatch({ type: 'prepDelete' })
     try {
       await axios.delete('attendance', {
         data: {
@@ -168,19 +168,19 @@ const AttendanceView = ({match, classData, roles, history}) => {
           classId
         }
       })
-      dispatch({type: 'updateField', name: 'isLoading', value: false})
+      dispatch({ type: 'updateField', name: 'isLoading', value: false })
       history.push('/dashboard/attendance/search')
     } catch (err) {
-      dispatch({type: 'showError', value: err.response.data.error})
+      dispatch({ type: 'showError', value: err.response.data.error })
     }
   }
 
   const handleSubmit = () => {
     const { attendanceDate: date, classId, type, students, users, hours, classAuthorisedForEdit } = state
     if (classAuthorisedForEdit.indexOf(classId) === -1) {
-      return dispatch({type: 'showError', value: 'You are not authorised to edit this attendance.'})
+      return dispatch({ type: 'showError', value: 'You are not authorised to edit this attendance.' })
     }
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     const requiredFields = object({
       type: string().required('Was this lesson held? Or was it cancelled?'),
       hours: number('Please enter a valid number of hours').min(0, 'The minimum hour is zero (0)').required('Please provide the number of hours')
@@ -197,23 +197,23 @@ const AttendanceView = ({match, classData, roles, history}) => {
           hours,
           type
         })
-        dispatch({type: 'successEdit'})
+        dispatch({ type: 'successEdit' })
       } catch (err) {
         if (err.response.data) {
-          dispatch({type: 'showError', value: err.response.data.error})
+          dispatch({ type: 'showError', value: err.response.data.error })
         }
       }
     }).catch(err => {
       if (err.name === 'ValidationError') {
-        dispatch({type: 'showError', value: err.errors})
+        dispatch({ type: 'showError', value: err.errors })
       }
     }).finally(() => {
-      dispatch({type: 'updateField', name: 'isLoading', value: false})
+      dispatch({ type: 'updateField', name: 'isLoading', value: false })
     })
   }
 
   const dismiss = () => {
-    dispatch({type: 'updateField', name: 'submitSuccess', value: false})
+    dispatch({ type: 'updateField', name: 'submitSuccess', value: false })
   }
   /*
   ===============
@@ -258,7 +258,7 @@ const AttendanceView = ({match, classData, roles, history}) => {
           </Form>
         </Grid.Column>
       </Grid.Row>
-      <Modal open={deleteConfirm} onClose={close} basic size='small'>
+      <Modal open={deleteConfirm} basic size='small'>
         <Header icon='archive' content='Delete Attendance' />
         <Modal.Content>
           <p>Are you sure you want to delete? This action is completely irreversible.</p>
