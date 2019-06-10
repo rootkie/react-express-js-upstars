@@ -158,33 +158,33 @@ FUNCTIONS
 
 const submitStudent = (state, dispatch, addStudent) => async e => {
   e.preventDefault()
-  dispatch({type: 'clearError'})
+  dispatch({ type: 'clearError' })
 
   const response = await useValidateStudent(state)
   if (response.status === true) {
     const { studentDataToSubmit } = response
     try {
       const newStudentId = await addStudent(studentDataToSubmit)
-      dispatch({type: 'updateField', name: 'redirectLink', value: newStudentId})
-      dispatch({type: 'updateField', name: 'successRedirect', value: true})
+      dispatch({ type: 'updateField', name: 'redirectLink', value: newStudentId })
+      dispatch({ type: 'updateField', name: 'successRedirect', value: true })
     } catch (error) {
-      dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})
+      dispatch({ type: 'updateField', name: 'errorMessage', value: error.response.data.error })
     }
   } else {
     const { errors } = response
-    dispatch({type: 'updateField', name: 'errorMessage', value: errors})
+    dispatch({ type: 'updateField', name: 'errorMessage', value: errors })
   }
 }
 
-const StudentForm = ({addStudent}) => {
+const StudentForm = ({ addStudent }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value: value})
+    dispatch({ type: 'updateField', name, value: value })
   }
 
-  const handleActiveChange = (e, {name}) => {
-    dispatch(({type: 'changeActive', name}))
+  const handleActiveChange = (e, { name }) => {
+    dispatch(({ type: 'changeActive', name }))
   }
 
   /*

@@ -83,13 +83,13 @@ const getVolunteers = (dispatch) => {
     .then(response => {
       const volunteerData = response.data.users
       const editedData = [...response.data.users]
-      dispatch({type: 'setVolunteerData', volunteerData, editedData})
+      dispatch({ type: 'setVolunteerData', volunteerData, editedData })
     })
 }
 
 const handleDelete = async (state, dispatch) => {
   const { selected } = state
-  dispatch({type: 'updateField', name: 'isLoading', value: true})
+  dispatch({ type: 'updateField', name: 'isLoading', value: true })
   if (selected.length === 0) return
   await axios.delete('/admin/user',
     {
@@ -98,11 +98,11 @@ const handleDelete = async (state, dispatch) => {
       }
     })
   getVolunteers(dispatch)
-  dispatch({type: 'updateField', name: 'selected', value: []})
-  dispatch({type: 'updateField', name: 'deleteConfirmationVisibility', value: false})
+  dispatch({ type: 'updateField', name: 'selected', value: [] })
+  dispatch({ type: 'updateField', name: 'deleteConfirmationVisibility', value: false })
 }
 
-const VolunteerView = ({roles}) => {
+const VolunteerView = ({ roles }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -110,8 +110,8 @@ const VolunteerView = ({roles}) => {
   }, [])
 
   const handleSearchChange = (e, { value }) => {
-    if (value.length < 1) return dispatch({type: 'resetSearch'})
-    dispatch({type: 'startLoadingSearch', value})
+    if (value.length < 1) return dispatch({ type: 'resetSearch' })
+    dispatch({ type: 'startLoadingSearch', value })
     axios.get(`usersResponsive/${value}`)
       .then(response => {
         const volunteerList = response.data.users.map(user => {
@@ -121,21 +121,21 @@ const VolunteerView = ({roles}) => {
             key: user._id
           }
         })
-        dispatch({type: 'completeSearch', volunteerList})
+        dispatch({ type: 'completeSearch', volunteerList })
       })
   }
 
   const handleResultSelect = (e, { result }) => {
-    dispatch({type: 'redirectUser', id: result.id})
+    dispatch({ type: 'redirectUser', id: result.id })
   }
 
   const handleCheckboxChange = (e, { name: _id, checked }) => {
     const { selected } = state
     const newSelection = checked ? [...selected, _id] : selected.filter(element => element !== _id)
-    dispatch({type: 'updateField', name: 'selected', value: newSelection})
+    dispatch({ type: 'updateField', name: 'selected', value: newSelection })
   }
 
-  const handleChange = (e, { name, value }) => dispatch({type: 'updateField', name, value})
+  const handleChange = (e, { name, value }) => dispatch({ type: 'updateField', name, value })
 
   const toggleOptions = () => dispatch({ type: 'updateField', name: 'moreOptions', value: !state.moreOptions })
 
@@ -143,13 +143,13 @@ const VolunteerView = ({roles}) => {
     e.preventDefault()
     switch (option) {
       case 'show':
-        dispatch({type: 'updateField', name: 'deleteConfirmationVisibility', value: true})
+        dispatch({ type: 'updateField', name: 'deleteConfirmationVisibility', value: true })
         break
       case 'confirm':
         await handleDelete(state, dispatch)
         break
       case 'cancel':
-        dispatch({type: 'updateField', name: 'deleteConfirmationVisibility', value: false})
+        dispatch({ type: 'updateField', name: 'deleteConfirmationVisibility', value: false })
         break
       default:
     }
@@ -158,7 +158,7 @@ const VolunteerView = ({roles}) => {
   const handleFilter = (e) => {
     e.preventDefault()
     const { genderSelector, volunteerData } = state
-    const options = [{field: 'gender', value: genderSelector}]
+    const options = [{ field: 'gender', value: genderSelector }]
     if (genderSelector.length !== 0) {
       const editedData = filterData(volunteerData, options)
       dispatch({ type: 'updateField', name: 'editedData', value: editedData })
@@ -167,7 +167,7 @@ const VolunteerView = ({roles}) => {
 
   const clearAll = e => {
     e.preventDefault()
-    dispatch({type: 'clearAll'})
+    dispatch({ type: 'clearAll' })
   }
 
   const { selected, isLoadingSearch, deleteConfirmationVisibility, moreOptions, genderSelector, isLoading, editedData, redirect, id, results, value } = state
@@ -189,8 +189,8 @@ const VolunteerView = ({roles}) => {
                 <Table.Row>
                   <Table.HeaderCell colSpan='5'>
                     <Form>
-                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <Form.Group inline style={{marginBottom: 0}}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Form.Group inline style={{ marginBottom: 0 }}>
                           <Search
                             loading={isLoadingSearch}
                             onResultSelect={handleResultSelect}
@@ -199,10 +199,10 @@ const VolunteerView = ({roles}) => {
                             value={value}
                           />
                         </Form.Group>
-                        <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={toggleOptions} />
+                        <Icon style={{ cursor: 'pointer' }} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={toggleOptions} />
                       </div>
                       {moreOptions && <div>
-                        <Form.Field style={{paddingTop: '10px'}}>
+                        <Form.Field style={{ paddingTop: '10px' }}>
                           <label>Filter by Gender</label>
                           <Dropdown name='genderSelector' value={genderSelector} placeholder='Male or Female' selection options={genderOptions} onChange={handleChange} />
                         </Form.Field>

@@ -2,7 +2,6 @@ import React from 'react'
 import { Form, Button, Modal, Header, Segment } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import PropTypes from 'prop-types'
-import moment from 'moment'
 
 const genderOptions = [
   { key: 'male', text: 'Male', value: 'M' },
@@ -10,24 +9,24 @@ const genderOptions = [
 ]
 
 const nationalityOptions = [
-  {key: 'singaporean', text: 'Singaporean', value: 'singaporean'},
-  {key: 'korean', text: 'Korean', value: 'korean'},
-  {key: 'australian', text: 'Australian', value: 'australian'},
-  {key: 'malaysian', text: 'Malaysian', value: 'malaysian'}
+  { key: 'singaporean', text: 'Singaporean', value: 'singaporean' },
+  { key: 'korean', text: 'Korean', value: 'korean' },
+  { key: 'australian', text: 'Australian', value: 'australian' },
+  { key: 'malaysian', text: 'Malaysian', value: 'malaysian' }
 ]
 
 const timeSlotOptions = [
-  {value: 'Monday 7-9.30pm', text: 'Monday 7-9.30pm'},
-  {value: 'Tuesday 7-9.30pm', text: 'Tuesday 7-9.30pm'},
-  {value: 'Wednesday 7-9.30pm', text: 'Wednesday 7-9.30pm'},
-  {value: 'Thursday 7-9.30pm', text: 'Thursday 7-9.30pm'},
-  {value: 'Friday 7-9.30pm', text: 'Friday 7-9.30pm'},
-  {value: 'Saturday 10-12.30pm', text: 'Saturday 10-12.30pm'},
-  {value: 'Saturday 12.15-1.15pm', text: 'Saturday 12.15-1.15pm'},
-  {value: 'Saturday 12.00-2.30pm', text: 'Saturday 12.00-2.30pm'}
+  { value: 'Monday 7-9.30pm', text: 'Monday 7-9.30pm' },
+  { value: 'Tuesday 7-9.30pm', text: 'Tuesday 7-9.30pm' },
+  { value: 'Wednesday 7-9.30pm', text: 'Wednesday 7-9.30pm' },
+  { value: 'Thursday 7-9.30pm', text: 'Thursday 7-9.30pm' },
+  { value: 'Friday 7-9.30pm', text: 'Friday 7-9.30pm' },
+  { value: 'Saturday 10-12.30pm', text: 'Saturday 10-12.30pm' },
+  { value: 'Saturday 12.15-1.15pm', text: 'Saturday 12.15-1.15pm' },
+  { value: 'Saturday 12.00-2.30pm', text: 'Saturday 12.00-2.30pm' }
 ]
 
-const PersonalInfo = ({dispatch, state, handleChange, recaptchaRef}) => {
+const PersonalInfo = ({ dispatch, state, handleChange, recaptchaRef }) => {
   const { name, address, postalCode, schoolClass, schoolLevel, handphone, homephone, dob, gender, nationality, nric,
     preferredTimeSlot, commencementDate, exitDate, terms, termsDetails } = state
 
@@ -53,13 +52,13 @@ const PersonalInfo = ({dispatch, state, handleChange, recaptchaRef}) => {
           <label>Date of birth</label>
           <DatePicker
             placeholderText='Click to select a date'
-            dateFormat='DD/MM/YYYY'
+            dateFormat='dd/MM/yyyy'
             showMonthDropdown
             showYearDropdown
             dropdownMode='select'
             selected={dob}
-            maxDate={moment()}
-            onChange={date => dispatch({type: 'updateField', name: 'dob', value: date})}
+            maxDate={new Date()}
+            onChange={date => dispatch({ type: 'updateField', name: 'dob', value: date })}
             required />
         </Form.Field>
         <Form.Select label='Gender' options={genderOptions} placeholder='Gender' name='gender' value={gender} onChange={handleChange} required />
@@ -72,7 +71,7 @@ const PersonalInfo = ({dispatch, state, handleChange, recaptchaRef}) => {
         <label>Date of Preferred Time Slot *</label>
         {timeSlotOptions.map((option, i) => {
           return (
-            <Form.Checkbox label={option.text} key={`option-${i}`} name={option.value} onChange={(e, {name, checked}) => dispatch({type: 'updateTimeslot', name, checked})} checked={preferredTimeSlot[option.value]} />
+            <Form.Checkbox label={option.text} key={`option-${i}`} name={option.value} onChange={(e, { name, checked }) => dispatch({ type: 'updateTimeslot', name, checked })} checked={preferredTimeSlot[option.value]} />
           )
         })}
       </Form.Group>
@@ -80,18 +79,18 @@ const PersonalInfo = ({dispatch, state, handleChange, recaptchaRef}) => {
         <label>Intended Date of Commencement</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           selected={commencementDate}
-          onChange={date => dispatch({type: 'updateField', name: 'commencementDate', value: date})}
+          onChange={date => dispatch({ type: 'updateField', name: 'commencementDate', value: date })}
           required />
       </Form.Field>
       <Form.Field>
         <label>Intended Date of Exit</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           selected={exitDate}
-          onChange={date => dispatch({type: 'updateField', name: 'exitDate', value: date})}
+          onChange={date => dispatch({ type: 'updateField', name: 'exitDate', value: date })}
           minDate={commencementDate}
           showMonthDropdown
           showYearDropdown
@@ -102,9 +101,9 @@ const PersonalInfo = ({dispatch, state, handleChange, recaptchaRef}) => {
       <Header as='h3'>Terms and Conditions</Header>
       <Form.Checkbox label={<label onClick={() => {
         recaptchaRef.current.execute()
-        dispatch({type: 'handleTermsOpen'})
+        dispatch({ type: 'handleTermsOpen' })
       }}>I agree to the Terms and Conditions</label>} name='terms' required checked={terms} />
-      <Modal open={termsDetails} onClose={this.close} dimmer='blurring' size='large'>
+      <Modal open={termsDetails} dimmer='blurring' size='large'>
         <Modal.Header>Terms and conditions</Modal.Header>
         <Modal.Content scrolling>
           <Modal.Description>
@@ -135,8 +134,8 @@ const PersonalInfo = ({dispatch, state, handleChange, recaptchaRef}) => {
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
-          <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={() => dispatch({type: 'handleTermsDisagree'})} />
-          <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={() => dispatch({type: 'handleTermsClose'})} />
+          <Button negative icon='close' labelPosition='right' content='I DISAGREE' onClick={() => dispatch({ type: 'handleTermsDisagree' })} />
+          <Button positive icon='checkmark' labelPosition='right' content='I AGREE' onClick={() => dispatch({ type: 'handleTermsClose' })} />
         </Modal.Actions>
       </Modal>
     </Segment>

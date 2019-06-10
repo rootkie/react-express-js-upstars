@@ -3,7 +3,7 @@ import { Grid, Menu } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import { NavLink } from 'react-router-dom'
 
-const SideMenu = ({roles}) => {
+const SideMenu = ({ roles }) => {
   return (
     <Grid.Column width={3}>
       <Menu vertical fluid>

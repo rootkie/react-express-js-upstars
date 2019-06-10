@@ -34,7 +34,7 @@ const reducer = (state, action) => {
   }
 }
 
-const ClassView = ({classData, stopClass, isLoading, roles}) => {
+const ClassView = ({ classData, stopClass, isLoading, roles }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   /*
@@ -45,26 +45,26 @@ const ClassView = ({classData, stopClass, isLoading, roles}) => {
   const handleCheckBox = (e, { name: _id, checked }) => { // name here is actually class _id
     const { selected } = state
     const newSelection = checked ? [...selected, _id] : selected.filter(element => element !== _id)
-    dispatch({type: 'updateSelection', newSelection})
+    dispatch({ type: 'updateSelection', newSelection })
   }
 
   const handleStop = async () => {
     const { selected } = state
     selected.length > 0 && await stopClass(selected) // check if non empty selected
-    dispatch({type: 'reset'})
+    dispatch({ type: 'reset' })
   }
 
   const handleStoppingConfirmation = (option) => async e => {
     e.preventDefault()
     switch (option) {
       case 'show':
-        dispatch({type: 'showDelete'})
+        dispatch({ type: 'showDelete' })
         break
       case 'confirm':
         await handleStop()
         break
       case 'cancel':
-        dispatch({type: 'closeDelete'})
+        dispatch({ type: 'closeDelete' })
         break
       default:
     }

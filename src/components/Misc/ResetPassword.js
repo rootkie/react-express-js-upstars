@@ -39,11 +39,11 @@ const reducer = (state, action) => {
   }
 }
 
-const ResetPassword = ({match}) => {
+const ResetPassword = ({ match }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const handleSubmit = e => {
@@ -51,18 +51,18 @@ const ResetPassword = ({match}) => {
     const { password, confirmPassword } = state
     const { token } = match.params
     if (password !== confirmPassword) {
-      dispatch({type: 'error', message: 'The 2 passwords do not match, please try again.'})
+      dispatch({ type: 'error', message: 'The 2 passwords do not match, please try again.' })
       return
     }
 
     dispatch({ type: 'updateField', value: 'Resetting password...', name: 'message' })
     axios.post('/resetpassword', { password, token })
       .then(response => {
-        dispatch({type: 'success', message: 'Your password has been successfully reset. Please proceed to log-in'})
+        dispatch({ type: 'success', message: 'Your password has been successfully reset. Please proceed to log-in' })
       })
       .catch(error => {
-        if (error.response.data.error) dispatch({type: 'error', message: error.response.data.error})
-        else dispatch({type: 'error', message: 'Something went wrong, please try again.'})
+        if (error.response.data.error) dispatch({ type: 'error', message: error.response.data.error })
+        else dispatch({ type: 'error', message: 'Something went wrong, please try again.' })
       })
   }
   const { confirmPassword, password, message, success } = state

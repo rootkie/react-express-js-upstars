@@ -194,6 +194,8 @@ module.exports.deleteUser = async (req, res, next) => {
       }
     }, {
       status: 'Deleted'
+    }, {
+      new: true
     }).select('name classes')
     if (!userDeleted) {
       const error = {
@@ -214,8 +216,7 @@ module.exports.deleteUser = async (req, res, next) => {
           users: userDeleted._id
         }
       }, {
-        new: true,
-        multi: true
+        timestamps: true
       })
     }
     res.status(200).send()

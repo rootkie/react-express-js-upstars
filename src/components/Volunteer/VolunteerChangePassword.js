@@ -36,7 +36,7 @@ const reducer = (state, action) => {
   }
 }
 
-const VolunteerChangePassword = ({_id}) => {
+const VolunteerChangePassword = ({ _id }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => dispatch({ type: 'updateField', name, value })

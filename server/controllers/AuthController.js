@@ -421,7 +421,7 @@ module.exports.register = async (req, res, next) => {
 }
 
 module.exports.verifyEmail = async (req, res, next) => {
-  const {token} = req.body
+  const { token } = req.body
   jwt.verify(token, process.env.SECRET_EMAIL, async (err, decoded) => {
     try {
       if (err) {

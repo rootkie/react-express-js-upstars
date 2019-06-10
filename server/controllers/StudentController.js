@@ -6,7 +6,7 @@ const Class = require('../models/class')
 // Add student function works for everyone
 module.exports.addStudent = async (req, res, next) => {
   const list = ['name', 'icNumber', 'dob', 'address', 'gender', 'nationality', 'classLevel', 'schoolName', 'fatherName', 'fatherIcNumber', 'fatherNationality', 'fatherEmail', 'fatherOccupation', 'fatherContactNumber', 'fatherIncome', 'motherName', 'motherIcNumber', 'motherNationality', 'motherEmail', 'motherOccupation', 'motherContactNumber', 'motherIncome', 'otherFamily', 'fas', 'fsc', 'tuition', 'academicInfo']
-  const {captchaCode} = req.body
+  const { captchaCode } = req.body
   let edited = {}
 
   // Use a loop to populate edited if field is present
@@ -57,9 +57,9 @@ module.exports.addStudent = async (req, res, next) => {
       throw error
     }
 
-    const successStudentSignup = await newStudent.save()
+    await newStudent.save()
     res.status(201).json({
-      newStudent: successStudentSignup._id
+      newStudent: true
     })
   } catch (err) {
     console.error(err)
@@ -119,7 +119,7 @@ module.exports.adminAddStudent = async (req, res, next) => {
 
 // Mentor / Admin / SuperAdmin only
 module.exports.editStudentById = async (req, res, next) => {
-  const {studentId} = req.body
+  const { studentId } = req.body
   try {
     // Check if studentId exists
     if (!(/^[0-9a-fA-F]{24}$/).test(studentId)) {
@@ -148,7 +148,7 @@ module.exports.editStudentById = async (req, res, next) => {
       }
       throw error
     }
-    const oldStatus = {...studentFound.status}
+    const oldStatus = { ...studentFound.status }
     studentFound.set(edited)
     const editedStudent = await studentFound.save()
 
@@ -164,8 +164,7 @@ module.exports.editStudentById = async (req, res, next) => {
             students: editedStudent._id
           }
         }, {
-          new: true,
-          multi: true
+          timestamps: true
         })
       } else if (editedStudent.status !== 'Active' && editedStudent.classes) {
       // If status if changed to anything other than Active, we will delete their IDs from the classes instead
@@ -178,8 +177,7 @@ module.exports.editStudentById = async (req, res, next) => {
             students: editedStudent._id
           }
         }, {
-          new: true,
-          multi: true
+          timestamps: true
         })
       }
     }
@@ -288,7 +286,7 @@ module.exports.deleteStudent = async (req, res, next) => {
     }, {
       status: 'Deleted'
     }, {
-      multi: true
+      timestamps: true
     })
     if (studentDeleted.n === 0) {
       const error = {
@@ -309,8 +307,7 @@ module.exports.deleteStudent = async (req, res, next) => {
               students: studentDetails._id
             }
           }, {
-            new: true,
-            multi: true
+            timestamps: true
           })
         }
       }
@@ -328,7 +325,7 @@ module.exports.deleteStudent = async (req, res, next) => {
 
 // Everyone
 module.exports.getStudentByName = async (req, res, next) => {
-  const {name} = req.params
+  const { name } = req.params
   try {
     // Find students from database real-time using name
     const studentsFiltered = await Student.find({
@@ -346,7 +343,7 @@ module.exports.getStudentByName = async (req, res, next) => {
 
 // Admin only
 module.exports.getOtherStudentByName = async (req, res, next) => {
-  const {name} = req.params
+  const { name } = req.params
   try {
     // Find other students from database real-time using name
     const studentsFiltered = await Student.find({

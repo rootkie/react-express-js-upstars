@@ -35,7 +35,7 @@ const isLoggedIn = async (dispatch) => {
       if (!refreshToken) {
         // Cleaning up the interface
         window.localStorage.removeItem('token')
-        dispatch({type: 'stopLoading'})
+        dispatch({ type: 'stopLoading' })
       } else {
         let newAccessToken = await axios.post('/refresh', { refreshToken })
         if (newAccessToken.data.status === true) {
@@ -46,15 +46,15 @@ const isLoggedIn = async (dispatch) => {
           // If refresh token is invalid, remove both and let them Login again to obtain valid tokens
           window.localStorage.removeItem('token')
           window.localStorage.removeItem('refreshToken')
-          dispatch({type: 'stopLoading'})
+          dispatch({ type: 'stopLoading' })
         }
       }
     } else {
       // Expiring means token is still valid, leave the refresh process to MainCtrl. Either way, redirect is true
-      dispatch({type: 'redirectUser'})
+      dispatch({ type: 'redirectUser' })
     }
   } catch (err) {
-    dispatch({type: 'stopLoading'})
+    dispatch({ type: 'stopLoading' })
   }
 }
 
@@ -118,9 +118,8 @@ const Login = () => {
   MISC FUNCTIONS
   =========================
   */
-
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const handleSubmit = e => {
@@ -128,20 +127,20 @@ const Login = () => {
     const { email, password } = state
 
     // Set the message and attempts to log in
-    dispatch({type: 'loggingIn'})
+    dispatch({ type: 'loggingIn' })
     axios.post('/login', { email, password })
       .then(response => {
         window.localStorage.setItem('token', response.data.token)
         window.localStorage.setItem('refreshToken', response.data.refresh)
         axios.defaults.headers.common['x-access-token'] = window.localStorage.token
-        dispatch({type: 'redirectUser'})
+        dispatch({ type: 'redirectUser' })
       })
       .catch(error => {
-        dispatch({type: 'showError', message: error.response.data.error})
+        dispatch({ type: 'showError', message: error.response.data.error })
         if (error.response.data.error === 'Your account has yet to be verified, please verify your email by checking your email account') {
-          dispatch({type: 'showLink'})
+          dispatch({ type: 'showLink' })
         } else {
-          dispatch({type: 'updateField', name: 'showLink', value: false})
+          dispatch({ type: 'updateField', name: 'showLink', value: false })
         }
       })
   }

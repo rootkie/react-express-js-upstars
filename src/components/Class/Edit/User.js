@@ -3,7 +3,7 @@ import { Header, Table, Checkbox, Button, Icon, Search, Divider } from 'semantic
 import PropTypes from 'prop-types'
 import axios from 'axios'
 
-const UserList = ({state, roles, dispatch, id, getClass}) => {
+const UserList = ({ state, roles, dispatch, id, getClass }) => {
   /*
   =============
   FUNCTIONS
@@ -12,14 +12,14 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
   const handleCheckBoxForUser = (e, { name: _id, checked }) => {
     const { userSelected } = state
     const newSelection = checked ? [...userSelected, _id] : userSelected.filter(element => element !== _id)
-    dispatch({type: 'handleChange', name: 'userSelected', value: newSelection})
+    dispatch({ type: 'handleChange', name: 'userSelected', value: newSelection })
   }
 
   const deleteUnsaved = (_id) => e => {
     e.preventDefault()
     const { userList } = state
     const newList = userList.filter(el => el._id !== _id)
-    dispatch({type: 'handleChange', name: 'userList', value: newList})
+    dispatch({ type: 'handleChange', name: 'userList', value: newList })
   }
 
   const addUser = async e => {
@@ -32,11 +32,11 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
     })
       .then(response => {
         getClass(id)
-        dispatch({type: 'addUserSuccess'})
-        setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
+        dispatch({ type: 'addUserSuccess' })
+        setTimeout(() => { dispatch({ type: 'closeMessage' }) }, 5000)
       })
       .catch(err => {
-        dispatch({type: 'showError', error: err.response.data.error})
+        dispatch({ type: 'showError', error: err.response.data.error })
       })
   }
 
@@ -50,20 +50,20 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
     })
       .then(response => {
         getClass(id)
-        dispatch({type: 'deleteUserSuccess'})
-        setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
+        dispatch({ type: 'deleteUserSuccess' })
+        setTimeout(() => { dispatch({ type: 'closeMessage' }) }, 5000)
       })
       .catch(err => {
-        dispatch({type: 'showError', error: err.response.data.error})
+        dispatch({ type: 'showError', error: err.response.data.error })
       })
   }
 
-  const handleResultsSelect = (e, {result}) => {
+  const handleResultsSelect = (e, { result }) => {
     const { userList, overallClassData } = state
     const exist = overallClassData.users.findIndex(user => user._id === result._id)
     const duplicate = userList.findIndex(user => user._id === result._id)
     if (exist !== -1 || duplicate !== -1) {
-      return dispatch({type: 'handleChange', name: 'valueUser', value: ''})
+      return dispatch({ type: 'handleChange', name: 'valueUser', value: '' })
     }
     const newList = [
       ...userList,
@@ -72,13 +72,13 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
         name: result.title
       }
     ]
-    dispatch({type: 'handleChange', name: 'userList', value: newList})
-    dispatch({type: 'handleChange', name: 'valueUser', value: ''})
+    dispatch({ type: 'handleChange', name: 'userList', value: newList })
+    dispatch({ type: 'handleChange', name: 'valueUser', value: '' })
   }
 
-  const handleSearchChange = (e, {value}) => {
-    if (value.length < 1) return dispatch({type: 'resetSearch'})
-    dispatch({type: 'searchChangeUser', value})
+  const handleSearchChange = (e, { value }) => {
+    if (value.length < 1) return dispatch({ type: 'resetSearch' })
+    dispatch({ type: 'searchChangeUser', value })
     axios.get(`usersResponsive/${value}`)
       .then(response => {
         const userOptions = response.data.users.map(user => {
@@ -88,7 +88,7 @@ const UserList = ({state, roles, dispatch, id, getClass}) => {
             key: user._id
           }
         })
-        dispatch({type: 'setUserOption', userOptions})
+        dispatch({ type: 'setUserOption', userOptions })
       })
   }
 

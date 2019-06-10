@@ -39,23 +39,23 @@ const ForgetPassword = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const handleSubmit = e => {
     e.preventDefault()
     const { email, nric } = state
-    dispatch({type: 'updateField', name: 'message', value: 'Processing in progress...'})
+    dispatch({ type: 'updateField', name: 'message', value: 'Processing in progress...' })
     axios.post('/changepassword', { email, nric })
       .then(response => {
-        dispatch({type: 'success', message: 'A password reset link has been sent to your email. Please allow for 5 minutes before requesting for a new link if you did not receive any email.'})
+        dispatch({ type: 'success', message: 'A password reset link has been sent to your email. Please allow for 5 minutes before requesting for a new link if you did not receive any email.' })
       })
       // Errors are catched. Axios defaults all errors to http codes !== 2xx
       .catch(error => {
         if (error.response.data.error) {
-          dispatch({type: 'error', message: error.response.data.error})
+          dispatch({ type: 'error', message: error.response.data.error })
         } else {
-          dispatch({type: 'error', message: 'There is something wrong. Please try again!'})
+          dispatch({ type: 'error', message: 'There is something wrong. Please try again!' })
         }
       })
   }

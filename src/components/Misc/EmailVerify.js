@@ -17,9 +17,9 @@ const verifyEmail = (dispatch, match) => {
   let { token } = match.params
   axios.post(`/verifyEmail`, { token })
     .then(response => {
-      dispatch({type: 'verificationSuccess'})
+      dispatch({ type: 'verificationSuccess' })
     }).catch(err => {
-      dispatch({type: 'verificationFailure', err})
+      dispatch({ type: 'verificationFailure', err })
     })
 }
 
@@ -40,7 +40,7 @@ const reducer = (state, action) => {
   }
 }
 
-const EmailVerify = ({match}) => {
+const EmailVerify = ({ match }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {

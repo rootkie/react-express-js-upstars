@@ -173,10 +173,9 @@ const reducer = (state, action) => {
         ...state,
         success: true,
         edit: false,
-        isLoading: false,
         buttonContent: 'Toggle Edit Mode',
         __v: state.__v + 1,
-        updatedAt: moment()
+        updatedAt: new Date()
       }
     default:
       return state
@@ -193,27 +192,29 @@ const toggleButton = (state, dispatch, editStudent, studentId) => async e => {
   e.preventDefault()
   const { edit } = state
   if (!edit) {
-    return dispatch({type: 'toggleEditMode'})
+    return dispatch({ type: 'toggleEditMode' })
   }
-  dispatch({type: 'clearError'})
-  dispatch({type: 'startLoading'})
+  dispatch({ type: 'clearError' })
+  dispatch({ type: 'startLoading' })
   const response = await useValidateStudent(state)
   if (response.status === true) {
     const { studentDataToSubmit } = response
     try {
       await editStudent(studentId, studentDataToSubmit)
-      dispatch({type: 'success'})
+      dispatch({ type: 'success' })
     } catch (error) {
-      dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})
+      dispatch({ type: 'updateField', name: 'errorMessage', value: error.response.data.error })
+    } finally {
+      dispatch({ type: 'updateField', name: 'isLoading', value: false })
     }
   } else {
     const { errors } = response
-    dispatch({type: 'updateField', name: 'errorMessage', value: errors})
-    dispatch({type: 'updateField', name: 'isLoading', value: false})
+    dispatch({ type: 'updateField', name: 'errorMessage', value: errors })
+    dispatch({ type: 'updateField', name: 'isLoading', value: false })
   }
 }
 
-const StudentEdit = ({editStudent, match, roles}) => {
+const StudentEdit = ({ editStudent, match, roles }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -227,7 +228,7 @@ const StudentEdit = ({editStudent, match, roles}) => {
         const { dob, tuition } = response.data.student
         let studentData = {
           ...response.data.student,
-          dob: moment(dob),
+          dob: new Date(dob),
           tuitionChoices: {
             CDAC: tuition.includes('CDAC'),
             Mendaki: tuition.includes('Mendaki'),
@@ -241,24 +242,24 @@ const StudentEdit = ({editStudent, match, roles}) => {
             ...studentData,
             admin: {
               ...studentData.admin,
-              commencementDate: commencementDate ? moment(commencementDate) : undefined,
-              interviewDate: interviewDate ? moment(interviewDate) : undefined,
-              exitDate: exitDate ? moment(exitDate) : undefined
+              commencementDate: commencementDate ? new Date(commencementDate) : undefined,
+              interviewDate: interviewDate ? new Date(interviewDate) : undefined,
+              exitDate: exitDate ? new Date(exitDate) : undefined
             }
           }
         }
-        dispatch({type: 'setStudentState', studentData})
+        dispatch({ type: 'setStudentState', studentData })
       })
   }
 
   const handleChange = (e, { name, value }) => {
     if (edit) {
-      dispatch({type: 'updateField', name, value: value})
+      dispatch({ type: 'updateField', name, value: value })
     }
   }
 
-  const handleActiveChange = useCallback((e, {name}) => {
-    dispatch(({type: 'changeActive', name}))
+  const handleActiveChange = useCallback((e, { name }) => {
+    dispatch(({ type: 'changeActive', name }))
   }, [state.activeItem])
 
   /*

@@ -4,7 +4,6 @@ import DatePicker from 'react-datepicker'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import axios from 'axios'
-import 'react-datepicker/dist/react-datepicker.css'
 import moment from 'moment'
 import StudentList from './Student'
 import UserList from './User'
@@ -87,7 +86,7 @@ const reducer = (state, action) => {
         submitSuccess: true,
         overallClassData: {
           ...state.overallClassData,
-          updatedAt: moment(),
+          updatedAt: new Date(),
           __v: state.overallClassData.__v + 1
         }
       }
@@ -183,11 +182,11 @@ const reducer = (state, action) => {
   }
 }
 
-const ClassEdit = ({editClass, roles, match, history}) => {
+const ClassEdit = ({ editClass, roles, match, history }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
-    dispatch({type: 'reload'})
+    dispatch({ type: 'reload' })
     const classId = match.params.id
     getClass(classId)
   }, [match.params.id])
@@ -195,7 +194,7 @@ const ClassEdit = ({editClass, roles, match, history}) => {
   const getClass = async (classId) => {
     try {
       const response = await axios.get('class/' + classId)
-      dispatch({type: 'setClassData', data: response.data.class})
+      dispatch({ type: 'setClassData', data: response.data.class })
     } catch (err) {
       if (err.response.status === 400) {
         history.replace('/dashboard/classes/view')
@@ -206,14 +205,14 @@ const ClassEdit = ({editClass, roles, match, history}) => {
   const handleChange = (e, { name, value }) => {
     const { edit } = state
     if (edit) {
-      dispatch({type: 'updateField', name, value})
+      dispatch({ type: 'updateField', name, value })
     }
   }
 
   const handleDateChange = (startDate) => {
     const { edit } = state
     if (edit) {
-      dispatch({type: 'updateField', name: 'startDate', value: startDate})
+      dispatch({ type: 'updateField', name: 'startDate', value: startDate })
     }
   }
 
@@ -221,17 +220,17 @@ const ClassEdit = ({editClass, roles, match, history}) => {
     e.preventDefault()
     const { overallClassData, edit } = state
     if (!edit) {
-      dispatch({type: 'editMode'})
+      dispatch({ type: 'editMode' })
     } else {
       if (overallClassData.classType === 'Enrichment') {
         overallClassData.dayAndTime = 'nil'
       }
       try {
         await editClass(overallClassData, match.params.id)
-        dispatch({type: 'closeEdit'})
-        setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
+        dispatch({ type: 'closeEdit' })
+        setTimeout(() => { dispatch({ type: 'closeMessage' }) }, 5000)
       } catch (error) {
-        if (error.response) dispatch({type: 'showError', error: error.response.data.error})
+        if (error.response) dispatch({ type: 'showError', error: error.response.data.error })
       }
     }
   }
@@ -240,9 +239,9 @@ const ClassEdit = ({editClass, roles, match, history}) => {
     e.preventDefault()
     axios.get(`/class/clone/${match.params.id}`)
       .then(response => {
-        dispatch({type: 'cloneSuccess', link: response.data.newClassId})
+        dispatch({ type: 'cloneSuccess', link: response.data.newClassId })
       }).catch(err => {
-        dispatch({type: 'showError', error: err.response.data.error})
+        dispatch({ type: 'showError', error: err.response.data.error })
       })
   }
 
@@ -295,10 +294,10 @@ const ClassEdit = ({editClass, roles, match, history}) => {
                 <label>Starting Date</label>
                 <DatePicker
                   placeholderText='Click to select a date'
-                  dateFormat='DD/MM/YYYY'
+                  dateFormat='dd/MM/yyyy'
                   showMonthDropdown
                   dropdownMode='select'
-                  selected={moment(overallClassData.startDate)}
+                  selected={new Date(overallClassData.startDate)}
                   onChange={handleDateChange}
                   required />
               </Form.Field>

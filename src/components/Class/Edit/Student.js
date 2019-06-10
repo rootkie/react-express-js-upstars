@@ -3,7 +3,7 @@ import { Header, Table, Checkbox, Button, Icon, Search, Divider } from 'semantic
 import PropTypes from 'prop-types'
 import axios from 'axios'
 
-const StudentList = ({state, roles, dispatch, id, getClass}) => {
+const StudentList = ({ state, roles, dispatch, id, getClass }) => {
   /*
   =============
   FUNCTIONS
@@ -12,14 +12,14 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
   const handleCheckBoxForStudent = (e, { name: _id, checked }) => {
     const { studentSelected } = state
     const newSelection = checked ? [...studentSelected, _id] : studentSelected.filter(element => element !== _id)
-    dispatch({type: 'handleChange', name: 'studentSelected', value: newSelection})
+    dispatch({ type: 'handleChange', name: 'studentSelected', value: newSelection })
   }
 
   const deleteUnsaved = (_id) => e => {
     e.preventDefault()
     const { studentList } = state
     const newList = studentList.filter(el => el._id !== _id)
-    dispatch({type: 'handleChange', name: 'studentList', value: newList})
+    dispatch({ type: 'handleChange', name: 'studentList', value: newList })
   }
 
   const addStudent = async e => {
@@ -32,11 +32,11 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
     })
       .then(response => {
         getClass(id)
-        dispatch({type: 'addStudentSuccess'})
-        setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
+        dispatch({ type: 'addStudentSuccess' })
+        setTimeout(() => { dispatch({ type: 'closeMessage' }) }, 5000)
       })
       .catch(err => {
-        dispatch({type: 'showError', error: err.response.data.error})
+        dispatch({ type: 'showError', error: err.response.data.error })
       })
   }
 
@@ -49,20 +49,20 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
     })
       .then(response => {
         getClass(id)
-        dispatch({type: 'deleteStudentSuccess'})
-        setTimeout(() => { dispatch({type: 'closeMessage'}) }, 5000)
+        dispatch({ type: 'deleteStudentSuccess' })
+        setTimeout(() => { dispatch({ type: 'closeMessage' }) }, 5000)
       })
       .catch(err => {
-        dispatch({type: 'showError', error: err.response.data.error})
+        dispatch({ type: 'showError', error: err.response.data.error })
       })
   }
 
-  const handleResultsSelect = (e, {result}) => {
+  const handleResultsSelect = (e, { result }) => {
     const { studentList, overallClassData } = state
     const exist = overallClassData.students.findIndex(student => student._id === result._id)
     const duplicate = studentList.findIndex(student => student._id === result._id)
     if (exist !== -1 || duplicate !== -1) {
-      return dispatch({type: 'handleChange', name: 'valueStudent', value: ''})
+      return dispatch({ type: 'handleChange', name: 'valueStudent', value: '' })
     }
     const newList = [
       ...studentList,
@@ -71,15 +71,15 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
         name: result.title
       }
     ]
-    dispatch({type: 'handleChange', name: 'studentList', value: newList})
-    dispatch({type: 'handleChange', name: 'valueStudent', value: ''})
+    dispatch({ type: 'handleChange', name: 'studentList', value: newList })
+    dispatch({ type: 'handleChange', name: 'valueStudent', value: '' })
   }
 
-  const handleSearchChange = (e, {value}) => {
+  const handleSearchChange = (e, { value }) => {
     if (value.length < 1) {
-      return dispatch({type: 'resetSearch'})
+      return dispatch({ type: 'resetSearch' })
     }
-    dispatch({type: 'searchChangeStudent', value})
+    dispatch({ type: 'searchChangeStudent', value })
     axios.get(`studentsResponsive/${value}`)
       .then(response => {
         const studentOptions = response.data.studentsFiltered.map(student => {
@@ -89,7 +89,7 @@ const StudentList = ({state, roles, dispatch, id, getClass}) => {
             key: student._id
           }
         })
-        dispatch({type: 'setStudentOption', studentOptions})
+        dispatch({ type: 'setStudentOption', studentOptions })
       })
   }
 

@@ -50,6 +50,20 @@ Or finally install nodemon as a global package (which is recommended by nodemon 
 $ npm i nodemon -g
 ```
 
+If you face issues of React Scripts not compiling and gives error on dynamic imports:
+```
+> Module parse failed: Unexpected token. You may need an appropriate loader to handle this file type.
+Try:
+$ npm i --save-dev acorn-dynamic-import@3
+```
+
+Issue of duplicate or conflicting dependencies such as:
+```
+> There might be a problem with the project dependency tree. It is likely not a bug in Create React App, but something you need to fix locally.
+Try:
+Adding SKIP_PREFLIGHT_CHECK=true into .env or .env.development file (of which the .env.development file is committed in the project)
+```
+
 ## Contributing
 
 This repository is where we do development and there are many ways you can participate in the project, for example:

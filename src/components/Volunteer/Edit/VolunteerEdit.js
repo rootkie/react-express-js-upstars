@@ -123,7 +123,7 @@ const reducer = (state, action) => {
   }
 }
 
-const VolunteerEdit = ({history, match, roles}) => {
+const VolunteerEdit = ({ history, match, roles }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -136,8 +136,8 @@ const VolunteerEdit = ({history, match, roles}) => {
       const { dob, exitDate, preferredTimeSlot } = response.data.user
       let userData = {
         ...response.data.user,
-        dob: moment(dob),
-        exitDate: moment(exitDate),
+        dob: new Date(dob),
+        exitDate: new Date(exitDate),
         preferredTimeSlot: {
           'Monday 7-9.30pm': preferredTimeSlot.includes('Monday 7-9.30pm'),
           'Tuesday 7-9.30pm': preferredTimeSlot.includes('Tuesday 7-9.30pm'),
@@ -155,12 +155,12 @@ const VolunteerEdit = ({history, match, roles}) => {
           ...userData,
           admin: {
             ...userData.admin,
-            interviewDate: interviewDate ? moment(interviewDate) : undefined,
-            commencementDate: commencementDate ? moment(commencementDate) : undefined
+            interviewDate: interviewDate ? new Date(interviewDate) : undefined,
+            commencementDate: commencementDate ? new Date(commencementDate) : undefined
           }
         }
       }
-      dispatch({type: 'initUser', userData})
+      dispatch({ type: 'initUser', userData })
     } catch (err) {
       if (err.response.status === 400) history.replace('/dashboard/volunteer/view')
     }
@@ -174,17 +174,17 @@ const VolunteerEdit = ({history, match, roles}) => {
   */
   const handleChange = (e, { name, value }) => {
     if (state.edit === true) {
-      dispatch({type: 'updateField', name, value})
+      dispatch({ type: 'updateField', name, value })
     }
   }
 
   const handleSubmit = e => {
     e.preventDefault()
     if (state.edit === false) {
-      dispatch({type: 'toggleEdit'})
+      dispatch({ type: 'toggleEdit' })
       return
     }
-    dispatch({type: 'beforeSubmit'})
+    dispatch({ type: 'beforeSubmit' })
 
     const { address, postalCode, handphone, homephone, schoolLevel, schoolClass, exitDate, admin,
       fatherName, fatherOccupation, fatherEmail, motherName, motherOccupation, motherEmail, preferredTimeSlot,
@@ -206,10 +206,10 @@ const VolunteerEdit = ({history, match, roles}) => {
       schoolClass: string().required('Please provide your school class'),
       postalCode: string().required('Please provide a postal code').matches(/^\d{6}$/, 'Please provide a valid postal code'),
       address: string().required('Please provide an address')
-    }, {abortEarly: true})
+    }, { abortEarly: true })
 
     fieldsToValidate
-      .validate({address, postalCode, handphone, homephone, schoolLevel, schoolClass, exitDate, fatherEmail, motherEmail, timeSlot, admin})
+      .validate({ address, postalCode, handphone, homephone, schoolLevel, schoolClass, exitDate, fatherEmail, motherEmail, timeSlot, admin })
       .then(valid => {
         const volunteerData = {
           userId: match.params.userId,
@@ -244,14 +244,14 @@ const VolunteerEdit = ({history, match, roles}) => {
         axios.post('/users', volunteerData)
           .then(async response => {
             await getProfile(match.params.userId)
-            dispatch({type: 'submitSuccess'})
+            dispatch({ type: 'submitSuccess' })
           })
           .catch((err) => {
-            dispatch({type: 'setErrorMessage', value: err.response.data.error})
+            dispatch({ type: 'setErrorMessage', value: err.response.data.error })
           })
       }).catch(err => {
         if (err.name === 'ValidationError') {
-          dispatch({type: 'setErrorMessage', value: err.errors})
+          dispatch({ type: 'setErrorMessage', value: err.errors })
         }
       })
   }
@@ -259,7 +259,7 @@ const VolunteerEdit = ({history, match, roles}) => {
   const handleItemClick = useCallback((e, { name }) => dispatch({ type: 'updateField', name: 'activeItem', value: name }), [state.activeItem])
 
   const deactivateAccount = useCallback((e) => {
-    dispatch({type: 'updateField', name: 'deactivate', value: true})
+    dispatch({ type: 'updateField', name: 'deactivate', value: true })
   }, [state.deactivate])
 
   const handleDeactivate = useCallback((e) => {
@@ -273,12 +273,12 @@ const VolunteerEdit = ({history, match, roles}) => {
         window.localStorage.removeItem('refreshToken')
         history.replace('/')
       }).catch(err => {
-        dispatch({type: 'setErrorMessage', value: err.response.data.error})
+        dispatch({ type: 'setErrorMessage', value: err.response.data.error })
       })
   }, [match.params.userId])
 
   const handleClose = useCallback((e) => {
-    dispatch({type: 'updateField', name: 'deactivate', value: false})
+    dispatch({ type: 'updateField', name: 'deactivate', value: false })
   }, [state.deactivate])
 
   /*

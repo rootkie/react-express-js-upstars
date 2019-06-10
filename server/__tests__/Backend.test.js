@@ -1716,7 +1716,7 @@ describe('testing student side APIs', () => {
         'schoolName': 'Upstars Secondary'
       })
       expect(response.statusCode).toBe(201)
-      expect(response.body).toEqual({ 'newStudent': expect.any(String) })
+      expect(response.body).toEqual({ 'newStudent': true })
     })
 
     test('duplicate account throw error', async () => {

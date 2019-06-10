@@ -2,12 +2,11 @@ import React from 'react'
 import { Form, Segment } from 'semantic-ui-react'
 import PropTypes from 'prop-types'
 import DatePicker from 'react-datepicker'
-import moment from 'moment'
 
-const Office = ({admin, dispatch, edit}) => {
-  const handleAdminChange = (e, {name, value}) => {
+const Office = ({ admin, dispatch, edit }) => {
+  const handleAdminChange = (e, { name, value }) => {
     if (edit) {
-      dispatch({type: 'updateAdminField', name, value})
+      dispatch({ type: 'updateAdminField', name, value })
     }
   }
 
@@ -18,8 +17,8 @@ const Office = ({admin, dispatch, edit}) => {
         <label>Interview date</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
-          selected={interviewDate ? moment(interviewDate) : undefined}
+          dateFormat='dd/MM/yyyy'
+          selected={interviewDate ? new Date(interviewDate) : undefined}
           onChange={date => { if (edit) dispatch({ type: 'updateAdminField', name: 'interviewDate', value: date }) }}
         />
       </Form.Field>
@@ -28,11 +27,11 @@ const Office = ({admin, dispatch, edit}) => {
         <label>Commencement date</label>
         <DatePicker
           placeholderText='Click to select a date'
-          dateFormat='DD/MM/YYYY'
+          dateFormat='dd/MM/yyyy'
           showMonthDropdown
           dropdownMode='select'
-          minDate={interviewDate ? moment(interviewDate) : undefined}
-          selected={commencementDate ? moment(commencementDate) : undefined}
+          minDate={interviewDate ? new Date(interviewDate) : undefined}
+          selected={commencementDate ? new Date(commencementDate) : undefined}
           onChange={date => { if (edit) dispatch({ type: 'updateAdminField', name: 'commencementDate', value: date }) }}
         />
       </Form.Field>

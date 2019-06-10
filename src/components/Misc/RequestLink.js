@@ -39,22 +39,22 @@ const RequestLink = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const handleChange = (e, { name, value }) => {
-    dispatch({type: 'updateField', name, value})
+    dispatch({ type: 'updateField', name, value })
   }
 
   const handleSubmit = e => {
     e.preventDefault()
     const { email, nric } = state
-    dispatch({type: 'updateField', name: 'message', value: 'Processing in progress...'})
+    dispatch({ type: 'updateField', name: 'message', value: 'Processing in progress...' })
     axios.post('/link', { email, nric })
       .then(response => {
-        dispatch({type: 'success', message: 'Your request has been successful. If the details match, an email will be sent to you.'})
+        dispatch({ type: 'success', message: 'Your request has been successful. If the details match, an email will be sent to you.' })
       })
       .catch(error => {
         if (error.response.data.error) {
-          dispatch({type: 'error', message: error.response.data.error})
+          dispatch({ type: 'error', message: error.response.data.error })
         } else {
-          dispatch({type: 'error', message: 'There is something wrong. Please try again!'})
+          dispatch({ type: 'error', message: 'There is something wrong. Please try again!' })
         }
       })
   }

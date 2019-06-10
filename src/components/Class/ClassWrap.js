@@ -20,12 +20,12 @@ FUNCTIONS
 */
 
 const getClasses = (dispatch, source) => {
-  axios.get('class', {cancelToken: source.token})
+  axios.get('class', { cancelToken: source.token })
     .then(response => {
       const { activeClasses, stoppedClasses } = response.data
       // Merge both together to show it in a single table
       const updatedClassData = activeClasses.concat(stoppedClasses)
-      dispatch({type: 'setClass', updatedClassData})
+      dispatch({ type: 'setClass', updatedClassData })
     })
 }
 
@@ -47,7 +47,7 @@ const reducer = (state, action) => {
   }
 }
 
-const ClassWrap = ({match, roles}) => {
+const ClassWrap = ({ match, roles }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const source = axios.CancelToken.source()
 
@@ -67,7 +67,7 @@ const ClassWrap = ({match, roles}) => {
 
   const addClass = async (classDataToSubmit) => {
     const { classData } = state
-    dispatch({type: 'updateClasses'})
+    dispatch({ type: 'updateClasses' })
     const response = await axios.post('/class', classDataToSubmit)
     // Adds the new class to the array of ACTIVE classes so that when you click view you can see it immediately.
     const updatedClassData = [
@@ -77,7 +77,7 @@ const ClassWrap = ({match, roles}) => {
         _id: response.data.newClassId,
         status: 'Active'
       }]
-    dispatch({type: 'setClass', updatedClassData})
+    dispatch({ type: 'setClass', updatedClassData })
     return response.data.newClassId
   }
 
@@ -93,7 +93,7 @@ const ClassWrap = ({match, roles}) => {
     const updatedClassData = [...classData]
     updatedClassData.splice(arrayIndex, 1, { ...classDataToSubmit, _id: classId })
     // const updatedClassData = classData.map((element) => (element._id === sid ? { ...classDataToSubmit, _id: sid } : element))
-    dispatch({type: 'setClass', updatedClassData})
+    dispatch({ type: 'setClass', updatedClassData })
   }
 
   const stopClass = async (classIds) => {

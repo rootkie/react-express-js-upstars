@@ -36,7 +36,7 @@ mongoose.Promise = global.Promise
 if (process.env.NODE_ENV === 'production') {
   mongoose.connect(process.env.DATABASE)
 } else {
-  mongoose.connect(process.env.DATABASE_DEBUG)
+  mongoose.connect(process.env.DATABASE_DEBUG, { poolSize: 10 })
 }
 /* Production & for Mongoose 4.11.0 and above && for MongoDB 3.6+
   mongoose.openUri(process.env.DATABASE, {

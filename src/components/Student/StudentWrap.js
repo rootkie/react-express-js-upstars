@@ -21,13 +21,13 @@ const initialState = {
   ============================================================================
 */
 const getStudents = async (dispatch, source) => {
-  const response = await axios.get('students', {cancelToken: source.token})
-  dispatch({type: 'studentLoaded', studentData: response.data.students})
+  const response = await axios.get('students', { cancelToken: source.token })
+  dispatch({ type: 'studentLoaded', studentData: response.data.students })
 }
 
 const getOtherStudents = async (dispatch, source) => {
-  const response = await axios.get('otherStudents', {cancelToken: source.token})
-  dispatch({type: 'otherStudentLoaded', otherStudentData: response.data.students})
+  const response = await axios.get('otherStudents', { cancelToken: source.token })
+  dispatch({ type: 'otherStudentLoaded', otherStudentData: response.data.students })
 }
 
 const reducer = (state, action) => {
@@ -53,7 +53,7 @@ const reducer = (state, action) => {
   }
 }
 
-const StudentWrap = ({roles, match}) => {
+const StudentWrap = ({ roles, match }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const source = axios.CancelToken.source()
 
@@ -68,7 +68,7 @@ const StudentWrap = ({roles, match}) => {
   }, [])
 
   const deleteStudent = async (studentId) => {
-    dispatch({type: 'startLoading'})
+    dispatch({ type: 'startLoading' })
     await axios.delete('/students',
       {
         data: {

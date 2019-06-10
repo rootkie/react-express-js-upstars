@@ -3,7 +3,7 @@ import FamilyDetails from '../StudentRegistration/FamilyDetails'
 import PersonalInfo from '../StudentRegistration/PersonalInfo'
 import { Form, Message, Header, Icon, Segment, Image, Grid, Step } from 'semantic-ui-react'
 import axios from 'axios'
-import { string, object, boolean, date } from 'yup'
+import { string, object, boolean, date, array, number } from 'yup'
 import ReCAPTCHA from 'react-google-recaptcha'
 const recaptchaRef = React.createRef()
 
@@ -174,7 +174,8 @@ const reducer = (state, action) => {
     case 'clearError':
       return {
         ...state,
-        errorMessage: ''
+        errorMessage: '',
+        submitSuccess: false
       }
     default:
       return state
@@ -189,13 +190,13 @@ SUBMIT FUNCTIONS
 
 const submitPersonal = (dispatch, state) => e => {
   e.preventDefault()
-  dispatch({type: 'clearError'})
+  dispatch({ type: 'clearError' })
   // This button is used as a 'next' and 'back' button while being binded to one function
   if (state.activeItem === 'Family Details') {
-    dispatch({type: 'updateField', name: 'activeItem', value: 'Personal Info'})
+    dispatch({ type: 'updateField', name: 'activeItem', value: 'Personal Info' })
   } else {
     const {
-      name, icNumber, dob, address, gender, nationality, classLevel, schoolName
+      name, icNumber, dob, address, gender, nationality, classLevel, schoolName, academicInfo
     } = state
     const requiredSchema = object({
       schoolName: string().required('Please provide your school name'),
@@ -208,12 +209,12 @@ const submitPersonal = (dispatch, state) => e => {
       name: string().required('Please provide your name')
     })
     requiredSchema.validate({
-      name, icNumber, dob, address, gender, nationality, classLevel, schoolName
-    }, {abortEarly: true}).then(valid => {
-      dispatch({type: 'updateField', name: 'activeItem', value: 'Family Details'})
+      name, icNumber, dob, address, gender, nationality, classLevel, schoolName, academicInfo
+    }, { abortEarly: true }).then(valid => {
+      dispatch({ type: 'updateField', name: 'activeItem', value: 'Family Details' })
     }).catch(err => {
       if (err.name === 'ValidationError') {
-        dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+        dispatch({ type: 'updateField', name: 'errorMessage', value: err.errors })
       }
     })
   }
@@ -221,7 +222,7 @@ const submitPersonal = (dispatch, state) => e => {
 
 const submitAll = (dispatch, state) => e => {
   e.preventDefault()
-  dispatch({type: 'clearError'})
+  dispatch({ type: 'clearError' })
 
   const {
     name, icNumber, dob, address, gender, nationality, classLevel, schoolName, terms,
@@ -295,16 +296,16 @@ const submitAll = (dispatch, state) => e => {
       .then(response => {
         // The reset is so that the timeout error will not appear after successful submission
         recaptchaRef.current.reset()
-        dispatch({type: 'showSuccess'})
+        dispatch({ type: 'showSuccess' })
       })
       .catch(error => {
         recaptchaRef.current.reset()
-        dispatch({type: 'updateField', name: 'terms', value: false})
-        dispatch({type: 'updateField', name: 'errorMessage', value: error.response.data.error})
+        dispatch({ type: 'updateField', name: 'terms', value: false })
+        dispatch({ type: 'updateField', name: 'errorMessage', value: error.response.data.error })
       })
   }).catch(err => {
     if (err.name === 'ValidationError') {
-      dispatch({type: 'updateField', name: 'errorMessage', value: err.errors})
+      dispatch({ type: 'updateField', name: 'errorMessage', value: err.errors })
     }
   })
 }
@@ -320,18 +321,18 @@ const StudentForm = () => {
   const { activeItem, errorMessage, submitSuccess } = state
 
   // Function to handle state change
-  const handleChange = (e, {name, value}) => {
-    dispatch({type: 'updateField', name, value})
+  const handleChange = (e, { name, value }) => {
+    dispatch({ type: 'updateField', name, value })
   }
 
-  const updateAcademic = (index, property) => (e, {value}) => {
+  const updateAcademic = (index, property) => (e, { value }) => {
     e.preventDefault()
-    dispatch({type: 'updateAcademic', index, property, value})
+    dispatch({ type: 'updateAcademic', index, property, value })
   }
 
-  const updateFamilyMember = (index, property) => (e, {value}) => {
+  const updateFamilyMember = (index, property) => (e, { value }) => {
     e.preventDefault()
-    dispatch({type: 'updateFamilyMember', index, property, value})
+    dispatch({ type: 'updateFamilyMember', index, property, value })
   }
 
   /*
@@ -346,7 +347,7 @@ const StudentForm = () => {
         {useMemo(() => (
           <React.Fragment>
             <Grid.Row>
-              <Image size='small' centered src={require('../../Misc/logo.png')} style={{height: '100%'}} />
+              <Image size='small' centered src={require('../../Misc/logo.png')} style={{ height: '100%' }} />
             </Grid.Row>
             <Grid.Row>
               <Grid.Column textAlign='center'>
@@ -412,8 +413,8 @@ const StudentForm = () => {
                 ref={recaptchaRef}
                 size='invisible'
                 sitekey='6LcfaJAUAAAAAGeIFvZbriv8zPaPFXqpq0qjQkNa' // Dev key under Ying Keat's account
-                onChange={() => dispatch({type: 'captchaChange'})}
-                onExpired={() => dispatch({type: 'captchaExpired'})}
+                onChange={() => dispatch({ type: 'captchaChange' })}
+                onExpired={() => dispatch({ type: 'captchaExpired' })}
               />
             </Form>
           </Grid.Column>

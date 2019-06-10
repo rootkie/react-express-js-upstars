@@ -3,6 +3,7 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 import { Container, Grid, Dimmer, Loader, Header, Icon } from 'semantic-ui-react'
 import axios from 'axios'
 import PropTypes from 'prop-types'
+import 'react-datepicker/dist/react-datepicker.css'
 import ErrorPage from './Error/ErrorPage'
 const Topbar = lazy(() => import('./Misc/Topbar'))
 const SideMenu = lazy(() => import('./Misc/SideMenu'))

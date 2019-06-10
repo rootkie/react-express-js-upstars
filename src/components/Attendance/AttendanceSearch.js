@@ -5,7 +5,6 @@ import PropTypes from 'prop-types'
 import moment from 'moment'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
-import 'react-datepicker/dist/react-datepicker.css'
 
 const datePickingStyle = {
   display: 'flex',
@@ -49,10 +48,10 @@ const reducer = (state, action) => {
 const getInitialAttendance = async (dispatch) => {
   const response = await axios.get('/attendance/class/dateStart/dateEnd')
   const { foundAttendances } = response.data
-  dispatch({type: 'initAttendance', attendances: foundAttendances})
+  dispatch({ type: 'initAttendance', attendances: foundAttendances })
 }
 
-const AttendanceSearch = ({classData}) => {
+const AttendanceSearch = ({ classData }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
@@ -67,7 +66,7 @@ const AttendanceSearch = ({classData}) => {
 
   const handleSearch = e => {
     e.preventDefault()
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     const { startDate, endDate, classSelector } = state
     /*
       Special formating is done below to fit the API call: /attendance/class/:classId?/dateStart/:dateStart?/dateEnd/:dateEnd?
@@ -86,16 +85,16 @@ const AttendanceSearch = ({classData}) => {
     axios.get('/attendance/class' + classSelectorFormat + '/dateStart' + startDateFormat + '/dateEnd' + endDateFormat)
       .then(response => {
         const { foundAttendances } = response.data
-        dispatch({type: 'initAttendance', attendances: foundAttendances})
+        dispatch({ type: 'initAttendance', attendances: foundAttendances })
       })
   }
 
   // Used to add a class as an additional filter
-  const getAttendance = (e, { value }) => dispatch({type: 'updateField', name: 'classSelector', value})
+  const getAttendance = (e, { value }) => dispatch({ type: 'updateField', name: 'classSelector', value })
 
   const clear = e => {
     e.preventDefault()
-    dispatch({type: 'clearField'})
+    dispatch({ type: 'clearField' })
   }
   /*
   ==========
@@ -120,39 +119,39 @@ const AttendanceSearch = ({classData}) => {
               <Table.Row>
                 <Table.HeaderCell colSpan='6'>
                   <Form>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                      <Form.Group inline style={{marginBottom: 0}}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Form.Group inline style={{ marginBottom: 0 }}>
                         <Form.Field style={datePickingStyle}>
                           <label>Starting Date</label>
                           <DatePicker
-                            dateFormat='DD/MM/YYYY'
+                            dateFormat='dd/MM/yyyy'
                             showMonthDropdown
                             showYearDropdown
                             dropdownMode='select'
                             selected={startDate}
                             maxDate={endDate}
-                            onChange={date => dispatch({type: 'updateField', name: 'startDate', value: date})}
+                            onChange={date => dispatch({ type: 'updateField', name: 'startDate', value: date })}
                             placeholderText='Click to select' />
                         </Form.Field>
                         <Form.Field style={datePickingStyle}>
                           <label>Ending Date</label>
                           <DatePicker
-                            dateFormat='DD/MM/YYYY'
+                            dateFormat='dd/MM/yyyy'
                             showMonthDropdown
                             showYearDropdown
                             dropdownMode='select'
                             selected={endDate}
                             minDate={startDate}
-                            onChange={date => dispatch({type: 'updateField', name: 'endDate', value: date})}
+                            onChange={date => dispatch({ type: 'updateField', name: 'endDate', value: date })}
                             placeholderText='Click to select' />
                         </Form.Field>
                         <Form.Button positive onClick={handleSearch}>Search attendance records</Form.Button>
                         <Form.Button negative onClick={clear}>Clear all fields</Form.Button>
                       </Form.Group>
-                      <Icon style={{cursor: 'pointer'}} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={() => dispatch({type: 'updateField', name: 'moreOptions', value: !moreOptions})} />
+                      <Icon style={{ cursor: 'pointer' }} name={`chevron ${moreOptions ? 'up' : 'down'}`} onClick={() => dispatch({ type: 'updateField', name: 'moreOptions', value: !moreOptions })} />
                     </div>
                     {moreOptions && <div>
-                      <Form.Field style={{paddingTop: '10px'}}>
+                      <Form.Field style={{ paddingTop: '10px' }}>
                         <label>Classes</label>
                         <Dropdown name='classSelector' value={classSelector} placeholder='Pick Classes' search selection minCharacters={0} options={classData} onChange={getAttendance} clearable />
                       </Form.Field>

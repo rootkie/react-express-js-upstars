@@ -92,6 +92,30 @@ module.exports.cloneClass = async (req, res, next) => {
     }
     const clone = new Class(clonedClass)
     const newClassData = await clone.save()
+    // Update the students and users in the cloned class to add in the new class as well
+    const updateStudent = Student.updateMany({
+      _id: {
+        $in: oldClassData.students
+      }
+    }, {
+      $addToSet: {
+        classes: newClassData._id
+      }
+    }, {
+      timestamps: true
+    })
+
+    const updateUser = User.updateMany({
+      _id: {
+        $in: oldClassData.users
+      }
+    }, {
+      $addToSet: {
+        classes: newClassData._id
+      }
+    })
+
+    await Promise.all([await updateStudent, await updateUser])
 
     res.status(201).json({
       newClassId: newClassData._id
@@ -139,7 +163,7 @@ module.exports.editClass = async (req, res, next) => {
   } catch (err) {
     console.error(err)
     if (err.name === 'ValidationError') {
-      res.status(400).send({error: 'Our server had issues validating your inputs. Please fill in using proper values'})
+      res.status(400).send({ error: 'Our server had issues validating your inputs. Please fill in using proper values' })
     } else if (err.status) {
       res.status(err.status).send({
         error: err.error
@@ -241,6 +265,8 @@ module.exports.deleteClass = async (req, res, next) => {
       }
     }, {
       'status': 'Stopped'
+    }, {
+      timestamps: true
     })
     if (classDeleted.n === 0) {
       return res.status(404).json({
@@ -306,7 +332,7 @@ module.exports.addStudentsToClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true
+      timestamps: true
     })
 
     return res.status(200).json({
@@ -362,7 +388,7 @@ module.exports.deleteStudentsFromClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true
+      timestamps: true
     })
 
     return res.status(200).json({
@@ -425,7 +451,7 @@ module.exports.addUsersToClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true
+      timestamps: true
     })
 
     return res.status(200).json({
@@ -481,7 +507,7 @@ module.exports.deleteUsersFromClass = async (req, res, next) => {
         classes: classId
       }
     }, {
-      new: true
+      timestamps: true
     })
 
     return res.status(200).json({

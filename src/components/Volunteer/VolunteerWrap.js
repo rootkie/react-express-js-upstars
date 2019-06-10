@@ -7,7 +7,7 @@ import VolunteerEdit from './Edit/VolunteerEdit'
 import VolunteerChangePassword from './VolunteerChangePassword'
 import ErrorPage from '../Error/ErrorPage'
 
-const VolunteerWrap = ({match, _id, roles}) => {
+const VolunteerWrap = ({ match, _id, roles }) => {
   return (
     <React.Fragment>
       <Switch>

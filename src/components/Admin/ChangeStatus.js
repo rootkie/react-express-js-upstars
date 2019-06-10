@@ -50,7 +50,7 @@ const ChangeStatus = () => {
   }, [])
 
   const handleChange = (e, { value }) => {
-    dispatch({type: 'updateField', name: 'searchName', value})
+    dispatch({ type: 'updateField', name: 'searchName', value })
   }
 
   const getData = async () => {
@@ -66,7 +66,7 @@ const ChangeStatus = () => {
     const activeUsers = active.data.users
     const suspendedUsers = suspended.data.users
     const deletedUsers = deleted.data.users
-    dispatch({type: 'initData', pendingUsers, activeUsers, suspendedUsers, deletedUsers})
+    dispatch({ type: 'initData', pendingUsers, activeUsers, suspendedUsers, deletedUsers })
   }
 
   const handleFilter = async (e) => {
@@ -75,18 +75,18 @@ const ChangeStatus = () => {
       refresh(e)
       return
     }
-    dispatch({type: 'updateField', name: 'isLoading', value: true})
+    dispatch({ type: 'updateField', name: 'isLoading', value: true })
     const response = await axios.get(`admin/search/${searchName}`)
     const pendingUsers = response.data.pendingMatched
     const activeUsers = response.data.activeMatched
     const suspendedUsers = response.data.suspendedMatched
     const deletedUsers = response.data.deletedMatched
-    dispatch({type: 'initData', pendingUsers, activeUsers, suspendedUsers, deletedUsers})
+    dispatch({ type: 'initData', pendingUsers, activeUsers, suspendedUsers, deletedUsers })
   }
 
   const refresh = (e) => {
     e.preventDefault()
-    dispatch({type: 'refreshData'})
+    dispatch({ type: 'refreshData' })
     getData()
   }
 
@@ -109,8 +109,8 @@ const ChangeStatus = () => {
                 <Table.Row>
                   <Table.HeaderCell colSpan='5'>
                     <Form>
-                      <div style={{display: 'flex'}}>
-                        <Form.Group inline style={{marginBottom: 0}}>
+                      <div style={{ display: 'flex' }}>
+                        <Form.Group inline style={{ marginBottom: 0 }}>
                           <Form.Input label='Search by name' placeholder='Leave it empty to view all' name='searchName' value={searchName} icon='search' onChange={handleChange} />
                           <Form.Button onClick={handleFilter}>Filter results</Form.Button>
                           <Form.Button positive onClick={refresh}>Refresh Data / Reset Search</Form.Button>

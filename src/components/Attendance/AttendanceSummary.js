@@ -59,7 +59,7 @@ const AttendanceSummary = () => {
                   <Table.Cell collapsing>{parseFloat(options.studentsPercentage * 100).toFixed(2)}%</Table.Cell>
                   <Table.Cell collapsing>{options.userNumber}</Table.Cell>
                   <Table.Cell collapsing>{parseFloat(options.usersPercentage * 100).toFixed(2)}%</Table.Cell>
-                  <Table.Cell collapsing>{options.STRatio}</Table.Cell>
+                  <Table.Cell collapsing>{options.STRatio.toFixed(3)}</Table.Cell>
                 </Table.Row>))}
             </Table.Body>
           </Table>

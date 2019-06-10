@@ -18,7 +18,7 @@ import {
 } from 'semantic-ui-react'
 import logo from './assets/images/head.jpg'
 
-const DesktopContainer = ({children}) => {
+const DesktopContainer = ({ children }) => {
   return (
     <Responsive {...Responsive.onlyComputer}>
       <Menu
@@ -55,7 +55,7 @@ DesktopContainer.propTypes = {
   children: PropTypes.node
 }
 
-const MobileContainer = ({children}) => {
+const MobileContainer = ({ children }) => {
   const [sidebarOpened, setSidebar] = useState(false)
   const handlePusherClick = () => {
     if (sidebarOpened) setSidebar(false)
