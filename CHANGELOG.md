@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.7.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.7.0-beta) (June 10, 2019, 9.03pm)
+## [0.7.0-beta](https://github.com/rootkie/react-express-js-upstars/tree/v0.7.0-beta) (June 10, 2019, 9.50pm)
 - [Bump] Version to 0.7.0-beta
 - [Added] Mongoose schema validation as add-on
 - [Changed] Tests data and fixes such as proper nric
